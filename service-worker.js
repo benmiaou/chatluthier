@@ -1,17 +1,15 @@
-const CACHE_NAME = 'ttrpg-sound-cache-v1';
+const CACHE_NAME = 'ttrpg-sound-cache-v2';
 const urlsToCache = [
   '/',
   '/index.html',
   '/styles.css',
-  '/app.js',
+  '/client.js'
   // Add URLs for your audio assets
-  '/sounds/background/explore.mp3',
-  '/sounds/background/combat.mp3',
-  '/sounds/background/victory.mp3',
+
   // ... more sound files
-  '/sounds/ambiance/rain.mp3',
+
   // ... more ambiance files
-  '/sounds/effects/spell.mp3',
+
   // ... more effects files
   // Also include other assets like images, icons etc.
 ];

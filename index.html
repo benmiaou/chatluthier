@@ -5,25 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TTRPG Sounds</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
-    <div id="background-music" class="section">
-        <!-- Background music controls -->
-    </div>
-    <div id="ambiance" class="section">
-        <!-- Ambiance sounds controls -->
-    </div>
-    <div id="soundboard" class="section">
-        <!-- Soundboard controls -->
-    </div>
+    <header>
+        <h1>Le Chat Luthier</h1>
+        <h1>TTRPG Audio Control Panel</h1>
+    </header>
 
-    <script src="app.js"></script>
+    <main>
+        <!-- Background Music Section -->
+        <section id="background-music" class="section">
+            <h2>Background Music <input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="AudioManager.setBackgroundVolume(this.value)"></h2>
+            <button onclick="AudioManager.playBackgroundSound('exploration')" class="button-stop">Play Exploration</button>
+            <button onclick="AudioManager.playBackgroundSound('battle')" class="button-stop">Play Battle</button>
+        </section>
+        
+        <!-- Ambiance Sounds Section -->
+        <section id="ambiance" class="section">
+            <h2>Ambiance Sounds <input type="range" min="0" max="100" value="50" class="slider" id="ambiance-volume" oninput="AudioManager.setVolume('ambiance', this.value)"></h2>
+            <button onclick="AudioManager.toggleSound('assets/ambiant/rain.mp3', true, this, 'ambiance')" class="button-stop">Toggle Rain</button>
+            <button onclick="AudioManager.toggleSound('assets/ambiant/thunder.mp3', true, this, 'ambiance')" class="button-stop">Toggle Thunder</button>
+        </section>
+
+        <!-- Soundboard Section -->
+        <section id="soundboard" class="section">
+            <h2>Soundboard</h2>
+            <button onclick="AudioManager.toggleSound('assets/soundboard/scream.mp3', false, this, 'soundboard')" class="button-stop">Toggle Scream</button>
+            <button onclick="AudioManager.toggleSound('assets/soundboard/explosion.mp3', false, this, 'soundboard')" class="button-stop">Toggle Explosion</button>
+        </section>
+    </main>
+
+    <footer>
+        <p>Chat Luthier</p>
+    </footer>
+
+    <script src="client.js" defer></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                .then(registration => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed:', err));
+            });
+        }
+    </script>
 </body>
-<script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/service-worker.js')
-            .then(() => console.log('Service Worker Registered'));
-    }
-</script>
-<link rel="manifest" href="/manifest.json">
 </html>

@@ -1,21 +1,20 @@
 {
-    "name": "TTRPG Sounds",
-    "short_name": "TTRPGSounds",
+    "name": "Chat Luthier",
+    "short_name": "Chat Luthier",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#000000",
     "description": "Play ambient sounds for tabletop RPG.",
-    "icons": [
+    "icons": [ 
         {
-            "src": "path/to/icons/icon-192x192.png",
+            "src": "assets/images/icon-192x192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "path/to/icons/icon-256x256.png",
+            "src": "assets/images/icon-256x256.png",
             "sizes": "256x256",
             "type": "image/png"
-        },
-        // Include other sizes as needed
+        }
     ]
 }
