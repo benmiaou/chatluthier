@@ -8,6 +8,7 @@ const app = express();
 app.use(cors()); // Enable CORS for all routes
 // Serve static files from the 'public' directory where 'index.html' is located
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.get('/list-sounds/:type', (req, res) => {
     const type = req.params.type;
     directoryPath = "";
@@ -25,7 +26,8 @@ app.get('/list-sounds/:type', (req, res) => {
             console.error('Error getting directory information:', err); // Log the error
             res.status(500).send('Failed to retrieve directory information');
         } else {
-            res.json(files);
+            const mp3Files = files.filter(file => file.endsWith('.mp3'));
+            res.json(mp3Files);
         }
     });
 });
