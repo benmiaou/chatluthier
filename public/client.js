@@ -43,6 +43,9 @@ const AudioManager = {
                     source.loop = false;
                     source.connect(gainNode);
                     gainNode.connect(this.audioContext.destination);
+
+                    let volume = document.getElementById('music-volume').value;
+                    gainNode.gain.value = volume / 100;
                     source.start(0);
     
                     source.onended = () => this.backGroundSoundLoop();
@@ -109,6 +112,8 @@ const AudioManager = {
                     source.loop = loop;
                     source.connect(gainNode);
                     gainNode.connect(this.audioContext.destination);
+                    let volume = document.getElementById('ambiance-volume').value;
+                    gainNode.gain.value = volume / 100;
                     source.start(0);
 
                     source.onended = () => {
