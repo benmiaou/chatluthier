@@ -101,11 +101,18 @@ nav a {
     display: block; /* Change display to block */
 }
 
+
+/* Icons styling */
+.icon {
+    height: 80px;
+    width: 100%;
+}
+
 /* Section styling */
 .section {
     padding: 20px;
     display: grid; /* Change display to grid */
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Set columns to auto-fill with a minimum width of 200px */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Set columns to auto-fill with a minimum width of 200px */
     grid-auto-rows: minmax(50px, auto); /* Set rows to automatically adjust height */
     gap: 20px; /* Add gap between grid items */
     align-items: center;
@@ -114,5 +121,12 @@ nav a {
 .button {
     flex: 1 0 auto;
     text-align: center;
+    text-transform: capitalize;
     /* Add any additional styling for buttons */
+}
+
+.button .volume-slider {
+    display: block;
+    margin-top: 15px;
+    width: 100%;
 }

@@ -100,7 +100,11 @@ const AudioManager = {
             button.classList.remove('button-play');
             button.classList.add('button-stop');
         } else {
-            const slider = button.nextElementSibling;  // Assuming the slider is the next sibling in the DOM
+            var slider = button.nextElementSibling;  // Assuming the slider is the next sibling in the DOM
+            if (!slider) { // If we cannot find the slider, we look for it if inside the element
+                slider = button.querySelector('input');
+            }
+            
             const initialVolume = slider.value / 100;  // Convert slider value to volume level
             this.createSound(url, loop, button, 'ambiance', initialVolume);
         }
@@ -165,12 +169,21 @@ const AudioManager = {
             const fileName = file.replace('.mp3', '');
             const container = document.createElement('div');
             container.className = 'sound-container';
-    
+
             const button = document.createElement('button');
             button.textContent = `${fileName}`;
-            button.onclick = () => this.toggleAmbientSound(`assets/${sectionId}/${file}`, true, button);
+            button.onclick = (e) => {
+                //Make sure we're not clicking the slider
+                if (e.target.localName != 'input') {
+                    this.toggleAmbientSound(`assets/${sectionId}/${file}`, true, button)
+                }
+            };
             button.classList.add('button-stop', 'button');
     
+            const icon = document.createElement('img');
+            icon.classList.add('icon');
+            icon.setAttribute('src', 'assets/images/icons/'+fileName+'.svg');
+
             const slider = document.createElement('input');
             slider.type = 'range';
             slider.min = 0;
@@ -185,7 +198,8 @@ const AudioManager = {
             };
     
             container.appendChild(button);
-            container.appendChild(slider);
+            button.appendChild(icon);
+            button.appendChild(slider);
             section.appendChild(container);
         });
     },
