@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ttrpg-sound-cache-v2';
+const CACHE_NAME = 'ttrpg-sound-cache-v4';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -13,6 +13,26 @@ const urlsToCache = [
   // ... more effects files
   // Also include other assets like images, icons etc.
 ];
+
+// Function to fetch all files in a directory recursively
+async function fetchDirectoryFiles(directory) {
+  const response = await fetch(`http://127.0.0.1:3000/list-sounds/${directory}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch directory: ${directory}`);
+  }
+  const data = await response.json();
+  return data.map(file => `/${directory}/${file}`);
+}
+
+// Add URLs for all files in the assets directory
+const assetsToCache = ['ambiance','background','exploration','images','soundboard' ]; // Add other directories if needed
+Promise.all(assetsToCache.map(fetchDirectoryFiles))
+  .then(results => {
+    const files = results.flat();
+    urlsToCache.push(...files);
+    console.log('Files to cache:', urlsToCache);
+  })
+  .catch(error => console.error('Error fetching directory files:', error));
 
 self.addEventListener('install', event => {
   // Perform install steps
