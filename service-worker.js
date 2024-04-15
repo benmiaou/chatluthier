@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ttrpg-sound-cache-v4';
+const CACHE_NAME = 'chat-luthier-cache-v4';
 const urlsToCache = [
   '/',
   '/index.html',
