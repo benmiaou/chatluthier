@@ -92,43 +92,62 @@ const AudioManager = {
         }
     },
 
-    toggleSound(url, loop, button, type) {
-        let sound = this.categories[type][url];
-
+    toggleAmbientSound(url, loop, button) {
+        let sound = this.categories.ambiance[url];
         if (sound && sound.source) {
             sound.source.stop();
-            delete this.categories[type][url];
+            delete this.categories.ambiance[url];
             button.classList.remove('button-play');
             button.classList.add('button-stop');
         } else {
-            const source = this.audioContext.createBufferSource();
-            const gainNode = this.audioContext.createGain();
-
-            fetch(url)
-                .then(response => response.arrayBuffer())
-                .then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer))
-                .then(audioBuffer => {
-                    source.buffer = audioBuffer;
-                    source.loop = loop;
-                    source.connect(gainNode);
-                    gainNode.connect(this.audioContext.destination);
-                    let volume = document.getElementById('ambiance-volume').value;
-                    gainNode.gain.value = volume / 100;
-                    source.start(0);
-
-                    source.onended = () => {
-                        delete this.categories[type][url];
-                        button.classList.remove('button-play');
-                        button.classList.add('button-stop');
-                    };
-
-                    this.categories[type][url] = { source, gainNode };
-                    button.classList.add('button-play');
-                    button.classList.remove('button-stop');
-                })
-                .catch(e => console.error('Error with decoding audio data', e));
+            const slider = button.nextElementSibling;  // Assuming the slider is the next sibling in the DOM
+            const initialVolume = slider.value / 100;  // Convert slider value to volume level
+            this.createSound(url, loop, button, 'ambiance', initialVolume);
         }
     },
+    
+    toggleSoundboardSound(url, loop, button) {
+        let sound = this.categories.soundboard[url];
+        if (sound && sound.source) {
+            sound.source.stop();
+            delete this.categories.soundboard[url];
+            button.classList.remove('button-play');
+            button.classList.add('button-stop');
+        } else {
+            this.createSound(url, loop, button, 'soundboard', 1);
+        }
+    },
+    
+    createSound(url, loop, button, type, initialVolume) {
+        const source = this.audioContext.createBufferSource();
+        const gainNode = this.audioContext.createGain();
+    
+        // Set the initial volume based on the slider's current value
+        gainNode.gain.value = initialVolume;
+    
+        fetch(url)
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer))
+            .then(audioBuffer => {
+                source.buffer = audioBuffer;
+                source.loop = loop;
+                source.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                source.start(0);
+    
+                source.onended = () => {
+                    delete this.categories[type][url];
+                    button.classList.remove('button-play');
+                    button.classList.add('button-stop');
+                };
+    
+                this.categories[type][url] = { source, gainNode };
+                button.classList.add('button-play');
+                button.classList.remove('button-stop');
+            })
+            .catch(e => console.error('Error with decoding audio data', e));
+    },
+    
 
     setVolume(type, volume) {
         const gainValue = volume / 100;
@@ -138,16 +157,48 @@ const AudioManager = {
             }
         });
     },
-    generateButtons(soundFiles, sectionId, loop) {
+    generateAmbientButtons(soundFiles, sectionId) {
         const section = document.getElementById(sectionId);
         section.innerHTML = ''; // Clear existing content
-
-
+    
+        soundFiles.forEach(file => {
+            const fileName = file.replace('.mp3', '');
+            const container = document.createElement('div');
+            container.className = 'sound-container';
+    
+            const button = document.createElement('button');
+            button.textContent = `${fileName}`;
+            button.onclick = () => this.toggleAmbientSound(`assets/${sectionId}/${file}`, true, button);
+            button.classList.add('button-stop', 'button');
+    
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.min = 0;
+            slider.max = 100;
+            slider.value = 50;  // Default value, you might want to store this per sound in future
+            slider.className = 'volume-slider';
+            slider.oninput = () => {
+                const sound = this.categories[sectionId][`assets/${sectionId}/${file}`];
+                if (sound && sound.gainNode) {
+                    sound.gainNode.gain.value = slider.value / 100;
+                }
+            };
+    
+            container.appendChild(button);
+            container.appendChild(slider);
+            section.appendChild(container);
+        });
+    },
+    
+    generateSoundboardButtons(soundFiles, sectionId) {
+        const section = document.getElementById(sectionId);
+        section.innerHTML = ''; // Clear existing content
+    
         soundFiles.forEach(file => {
             const fileName = file.replace('.mp3', '');
             const button = document.createElement('button');
-            button.textContent = `${fileName}`;
-            button.onclick = () => AudioManager.toggleSound(`assets/${sectionId}/${file}`, loop, button, sectionId);
+            button.textContent = fileName;
+            button.onclick = () => this.toggleSoundboardSound(`assets/${sectionId}/${file}`, false, button);
             button.classList.add('button-stop', 'button');
             section.appendChild(button);
         });
