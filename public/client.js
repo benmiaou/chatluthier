@@ -47,7 +47,7 @@ const AudioManager = {
                     let volume = document.getElementById('music-volume').value;
                     gainNode.gain.value = volume / 100;
                     source.start(0);
-    
+
                     source.onended = () => this.backGroundSoundLoop();
 
                     this.activeBackgroundSound = { source, gainNode };
@@ -118,7 +118,12 @@ const AudioManager = {
             button.classList.remove('button-play');
             button.classList.add('button-stop');
         } else {
-            this.createSound(url, loop, button, 'soundboard', 1);
+            var slider = document.getElementById('sounboard-volume');  // Assuming the slider is the next sibling in the DOM
+            if (!slider) { // If we cannot find the slider, we look for it if inside the element
+                slider = button.querySelector('input');
+            }
+            const initialVolume = slider.value / 100;  // Convert slider value to volume level
+            this.createSound(url, loop, button, 'soundboard', initialVolume);
         }
     },
     
