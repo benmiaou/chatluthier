@@ -161,6 +161,8 @@ const AudioManager = {
             }
         });
     },
+
+
     generateAmbientButtons(soundFiles, sectionId) {
         const section = document.getElementById(sectionId);
         section.innerHTML = ''; // Clear existing content

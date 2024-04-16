@@ -13,6 +13,12 @@
     </header>
 
     <main>
+        <!-- Upload Music Section -->
+        <form method='post' action='upload' enctype="multipart/form-data">
+        <input type='file' name='fileUpload'>
+        <input type='submit'>
+        </form>
+
         <!-- Background Music Section -->
         <h2>Background Music <input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="AudioManager.setBackgroundVolume(this.value)"></h2>
         <section id="background-music" class="section">
