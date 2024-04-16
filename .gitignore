@@ -131,3 +131,7 @@ dist
 
 # AWS
 *.pem
+
+
+# Jetbrains
+.idea*
