@@ -15,7 +15,8 @@ const soundBar = {
 
       // Add text inside the sound bar
       const soundBarText = document.createElement('div');
-      soundBarText.textContent = fileName; // Text content based on the file name
+      const capitalizedFileName = fileName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('-');
+      soundBarText.textContent =capitalizedFileName;
       soundBarText.className = 'sound-bar-text';
 
       const icon = document.createElement('img');
