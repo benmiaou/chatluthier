@@ -169,8 +169,9 @@ nav a {
 }
 
 .sound-bar-text, .icon {
-    user-select: none; /* Prevent text and icons from being selectable */
-    -webkit-user-select: none; /* Safari specific prefix */
-    -moz-user-select: none; /* Firefox specific prefix */
-    -ms-user-select: none; /* Internet Explorer/Edge specific prefix */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    pointer-events: none; /* Make sure events pass through the text and icon */
 }
