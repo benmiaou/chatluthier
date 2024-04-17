@@ -14,6 +14,21 @@ h2 {
     text-align: center;
 }
 
+/* Global styling */
+
+@font-face {
+    font-family: Bagnard;
+    src: url(assets/fonts/BagnardSans.otf);
+}
+
+body {
+    font-family: Bagnard;
+}
+
+button {
+    font-family: Bagnard;   
+}
+
 /* Styling for the header section */
 header {
     background: url('assets/images/chatlutier.webp') no-repeat center center;
@@ -137,6 +152,9 @@ nav a {
     height: 100px; /* Adjust the height as needed */
     background-color: #f44336; /* Light grey background for visibility */
     overflow: hidden; /* Keeps children elements from overflowing */
+
+    background-position: center;
+    background-size: cover;
 }
 
 .progress-bar {
@@ -149,12 +167,16 @@ nav a {
 .sound-bar-text {
     position: absolute;
     left: 50%; /* Position the left edge of the text at the center of the container */
-    top: 0;
+    top: 10px;
     transform: translateX(-50%); /* Shift the text left by half its width to truly center it */
-    color: white; /* Text color for visibility against the progress bar */
-    z-index: 2; /* Ensures text is above the progress bar */
+    z-index: 0; /* Make sure the text stays under the bar to avoid dragging issues */
     text-align: center; /* Ensure text alignment is centered, good for multi-line */
+
+    padding: 5px 10px;
+    color: black;
+    background-color: rgba(255, 255, 255, 0.7);
 }
+
 .icon {
     position: absolute;
     top: 25%; /* Adjust top positioning to center vertically */

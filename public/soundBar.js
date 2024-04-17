@@ -7,24 +7,19 @@ const soundBar = {
   createProgressBar: function (fileName) {
     const progressBarContainer = document.createElement('div');
     progressBarContainer.className = 'progress-bar-container';
+    progressBarContainer.setAttribute('style', 'background-image: url(assets/images/backgrounds/'+fileName+'.webp)');
 
     const progressBar = document.createElement('div');
     progressBar.className = 'progress-bar';
     progressBar.id = 'progress-bar-' + fileName;
     progressBarContainer.appendChild(progressBar);
 
-      // Add text inside the sound bar
-      const soundBarText = document.createElement('div');
-      soundBarText.textContent = fileName; // Text content based on the file name
-      soundBarText.className = 'sound-bar-text';
+    // Add text inside the sound bar
+    const soundBarText = document.createElement('div');
+    soundBarText.textContent = fileName; // Text content based on the file name
+    soundBarText.className = 'sound-bar-text';
 
-      const icon = document.createElement('img');
-      icon.classList.add('icon');
-      icon.setAttribute('src', 'assets/images/icons/'+fileName+'.svg');
-      icon.setAttribute('alt', 'Icon for ' + fileName);
-
-      progressBarContainer.appendChild(soundBarText);
-      progressBarContainer.appendChild(icon);
+    progressBarContainer.appendChild(soundBarText);
 
     this.initializeDraggableProgressBar(progressBarContainer ,progressBar);
 
