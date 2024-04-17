@@ -6,6 +6,8 @@
     <title>Chat Luthier</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
+    <script src="soundBar.js" defer></script>
+    <script src="client.js" defer></script>
 </head>
 <body>
     <header>
@@ -26,12 +28,12 @@
         </section>
 
         <!-- Soundboard Section -->
-        <h2>Soundboard <input type="range" min="0" max="100" value="50" class="slider" id="sounboard-volume" oninput="AudioManager.setBackgroundVolume(this.value)"></h2>
+        <h2>Soundboard <input type="range" min="0" max="100" value="50" class="slider" id="soundboard-volume" oninput="AudioManager.setVolume('soundboard', this.value)"></h2>
         <section id="soundboard" class="section">
         </section>
     </main>
 
-    <script src="client.js" defer></script>
+
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -40,22 +42,22 @@
                 .catch(err => console.log('Service Worker registration failed:', err));
             });
         }
-            // Function to generate buttons dynamically based on sound files
-     // Fetch sound files for ambiance section and generate buttons
-     fetch('http://127.0.0.1:3000/list-sounds/ambiance')
-        .then(response => response.json())
-        .then(soundFiles => {
-            AudioManager.generateAmbientButtons(soundFiles, 'ambiance', true);
-        })
-        .catch(error => console.error('Error fetching ambiance sound files:', error));
+        // Function to generate buttons dynamically based on sound files
+        // Fetch sound files for ambiance section and generate buttons
+        fetch('http://127.0.0.1:3000/list-sounds/ambiance')
+            .then(response => response.json())
+            .then(soundFiles => {
+                AudioManager.generateAmbientButtons(soundFiles, 'ambiance');
+            })
+            .catch(error => console.error('Error fetching ambiance sound files:', error));
 
-    // Fetch sound files for soundboard section and generate buttons
-    fetch('http://127.0.0.1:3000/list-sounds/soundboard')
-        .then(response => response.json())
-        .then(soundFiles => {
-            AudioManager.generateSoundboardButtons(soundFiles, 'soundboard', false);
-        })
-        .catch(error => console.error('Error fetching soundboard sound files:', error));
+        // Fetch sound files for soundboard section and generate buttons
+        fetch('http://127.0.0.1:3000/list-sounds/soundboard')
+            .then(response => response.json())
+            .then(soundFiles => {
+                AudioManager.generateSoundboardButtons(soundFiles, 'soundboard');
+            })
+            .catch(error => console.error('Error fetching soundboard sound files:', error));
     </script>
 </body>
 </html>

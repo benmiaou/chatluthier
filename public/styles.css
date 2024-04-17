@@ -130,3 +130,43 @@ nav a {
     margin-top: 15px;
     width: 100%;
 }
+
+.progress-bar-container {
+    position: relative;
+    width: 100%;
+    height: 100px; /* Adjust the height as needed */
+    background-color: #f44336; /* Light grey background for visibility */
+    overflow: hidden; /* Keeps children elements from overflowing */
+}
+
+.progress-bar {
+    background-color: #4CAF50; /* Green to indicate progress */
+    width: 0%; /* Initial width */
+    height: 100%; /* Fills the container vertically */
+    transition: width 0.3s ease; /* Smooth transition for width changes */
+}
+
+.sound-bar-text {
+    position: absolute;
+    left: 50%; /* Position the left edge of the text at the center of the container */
+    top: 0;
+    transform: translateX(-50%); /* Shift the text left by half its width to truly center it */
+    color: white; /* Text color for visibility against the progress bar */
+    z-index: 2; /* Ensures text is above the progress bar */
+    text-align: center; /* Ensure text alignment is centered, good for multi-line */
+}
+.icon {
+    position: absolute;
+    top: 25%; /* Adjust top positioning to center vertically */
+    right: 25%; /* Places the icon to the right inside the container */
+    width: 50%; /* Standard size for visibility */
+    height: 50%; /* Maintain aspect ratio */
+    z-index: 3; /* Ensures icon is visible above all other content */
+}
+
+.sound-bar-text, .icon {
+    user-select: none; /* Prevent text and icons from being selectable */
+    -webkit-user-select: none; /* Safari specific prefix */
+    -moz-user-select: none; /* Firefox specific prefix */
+    -ms-user-select: none; /* Internet Explorer/Edge specific prefix */
+}
