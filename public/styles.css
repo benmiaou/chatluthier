@@ -155,10 +155,11 @@ nav a {
 
     background-position: center;
     background-size: cover;
+    border-radius: 5px;
 }
 
 .progress-bar {
-    background-color: #4CAF50; /* Green to indicate progress */
+    background-color: rgba(76, 175, 80, 0.6); /* Green to indicate progress */
     width: 0%; /* Initial width */
     height: 100%; /* Fills the container vertically */
     transition: width 0.3s ease; /* Smooth transition for width changes */
