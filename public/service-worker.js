@@ -1,17 +1,11 @@
-const CACHE_NAME = 'chat-luthier-cache-v4';
+const CACHE_NAME = 'chat-luthier-cache-v6';
 const urlsToCache = [
   '/',
   '/index.html',
   '/styles.css',
-  '/client.js'
-  // Add URLs for your audio assets
-
-  // ... more sound files
-
-  // ... more ambiance files
-
-  // ... more effects files
-  // Also include other assets like images, icons etc.
+  '/audioManager.js',
+  '/localDirectory.js',
+  '/soudBar.js'
 ];
 
 // Function to fetch all files in a directory recursively

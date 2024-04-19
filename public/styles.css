@@ -14,14 +14,53 @@ h2 {
     text-align: center;
 }
 
-/* Styling for the header section */
 header {
-    background: url('assets/images/chatlutier.webp') no-repeat center center;
     background-size: cover;
     padding: 20px;
     text-align: center;
+    position: relative;
+    color: #fff;
+}
+.top-left-controls {
+    text-align: left; /* Aligns the button and status text to the left */
+}
+.logo {
+    width: 50px; /* Adjust size as necessary */
+    height: auto;
+    vertical-align: middle;
+}
+.status {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #FFD700; /* Example to make the status more visible */
+}
+.center-content {
+    text-align: center; /* Keeps the logo and title centered */
+}
+.button-directory {
+    background-color: #4CAF50; /* A green color for the directory button */
+    color: white;
+    border: none;
+    padding: 6px 12px; /* Adjust padding to suit design */
+    font-size: 0.9em;
+    border-radius: 4px; /* A slightly different radius */
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* A bit of shadow for depth */
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
 
+.button-directory:hover {
+    background-color: #367C39; /* Darker green on hover */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25); /* Deeper shadow for a 3D effect on hover */
+}
+.header-content {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between; /* Aligns children (top-left and center) on opposite sides */
+    align-items: center; /* Vertically centers the flex items */
+}
 /* Title styling within each section */
 .section h2 {
     margin-bottom: 20px; /* Increased margin for better visual separation */
