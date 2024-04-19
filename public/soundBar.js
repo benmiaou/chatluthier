@@ -7,21 +7,28 @@ const soundBar = {
   createProgressBar: function (fileName) {
     const progressBarContainer = document.createElement('div');
     progressBarContainer.className = 'progress-bar-container';
+    progressBarContainer.draggable = false;
 
     const progressBar = document.createElement('div');
     progressBar.className = 'progress-bar';
     progressBar.id = 'progress-bar-' + fileName;
+    progressBar.draggable = false;
     progressBarContainer.appendChild(progressBar);
 
       // Add text inside the sound bar
       const soundBarText = document.createElement('div');
-      soundBarText.textContent = fileName; // Text content based on the file name
+      const capitalizedFileName = fileName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('-');
+      soundBarText.textContent =capitalizedFileName;
       soundBarText.className = 'sound-bar-text';
+      soundBarText.draggable = false; // Disable dragging for the text
+
 
       const icon = document.createElement('img');
       icon.classList.add('icon');
       icon.setAttribute('src', 'assets/images/icons/'+fileName+'.svg');
       icon.setAttribute('alt', 'Icon for ' + fileName);
+      icon.draggable = false; // Disable dragging for the icon
+
 
       progressBarContainer.appendChild(soundBarText);
       progressBarContainer.appendChild(icon);
@@ -64,6 +71,7 @@ const soundBar = {
                 this.setProgress(e, progressBar, movementX, progressBarContainer);
                 this.lastX = getPositionX(e); // Update last position
             }
+            e.preventDefault(); // Prevent scrolling when dragging
         }
     });
 
@@ -89,7 +97,7 @@ const soundBar = {
   setProgress: function (e, progressBar, movementX, progressBarContainer) {
     if (!movementX) return; // Only run calculations if there is movement
     const now = Date.now();
-    if (now - this.lastInvocation < 50) return; // Throttle updates to every 100ms
+    if (now - this.lastInvocation < 5) return; // Throttle updates to every 100ms
     this.lastInvocation  = now;
     const rect = progressBar.getBoundingClientRect();
     const totalWidth = rect.width;

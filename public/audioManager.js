@@ -69,13 +69,13 @@ const AudioManager = {
 
     async playBackgroundSound(type, button) {
         if (this.activeBackgroundSound) {
+            this.activeBackgroundSound.source.onended = null;
             this.activeBackgroundSound.source.stop();
             this.activeBackgroundSound = null;
             this.backgroundButton.classList.remove('button-play');
             this.backgroundButton.classList.add('button-stop');
             if (type === this.type) return;
         }
-
         this.backgroundButton = button;
         button.classList.add('button-play');
         button.classList.remove('button-stop');
@@ -116,73 +116,6 @@ const AudioManager = {
                 console.error('Sound bar container not found.');
             }
         }
-    },
-
-    toggleSoundboardSound(url, loop, button) {
-        let sound = this.categories.soundboard[url];
-        if (sound && sound.source) {
-            sound.source.stop();
-            delete this.categories.soundboard[url];
-            button.classList.remove('button-play');
-            button.classList.add('button-stop');
-        } else {
-            const slider = document.getElementById('soundboard-volume'); // Assuming the slider is the next sibling in the DOM
-            if (!slider) { // If we cannot find the slider, we look for it if inside the element
-                slider = button.querySelector('input');
-            }
-            const initialVolume = slider.value / 100; // Convert slider value to volume level
-            this.createSound(url, loop, button, 'soundboard', initialVolume);
-        }
-    },
-
-    createSound(url, loop, button, type, initialVolume) {
-        const context = this.getAudioContext();
-        if (context.state === 'suspended') {
-            context.resume();
-        }
-        const source = this.getAudioContext().createBufferSource();
-        const gainNode = this.getAudioContext().createGain();
-
-        // Set the initial volume based on the slider's current value
-        gainNode.gain.value = initialVolume;
-
-        fetch(url)
-            .then(response => response.arrayBuffer())
-            .then(arrayBuffer => this.getAudioContext().decodeAudioData(arrayBuffer))
-            .then(audioBuffer => {
-                source.buffer = audioBuffer;
-                source.loop = loop;
-                source.connect(gainNode);
-                gainNode.connect(this.getAudioContext().destination);
-                source.start(0);
-
-                source.onended = () => {
-                    delete this.categories[type][url];
-                    if(button)
-                    {
-                        button.classList.remove('button-play');
-                        button.classList.add('button-stop');
-                    }
-                };
-
-                this.categories[type][url] = { source, gainNode };
-                if(button)
-                {
-                    button.classList.add('button-play');
-                    button.classList.remove('button-stop');
-                }
-            })
-            .catch(e => console.error('Error with decoding audio data', e));
-    },
-
-
-    setVolume(type, volume) {
-        const gainValue = volume / 100;
-        Object.values(this.categories[type]).forEach(sound => {
-            if (sound.gainNode) {
-                sound.gainNode.gain.value = gainValue;
-            }
-        });
     },
 
     generateAmbientButtons(soundFiles, sectionId) {
@@ -229,19 +162,136 @@ const AudioManager = {
         });
     },
 
+    createSound(urlOrHandle, loop, button, type, initialVolume) {
+        console.log('Received type:', typeof urlOrHandle, urlOrHandle);
+        if (urlOrHandle instanceof FileSystemFileHandle) {
+            console.log('Confirmed as FileHandle');
+        } else {
+            console.log('Not a FileHandle');
+        }
+        const context = this.getAudioContext();
+        if (context.state === 'suspended') {
+            context.resume();
+        }
     
+        const source = context.createBufferSource();
+        const gainNode = context.createGain();
+        gainNode.gain.value = initialVolume; // Set the initial volume
     
-    generateSoundboardButtons(soundFiles, sectionId) {
-        const section = document.getElementById(sectionId);
-        section.innerHTML = ''; // Clear existing content
+        const processAudioBuffer = (arrayBuffer) => {
+            context.decodeAudioData(arrayBuffer)
+                .then(audioBuffer => {
+                    source.buffer = audioBuffer;
+                    source.loop = loop;
+                    source.connect(gainNode);
+                    gainNode.connect(context.destination);
+                    source.start(0);
+    
+                    source.onended = () => {
+                        delete this.categories[type][urlOrHandle];
+                        if (button) {
+                            button.classList.remove('button-play');
+                            button.classList.add('button-stop');
+                        }
+                    };
+    
+                    this.categories[type][urlOrHandle] = { source, gainNode };
+                    if (button) {
+                        button.classList.add('button-play');
+                        button.classList.remove('button-stop');
+                    }
+                })
+                .catch(e => console.error('Error with decoding audio data:', e));
+        };
+    
+        // Check if urlOrHandle is a file handle
+        if (urlOrHandle instanceof FileSystemFileHandle) {
+            urlOrHandle.getFile().then(file => {
+                file.arrayBuffer().then(arrayBuffer => {
+                    processAudioBuffer(arrayBuffer);
+                }).catch(e => console.error('Error reading file arrayBuffer:', e));
+            }).catch(e => console.error('Error getting file:', e));
+        } else {
+            // Assume urlOrHandle is a URL
+            fetch(urlOrHandle)
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => processAudioBuffer(arrayBuffer))
+                .catch(e => console.error('Error fetching or decoding audio data:', e));
+        }
+    },
 
-        soundFiles.forEach(file => {
-            const fileName = file.replace('.mp3', '');
+    setVolume(type, volume) {
+        const gainValue = volume / 100;
+        Object.values(this.categories[type]).forEach(sound => {
+            if (sound.gainNode) {
+                sound.gainNode.gain.value = gainValue;
+            }
+        });
+    },
+
+    async loadLocalSoundFiles() {
+        const directory = await LocalDirectory.getDirectory();
+        if (!directory) {
+            console.error("Directory handle is not set.");
+            return;
+        }
+    
+        const soundboardDir = await directory.getDirectoryHandle('soundboard', { create: true });
+        const localFiles = await LocalDirectory.listMP3Files(soundboardDir);
+        
+        // Pass file handles directly to the button generator
+        this.generateSoundboardButtons(localFiles, 'soundboardLocal', true);
+    },
+
+    generateSoundboardButtons(items, sectionId, isLocal = false) {
+        const section = document.getElementById(sectionId);
+        section.innerHTML = '';  // Clear existing content
+    
+        items.forEach(item => {
+            // Determine if the item is a file handle or a string based on `isLocal`
+            const fileName = isLocal ? item.name.replace('.mp3', '') : item.replace('.mp3', '');
             const button = document.createElement('button');
             button.textContent = fileName;
-            button.onclick = () => this.toggleSoundboardSound(`assets/${sectionId}/${file}`, false, button);
+    
+            if (isLocal) {
+                // If local, the item is a file handle
+                button.onclick = () => {
+                    this.toggleSoundboardSound(item, false, button);
+                };
+            } else {
+                // If not local, the item is treated as a string path
+                const filePath = `assets/soundboard/${item}`;
+                button.onclick = () => {
+                    this.toggleSoundboardSound(filePath, false, button);
+                };
+            }
+    
             button.classList.add('button-stop', 'button');
             section.appendChild(button);
         });
+    },
+
+    findVolumeControl(button) {
+        // Tries to find the slider associated with the button, assuming each button might be part of a larger control group.
+        let parent = button.parentNode;
+        while (parent && !parent.querySelector('.slider')) {
+            parent = parent.parentNode;  // Traverse up until you find a container with a slider
+        }
+        return parent ? parent.querySelector('.slider') : null;
+    },
+
+    toggleSoundboardSound(fileHandleOrPath, loop, button) {
+        const soundKey = fileHandleOrPath.name || fileHandleOrPath; // Use the file name or path as key
+        let sound = this.categories.soundboard[soundKey];
+        if (sound && sound.source) {
+            sound.source.stop();
+            delete this.categories.soundboard[soundKey];
+            button.classList.remove('button-play');
+            button.classList.add('button-stop');
+        } else {
+            const slider = this.findVolumeControl(button);
+            const initialVolume = slider ? slider.value / 100 : 1;
+            this.createSound(fileHandleOrPath, loop, button, 'soundboard', initialVolume);
+        }
     },
 }

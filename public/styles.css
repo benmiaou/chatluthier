@@ -14,14 +14,53 @@ h2 {
     text-align: center;
 }
 
-/* Styling for the header section */
 header {
-    background: url('assets/images/chatlutier.webp') no-repeat center center;
     background-size: cover;
     padding: 20px;
     text-align: center;
+    position: relative;
+    color: #fff;
+}
+.top-left-controls {
+    text-align: left; /* Aligns the button and status text to the left */
+}
+.logo {
+    width: 50px; /* Adjust size as necessary */
+    height: auto;
+    vertical-align: middle;
+}
+.status {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #FFD700; /* Example to make the status more visible */
+}
+.center-content {
+    text-align: center; /* Keeps the logo and title centered */
+}
+.button-directory {
+    background-color: #4CAF50; /* A green color for the directory button */
+    color: white;
+    border: none;
+    padding: 6px 12px; /* Adjust padding to suit design */
+    font-size: 0.9em;
+    border-radius: 4px; /* A slightly different radius */
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* A bit of shadow for depth */
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
 
+.button-directory:hover {
+    background-color: #367C39; /* Darker green on hover */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25); /* Deeper shadow for a 3D effect on hover */
+}
+.header-content {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between; /* Aligns children (top-left and center) on opposite sides */
+    align-items: center; /* Vertically centers the flex items */
+}
 /* Title styling within each section */
 .section h2 {
     margin-bottom: 20px; /* Increased margin for better visual separation */
@@ -112,7 +151,7 @@ nav a {
 .section {
     padding: 20px;
     display: grid; /* Change display to grid */
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Set columns to auto-fill with a minimum width of 200px */
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Set columns to auto-fill with a minimum width of 200px */
     grid-auto-rows: minmax(50px, auto); /* Set rows to automatically adjust height */
     gap: 20px; /* Add gap between grid items */
     align-items: center;
@@ -148,13 +187,17 @@ nav a {
 
 .sound-bar-text {
     position: absolute;
-    left: 50%; /* Position the left edge of the text at the center of the container */
-    top: 0;
-    transform: translateX(-50%); /* Shift the text left by half its width to truly center it */
+    left: 0; /* Align left edge to the container's left edge */
+    right: 0; /* Align right edge to the container's right edge */
+    top: 0; /* Align top to the container's top */
     color: white; /* Text color for visibility against the progress bar */
     z-index: 2; /* Ensures text is above the progress bar */
-    text-align: center; /* Ensure text alignment is centered, good for multi-line */
+    text-align: center; /* Center text horizontally */
+    overflow: hidden; /* Prevents text from overflowing */
+    white-space: nowrap; /* Keeps the text on one line */
+    text-overflow: ellipsis; /* Adds an ellipsis if the text overflows the available space */
 }
+
 .icon {
     position: absolute;
     top: 25%; /* Adjust top positioning to center vertically */
@@ -165,8 +208,9 @@ nav a {
 }
 
 .sound-bar-text, .icon {
-    user-select: none; /* Prevent text and icons from being selectable */
-    -webkit-user-select: none; /* Safari specific prefix */
-    -moz-user-select: none; /* Firefox specific prefix */
-    -ms-user-select: none; /* Internet Explorer/Edge specific prefix */
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    pointer-events: none; /* Make sure events pass through the text and icon */
 }
