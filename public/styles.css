@@ -156,6 +156,7 @@ nav a {
     background-position: center;
     background-size: cover;
     border-radius: 5px;
+    border: 2px solid #ee951f;
 }
 
 .progress-bar {
