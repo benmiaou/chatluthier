@@ -44,6 +44,8 @@
         <h2>Ambiance Sounds</h2>
         <section id="ambiance" class="section">
         </section>
+        <section id="ambianceLocal" class="section">
+        </section>
 
         <!-- Soundboard Section -->
         <h2>Soundboard <input type="range" min="0" max="100" value="50" class="slider" id="soundboard-volume" oninput="AudioManager.setVolume('soundboard', this.value)"></h2>
@@ -56,15 +58,10 @@
 
     <script  type="module">
         //Load dir Handle if possible
-        subtypeSelector.addEventListener('change', function() {
-        AudioManager.subType = this.value;
-        console.log('AudioManager.subType set to:', AudioManager.subType);
+        subtypeSelector.addEventListener('change', function() 
+        {
+            AudioManager.subType = this.value;
         });
-        document.addEventListener('DOMContentLoaded', () => {
-            LocalDirectory.getDirectory();
-            AudioManager.loadLocalSoundFiles();
-        });
-
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')
@@ -82,7 +79,7 @@
         }
 
         // Function to generate buttons dynamically based on sound files
-        function fetchSoundData() {
+        async function fetchSoundData() {
             fetch('http://127.0.0.1:3000/list-sounds/ambiance')
                 .then(response => response.json())
                 .then(soundFiles => {
@@ -96,7 +93,9 @@
                     AudioManager.generateSoundboardButtons(soundFiles, 'soundboard', false);
                 })
                 .catch(error => console.error('Error fetching soundboard sound files:', error));
-            AudioManager.preloadBackgroundSounds()
+            await AudioManager.preloadBackgroundSounds()
+            await LocalDirectory.getDirectory();
+            await AudioManager.loadLocalSoundFiles();
         }
     </script>
 </body>

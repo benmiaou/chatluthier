@@ -4,7 +4,7 @@ const AudioManager = {
     activeBackgroundSound: null,
     soundFiles: null,
     type: null,
-    subType : "meadow",
+    subType : "default",
     categories: {
         background: {},
         ambiance: {},
@@ -25,11 +25,14 @@ const AudioManager = {
         const existingOptions = new Set(Array.from(subtypeSelector.options).map(opt => opt.value));
         for (let type of types) {
             try {
-                console.log('preloadBackgroundSounds ' + type)
                 const response = await fetch(`http://127.0.0.1:3000/list-files/${encodeURIComponent(type)}`);
                 const subTypes = await response.json();
-                this.categories[type] = {};
                 const subtypeSelector = document.getElementById('subtypeSelector');
+                  // Ensure `this.categories[type]` is initialized
+                  if (!this.categories[type]) {
+                    this.categories[type] = {}; // Initialize if missing
+                }
+    
                 for (let subType of subTypes) {
                     //Add option comboBox
                     if (!existingOptions.has(subType) && subType !== "default") {
@@ -39,12 +42,9 @@ const AudioManager = {
                         subtypeSelector.appendChild(option);
                         existingOptions.add(subType);
                     }
-
-                    console.log('Load ' + subType)
                     const subResponse = await fetch(`http://127.0.0.1:3000/list-sounds/${encodeURIComponent(type + '/' + subType)}`);
                     const files = await subResponse.json();
                     // Shuffle and save files
-                    console.log('Load ' + files)
                     this.categories[type][subType] = this.shuffleArray(files.map(file => `assets/${type}/${subType}/${file}`));
                 }
             } catch (e) {
@@ -67,8 +67,11 @@ const AudioManager = {
             return;
         }
         files = {}
+       
         if(!this.categories[this.type][this.subType])
         {
+            console.log("Not existing : " + this.type +" - " + this.subType)
+            console.log("Not existing : " +  Object.keys(this.categories[this.type]))
             files = this.categories[this.type]["default"];
         }
         else
@@ -107,41 +110,64 @@ const AudioManager = {
     
         let newGainValue = Math.min(desiredRMS / rms, 1.5); // Capping the gain to prevent distortion
         if (isFinite(newGainValue) && newGainValue > 0) {
-            console.log("newGainValue " + newGainValue);
             // Smooth transition using exponential ramp to the new gain value
             this.activeBackgroundSound.gainNode.gain.exponentialRampToValueAtTime(newGainValue, this.getAudioContext().currentTime + 0.1);
         }
     },
 
-    playSound(file) {
-        const source = this.getAudioContext().createBufferSource();
-        const gainNode = this.getAudioContext().createGain();
-        const analyser = this.getAudioContext().createAnalyser();
-
-        fetch(file)
-            .then(response => response.arrayBuffer())
-            .then(arrayBuffer => this.getAudioContext().decodeAudioData(arrayBuffer))
-            .then(audioBuffer => {
-                source.buffer = audioBuffer;
-                source.loop = false;
-                source.connect(analyser);
-                analyser.connect(gainNode);
-                gainNode.connect(this.getAudioContext().destination);
-
-                let volume = document.getElementById('music-volume').value;
-                gainNode.gain.value = volume / 100;
-                source.start(0);
-                const updateGain = () => {
-                    this.adjustVolume();
-                    if (!source.paused) {
-                        requestAnimationFrame(updateGain);
-                    }
-                }
-                source.onended = () => this.backGroundSoundLoop();
-                this.activeBackgroundSound = { source, gainNode, analyser};
-                //updateGain(); WIP
-            })
-            .catch(e => console.error('Error with decoding audio data:', e));
+    playSound(fileOrHandle) {
+        const context = this.getAudioContext();
+        if (context.state === 'suspended') {
+            context.resume();
+        }
+    
+        const source = context.createBufferSource();
+        const gainNode = context.createGain();
+        const analyser = context.createAnalyser();
+    
+        const processAudioBuffer = (arrayBuffer) => {
+            context.decodeAudioData(arrayBuffer)
+                .then(audioBuffer => {
+                    source.buffer = audioBuffer;
+                    source.loop = false;
+                    source.connect(analyser);
+                    analyser.connect(gainNode);
+                    gainNode.connect(context.destination);
+    
+                    const volume = document.getElementById('music-volume').value;
+                    gainNode.gain.value = volume / 100; // Set initial volume
+                    source.start(0);
+    
+                    const updateGain = () => {
+                        this.adjustVolume(); // If you have an adjustVolume function
+                        if (!source.ended) { // Instead of paused, check if source has ended
+                            requestAnimationFrame(updateGain); // Recursively update gain
+                        }
+                    };
+    
+                    source.onended = () => {
+                        console.log('Sound ended, looping to next.');
+                        this.backGroundSoundLoop(); // Set up loop logic
+                    };
+    
+                    this.activeBackgroundSound = { source, gainNode, analyser }; // Store active sound
+                   // updateGain(); //WIP
+                })
+                .catch(e => console.error('Error decoding audio data:', e));
+        };
+    
+        // Determine if it's a file handle or URL
+        if (fileOrHandle instanceof FileSystemFileHandle) {
+            fileOrHandle.getFile()
+                .then(file => file.arrayBuffer())
+                .then(arrayBuffer => processAudioBuffer(arrayBuffer))
+                .catch(e => console.error('Error reading local file:', e));
+        } else {
+            fetch(fileOrHandle)
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => processAudioBuffer(arrayBuffer))
+                .catch(e => console.error('Error fetching audio data:', e));
+        }
     },
 
     async playBackgroundSound(type, button) {
@@ -173,12 +199,12 @@ const AudioManager = {
         }
     },
 
-    toggleAmbientSound(url, loop, soundBarContainer) {
-        let sound = this.categories.ambiance[url];
+    toggleAmbientSound(fileHandleOrPath, loop, soundBarContainer) {
+        let sound = this.categories.ambiance[fileHandleOrPath];
         if (sound && sound.source) 
         {
             sound.source.stop();
-            delete this.categories.ambiance[url];
+            delete this.categories.ambiance[fileHandleOrPath];
         } 
         else 
         {
@@ -187,19 +213,19 @@ const AudioManager = {
                 // Retrieve the volume value from the sound bar
                 const soundBarValue = soundBar.getVolumeFromProgressBar(soundBarContainer);
                 // Use the sound bar value as the initial volume
-                this.createSound(url, loop, null, 'ambiance', soundBarValue);
+                this.createSound(fileHandleOrPath, loop, null, 'ambiance', soundBarValue);
             } else {
                 console.error('Sound bar container not found.');
             }
         }
     },
 
-    generateAmbientButtons(soundFiles, sectionId) {
+    generateAmbientButtons(soundFiles, sectionId, isLocal = false) {
         const section = document.getElementById(sectionId);
         section.innerHTML = ''; // Clear existing content
     
-        soundFiles.forEach(file => {
-            const fileName = file.replace('.mp3', '');
+        soundFiles.forEach(item => {
+            const fileName = isLocal ? item.name.replace('.mp3', '') : item.replace('.mp3', '');
             const container = document.createElement('div');
             container.className = 'sound-container';
     
@@ -214,16 +240,26 @@ const AudioManager = {
             // Assuming 'soundBar' is the object exported from 'soundBar.js'
             const progressBarContainer = soundBar.createProgressBar(fileName);
             progressBarContainer.addEventListener('soundBarValueChanged', () => {
-                const sound = this.categories[sectionId][`assets/${sectionId}/${file}`];
+                // If local, the item is a file handle
+                fileHandleOrPath = null
+                if(isLocal)
+                {
+                    fileHandleOrPath = item;
+                }
+                else
+                {
+                    fileHandleOrPath = `assets/ambiance/${item}`;
+                }
+                const sound = this.categories.ambiance[fileHandleOrPath];
                 if(!isRunning && !sound && soundBar.getVolumeFromProgressBar(progressBarContainer) > 0)
                 {
                     isRunning = true;
-                    this.toggleAmbientSound(`assets/${sectionId}/${file}`, true, progressBarContainer);
+                    this.toggleAmbientSound(fileHandleOrPath, true, progressBarContainer);
                 }
                 else if(sound && soundBar.getVolumeFromProgressBar(progressBarContainer) == 0)
                 {
                     isRunning = false;
-                    this.toggleAmbientSound(`assets/${sectionId}/${file}`, true, progressBarContainer);
+                    this.toggleAmbientSound(fileHandleOrPath, true, progressBarContainer);
                 }
                 else if (sound && sound.gainNode) 
                 {
@@ -309,9 +345,91 @@ const AudioManager = {
     
         const soundboardDir = await directory.getDirectoryHandle('soundboard', { create: true });
         const localFiles = await LocalDirectory.listMP3Files(soundboardDir);
-        
         // Pass file handles directly to the button generator
         this.generateSoundboardButtons(localFiles, 'soundboardLocal', true);
+
+        const AmbientDir = await directory.getDirectoryHandle('ambiance', { create: true });
+        const localAmbianceFiles = await LocalDirectory.listMP3Files(AmbientDir);
+        // Pass file handles directly to the button generator
+        this.generateAmbientButtons(localAmbianceFiles, 'ambianceLocal', true);
+
+        this.updateLocalBackgroundMusic();
+    },
+
+    async updateLocalBackgroundMusic() {
+        const rootDir = await LocalDirectory.getDirectory();
+        if (!rootDir) {
+            console.error("Root directory handle is not set.");
+            return;
+        }
+    
+        function getSubtypeName(path) {
+            const parts = path.split('/');
+            return parts[parts.length - 1];
+        }
+    
+        const types = [ 'background/battle', 'background/exploration'];
+        const backgroundDir = await rootDir.getDirectoryHandle('background', { create: true });
+        const existingOptions = new Set(Array.from(subtypeSelector.options).map(opt => opt.value));
+    
+        for (let type of types) {
+            try {
+                const typeDir = await backgroundDir.getDirectoryHandle(getSubtypeName(type), { create: true });
+                const subTypeHandles = [];
+    
+                // Get all subdirectories (subtypes)
+                for await (const entry of typeDir.values()) {
+                    if (entry.kind === 'directory') {
+                        subTypeHandles.push(entry);
+                    }
+                }
+    
+                // Ensure `this.categories[type]` is initialized
+                if (!this.categories[type]) {
+                    this.categories[type] = {}; // Initialize if missing
+                }
+    
+                const existingSubtypes = new Set(Object.keys(this.categories[type]));
+    
+                for (let subTypeHandle of subTypeHandles) {
+                    const subTypeName = subTypeHandle.name;
+  
+                    // Ensure subtype is initialized
+                    if (!Array.isArray(this.categories[type][subTypeName])) {
+                        this.categories[type][subTypeName] = []; // Initialize as an array
+                        console.log("init " + type + " " + subTypeName);
+                    }
+    
+                    if (!existingOptions.has(subTypeName) && subTypeName !== "default") {
+                        const option = document.createElement('option');
+                        option.value = subTypeName;
+                        option.textContent = subTypeName;
+                        subtypeSelector.appendChild(option);
+                        existingOptions.add(subTypeName);
+                    }
+    
+                 
+    
+                    const files = await LocalDirectory.listMP3Files(subTypeHandle);
+    
+                    const existingFiles = new Set(
+                        this.categories[type][subTypeName].map(file => file.name)
+                    );
+    
+                    // Add new files only if they don't already exist
+                    for (let fileHandle of files) {
+                        if (!existingFiles.has(fileHandle.name)) {
+                            this.categories[type][subTypeName].push(fileHandle);
+                            console.log(`add : ${fileHandle.name} to ${type}-${subTypeName}`);
+                            existingFiles.add(fileHandle.name);  // Keep track of added files
+                        }
+                    }
+                }
+                console.log("this.categories[type] : " + Object.keys(this.categories[type]))
+            } catch (e) {
+                console.error(`Error scanning ${type}:`, e);
+            }
+        }
     },
 
     generateSoundboardButtons(items, sectionId, isLocal = false) {
@@ -352,11 +470,10 @@ const AudioManager = {
     },
 
     toggleSoundboardSound(fileHandleOrPath, loop, button) {
-        const soundKey = fileHandleOrPath.name || fileHandleOrPath; // Use the file name or path as key
-        let sound = this.categories.soundboard[soundKey];
+        let sound = this.categories.soundboard[fileHandleOrPath];
         if (sound && sound.source) {
             sound.source.stop();
-            delete this.categories.soundboard[soundKey];
+            delete this.categories.soundboard[fileHandleOrPath];
             button.classList.remove('button-play');
             button.classList.add('button-stop');
         } else {
