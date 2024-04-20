@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/MainIcon/favicon_io/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/MainIcon/favicon_io/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/MainIcon/favicon_io/favicon-16x16.png">
-    <link rel="icon" href="assets/images/MainIcon/favicon_io/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicons/favicon-16x16.png">
+    <link rel="icon" href="assets/images/favicons/favicon.ico" type="image/x-icon">
     <link rel="manifest" href="/site.webmanifest">
     <title>Chat Luthier</title>
     <link rel="stylesheet" href="styles.css">
@@ -23,7 +23,7 @@
                 <div id="directoryStatus" class="status">Directory not set</div>
             </div>
             <div class="center-content">
-                <img src="assets/images/MainIcon/favicon_io/apple-touch-icon.png" alt="Le Chat Luthier Logo" class="logo">
+                <img src="assets/images/favicons/MainLogo.webp" alt="Le Chat Luthier Logo" class="logo">
                 <h1>Le Chat Luthier</h1>
             </div>
         </div>
@@ -58,31 +58,38 @@
             AudioManager.loadLocalSoundFiles();
         });
 
-        //Start cache system
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                .then(registration => console.log('Service Worker registered'))
-                .catch(err => console.log('Service Worker registration failed:', err));
+                navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registered');
+                    fetchSoundData();
+
+                }).catch(err => {
+                    console.log('Service Worker registration failed:', err);
+                    fetchSoundData();
+                });
             });
+        } else {
+            fetchSoundData();
         }
 
         // Function to generate buttons dynamically based on sound files
-        // Fetch sound files for ambiance section and generate buttons
-        fetch('http://127.0.0.1:3000/list-sounds/ambiance')
-            .then(response => response.json())
-            .then(soundFiles => {
-                AudioManager.generateAmbientButtons(soundFiles, 'ambiance');
-            })
-            .catch(error => console.error('Error fetching ambiance sound files:', error));
+        function fetchSoundData() {
+            fetch('http://127.0.0.1:3000/list-sounds/ambiance')
+                .then(response => response.json())
+                .then(soundFiles => {
+                    AudioManager.generateAmbientButtons(soundFiles, 'ambiance');
+                })
+                .catch(error => console.error('Error fetching ambiance sound files:', error));
 
-        // Fetch sound files for soundboard section and generate buttons
-        fetch('http://127.0.0.1:3000/list-sounds/soundboard')
-            .then(response => response.json())
-            .then(soundFiles => {
-                AudioManager.generateSoundboardButtons(soundFiles, 'soundboard', false);
-            })
-            .catch(error => console.error('Error fetching soundboard sound files:', error));
+            fetch('http://127.0.0.1:3000/list-sounds/soundboard')
+                .then(response => response.json())
+                .then(soundFiles => {
+                    AudioManager.generateSoundboardButtons(soundFiles, 'soundboard', false);
+                })
+                .catch(error => console.error('Error fetching soundboard sound files:', error));
+        }
     </script>
 </body>
 </html>
