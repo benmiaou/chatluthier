@@ -100,7 +100,6 @@ const AudioManager = {
         let sound = this.categories.ambiance[url];
         if (sound && sound.source) 
         {
-            console.log("Stop")
             sound.source.stop();
             delete this.categories.ambiance[url];
         } 
@@ -162,13 +161,8 @@ const AudioManager = {
         });
     },
 
-    createSound(urlOrHandle, loop, button, type, initialVolume) {
-        console.log('Received type:', typeof urlOrHandle, urlOrHandle);
-        if (urlOrHandle instanceof FileSystemFileHandle) {
-            console.log('Confirmed as FileHandle');
-        } else {
-            console.log('Not a FileHandle');
-        }
+    createSound(urlOrHandle, loop, button, type, initialVolume) 
+    {
         const context = this.getAudioContext();
         if (context.state === 'suspended') {
             context.resume();
