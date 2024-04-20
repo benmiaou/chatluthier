@@ -4,10 +4,8 @@ export const LocalDirectory = {
     directoryHandle: null,
 
     async selectDirectory() {
-        console.log('selectDirectory');
         try 
         {
-            console.log('Requesting directory picker');
             this.directoryHandle = await window.showDirectoryPicker();
             // Store the directory handle in IndexedDB after obtaining it
             await set('directory', this.directoryHandle);
@@ -22,12 +20,10 @@ export const LocalDirectory = {
     },
 
     async getDirectory() {
-        console.log('getDirectory');
         if (!this.directoryHandle) {
             try {
                 const storedHandle = await get('directory');
                 if (storedHandle) {
-                    console.log('Directory handle retrieved from IndexedDB.');
                     // Test if the handle still has valid permissions
                     try {
                         // Attempt to read from the directory to confirm access rights
@@ -58,8 +54,8 @@ export const LocalDirectory = {
         }
     },
 
-    async listDirectories(directory) {
-        console.log('listDirectories');
+    async listDirectories(directory) 
+    {
         if (!directory)
             return;
         const directories = [];
@@ -85,8 +81,8 @@ export const LocalDirectory = {
         return files;
     },
 
-    async initDirectories() {
-        console.log('initDirectories');
+    async initDirectories() 
+    {
         if (!this.directoryHandle)
             return;
 
@@ -107,7 +103,6 @@ export const LocalDirectory = {
     async createDirectories(path) {
         if (!this.directoryHandle)
             return;
-        console.log('createDirectories ' + path);
         const parts = path.split('/');
         let currentDir = this.directoryHandle;
 

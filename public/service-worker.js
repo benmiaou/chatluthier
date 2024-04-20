@@ -24,7 +24,6 @@ async function fetchDirectoryFiles(directory) {
 
 self.addEventListener('install', event => {
     console.log('Service Worker installing.');
-
     // Function to fetch and cache a single file
     async function cacheFile(cache, url) {
         try {

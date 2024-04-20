@@ -26,7 +26,6 @@ app.get('/list-sounds/:type', (req, res) => {
     {
         directoryPath = path.join(__dirname, 'assets', type);
     }
-    console.log(directoryPath);
     fs.readdir(directoryPath, (err, files) => {
         if (err) {
             console.error('Error getting directory information:', err); // Log the error
@@ -41,10 +40,7 @@ app.get('/list-files/:type', (req, res) => {
     const type = req.params.type;
     directoryPath = "";
     directoryPath = path.join(__dirname, 'assets', decodeURIComponent(type));
-    console.log("Attempting to list files from:", directoryPath); // Debugging output
-
     fs.readdir(directoryPath, (err, files) => {
-        console.log(files);
         if (err) {
             console.error('Error getting directory information:', err); // Log the error
             res.status(500).send('Failed to retrieve directory information');
