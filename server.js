@@ -15,25 +15,19 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
     next();
   });;
-app.get('/list-sounds/:type', (req, res) => {
-    const type = req.params.type;
-    directoryPath = "";
-    if(type === "exploration" || type === "battle")
-    {
-        directoryPath = path.join(__dirname, 'assets', 'background', type);
-    }
-    else
-    {
-        directoryPath = path.join(__dirname, 'assets', type);
-    }
-    fs.readdir(directoryPath, (err, files) => {
+  app.get('/list-sounds/:type', (req, res) => {
+    const type = decodeURIComponent(req.params.type);
+    const directoryPath = path.join(__dirname, 'assets', type);
+
+    fs.readdir(directoryPath, { withFileTypes: true }, (err, entries) => {
         if (err) {
-            console.error('Error getting directory information:', err); // Log the error
+            console.error('Error getting directory information:', err);
             res.status(500).send('Failed to retrieve directory information');
-        } else {
-            const mp3Files = files.filter(file => file.endsWith('.mp3'));
-            res.json(mp3Files);
+            return;
         }
+
+        const mp3Files = entries.filter(entry => !entry.isDirectory() && entry.name.endsWith('.mp3'));
+        res.json(mp3Files.map(entry => entry.name));
     });
 });
 app.get('/list-files/:type', (req, res) => {
