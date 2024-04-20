@@ -1,6 +1,17 @@
 const AudioManager = {
     // Define audio context globally, initially as null
-     audioContext : null,
+    audioContext : null,
+    activeBackgroundSound: null,
+    soundFiles: null,
+    type: null,
+    subType : "meadow",
+    categories: {
+        background: {},
+        ambiance: {},
+        soundboard: {}
+    },
+    backgroundButton: null,
+    soundIndex : 0,
 
     getAudioContext() {
         if (!this.audioContext) {
@@ -9,62 +20,128 @@ const AudioManager = {
         return  this.audioContext;
     },
 
-    activeBackgroundSound: null,
-    soundFiles: null,
-    type: null,
-    categories: {
-        background: {},
-        ambiance: {},
-        soundboard: {}
-    },
-    backgroundButton: null,
+    async preloadBackgroundSounds() {
+        const types = ['background/exploration', 'background/battle'];
+        const existingOptions = new Set(Array.from(subtypeSelector.options).map(opt => opt.value));
+        for (let type of types) {
+            try {
+                console.log('preloadBackgroundSounds ' + type)
+                const response = await fetch(`http://127.0.0.1:3000/list-files/${encodeURIComponent(type)}`);
+                const subTypes = await response.json();
+                this.categories[type] = {};
+                const subtypeSelector = document.getElementById('subtypeSelector');
+                for (let subType of subTypes) {
+                    //Add option comboBox
+                    if (!existingOptions.has(subType) && subType !== "default") {
+                        const option = document.createElement('option');
+                        option.value = subType;
+                        option.textContent = subType;
+                        subtypeSelector.appendChild(option);
+                        existingOptions.add(subType);
+                    }
 
-    fetchSoundFiles() {
-        return fetch(`http://127.0.0.1:3000/list-sounds/${this.type}`)
-            .then(response => response.json())
-            .then(data => {
-                this.soundFiles = data;
-                if (!this.soundFiles.length) {
-                    console.error('No sound files found.');
+                    console.log('Load ' + subType)
+                    const subResponse = await fetch(`http://127.0.0.1:3000/list-sounds/${encodeURIComponent(type + '/' + subType)}`);
+                    const files = await subResponse.json();
+                    // Shuffle and save files
+                    console.log('Load ' + files)
+                    this.categories[type][subType] = this.shuffleArray(files.map(file => `assets/${type}/${subType}/${file}`));
                 }
-                return this.soundFiles;
-            })
-            .catch(e => {
-                console.error('Error fetching sound file list from server:', e);
-                return null;
-            });
+            } catch (e) {
+                console.error(`Error fetching ${type} files from server:`, e);
+            }
+        }
+    },
+
+    shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
     },
 
     backGroundSoundLoop() {
-        const soundDirectory = this.type === 'exploration' ? 'assets/background/exploration/' : 'assets/background/battle/';
-        const randomFile = this.soundFiles[Math.floor(Math.random() * this.soundFiles.length)];
-        const url = soundDirectory + randomFile;
+        if (!this.type || !this.subType || !this.categories[this.type]) {
+            console.error('Invalid type or subtype specified for playback.');
+            return;
+        }
+        files = {}
+        if(!this.categories[this.type][this.subType])
+        {
+            files = this.categories[this.type]["default"];
+        }
+        else
+        {
+            files = this.categories[this.type][this.subType];
+        }
+        if (this.soundIndex >= files.length) {
+            this.soundIndex = 0;  // Reset index if it exceeds the array
+        }
+        const fileToPlay = files[this.soundIndex++];
+        this.playSound(fileToPlay);
+    },
 
-        const playSound = (file) => {
-            const source = this.getAudioContext().createBufferSource();
-            const gainNode = this.getAudioContext().createGain();
+    adjustVolume() {
+        const dataArray = new Uint8Array(this.activeBackgroundSound.analyser.frequencyBinCount);
+        this.activeBackgroundSound.analyser.getByteTimeDomainData(dataArray);
+    
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+            const value = (dataArray[i] / 128) - 1;
+            sum += value * value;
+        }
+        const rms = Math.sqrt(sum / dataArray.length);
+     
+        const desiredRMS = 0.01;
+        const noiseThreshold = desiredRMS / 4; // Threshold to determine what is considered noise
+    
+        if (rms === 0) {
+            this.activeBackgroundSound.gainNode.gain.setValueAtTime(0.1, this.getAudioContext().currentTime);
+            return;
+        }
+        if (rms < noiseThreshold) {
+            this.activeBackgroundSound.gainNode.gain.setValueAtTime(0, this.getAudioContext().currentTime);
+            return;
+        }
+    
+        let newGainValue = Math.min(desiredRMS / rms, 1.5); // Capping the gain to prevent distortion
+        if (isFinite(newGainValue) && newGainValue > 0) {
+            console.log("newGainValue " + newGainValue);
+            // Smooth transition using exponential ramp to the new gain value
+            this.activeBackgroundSound.gainNode.gain.exponentialRampToValueAtTime(newGainValue, this.getAudioContext().currentTime + 0.1);
+        }
+    },
 
-            fetch(file)
-                .then(response => response.arrayBuffer())
-                .then(arrayBuffer => this.getAudioContext().decodeAudioData(arrayBuffer))
-                .then(audioBuffer => {
-                    source.buffer = audioBuffer;
-                    source.loop = false;
-                    source.connect(gainNode);
-                    gainNode.connect(this.getAudioContext().destination);
+    playSound(file) {
+        const source = this.getAudioContext().createBufferSource();
+        const gainNode = this.getAudioContext().createGain();
+        const analyser = this.getAudioContext().createAnalyser();
 
-                    let volume = document.getElementById('music-volume').value;
-                    gainNode.gain.value = volume / 100;
-                    source.start(0);
+        fetch(file)
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => this.getAudioContext().decodeAudioData(arrayBuffer))
+            .then(audioBuffer => {
+                source.buffer = audioBuffer;
+                source.loop = false;
+                source.connect(analyser);
+                analyser.connect(gainNode);
+                gainNode.connect(this.getAudioContext().destination);
 
-                    source.onended = () => this.backGroundSoundLoop();
-
-                    this.activeBackgroundSound = { source, gainNode };
-                })
-                .catch(e => console.error('Error with decoding audio data', e));
-        };
-
-        playSound(url);
+                let volume = document.getElementById('music-volume').value;
+                gainNode.gain.value = volume / 100;
+                source.start(0);
+                const updateGain = () => {
+                    this.adjustVolume();
+                    if (!source.paused) {
+                        requestAnimationFrame(updateGain);
+                    }
+                }
+                source.onended = () => this.backGroundSoundLoop();
+                this.activeBackgroundSound = { source, gainNode, analyser};
+                //updateGain(); WIP
+            })
+            .catch(e => console.error('Error with decoding audio data:', e));
     },
 
     async playBackgroundSound(type, button) {
@@ -80,8 +157,8 @@ const AudioManager = {
         button.classList.add('button-play');
         button.classList.remove('button-stop');
         this.type = type;
-        await this.fetchSoundFiles();
-        if (!this.soundFiles) {
+        
+        if (!this.categories[type]) {
             console.error('Sound files not loaded.');
             return;
         }

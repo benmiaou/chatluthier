@@ -9,7 +9,7 @@ const urlsToCache = [
   '/offline.html',  
   'site.webmanifest'
 ];
-const assetsToCache = ['ambiance', 'background/battle', 'background/exploration', 'images/icons', 'images/favicons', 'soundboard'];
+const assetsToCache = ['ambiance', 'background/battle/default', 'background/exploration/default', 'images/icons', 'images/favicons', 'soundboard'];
 
 // Function to fetch all files in a directory recursively
 async function fetchDirectoryFiles(directory) {

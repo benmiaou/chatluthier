@@ -33,8 +33,11 @@
         <!-- Background Music Section -->
         <h2>Background <input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="AudioManager.setBackgroundVolume(this.value)"></h2>
         <section id="background-music" class="section">
-            <button onclick="AudioManager.playBackgroundSound('exploration', this)"  class="button-stop">Play Exploration</button>
-            <button onclick="AudioManager.playBackgroundSound('battle', this)"  class="button-stop">Play Battle</button>
+            <button onclick="AudioManager.playBackgroundSound('background/exploration', this)"  class="button-stop">Play Exploration</button>
+            <button onclick="AudioManager.playBackgroundSound('background/battle', this)"  class="button-stop">Play Battle</button>
+            <select id="subtypeSelector">
+                <option>meadow</option>
+            </select>
         </section>
         
         <!-- Ambiance Sounds Section -->
@@ -53,6 +56,10 @@
 
     <script  type="module">
         //Load dir Handle if possible
+        subtypeSelector.addEventListener('change', function() {
+        AudioManager.subType = this.value;
+        console.log('AudioManager.subType set to:', AudioManager.subType);
+        });
         document.addEventListener('DOMContentLoaded', () => {
             LocalDirectory.getDirectory();
             AudioManager.loadLocalSoundFiles();
@@ -89,6 +96,7 @@
                     AudioManager.generateSoundboardButtons(soundFiles, 'soundboard', false);
                 })
                 .catch(error => console.error('Error fetching soundboard sound files:', error));
+            AudioManager.preloadBackgroundSounds()
         }
     </script>
 </body>
