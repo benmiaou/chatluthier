@@ -33,7 +33,7 @@
     <main>
         <!-- Background Music Section -->
         <h2>Background 
-            <button id="add-sound-button" onclick="ModalUploadWindow.openBackgroundUploadModal()">+</button> 
+            <button id="add-sound-button" class="add-sound-button" onclick="ModalUploadWindow.openBackgroundUploadModal()">+</button> 
             <input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="AudioManager.setBackgroundVolume(this.value)">
         </h2>
         <section id="background-music" class="section">
@@ -46,7 +46,7 @@
         
         <!-- Ambiance Sounds Section -->
         <h2>Ambiance Sounds
-            <button id="add-sound-button" onclick="ModalUploadWindow.openAmbianceUploadModal()">+</button> 
+            <button id="add-sound-button" class="add-sound-button" onclick="ModalUploadWindow.openAmbianceUploadModal()">+</button> 
         </h2>
         <section id="ambiance" class="section">
         </section>
@@ -55,7 +55,7 @@
 
         <!-- Soundboard Section -->
         <h2>Soundboard  
-            <button id="add-sound-button" onclick="ModalUploadWindow.openSoundboardUploadModal()">+</button> 
+            <button id="add-sound-button" class="add-sound-button" onclick="ModalUploadWindow.openSoundboardUploadModal()">+</button> 
             <input type="range" min="0" max="100" value="50" class="slider" id="soundboard-volume" oninput="AudioManager.setVolume('soundboard', this.value)">
         </h2>
         <section id="soundboard" class="section">
@@ -103,10 +103,10 @@
          {
             const controlTop = document.getElementById('top-left-controls');
             controlTop.style.display = 'none'; 
-            const buttons = document.querySelectorAll('.add-sound-button'); // Select all elements with the class
+            const buttons = document.querySelectorAll('.add-sound-button'); // Note the period before the class name
             buttons.forEach(button => {
-                button.style.display = 'none'; 
-             });
+                button.style.display = 'none'; // Hide each button
+            });
          }
 
         //Load dir Handle if possible
