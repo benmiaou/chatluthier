@@ -36,11 +36,12 @@
             <button id="add-sound-button" class="add-sound-button" onclick="ModalUploadWindow.openBackgroundUploadModal()">+</button> 
             <input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="AudioManager.setBackgroundVolume(this.value)">
         </h2>
+        <section id="background-music-Credit">---</section>
         <section id="background-music" class="section">
             <button onclick="AudioManager.playBackgroundSound('background/exploration', this)"  class="button-stop">Play Exploration</button>
             <button onclick="AudioManager.playBackgroundSound('background/battle', this)"  class="button-stop">Play Battle</button>
             <select id="subtypeSelector">
-                <option>meadow</option>
+                <option>default</option>
             </select>
         </section>
         
@@ -148,6 +149,7 @@
             await AudioManager.preloadBackgroundSounds()
             await LocalDirectory.getDirectory();
             await AudioManager.loadLocalSoundFiles();
+            await AudioManager.fetchCredits();
         }
     </script>
 </body>
