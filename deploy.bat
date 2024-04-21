@@ -2,6 +2,7 @@ ssh -i chatluthier.pem ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com
 scp -i chatluthier.pem -r public ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com:/home/ec2-user/chatluthier
 scp -i chatluthier.pem -r assets ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com:/home/ec2-user/chatluthier
 scp -i chatluthier.pem server.js ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com:/home/ec2-user/chatluthier
+scp -i chatluthier.pem credits.json ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com:/home/ec2-user/chatluthier
 scp -i chatluthier.pem manyfest.json ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com:/home/ec2-user/chatluthier
 scp -i chatluthier.pem package-lock.json ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com:/home/ec2-user/chatluthier
 scp -i chatluthier.pem package.json ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com:/home/ec2-user/chatluthier

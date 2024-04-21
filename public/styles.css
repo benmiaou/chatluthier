@@ -47,7 +47,9 @@ header {
     color: #fff;
 }
 .top-left-controls {
-    text-align: left; /* Aligns the button and status text to the left */
+    position: absolute; /* Allows it to "float" independently */
+    left: 10; /* Fixes it to the left side */
+    padding: 20px; /* Padding to maintain consistent spacing */
 }
 .logo {
     width: 50px; /* Adjust size as necessary */
@@ -60,8 +62,10 @@ header {
     color: #FFD700; /* Example to make the status more visible */
 }
 .center-content {
-    text-align: center; /* Keeps the logo and title centered */
+    flex-grow: 1; /* Allows this section to expand and center content */
+    text-align: center; /* Centers the text and images */
 }
+
 .button-directory {
     background-color: #4CAF50; /* A green color for the directory button */
     color: white;
@@ -79,12 +83,14 @@ header {
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25); /* Deeper shadow for a 3D effect on hover */
 }
 .header-content {
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Ensures the center-content remains centered */
+    background-color: rgba(0, 0, 0, 0.5);
     border-radius: 8px;
     padding: 20px;
-    display: flex;
-    align-items: center; /* Vertically centers the flex items */
 }
+
 /* Title styling within each section */
 .section h2 {
     margin-bottom: 20px; /* Increased margin for better visual separation */
