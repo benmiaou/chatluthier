@@ -5,6 +5,31 @@
     box-sizing: border-box;
 }
 
+/* CSS to style links globally (optional) */
+a {
+    color: #3498db; /* A blue that's softer than the default */
+    text-decoration: none; /* Removes the underline by default */
+}
+
+a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
+/* CSS to style links within the credit section */
+#background-music-Credit a {
+    color: #388497; /* A red color for the credit links */
+    text-decoration: none; /* No underline */
+}
+
+#background-music-Credit a:hover {
+    text-decoration: underline; /* Underline when hovering over credit links */
+}
+/* Center the text within the credit section */
+#background-music-Credit {
+    text-align: center; /* Align text to the center */
+    margin: 10px 0; /* Optional: Add some spacing around the section */
+}
+
 body {
     font-family: 'Arial', sans-serif;
     background-color: #333; /* Adjust the color to match your background */
@@ -58,7 +83,6 @@ header {
     border-radius: 8px;
     padding: 20px;
     display: flex;
-    justify-content: space-between; /* Aligns children (top-left and center) on opposite sides */
     align-items: center; /* Vertically centers the flex items */
 }
 /* Title styling within each section */

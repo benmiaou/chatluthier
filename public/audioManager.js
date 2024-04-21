@@ -12,6 +12,7 @@ const AudioManager = {
     },
     backgroundButton: null,
     soundIndex : 0,
+    creditsMap : null,
 
     getAudioContext() {
         if (!this.audioContext) {
@@ -20,6 +21,16 @@ const AudioManager = {
         return  this.audioContext;
     },
 
+    async fetchCredits() {
+        try {
+            const response = await fetch('/credits');
+            this.creditsMap = await response.json();
+            console.log('Credits received:', this.creditsMap);
+        } catch (error) {
+            console.error('Error fetching credits:', error);
+        }
+    },
+    
     async preloadBackgroundSounds() {
         const types = ['background/exploration', 'background/battle'];
         const existingOptions = new Set(Array.from(subtypeSelector.options).map(opt => opt.value));
@@ -35,7 +46,7 @@ const AudioManager = {
     
                 for (let subType of subTypes) {
                     //Add option comboBox
-                    if (!existingOptions.has(subType) && subType !== "default") {
+                    if (!existingOptions.has(subType)) {
                         const option = document.createElement('option');
                         option.value = subType;
                         option.textContent = subType;
@@ -116,6 +127,7 @@ const AudioManager = {
     },
 
     playSound(fileOrHandle) {
+        console.log("playSound : " + fileOrHandle)
         const context = this.getAudioContext();
         if (context.state === 'suspended') {
             context.resume();
@@ -163,6 +175,16 @@ const AudioManager = {
                 .then(arrayBuffer => processAudioBuffer(arrayBuffer))
                 .catch(e => console.error('Error reading local file:', e));
         } else {
+            filename = this. getFilename(fileOrHandle)
+            const creditTitle = document.getElementById('background-music-Credit'); 
+            if(this.creditsMap[filename])
+            {
+                creditTitle.innerHTML  = this.creditsMap[filename];
+            }
+            else
+            {
+                creditTitle.innerHTML  = "---";
+            }
             fetch(fileOrHandle)
                 .then(response => response.arrayBuffer())
                 .then(arrayBuffer => processAudioBuffer(arrayBuffer))
@@ -170,7 +192,24 @@ const AudioManager = {
         }
     },
 
+
+    // Function to get the filename from a file path or a file handle
+    getFilename(fileOrHandle) {
+        if (typeof fileOrHandle === 'string') {
+            // If it's a file path, extract the filename
+            return fileOrHandle.split('/').pop(); // Get the last segment
+        } else if (fileOrHandle.name) {
+            // If it's a file handle, use the .name property
+            return fileOrHandle.name;
+        } else {
+            throw new Error('Unknown file type');
+        }
+    },
+
+
     async playBackgroundSound(type, button) {
+        const creditTitle = document.getElementById('background-music-Credit'); 
+        creditTitle.innerHTML  = "---";
         if (this.activeBackgroundSound) {
             this.activeBackgroundSound.source.onended = null;
             this.activeBackgroundSound.source.stop();
@@ -397,7 +436,6 @@ const AudioManager = {
                     // Ensure subtype is initialized
                     if (!Array.isArray(this.categories[type][subTypeName])) {
                         this.categories[type][subTypeName] = []; // Initialize as an array
-                        console.log("init " + type + " " + subTypeName);
                     }
     
                     if (!existingOptions.has(subTypeName) && subTypeName !== "default") {
@@ -420,12 +458,10 @@ const AudioManager = {
                     for (let fileHandle of files) {
                         if (!existingFiles.has(fileHandle.name)) {
                             this.categories[type][subTypeName].push(fileHandle);
-                            console.log(`add : ${fileHandle.name} to ${type}-${subTypeName}`);
                             existingFiles.add(fileHandle.name);  // Keep track of added files
                         }
                     }
                 }
-                console.log("this.categories[type] : " + Object.keys(this.categories[type]))
             } catch (e) {
                 console.error(`Error scanning ${type}:`, e);
             }
