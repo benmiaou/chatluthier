@@ -102,7 +102,11 @@
          if (typeof window.showDirectoryPicker !== 'function')
          {
             const controlTop = document.getElementById('top-left-controls');
-            controlTop.style.display = 'none'; // Hide the modal
+            controlTop.style.display = 'none'; 
+            const buttons = document.querySelectorAll('.add-sound-button'); // Select all elements with the class
+            buttons.forEach(button => {
+                button.style.display = 'none'; 
+             });
          }
 
         //Load dir Handle if possible
