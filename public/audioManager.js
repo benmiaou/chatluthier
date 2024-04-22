@@ -13,6 +13,8 @@ const AudioManager = {
     backgroundButton: null,
     soundIndex : 0,
     creditsMap : null,
+    isPlayBackgroundAllowed: true, // Flag to indicate if play is allowed
+
 
     getAudioContext() {
         if (!this.audioContext) {
@@ -127,7 +129,6 @@ const AudioManager = {
     },
 
     playSound(fileOrHandle) {
-        console.log("playSound : " + fileOrHandle)
         const context = this.getAudioContext();
         if (context.state === 'suspended') {
             context.resume();
@@ -208,6 +209,17 @@ const AudioManager = {
 
 
     async playBackgroundSound(type, button) {
+        // Prevent overlapping sounds
+        if (!this.isPlayBackgroundAllowed) 
+        {
+            return;
+        }
+         // Disable play to prevent rapid clicks
+         this.isPlayBackgroundAllowed = false;
+         setTimeout(() => {
+             this.isPlayBackgroundAllowed = true; // Allow play after 1 second
+         }, 1000); // 1-second delay
+
         const creditTitle = document.getElementById('background-music-Credit'); 
         creditTitle.innerHTML  = "---";
         if (this.activeBackgroundSound) {
