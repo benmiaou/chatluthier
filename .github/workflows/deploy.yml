@@ -20,6 +20,10 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.CHATLUTHIER_PEM }}  # Access the SSH key from GitHub Secrets
 
+      - name: Add EC2 Host to Known Hosts
+        run: |
+          ssh-keyscan -H ec2-13-60-6-122.eu-north-1.compute.amazonaws.com >> ~/.ssh/known_hosts  # Add the EC2 host to known hosts
+
       # Step 3: Clear the target directory on the remote server
       - name: Clear remote directory
         run: |
