@@ -131,7 +131,7 @@ dist
 
 # AWS
 *.pem
-*deploy.bat
+deploy.bat
 
 
 # Jetbrains

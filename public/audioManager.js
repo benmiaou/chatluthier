@@ -54,7 +54,7 @@ const AudioManager = {
                 const subTypes = await response.json();
 
                   // Ensure `this.categories[type]` is initialized
-                  if (!this.categories[type]) {
+                 if (!this.categories[type]) {
                     this.categories[type] = {}; // Initialize if missing
                 }
                 if (!this.categories[type][this.DEFAULT_SUBTYPE]) {
@@ -79,6 +79,7 @@ const AudioManager = {
                         }
                     });
                 }
+                this.shuffleArray(this.categories[type][this.DEFAULT_SUBTYPE]);
             } catch (e) {
                 console.error(`Error fetching ${type} files from server:`, e);
             }
