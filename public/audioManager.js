@@ -1,5 +1,6 @@
 const AudioManager = {
     // Define audio context globally, initially as null
+    DEFAULT_SUBTYPE : "default",
     audioContext : null,
     activeBackgroundSound: null,
     soundFiles: null,
@@ -32,33 +33,51 @@ const AudioManager = {
             console.error('Error fetching credits:', error);
         }
     },
+
+    addOptionToSubtypeSelector(subType)
+    {
+        const subtypeSelector = document.getElementById('subtypeSelector');
+        const option = document.createElement('option');
+        option.value = subType;
+        option.textContent = subType;
+        subtypeSelector.appendChild(option);
+    },
     
     async preloadBackgroundSounds() {
         const types = ['background/exploration', 'background/battle'];
         const existingOptions = new Set(Array.from(subtypeSelector.options).map(opt => opt.value));
+        existingOptions.add(this.DEFAULT_SUBTYPE);
+       
         for (let type of types) {
             try {
                 const response = await fetch(`http://127.0.0.1:3000/list-files/${encodeURIComponent(type)}`);
                 const subTypes = await response.json();
-                const subtypeSelector = document.getElementById('subtypeSelector');
+
                   // Ensure `this.categories[type]` is initialized
                   if (!this.categories[type]) {
                     this.categories[type] = {}; // Initialize if missing
+                }
+                if (!this.categories[type][this.DEFAULT_SUBTYPE]) {
+                    this.categories[type][this.DEFAULT_SUBTYPE] = []; // Initialize if missing
                 }
     
                 for (let subType of subTypes) {
                     //Add option comboBox
                     if (!existingOptions.has(subType)) {
-                        const option = document.createElement('option');
-                        option.value = subType;
-                        option.textContent = subType;
-                        subtypeSelector.appendChild(option);
+                        this.addOptionToSubtypeSelector(subType);
                         existingOptions.add(subType);
                     }
                     const subResponse = await fetch(`http://127.0.0.1:3000/list-sounds/${encodeURIComponent(type + '/' + subType)}`);
                     const files = await subResponse.json();
                     // Shuffle and save files
-                    this.categories[type][subType] = this.shuffleArray(files.map(file => `assets/${type}/${subType}/${file}`));
+                    if(subType !== this.DEFAULT_SUBTYPE)
+                        this.categories[type][subType] = this.shuffleArray(files.map(file => `assets/${type}/${subType}/${file}`));
+                    files.forEach((file) => {
+                        const assetPath = `assets/${type}/${subType}/${file}`;
+                        if (!this.categories[type][this.DEFAULT_SUBTYPE].includes(assetPath)) {
+                            this.categories[type][this.DEFAULT_SUBTYPE].push(assetPath);
+                        }
+                    });
                 }
             } catch (e) {
                 console.error(`Error fetching ${type} files from server:`, e);
@@ -85,7 +104,7 @@ const AudioManager = {
         {
             console.log("Not existing : " + this.type +" - " + this.subType)
             console.log("Not existing : " +  Object.keys(this.categories[this.type]))
-            files = this.categories[this.type]["default"];
+            files = this.categories[this.type][this.DEFAULT_SUBTYPE];
         }
         else
         {
@@ -450,18 +469,12 @@ const AudioManager = {
                         this.categories[type][subTypeName] = []; // Initialize as an array
                     }
     
-                    if (!existingOptions.has(subTypeName) && subTypeName !== "default") {
-                        const option = document.createElement('option');
-                        option.value = subTypeName;
-                        option.textContent = subTypeName;
-                        subtypeSelector.appendChild(option);
+                    if (!existingOptions.has(subTypeName) && subTypeName !== this.DEFAULT_SUBTYPE) 
+                    {
+                        this.addOptionToSubtypeSelector(subTypeName);
                         existingOptions.add(subTypeName);
                     }
-    
-                 
-    
                     const files = await LocalDirectory.listMP3Files(subTypeHandle);
-    
                     const existingFiles = new Set(
                         this.categories[type][subTypeName].map(file => file.name)
                     );
