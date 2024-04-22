@@ -1,8 +1,10 @@
 const soundBar = {
+  MAX_GAIN : 100,
   isDragging: false,
   lastX: 0, // Last X position, used to calculate movement
   stepSize: 10, // Step size as a percentage
   lastInvocation: 0, // Time of the last function call
+  moved : false,
   
   createProgressBar: function (fileName) {
     const progressBarContainer = document.createElement('div');
@@ -39,25 +41,30 @@ const soundBar = {
 
     progressBarContainer.addEventListener('mousedown', (e) => {
         this.isDragging = true;
+        this.moved = false;
         this.lastX = getPositionX(e); // Use helper to get initial position
     });
 
     progressBarContainer.addEventListener('touchstart', (e) => {
         this.isDragging = true;
+        this.moved = false;
         this.lastX = getPositionX(e); // Use helper to get initial position
         e.preventDefault(); // Prevent scrolling when touching
     }, { passive: false });
 
-    document.addEventListener('mouseup', () => {
+    progressBarContainer.addEventListener('mouseup', (e) => {
+        if(!this.moved) this.setProgress(e, progressBar, null, progressBarContainer);
         this.isDragging = false;
     });
 
-    document.addEventListener('touchend', () => {
+    progressBarContainer.addEventListener('touchend', (e) => {
+        if(!this.moved) this.setProgress(e, progressBar, null, progressBarContainer);
         this.isDragging = false;
     });
 
     progressBarContainer.addEventListener('mousemove', (e) => {
         if (this.isDragging) {
+            this.moved = true;
             const movementX = getPositionX(e) - this.lastX;
             if (Math.abs(movementX) >= progressBar.offsetWidth / 10) {
                 this.setProgress(e, progressBar, movementX, progressBarContainer);
@@ -69,6 +76,7 @@ const soundBar = {
 
     progressBarContainer.addEventListener('touchmove', (e) => {
         if (this.isDragging) {
+            this.moved = true;
             const movementX = getPositionX(e) - this.lastX;
             if (Math.abs(movementX) >= progressBar.offsetWidth / 10) {
                 this.setProgress(e, progressBar, movementX, progressBarContainer);
@@ -87,16 +95,33 @@ const soundBar = {
     });
 },
   setProgress: function (e, progressBar, movementX, progressBarContainer) {
-    if (!movementX) return; // Only run calculations if there is movement
+    if (!movementX) {
+        const currentProgress = parseInt(progressBar.style.width, 10) || 0;
+
+        if (currentProgress >= this.MAX_GAIN) {
+            // Reset to 0% if already at this.MAX_GAIN%
+            progressBar.style.width = '0%';
+        } else {
+            // Otherwise, increase by 25%
+            const newProgress = Math.min(this.MAX_GAIN, currentProgress + 25); // Cap at this.MAX_GAIN%
+            progressBar.style.width = newProgress + '%';
+        }
+
+        // Dispatch custom event when value changes
+        const event = new CustomEvent('soundBarValueChanged');
+        progressBarContainer.dispatchEvent(event);
+
+        return; // Return early if there's no movement
+    }
     const now = Date.now();
     if (now - this.lastInvocation < 5) return; // Throttle updates to every 100ms
     this.lastInvocation  = now;
     const rect = progressBar.getBoundingClientRect();
     const totalWidth = rect.width;
     const currentProgress = parseInt(progressBar.style.width, 10) || 0;
-    let newProgress = currentProgress + (movementX > 0 ? this.stepSize : -this.stepSize);
-    newProgress = Math.min(100, Math.max(0, newProgress));
-    progressBar.style.width = newProgress + '%'; // Clamp between 0 and 100
+    let newProgress = currentProgress + (movementX * 2);
+    newProgress = Math.min(this.MAX_GAIN, Math.max(0, newProgress));
+    progressBar.style.width = newProgress + '%'; // Clamp between 0 and this.MAX_GAIN
         // Dispatch custom event when value changes
     const event = new CustomEvent('soundBarValueChanged');
     progressBarContainer.dispatchEvent(event);
@@ -105,6 +130,6 @@ const soundBar = {
   getVolumeFromProgressBar: function (progressBarContainer) {
     const progressBar = progressBarContainer.querySelector('.progress-bar');
     const widthPercentage = progressBar.style.width || '0%';
-    return parseFloat(widthPercentage) / 100; // Convert the percentage string to a float
+    return parseFloat(widthPercentage) / this.MAX_GAIN; // Convert the percentage string to a float
   }
 };
