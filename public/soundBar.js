@@ -7,6 +7,7 @@ const soundBar = {
   createProgressBar: function (fileName) {
     const progressBarContainer = document.createElement('div');
     progressBarContainer.className = 'progress-bar-container';
+    progressBarContainer.setAttribute('style', 'background-image: url(assets/images/backgrounds/'+fileName+'.webp)');
     progressBarContainer.draggable = false;
 
     const progressBar = document.createElement('div');
@@ -15,24 +16,15 @@ const soundBar = {
     progressBar.draggable = false;
     progressBarContainer.appendChild(progressBar);
 
-      // Add text inside the sound bar
-      const soundBarText = document.createElement('div');
-      const capitalizedFileName = fileName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('-');
-      soundBarText.textContent =capitalizedFileName;
-      soundBarText.className = 'sound-bar-text';
-      soundBarText.draggable = false; // Disable dragging for the text
+    // Add text inside the sound bar
+    const soundBarText = document.createElement('div');
+    const capitalizedFileName = fileName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    soundBarText.textContent =capitalizedFileName;
+    soundBarText.className = 'sound-bar-text';
+    soundBarText.draggable = false; // Disable dragging for the text
 
-
-      const icon = document.createElement('img');
-      icon.classList.add('icon');
-      icon.setAttribute('src', 'assets/images/icons/'+fileName+'.svg');
-      icon.setAttribute('alt', 'Icon for ' + fileName);
-      icon.draggable = false; // Disable dragging for the icon
-
-
-      progressBarContainer.appendChild(soundBarText);
-      progressBarContainer.appendChild(icon);
-
+    progressBarContainer.appendChild(soundBarText);
+      
     this.initializeDraggableProgressBar(progressBarContainer ,progressBar);
 
     return progressBarContainer;

@@ -39,6 +39,23 @@ h2 {
     text-align: center;
 }
 
+
+/* Global styling */
+
+@font-face {
+    font-family: Bagnard;
+    src: url(assets/fonts/BagnardSans.otf);
+}
+
+body {
+    font-family: Bagnard;
+}
+
+button {
+    font-family: Bagnard;   
+}
+
+/* Styling for the header section */
 header {
     background-size: cover;
     padding: 20px;
@@ -181,7 +198,7 @@ nav a {
 .section {
     padding: 20px;
     display: grid; /* Change display to grid */
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Set columns to auto-fill with a minimum width of 200px */
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Set columns to auto-fill with a minimum width of 200px */
     grid-auto-rows: minmax(50px, auto); /* Set rows to automatically adjust height */
     gap: 20px; /* Add gap between grid items */
     align-items: center;
@@ -206,10 +223,15 @@ nav a {
     height: 100px; /* Adjust the height as needed */
     background-color: #f44336; /* Light grey background for visibility */
     overflow: hidden; /* Keeps children elements from overflowing */
+
+    background-position: center;
+    background-size: cover;
+    border-radius: 5px;
+    border: 2px solid #ee951f;
 }
 
 .progress-bar {
-    background-color: #4CAF50; /* Green to indicate progress */
+    background-color: rgba(76, 175, 80, 0.6); /* Green to indicate progress */
     width: 0%; /* Initial width */
     height: 100%; /* Fills the container vertically */
     transition: width 0.3s ease; /* Smooth transition for width changes */
@@ -217,15 +239,19 @@ nav a {
 
 .sound-bar-text {
     position: absolute;
-    left: 0; /* Align left edge to the container's left edge */
-    right: 0; /* Align right edge to the container's right edge */
-    top: 0; /* Align top to the container's top */
-    color: white; /* Text color for visibility against the progress bar */
-    z-index: 2; /* Ensures text is above the progress bar */
+    left: 50%; /* Position the left edge of the text at the center of the container */
+    top: 10px;
+    transform: translateX(-50%); /* Shift the text left by half its width to truly center it */
+    z-index: 0; /* Make sure the text stays under the bar to avoid dragging issues */
+    text-align: center; /* Ensure text alignment is centered, good for multi-line */
+
+    padding: 5px 10px;
+    color: black;
+    background-color: rgba(255, 255, 255, 0.7);
+
     text-align: center; /* Center text horizontally */
     overflow: hidden; /* Prevents text from overflowing */
-    white-space: nowrap; /* Keeps the text on one line */
-    text-overflow: ellipsis; /* Adds an ellipsis if the text overflows the available space */
+    width: 80%;
 }
 
 .icon {
