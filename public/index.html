@@ -3,61 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/images/favicons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicons/favicon-16x16.png">
+    <link rel="icon" href="assets/images/favicons/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="/site.webmanifest">
     <title>Chat Luthier</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="manifest" href="manifest.json">
     <script src="soundBar.js" defer></script>
-    <script src="client.js" defer></script>
+    <script src="audioManager.js" defer></script>
+    <script src="modalWindow.js" defer></script>
+    <script   type="module">import { LocalDirectory } from './localDirectory.js';</script>
 </head>
 <body>
     <header>
-        <h1>Le Chat Luthier</h1>
+        <div class="header-content">
+            <div class="top-left-controls" id="top-left-controls">
+                <button onclick="LocalDirectory.selectDirectory()" class="button-directory">Set Local Directory</button>
+                <div id="directoryStatus" class="status">Directory not set</div>
+            </div>
+            <div class="center-content">
+                <img src="assets/images/favicons/MainLogo.webp" alt="Le Chat Luthier Logo" class="logo">
+                <h1>Le Chat Luthier</h1>
+            </div>
+
+        </div>
     </header>
 
     <main>
         <!-- Background Music Section -->
-        <h2>Background <input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="AudioManager.setBackgroundVolume(this.value)"></h2>
+        <h2>Background 
+            <button id="add-sound-button" class="add-sound-button" onclick="ModalUploadWindow.openBackgroundUploadModal()">+</button> 
+            <input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="AudioManager.setBackgroundVolume(this.value)">
+        </h2>
+        <section id="background-music-Credit">---</section>
         <section id="background-music" class="section">
-            <button onclick="AudioManager.playBackgroundSound('exploration', this)"  class="button-stop">Play Exploration</button>
-            <button onclick="AudioManager.playBackgroundSound('battle', this)"  class="button-stop">Play Battle</button>
+            <button onclick="AudioManager.playBackgroundSound('background/exploration', this)"  class="button-stop">Play Exploration</button>
+            <button onclick="AudioManager.playBackgroundSound('background/battle', this)"  class="button-stop">Play Battle</button>
+            <select id="subtypeSelector">
+                <option>default</option>
+            </select>
         </section>
         
         <!-- Ambiance Sounds Section -->
-        <h2>Ambiance Sounds</h2>
+        <h2>Ambiance Sounds
+            <button id="add-sound-button" class="add-sound-button" onclick="ModalUploadWindow.openAmbianceUploadModal()">+</button> 
+        </h2>
         <section id="ambiance" class="section">
+        </section>
+        <section id="ambianceLocal" class="section">
         </section>
 
         <!-- Soundboard Section -->
-        <h2>Soundboard <input type="range" min="0" max="100" value="50" class="slider" id="soundboard-volume" oninput="AudioManager.setVolume('soundboard', this.value)"></h2>
+        <h2>Soundboard  
+            <button id="add-sound-button" class="add-sound-button" onclick="ModalUploadWindow.openSoundboardUploadModal()">+</button> 
+            <input type="range" min="0" max="100" value="50" class="slider" id="soundboard-volume" oninput="AudioManager.setVolume('soundboard', this.value)">
+        </h2>
         <section id="soundboard" class="section">
+        </section>
+        <section id="soundboardLocal" class="section">
         </section>
     </main>
 
+    <!-- Modal HTML Structures -->
+    <div id="background-upload-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="ModalUploadWindow.closeBackgroundUploadModal()">&times;</span>
+            <h2>Upload Background File</h2>
+            <input type="file" id="background-file-input" accept=".mp3" />
+            <select id="background-type-selector"> <!-- Selector for battle or exploration -->
+                <option value="battle">Battle</option>
+                <option value="exploration">Exploration</option>
+            </select>
+            <select id="background-subtype-selector"></select>
+            <input type="text" id="new-subtype-input" placeholder="New Subtype" />
+            <button onclick="ModalUploadWindow.uploadBackgroundFile()">Upload</button>
+        </div>
+    </div>
 
-    <script>
+    <div id="ambiance-upload-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="ModalUploadWindow.closeAmbianceUploadModal()">&times;</span>
+            <h2>Upload Ambiance File</h2>
+            <input type="file" id="ambiance-file-input" accept=".mp3" />
+            <button onclick="ModalUploadWindow.uploadAmbianceFile()">Upload</button>
+        </div>
+    </div>
+
+    <div id="soundboard-upload-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="ModalUploadWindow.closeSoundboardUploadModal()">&times;</span>
+            <h2>Upload Soundboard File</h2>
+            <input type="file" id="soundboard-file-input" accept=".mp3" />
+            <button onclick="ModalUploadWindow.uploadSoundboardFile()">Upload</button>
+        </div>
+    </div>
+
+    <script  type="module">
+         if (typeof window.showDirectoryPicker !== 'function')
+         {
+            const controlTop = document.getElementById('top-left-controls');
+            controlTop.style.display = 'none'; 
+            const buttons = document.querySelectorAll('.add-sound-button'); // Note the period before the class name
+            buttons.forEach(button => {
+                button.style.display = 'none'; // Hide each button
+            });
+         }
+
+        //Load dir Handle if possible
+        subtypeSelector.addEventListener('change', function() 
+        {
+            AudioManager.subType = this.value;
+        });
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                .then(registration => console.log('Service Worker registered'))
-                .catch(err => console.log('Service Worker registration failed:', err));
-            });
-        }
-        // Function to generate buttons dynamically based on sound files
-        // Fetch sound files for ambiance section and generate buttons
-        fetch('http://127.0.0.1:3000/list-sounds/ambiance')
-            .then(response => response.json())
-            .then(soundFiles => {
-                AudioManager.generateAmbientButtons(soundFiles, 'ambiance');
-            })
-            .catch(error => console.error('Error fetching ambiance sound files:', error));
+                navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registered');
+                    fetchSoundData();
 
-        // Fetch sound files for soundboard section and generate buttons
-        fetch('http://127.0.0.1:3000/list-sounds/soundboard')
-            .then(response => response.json())
-            .then(soundFiles => {
-                AudioManager.generateSoundboardButtons(soundFiles, 'soundboard');
-            })
-            .catch(error => console.error('Error fetching soundboard sound files:', error));
+                }).catch(err => {
+                    console.log('Service Worker registration failed:', err);
+                    fetchSoundData();
+                });
+            });
+        } else {
+            fetchSoundData();
+        }
+
+        // Function to generate buttons dynamically based on sound files
+        async function fetchSoundData() {
+            fetch('http://127.0.0.1:3000/list-sounds/ambiance')
+                .then(response => response.json())
+                .then(soundFiles => {
+                    AudioManager.generateAmbientButtons(soundFiles, 'ambiance');
+                })
+                .catch(error => console.error('Error fetching ambiance sound files:', error));
+
+            fetch('http://127.0.0.1:3000/list-sounds/soundboard')
+                .then(response => response.json())
+                .then(soundFiles => {
+                    AudioManager.generateSoundboardButtons(soundFiles, 'soundboard', false);
+                })
+                .catch(error => console.error('Error fetching soundboard sound files:', error));
+            await AudioManager.preloadBackgroundSounds()
+            await LocalDirectory.getDirectory();
+            await AudioManager.loadLocalSoundFiles();
+            await AudioManager.fetchCredits();
+        }
     </script>
 </body>
 </html>
