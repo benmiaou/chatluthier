@@ -132,7 +132,8 @@ dist
 # AWS
 *.pem
 deploy.bat
-
+serviceAccountKey.json
+user_data
 
 # Jetbrains
 .idea*

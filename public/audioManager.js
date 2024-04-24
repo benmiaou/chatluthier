@@ -1,16 +1,18 @@
 const AudioManager = {
     // Define audio context globally, initially as null
-    DEFAULT_SUBTYPE : "default",
+    DEFAULT_CONTEXT : "default",
     audioContext : null,
     activeBackgroundSound: null,
     soundFiles: null,
     type: null,
-    subType : "default",
+    context : "default",
     categories: {
         background: {},
         ambiance: {},
         soundboard: {}
     },
+    backgroundMusicFilesToPlay : [],
+    backgroundMusicArray : [],
     backgroundButton: null,
     soundIndex : 0,
     creditsMap : null,
@@ -24,16 +26,6 @@ const AudioManager = {
         return  this.audioContext;
     },
 
-    async fetchCredits() {
-        try {
-            const response = await fetch('/credits');
-            this.creditsMap = await response.json();
-            console.log('Credits received:', this.creditsMap);
-        } catch (error) {
-            console.error('Error fetching credits:', error);
-        }
-    },
-
     addOptionToSubtypeSelector(subType)
     {
         const subtypeSelector = document.getElementById('subtypeSelector');
@@ -44,46 +36,28 @@ const AudioManager = {
     },
     
     async preloadBackgroundSounds() {
-        const types = ['background/exploration', 'background/battle'];
+        console.log("preloadBackgroundSounds : ")
         const existingOptions = new Set(Array.from(subtypeSelector.options).map(opt => opt.value));
-        existingOptions.add(this.DEFAULT_SUBTYPE);
-       
-        for (let type of types) {
-            try {
-                const response = await fetch(`http://127.0.0.1:3000/list-files/${encodeURIComponent(type)}`);
-                const subTypes = await response.json();
-
-                  // Ensure `this.categories[type]` is initialized
-                 if (!this.categories[type]) {
-                    this.categories[type] = {}; // Initialize if missing
-                }
-                if (!this.categories[type][this.DEFAULT_SUBTYPE]) {
-                    this.categories[type][this.DEFAULT_SUBTYPE] = []; // Initialize if missing
-                }
-    
-                for (let subType of subTypes) {
+        existingOptions.add(this.DEFAULT_CONTEXT);
+        try {
+                const response = await fetch(`/backgoundMusic`);
+                this.backgroundMusicArray = await response.json();
+                this.backgroundMusicArray = this.shuffleArray(this.backgroundMusicArray)
+                for (let music of this.backgroundMusicArray) 
+                {
                     //Add option comboBox
-                    if (!existingOptions.has(subType)) {
-                        this.addOptionToSubtypeSelector(subType);
-                        existingOptions.add(subType);
-                    }
-                    const subResponse = await fetch(`http://127.0.0.1:3000/list-sounds/${encodeURIComponent(type + '/' + subType)}`);
-                    const files = await subResponse.json();
-                    // Shuffle and save files
-                    if(subType !== this.DEFAULT_SUBTYPE)
-                        this.categories[type][subType] = this.shuffleArray(files.map(file => `assets/${type}/${subType}/${file}`));
-                    files.forEach((file) => {
-                        const assetPath = `assets/${type}/${subType}/${file}`;
-                        if (!this.categories[type][this.DEFAULT_SUBTYPE].includes(assetPath)) {
-                            this.categories[type][this.DEFAULT_SUBTYPE].push(assetPath);
+                    for (let subType of music.contexts) 
+                    {
+                        if (!existingOptions.has(subType)) 
+                        {
+                            this.addOptionToSubtypeSelector(subType);
+                            existingOptions.add(subType);
                         }
-                    });
+                    }
                 }
-                this.shuffleArray(this.categories[type][this.DEFAULT_SUBTYPE]);
             } catch (e) {
-                console.error(`Error fetching ${type} files from server:`, e);
+                console.error(`Error fetching files from server:`, e);
             }
-        }
     },
 
     shuffleArray(array) {
@@ -94,27 +68,30 @@ const AudioManager = {
         return array;
     },
 
-    backGroundSoundLoop() {
-        if (!this.type || !this.subType || !this.categories[this.type]) {
-            console.error('Invalid type or subtype specified for playback.');
-            return;
+    findSoundsByTypeAndContext() {
+        if (!Array.isArray(this.backgroundMusicArray)) {
+          throw new Error("Input data is not an array.");
         }
-        files = {}
-       
-        if(!this.categories[this.type][this.subType])
+        if(this.context !== this.DEFAULT_CONTEXT)
         {
-            console.log("Not existing : " + this.type +" - " + this.subType)
-            console.log("Not existing : " +  Object.keys(this.categories[this.type]))
-            files = this.categories[this.type][this.DEFAULT_SUBTYPE];
+            return this.backgroundMusicArray.filter(sound => 
+            sound.types.includes(this.type) && sound.contexts.includes(this.context)
+            );
         }
         else
         {
-            files = this.categories[this.type][this.subType];
+            return this.backgroundMusicArray.filter(sound => sound.types.includes(this.type));
         }
-        if (this.soundIndex >= files.length) {
+    },
+
+    backGroundSoundLoop() {
+       
+        if (this.soundIndex >= this.filesToPlay.length) {
             this.soundIndex = 0;  // Reset index if it exceeds the array
         }
-        const fileToPlay = files[this.soundIndex++];
+        const fileToPlay = this.filesToPlay[this.soundIndex++];
+        console.log( this.filesToPlay)
+        console.log(fileToPlay)
         this.playSound(fileToPlay);
     },
 
@@ -196,17 +173,9 @@ const AudioManager = {
                 .then(arrayBuffer => processAudioBuffer(arrayBuffer))
                 .catch(e => console.error('Error reading local file:', e));
         } else {
-            filename = this. getFilename(fileOrHandle)
             const creditTitle = document.getElementById('background-music-Credit'); 
-            if(this.creditsMap[filename])
-            {
-                creditTitle.innerHTML  = this.creditsMap[filename];
-            }
-            else
-            {
-                creditTitle.innerHTML  = "---";
-            }
-            fetch(fileOrHandle)
+            creditTitle.innerHTML  = fileOrHandle.credit;
+            fetch("assets/background/" + fileOrHandle.filename)
                 .then(response => response.arrayBuffer())
                 .then(arrayBuffer => processAudioBuffer(arrayBuffer))
                 .catch(e => console.error('Error fetching audio data:', e));
@@ -254,13 +223,10 @@ const AudioManager = {
         button.classList.add('button-play');
         button.classList.remove('button-stop');
         this.type = type;
-        
-        if (!this.categories[type]) {
-            console.error('Sound files not loaded.');
-            return;
-        }
-
-        this.backGroundSoundLoop();
+    
+        this.filesToPlay =  this.findSoundsByTypeAndContext();
+        if(this.filesToPlay.length > 0)
+            this.backGroundSoundLoop();
     },
 
     setBackgroundVolume(volume) {
@@ -470,7 +436,7 @@ const AudioManager = {
                         this.categories[type][subTypeName] = []; // Initialize as an array
                     }
     
-                    if (!existingOptions.has(subTypeName) && subTypeName !== this.DEFAULT_SUBTYPE) 
+                    if (!existingOptions.has(subTypeName) && subTypeName !== this.DEFAULT_CONTEXT) 
                     {
                         this.addOptionToSubtypeSelector(subTypeName);
                         existingOptions.add(subTypeName);

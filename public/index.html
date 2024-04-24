@@ -15,6 +15,7 @@
     <script src="audioManager.js" defer></script>
     <script src="modalWindow.js" defer></script>
     <script   type="module">import { LocalDirectory } from './localDirectory.js';</script>
+    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework"></script>
 </head>
 <body>
     <header>
@@ -27,6 +28,7 @@
                 <img src="assets/images/favicons/MainLogo.webp" alt="Le Chat Luthier Logo" class="logo">
                 <h1>Le Chat Luthier</h1>
             </div>
+            <button id="google-login-button">Login with Google</button>
 
         </div>
     </header>
@@ -39,8 +41,9 @@
         </h2>
         <section id="background-music-Credit">---</section>
         <section id="background-music" class="section">
-            <button onclick="AudioManager.playBackgroundSound('background/exploration', this)"  class="button-stop">Play Exploration</button>
-            <button onclick="AudioManager.playBackgroundSound('background/battle', this)"  class="button-stop">Play Battle</button>
+            <button onclick="AudioManager.playBackgroundSound('ambient', this)"  class="button-stop">Play Ambient</button>
+            <button onclick="AudioManager.playBackgroundSound('moderate', this)"  class="button-stop">Play Moderate</button>
+            <button onclick="AudioManager.playBackgroundSound('intense', this)"  class="button-stop">Play Intense</button>
             <select id="subtypeSelector">
                 <option>default</option>
             </select>
@@ -100,16 +103,19 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.19.0/firebase-app.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.19.0/firebase-auth.js" type="module"></script>
+    <script src="login.js" type="module" defer></script>
     <script  type="module">
-         if (typeof window.showDirectoryPicker !== 'function')
-         {
+        if (typeof window.showDirectoryPicker !== 'function')
+        {
             const controlTop = document.getElementById('top-left-controls');
             controlTop.style.display = 'none'; 
             const buttons = document.querySelectorAll('.add-sound-button'); // Note the period before the class name
             buttons.forEach(button => {
                 button.style.display = 'none'; // Hide each button
             });
-         }
+        }
 
         //Load dir Handle if possible
         subtypeSelector.addEventListener('change', function() 
@@ -150,7 +156,6 @@
             await AudioManager.preloadBackgroundSounds()
             await LocalDirectory.getDirectory();
             await AudioManager.loadLocalSoundFiles();
-            await AudioManager.fetchCredits();
         }
     </script>
 </body>

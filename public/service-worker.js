@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chat-luthier-cache-v321321321321321321';
+const CACHE_NAME = 'chat-luthier-cache-v8';
 const urlsToCache = [
   '/',
   '/index.html',
