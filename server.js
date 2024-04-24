@@ -4,14 +4,16 @@ const path = require('path');
 const cors = require('cors'); // Import CORS module
 const admin = require('firebase-admin');
 
-const serviceAccount = require('./serviceAccountKey.json'); // Your downloaded key
-
 const app = express();
 
-admin.initializeApp({
+try {
+    const serviceAccount = require('./serviceAccountKey.json'); // Your downloaded key
+
+    admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
-  
+} catch (e) {}
+
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Middleware for parsing JSON bodies
 // Serve static files from the 'public' directory where 'index.html' is located
