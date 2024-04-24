@@ -3,7 +3,7 @@
       "filename":"battle-of-the-dragons-8037.mp3",
       "display_name": "Battle of the dragons",
       "types" : ["intense"],
-      "contexts" : ["meadow"],
+      "contexts" : ["meadow", "city", "cave", "forest"],
       "credit": "<a href=\"https://pixabay.com/fr/users/17406877-17406877/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8037\">17406877</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8037\">Pixabay</a>"
      },
     {
@@ -17,28 +17,28 @@
     "filename":"a-song-of-wolves-and-dragons-8034.mp3",
       "display_name": "A song of wolves and dragons",
       "types" : ["intense"],
-      "contexts": ["meadow"],
+      "contexts": ["city", "meadow", "cave"],
       "credit": "<a href=\"https://pixabay.com/fr/users/17406877-17406877/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8034\">17406877</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8034\">Pixabay</a>"
      },
     {
     "filename":"medieval-background-196571.mp3",
       "display_name": "Medieval background",
-      "types" : ["Moderate"],
+      "types" : ["moderate"],
       "contexts": ["city"],
       "credit": "<a href=\"https://pixabay.com/fr/users/lucafrancini-19914739/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=196571\">Luca Francini</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=196571\">Pixabay</a>"
      },
     {
     "filename":"adventures-of-the-fellowship-8036.mp3",
       "display_name": "Adventures of the fellowship",
-      "types" :  ["Moderate"],
-      "contexts": ["meadow"],
+      "types" :  ["moderate"],
+      "contexts": ["meadow", "city"],
       "credit": "<a href=\"https://pixabay.com/fr/users/17406877-17406877/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8036\">17406877</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8036\">Pixabay</a>"
      },
     {
     "filename":"battle-hymn-ii-epic-version-189998.mp3",
       "display_name": "Battle hymn II epic version",
       "types" :  ["intense"],
-      "contexts": ["batlle"],
+      "contexts": ["je sais pas"],
       "credit": "<a href=\"https://pixabay.com/fr/users/oliver_dee-41462276/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=189998\">Oliver Dee</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=189998\">Pixabay</a>"
      },
     {
@@ -66,7 +66,7 @@
     "filename":"caves-of-dawn-10376.mp3",
       "display_name": "Caves of dawn",
       "types" :  ["intense"],
-      "contexts": ["ambient", "cave"],
+      "contexts": ["cave", "tension"],
       "credit": "<a href=\"https://pixabay.com/fr/users/guilhermebernardes-24203804/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10376\">Guilherme Bernardes William</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10376\">Pixabay</a>"
      },
     {
@@ -93,29 +93,29 @@
     {
     "filename":"397_Homecoming.mp3",
       "display_name": "Homecoming",
-      "types" :  ["intense"],
-      "contexts": ["ambient"],
-      "credit": "<a href=\"https://tabletopaudio.com/\">Tabletop Audio</a>"
+      "types" :  ["moderate"],
+      "contexts": ["city"],
+      "credit": "Music by <a href=\"https://tabletopaudio.com/\">Tabletop Audio</a>"
      },
     {
     "filename":"When_The_Bards_Dance_-_C._Filipe_Alves.mp3",
       "display_name": "When The Bards Dance",
-      "types" :  ["Moderate"],
+      "types" :  ["moderate"],
       "contexts": ["city"],
       "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/183444\">When The Bards Dance</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/338006/C._Filipe_Alves\">Filipe Alves</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
      },
     {
     "filename":"Bards_of_the_Streets_-_Crypt_of_Insomnia.mp3",
       "display_name": "Bards of the Streets",
-      "types" :  ["Moderate"],
-      "contexts": ["city"],
+      "types" :  ["moderate"],
+      "contexts": ["city", "tavern"],
       "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734043\">Bards of the Streets</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
      },
     {
     "filename":"Crypt_of_Insomnia_-_Lore_and_Myths.mp3",
       "display_name": "Lore and Myths",
-      "types" :  ["Moderate"],
-      "contexts": ["myths", "mystery"],
+      "types" :  ["moderate"],
+      "contexts": ["city", "meadow", "forest"],
       "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148634\">Lore and Myths</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
      },
      {
@@ -135,8 +135,8 @@
  {
     "filename":"Cave_-_celestial.aeon.project.mp3",
       "display_name": "Cave",
-      "types" :  ["Moderate"],
-      "contexts": ["cave"],
+      "types" :  ["ambient"],
+      "contexts": ["cave", "mystery"],
       "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1321938\">Cave</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
      },
  {

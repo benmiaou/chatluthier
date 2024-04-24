@@ -19,29 +19,8 @@ export const LocalDirectory = {
         return this.directoryHandle;
     },
 
-    async getDirectory() {
-        if (!this.directoryHandle) {
-            try {
-                const storedHandle = await get('directory');
-                if (storedHandle) {
-                    // Test if the handle still has valid permissions
-                    try {
-                        // Attempt to read from the directory to confirm access rights
-                        for await (const _ of storedHandle.values()) break; // We only need to start the iteration to test permissions
-                        this.directoryHandle = storedHandle;
-                        console.log('Access to directory confirmed.');
-                        this.updateStatus("Directory is set and ready.", "green");
-                    } catch (err) {
-                        this.updateStatus("Directory not set.", "red");
-                        console.error('Access to directory lost or permission revoked:', err);
-                        this.directoryHandle = null; // Clear the handle as it's no longer valid
-                    }
-                }
-            } catch (error) {
-                this.updateStatus("Error retrieving directory handle.", "red");
-                console.error('Error retrieving or testing directory handle:', error);
-            }
-        }
+    async getDirectory() 
+    {
         return this.directoryHandle;
     },
 
