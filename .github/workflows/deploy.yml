@@ -26,7 +26,7 @@ jobs:
       
       - name: Pull latest code
         run: |
-          ssh ec2-user@chatluthier.org "cd /home/ec2-user/chatluthier && git pull origin main"
+          ssh ec2-user@chatluthier.org "cd /home/ec2-user/chatluthier && git fetch && git reset --hard origin/main"
 
       - name: Change domain
         run: |
