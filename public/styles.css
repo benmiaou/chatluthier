@@ -187,6 +187,11 @@ nav a {
     display: block; /* Change display to block */
 }
 
+.button-stop:disabled {
+    background-color: #803d38;
+    cursor: not-allowed;
+}
+
 
 /* Icons styling */
 .icon {

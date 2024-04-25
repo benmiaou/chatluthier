@@ -26,18 +26,18 @@ const AudioManager = {
         return  this.audioContext;
     },
 
-    addOptionToSubtypeSelector(subType)
+    addOptionTocontextSelector(subType)
     {
-        const subtypeSelector = document.getElementById('subtypeSelector');
+        const contextSelector = document.getElementById('contextSelector');
         const option = document.createElement('option');
         option.value = subType;
         option.textContent = subType;
-        subtypeSelector.appendChild(option);
+        contextSelector.appendChild(option);
     },
     
     async preloadBackgroundSounds() {
         console.log("preloadBackgroundSounds : ")
-        const existingOptions = new Set(Array.from(subtypeSelector.options).map(opt => opt.value));
+        const existingOptions = new Set(Array.from(contextSelector.options).map(opt => opt.value));
         existingOptions.add(this.DEFAULT_CONTEXT);
         try {
                 const response = await fetch(`/backgroundMusic`);
@@ -50,7 +50,7 @@ const AudioManager = {
                     {
                         if (!existingOptions.has(subType)) 
                         {
-                            this.addOptionToSubtypeSelector(subType);
+                            this.addOptionTocontextSelector(subType);
                             existingOptions.add(subType);
                         }
                     }
@@ -72,13 +72,10 @@ const AudioManager = {
         if (!Array.isArray(this.backgroundMusicArray)) {
           throw new Error("Input data is not an array.");
         }
-
-        this.context = subtypeSelector.value;
-
         if(this.context !== this.DEFAULT_CONTEXT)
         {
             return this.backgroundMusicArray.filter(sound => 
-                sound.types.includes(this.type) && sound.contexts.includes(this.context)
+            sound.types.includes(this.type) && sound.contexts.includes(this.context)
             );
         }
         else
@@ -99,7 +96,7 @@ const AudioManager = {
         if (this.filesToPlay.length == 0) {
             alert("No sounds found for this combination : " + this.type + " " + this.context);
         }
-
+        console.log("Play : " +  this.type + " " + this.context )
         this.playSound(fileToPlay);
     },
 
@@ -130,6 +127,44 @@ const AudioManager = {
         if (isFinite(newGainValue) && newGainValue > 0) {
             // Smooth transition using exponential ramp to the new gain value
             this.activeBackgroundSound.gainNode.gain.exponentialRampToValueAtTime(newGainValue, this.getAudioContext().currentTime + 0.1);
+        }
+    },
+
+    updateButton(typeName)
+    {
+        result = this.backgroundMusicArray.filter(sound => 
+            sound.types.includes(typeName) && sound.contexts.includes(this.context))
+        button = document.getElementById(typeName+'Button'); 
+        if (result.length === 0) {
+            button.disabled = true; // Disable the button if the array is empty
+          } else {
+            button.disabled = false; // Enable the button if the array is not empty
+          }
+    },
+
+    setContext(newContext)
+    {
+        this.context = newContext;
+        this.filesToPlay =  this.findSoundsByTypeAndContext();
+        this.updateButton("calm")
+        this.updateButton("dynamic")
+        this.updateButton("intense")
+        if(this.activeBackgroundSound)
+        {
+            if(this.filesToPlay.length == 0)
+            {
+                const creditTitle = document.getElementById('background-music-Credit'); 
+                creditTitle.innerHTML  = "---";
+                this.activeBackgroundSound.source.onended = null;
+                this.activeBackgroundSound.source.stop();
+                this.activeBackgroundSound = null;
+                this.backgroundButton.classList.remove('button-play');
+                this.backgroundButton.classList.add('button-stop');
+            }
+            else
+            {
+            this.activeBackgroundSound.source.stop();
+            }
         }
     },
 
@@ -219,7 +254,8 @@ const AudioManager = {
 
         const creditTitle = document.getElementById('background-music-Credit'); 
         creditTitle.innerHTML  = "---";
-        if (this.activeBackgroundSound) {
+        if (this.activeBackgroundSound) 
+        {
             this.activeBackgroundSound.source.onended = null;
             this.activeBackgroundSound.source.stop();
             this.activeBackgroundSound = null;
@@ -227,14 +263,14 @@ const AudioManager = {
             this.backgroundButton.classList.add('button-stop');
             if (type === this.type) return;
         }
+        this.type = type;
+        this.filesToPlay =  this.findSoundsByTypeAndContext();
+        if(this.filesToPlay.length == 0)
+            return;
         this.backgroundButton = button;
         button.classList.add('button-play');
         button.classList.remove('button-stop');
-        this.type = type;
-    
-        this.filesToPlay =  this.findSoundsByTypeAndContext();
-        if(this.filesToPlay.length > 0)
-            this.backGroundSoundLoop();
+        this.backGroundSoundLoop();
     },
 
     setBackgroundVolume(volume) {
@@ -415,7 +451,7 @@ const AudioManager = {
     
         const types = [ 'background/battle', 'background/exploration'];
         const backgroundDir = await rootDir.getDirectoryHandle('background', { create: true });
-        const existingOptions = new Set(Array.from(subtypeSelector.options).map(opt => opt.value));
+        const existingOptions = new Set(Array.from(contextSelector.options).map(opt => opt.value));
     
         for (let type of types) {
             try {
@@ -446,7 +482,7 @@ const AudioManager = {
     
                     if (!existingOptions.has(subTypeName) && subTypeName !== this.DEFAULT_CONTEXT) 
                     {
-                        this.addOptionToSubtypeSelector(subTypeName);
+                        this.addOptionTocontextSelector(subTypeName);
                         existingOptions.add(subTypeName);
                     }
                     const files = await LocalDirectory.listMP3Files(subTypeHandle);

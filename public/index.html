@@ -20,15 +20,15 @@
 <body>
     <header>
         <div class="header-content">
-            <div class="top-left-controls" id="top-left-controls">
+           <!-- <div class="top-left-controls" id="top-left-controls">
                 <button onclick="LocalDirectory.selectDirectory()" class="button-directory">Set Local Directory</button>
                 <div id="directoryStatus" class="status">Directory not set</div>
-            </div>
+            </div> -->
             <div class="center-content">
                 <img src="assets/images/favicons/MainLogo.webp" alt="Le Chat Luthier Logo" class="logo">
                 <h1>Le Chat Luthier</h1>
             </div>
-            <button id="google-login-button">Login with Google</button>
+             <!--<button id="google-login-button">Login with Google</button> -->
 
         </div>
     </header>
@@ -41,10 +41,10 @@
         </h2>
         <section id="background-music-Credit">---</section>
         <section id="background-music" class="section">
-            <button onclick="AudioManager.playBackgroundSound('calm', this)"  class="button-stop">Play Calm</button>
-            <button onclick="AudioManager.playBackgroundSound('dynamic', this)"  class="button-stop">Play Dynamic</button>
-            <button onclick="AudioManager.playBackgroundSound('intense', this)"  class="button-stop">Play Intense</button>
-            <select id="subtypeSelector">
+            <button id="calmButton" onclick="AudioManager.playBackgroundSound('calm', this)"  class="button-stop">Play Calm</button>
+            <button id="dynamicButton" onclick="AudioManager.playBackgroundSound('dynamic', this)"  class="button-stop">Play Dynamic</button>
+            <button id="intenseButton" onclick="AudioManager.playBackgroundSound('intense', this)"  class="button-stop">Play Intense</button>
+            <select id="contextSelector">
                 <option>default</option>
             </select>
         </section>
@@ -116,11 +116,9 @@
                 button.style.display = 'none'; // Hide each button
             });
         }
-        subtypeSelector.addEventListener('change', function() 
+        contextSelector.addEventListener('change', function() 
         {
-            AudioManager.filesToPlay =  AudioManager.findSoundsByTypeAndContext();
-            AudioManager.activeBackgroundSound.source.stop();
-            AudioManager.subType = this.value;
+            AudioManager.setContext(this.value)
         });
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
