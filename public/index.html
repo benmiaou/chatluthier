@@ -13,6 +13,9 @@
     <link rel="manifest" href="manifest.json">
     <script src="soundBar.js" defer></script>
     <script src="audioManager.js" defer></script>
+    <script src="backgroundMusic.js" defer></script>
+    <script src="ambianceSounds.js" defer></script>
+    <script src="soundboard.js" defer></script>
     <script src="modalWindow.js" defer></script>
     <script   type="module">import { LocalDirectory } from './localDirectory.js';</script>
     <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework"></script>
@@ -37,13 +40,13 @@
         <!-- Background Music Section -->
         <h2>Background 
             <button id="add-sound-button" class="add-sound-button" onclick="ModalUploadWindow.openBackgroundUploadModal()">+</button> 
-            <input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="AudioManager.setBackgroundVolume(this.value)">
+            <input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="BackgroundMusic.setBackgroundVolume(this.value)">
         </h2>
         <section id="background-music-Credit">---</section>
         <section id="background-music" class="section">
-            <button id="calmButton" onclick="AudioManager.playBackgroundSound('calm', this)"  class="button-stop">Play Calm</button>
-            <button id="dynamicButton" onclick="AudioManager.playBackgroundSound('dynamic', this)"  class="button-stop">Play Dynamic</button>
-            <button id="intenseButton" onclick="AudioManager.playBackgroundSound('intense', this)"  class="button-stop">Play Intense</button>
+            <button id="calmButton" onclick="BackgroundMusic.playBackgroundSound('calm', this)"  class="button-stop">Play Calm</button>
+            <button id="dynamicButton" onclick="BackgroundMusic.playBackgroundSound('dynamic', this)"  class="button-stop">Play Dynamic</button>
+            <button id="intenseButton" onclick="BackgroundMusic.playBackgroundSound('intense', this)"  class="button-stop">Play Intense</button>
             <select id="contextSelector">
                 <option>default</option>
             </select>
@@ -61,7 +64,7 @@
         <!-- Soundboard Section -->
         <h2>Soundboard  
             <button id="add-sound-button" class="add-sound-button" onclick="ModalUploadWindow.openSoundboardUploadModal()">+</button> 
-            <input type="range" min="0" max="100" value="50" class="slider" id="soundboard-volume" oninput="AudioManager.setVolume('soundboard', this.value)">
+            <input type="range" min="0" max="100" value="50" class="slider" id="soundboard-volume" oninput="Soundboard.setVolume(this.value)">
         </h2>
         <section id="soundboard" class="section">
         </section>
@@ -107,7 +110,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.19.0/firebase-auth.js" type="module"></script>
     <script src="login.js" type="module" defer></script>
     <script  type="module">
-        if (typeof window.showDirectoryPicker !== 'function')
+        if (typeof window.showDirectoryPicker !== 'function' || true)
         {
             const controlTop = document.getElementById('top-left-controls');
             controlTop.style.display = 'none'; 
@@ -138,20 +141,9 @@
 
         // Function to generate buttons dynamically based on sound files
         async function fetchSoundData() {
-            fetch('http://127.0.0.1:3000/list-sounds/ambiance')
-                .then(response => response.json())
-                .then(soundFiles => {
-                    AudioManager.generateAmbientButtons(soundFiles, 'ambiance');
-                })
-                .catch(error => console.error('Error fetching ambiance sound files:', error));
-
-            fetch('http://127.0.0.1:3000/list-sounds/soundboard')
-                .then(response => response.json())
-                .then(soundFiles => {
-                    AudioManager.generateSoundboardButtons(soundFiles, 'soundboard', false);
-                })
-                .catch(error => console.error('Error fetching soundboard sound files:', error));
-            await AudioManager.preloadBackgroundSounds()
+            await AmbianceSounds.loadAmbianceButtons();
+            await Soundboard.loadSoundboardButtons();
+            await BackgroundMusic.preloadBackgroundSounds()
             await LocalDirectory.getDirectory();
         }
     </script>

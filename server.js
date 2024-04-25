@@ -53,10 +53,6 @@ app.get('/list-files/:type', (req, res) => {
         }
     });
 });
-// Define a route to return the creditsMap
-app.get('/backgroundMusic', (req, res) => {
-    res.json(backgroundMusic); // Return the credits map as JSON
-});
 
 app.post('/login', async (req, res) => {
     try {
@@ -75,11 +71,14 @@ app.post('/login', async (req, res) => {
     }
   });
 
-// Global variable to store credits
+// Global variable to store backgroundMusic
 let backgroundMusic = {};
-
-// Function to load backgroundCredits.json at server startup
-function loadCredits() {
+// Define a route to return the backgroundMusic
+app.get('/backgroundMusic', (req, res) => {
+    res.json(backgroundMusic); // Return the backgroundMusic array as JSON
+});
+// Function to load backgroundMusic.json at server startup
+function loadBackgroundMusic() {
     const backgroundMusicPath = path.join(__dirname, 'backgroundMusic.json');
     try {
         const backgroundMusicData = fs.readFileSync(backgroundMusicPath, 'utf8');
@@ -90,6 +89,46 @@ function loadCredits() {
         backgroundMusic = {}; // Fallback to empty map if there's an error
     }
 }
-loadCredits();
+loadBackgroundMusic();
+
+// Global variable to store ambianceSounds
+let ambianceSounds = {};
+// Define a route to return the ambianceSounds
+app.get('/ambianceSounds', (req, res) => {
+    res.json(ambianceSounds); // Return the ambianceSounds array as JSON
+});
+// Function to load ambianceSounds.json at server startup
+function loadAmbianceSounds() {
+    const ambianceSoundsPath = path.join(__dirname, 'ambianceSounds.json');
+    try {
+        const ambianceSoundsData = fs.readFileSync(ambianceSoundsPath, 'utf8');
+        ambianceSounds = JSON.parse(ambianceSoundsData);
+        console.log('Music loaded successfully:', ambianceSounds);
+    } catch (error) {
+        console.error('Error loading ambianceSounds.json:', error);
+        ambianceSounds = {}; // Fallback to empty map if there's an error
+    }
+}
+loadAmbianceSounds();
+
+// Global variable to store soundboard
+let soundboard = {};
+// Define a route to return the soundboard array
+app.get('/soundboard', (req, res) => {
+    res.json(soundboard); // Return the soundboard array as JSON
+});
+// Function to load backgroundCredits.json at server startup
+function loadSoundboard() {
+    const soundboardPath = path.join(__dirname, 'soundboard.json');
+    try {
+        const soundboardData = fs.readFileSync(soundboardPath, 'utf8');
+        soundboard = JSON.parse(soundboardData);
+        console.log('Music loaded successfully:', soundboard);
+    } catch (error) {
+        console.error('Error loading soundboard.json:', error);
+        soundboard = {}; // Fallback to empty map if there's an error
+    }
+}
+loadSoundboard();
 
 app.listen(3000, '0.0.0.0', () => console.log('Server started on port 3000'));

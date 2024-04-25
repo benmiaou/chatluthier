@@ -1,0 +1,114 @@
+const AmbianceSounds = {
+
+    currentAmbiances: {},
+    audioContext : null,
+
+    getAudioContext() {
+        if (!this.audioContext) {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        return  this.audioContext;
+    },
+
+    async loadAmbianceButtons()
+    {
+        const response = await fetch(`/ambianceSounds`);
+        ambianceSounds = await response.json();
+        this.generateAmbientButtons(ambianceSounds)
+    },
+
+    generateAmbientButtons(ambianceSounds) {
+        const section = document.getElementById("ambiance");
+        section.innerHTML = ''; // Clear existing content
+    
+        ambianceSounds.forEach(ambianceSound => {
+            const fileName = ambianceSound.filename.replace('.mp3', '');
+            const container = document.createElement('div');
+            container.className = 'sound-container';
+    
+            // Create a div for the sound bar
+            const soundBarDiv = document.createElement('div');
+            soundBarDiv.id = `sound-bar-${fileName}`; // Set a unique ID for the sound bar
+            soundBarDiv.className = 'sound-bar'; // Apply styling to the sound bar
+    
+            // Append the sound bar div to the container
+            container.appendChild(soundBarDiv);
+            let isRunning = false;
+            // Assuming 'soundBar' is the object exported from 'soundBar.js'
+            const progressBarContainer = soundBar.createProgressBar(fileName);
+            progressBarContainer.addEventListener('soundBarValueChanged', () => 
+            {
+                const sound = this.currentAmbiances[ambianceSound];
+                if(!isRunning && !sound && soundBar.getVolumeFromProgressBar(progressBarContainer) > 0)
+                {
+                    isRunning = true;
+                    this.toggleAmbientSound(ambianceSound, progressBarContainer);
+                }
+                else if(sound && soundBar.getVolumeFromProgressBar(progressBarContainer) == 0)
+                {
+                    isRunning = false;
+                    this.toggleAmbientSound(ambianceSound, progressBarContainer);
+                }
+                else if (sound && sound.gainNode) 
+                {
+                    sound.gainNode.gain.value = soundBar.getVolumeFromProgressBar(progressBarContainer);
+                }
+            });
+            // Append progress bar container to the container
+            container.appendChild(progressBarContainer);
+            
+            // Append the container to the section
+            section.appendChild(container);
+        });
+    },
+
+    toggleAmbientSound(ambianceSound, soundBarContainer) {
+        let sound = this.currentAmbiances[ambianceSound];
+        if (sound && sound.source) 
+        {
+            sound.source.stop();
+            delete this.currentAmbiances[ambianceSound];
+        } 
+        else 
+        {
+            // Find the parent container of the button, which should contain the sound bar
+            if (soundBarContainer) {
+                // Retrieve the volume value from the sound bar
+                const soundBarValue = soundBar.getVolumeFromProgressBar(soundBarContainer);
+                // Use the sound bar value as the initial volume
+                this.createSound(ambianceSound, null, 'ambiance', soundBarValue);
+            } else {
+                console.error('Sound bar container not found.');
+            }
+        }
+    },
+
+    createSound(urlOrHandle, initialVolume) 
+    {
+        const context = this.getAudioContext();
+        if (context.state === 'suspended') {
+            context.resume();
+        }
+    
+        const source = context.createBufferSource();
+        const gainNode = context.createGain();
+        gainNode.gain.value = initialVolume; // Set the initial volume
+    
+        const processAudioBuffer = (arrayBuffer) => {
+            context.decodeAudioData(arrayBuffer)
+                .then(audioBuffer => {
+                    source.buffer = audioBuffer;
+                    source.loop = true;
+                    source.connect(gainNode);
+                    gainNode.connect(context.destination);
+                    source.start(0);
+                    this.currentAmbiances[urlOrHandle] = { source, gainNode };
+                })
+                .catch(e => console.error('Error with decoding audio data:', e));
+        };
+        fetch("assets/ambiance/" + urlOrHandle.filename)
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => processAudioBuffer(arrayBuffer))
+            .catch(e => console.error('Error fetching or decoding audio data:', e));
+    },
+}

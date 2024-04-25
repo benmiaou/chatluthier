@@ -1,0 +1,16 @@
+[
+    {
+      "filename":"crowd-talking.mp3",
+      "display_name": "Talking",
+      "imageFile" : "crowd-talking.webp",
+      "contexts" : ["town", "city", "tavern"],
+      "credit": "Unknown"
+     },
+    {
+      "filename": "thunder.mp3",
+      "display_name": "Thunder",
+      "imageFile" : "thunder.webp",
+      "contexts": ["meteo"],
+      "credit": "Unknown"
+     }
+]
