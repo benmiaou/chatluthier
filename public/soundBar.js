@@ -26,6 +26,15 @@ const soundBar = {
     soundBarText.className = 'sound-bar-text';
     soundBarText.draggable = false; // Disable dragging for the text
 
+    const progressBarVolumeMinus = document.createElement('div');
+    progressBarVolumeMinus.className = 'progress-bar-volume minus';
+
+    const progressBarVolumePlus = document.createElement('div');
+    progressBarVolumePlus.className = 'progress-bar-volume plus';
+
+    progressBarContainer.appendChild(progressBarVolumeMinus);
+    progressBarContainer.appendChild(progressBarVolumePlus);
+
     progressBarContainer.appendChild(soundBarText);
       
     this.initializeDraggableProgressBar(progressBarContainer ,progressBar);
