@@ -54,8 +54,8 @@ app.get('/list-files/:type', (req, res) => {
     });
 });
 // Define a route to return the creditsMap
-app.get('/backgoundMusic', (req, res) => {
-    res.json(backgoundMusic); // Return the credits map as JSON
+app.get('/backgroundMusic', (req, res) => {
+    res.json(backgroundMusic); // Return the credits map as JSON
 });
 
 app.post('/login', async (req, res) => {
@@ -76,18 +76,18 @@ app.post('/login', async (req, res) => {
   });
 
 // Global variable to store credits
-let backgoundMusic = {};
+let backgroundMusic = {};
 
 // Function to load backgroundCredits.json at server startup
 function loadCredits() {
-    const backgoundMusicPath = path.join(__dirname, 'backgoundMusic.json');
+    const backgroundMusicPath = path.join(__dirname, 'backgroundMusic.json');
     try {
-        const backgoundMusicData = fs.readFileSync(backgoundMusicPath, 'utf8');
-        backgoundMusic = JSON.parse(backgoundMusicData);
-        console.log('Music loaded successfully:', backgoundMusic);
+        const backgroundMusicData = fs.readFileSync(backgroundMusicPath, 'utf8');
+        backgroundMusic = JSON.parse(backgroundMusicData);
+        console.log('Music loaded successfully:', backgroundMusic);
     } catch (error) {
-        console.error('Error loading backgoundMusic.json:', error);
-        backgoundMusic = {}; // Fallback to empty map if there's an error
+        console.error('Error loading backgroundMusic.json:', error);
+        backgroundMusic = {}; // Fallback to empty map if there's an error
     }
 }
 loadCredits();

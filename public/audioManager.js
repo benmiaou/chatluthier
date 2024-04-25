@@ -40,7 +40,7 @@ const AudioManager = {
         const existingOptions = new Set(Array.from(subtypeSelector.options).map(opt => opt.value));
         existingOptions.add(this.DEFAULT_CONTEXT);
         try {
-                const response = await fetch(`/backgoundMusic`);
+                const response = await fetch(`/backgroundMusic`);
                 this.backgroundMusicArray = await response.json();
                 this.backgroundMusicArray = this.shuffleArray(this.backgroundMusicArray)
                 for (let music of this.backgroundMusicArray) 
