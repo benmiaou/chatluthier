@@ -18,16 +18,20 @@ jobs:
 
       - name: Add EC2 Host to Known Hosts
         run: |
-          ssh-keyscan -H ec2-13-60-6-122.eu-north-1.compute.amazonaws.com >> ~/.ssh/known_hosts  # Ensure SSH connection works smoothly
+          ssh-keyscan -H https://chatluthier.org/ >> ~/.ssh/known_hosts  # Ensure SSH connection works smoothly
       
       - name: Add GitHub's Host Key to Known Hosts on EC2
         run: |
-          ssh ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com "ssh-keyscan -H github.com >> ~/.ssh/known_hosts"  # Add GitHub's host key to the server's known hosts
+          ssh ec2-user@https://chatluthier.org/ "ssh-keyscan -H github.com >> ~/.ssh/known_hosts"  # Add GitHub's host key to the server's known hosts
       
       - name: Pull latest code
         run: |
-          ssh ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com "cd /home/ec2-user/chatluthier && git pull origin main"
+          ssh ec2-user@https://chatluthier.org/ "cd /home/ec2-user/chatluthier && git pull origin main"
 
+      - name: Change domain
+        run: |
+          ssh ec2-user@https://chatluthier.org/ "cd /home/ec2-user/chatluthier && find . -type f \( -name '*.js' -o -name '*.html' \) -exec sed -i 's|http://127.0.0.1:3000|https://chatluthier.org|g' {} \;find . -type f \( -name '*.js' -o -name '*.html' \) -exec sed -i 's|localhost|chatluthier.org|g' {} \;
+      
       - name: Restart server
         run: |
-          ssh ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com "pm2 restart all"
+          ssh ec2-user@https://chatluthier.org/ "pm2 restart all"
