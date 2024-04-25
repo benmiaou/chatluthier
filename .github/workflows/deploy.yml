@@ -20,15 +20,10 @@ jobs:
         run: |
           ssh-keyscan -H ec2-13-60-6-122.eu-north-1.compute.amazonaws.com >> ~/.ssh/known_hosts  # Ensure SSH connection works smoothly
       
-      - name: Initialize Git if not existing
+      - name: Add GitHub's Host Key to Known Hosts on EC2
         run: |
-          ssh ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com "
-          if [ ! -d '/home/ec2-user/chatluthier/.git' ]; then
-            git init /home/ec2-user/chatluthier
-            git -C /home/ec2-user/chatluthier remote add origin git@github.com:benmiaou/chatluthier.git
-            git -C /home/ec2-user/chatluthier pull origin main
-          fi"
-
+          ssh ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com "ssh-keyscan -H github.com >> ~/.ssh/known_hosts"  # Add GitHub's host key to the server's known hosts
+      
       - name: Pull latest code
         run: |
           ssh ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com "cd /home/ec2-user/chatluthier && git pull origin main"
