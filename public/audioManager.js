@@ -93,8 +93,13 @@ const AudioManager = {
             this.soundIndex = 0;  // Reset index if it exceeds the array
         }
         const fileToPlay = this.filesToPlay[this.soundIndex++];
-        console.log( this.filesToPlay)
-        console.log(fileToPlay)
+        console.log( this.filesToPlay);
+        console.log(fileToPlay);
+
+        if (this.filesToPlay.length == 0) {
+            alert("No sounds found for this combination : " + this.type + " " + this.context);
+        }
+
         this.playSound(fileToPlay);
     },
 
