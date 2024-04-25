@@ -24,6 +24,7 @@ jobs:
         run: |
           ssh ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com "
           if [ ! -d '/home/ec2-user/chatluthier/.git' ]; then
+            sudo yum install -y git  # Install Git (for Amazon Linux)
             git init /home/ec2-user/chatluthier
             git -C /home/ec2-user/chatluthier remote add origin git@github.com:benmiaou/chatluthier.git
             git -C /home/ec2-user/chatluthier pull origin main
