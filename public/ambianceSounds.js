@@ -22,20 +22,19 @@ const AmbianceSounds = {
         section.innerHTML = ''; // Clear existing content
     
         ambianceSounds.forEach(ambianceSound => {
-            const fileName = ambianceSound.filename.replace('.mp3', '');
             const container = document.createElement('div');
             container.className = 'sound-container';
     
             // Create a div for the sound bar
             const soundBarDiv = document.createElement('div');
-            soundBarDiv.id = `sound-bar-${fileName}`; // Set a unique ID for the sound bar
+            soundBarDiv.id = `sound-bar-${ambianceSound.filename}`; // Set a unique ID for the sound bar
             soundBarDiv.className = 'sound-bar'; // Apply styling to the sound bar
     
             // Append the sound bar div to the container
             container.appendChild(soundBarDiv);
             let isRunning = false;
             // Assuming 'soundBar' is the object exported from 'soundBar.js'
-            const progressBarContainer = soundBar.createProgressBar(fileName);
+            const progressBarContainer = soundBar.createProgressBar(ambianceSound);
             progressBarContainer.addEventListener('soundBarValueChanged', () => 
             {
                 const sound = this.currentAmbiances[ambianceSound];

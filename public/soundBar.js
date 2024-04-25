@@ -7,22 +7,21 @@ const soundBar = {
   lastInvocation: 0, // Time of the last function call
   moved : false,
   
-  createProgressBar: function (fileName) {
+  createProgressBar: function (ambianceSounds) {
     const progressBarContainer = document.createElement('div');
     progressBarContainer.className = 'progress-bar-container';
-    progressBarContainer.setAttribute('style', 'background-image: url(assets/images/backgrounds/'+fileName+'.webp)');
+    progressBarContainer.setAttribute('style', 'background-image: url(assets/images/backgrounds/'+ambianceSounds.imageFile+')');
     progressBarContainer.draggable = false;
 
     const progressBar = document.createElement('div');
     progressBar.className = 'progress-bar';
-    progressBar.id = 'progress-bar-' + fileName;
+    progressBar.id = 'progress-bar-' + ambianceSounds.filename;
     progressBar.draggable = false;
     progressBarContainer.appendChild(progressBar);
 
     // Add text inside the sound bar
     const soundBarText = document.createElement('div');
-    const capitalizedFileName = fileName.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-    soundBarText.textContent =capitalizedFileName;
+    soundBarText.textContent =ambianceSounds.display_name;
     soundBarText.className = 'sound-bar-text';
     soundBarText.draggable = false; // Disable dragging for the text
 
