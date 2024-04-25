@@ -1,16 +1,16 @@
 [
     {
-      "filename":"crowd-talking.mp3",
+      "filename":"crowd-of-people-talking-29054.mp3",
       "display_name": "Talking",
       "imageFile" : "crowd-talking.webp",
       "contexts" : ["town", "city", "tavern"],
-      "credit": "Unknown"
+      "credit": "Sound Effect from <a href=\"https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=29054\">Pixabay</a>"
      },
     {
-      "filename": "thunder.mp3",
+      "filename": "natural-thunder-113219.mp3",
       "display_name": "Thunder",
       "imageFile" : "thunder.webp",
       "contexts": ["meteo"],
-      "credit": "Unknown"
+      "credit": "Sound Effect by <a href=\"https://pixabay.com/fr/users/soundsforyou-4861230/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=113219\">Mikhail</a> from <a href=\"https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=113219\">Pixabay</a>"
      }
 ]

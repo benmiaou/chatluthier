@@ -1,15 +1,15 @@
 [
     {
-      "filename":"scream.mp3",
+      "filename":"male-scream-in-fear-123079.mp3",
       "display_name": "Scream",
       "contexts" : ["all"],
-      "credit": "unknown"
+      "credit": "Sound Effect by <a href=\"https://pixabay.com/fr/users/universfield-28281460/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=123079\">UNIVERSFIELD</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=123079\">Pixabay</a>"
      },
     {
-      "filename": "water-splash.mp3",
+      "filename": "water-splash-46402.mp3",
       "display_name": "Water splash",
       "contexts": ["water"],
-      "credit": "unknown"
+      "credit": "Sound Effect from <a href=\"https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=46402\">Pixabay</a>"
      }
 
 ]
