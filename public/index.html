@@ -22,10 +22,6 @@
 <body>
     <header>
         <div class="header-content">
-            <div  style="display: none" class="top-left-controls" id="top-left-controls">
-                <button onclick="LocalDirectory.selectDirectory()" class="button-directory">Set Local Directory</button>
-                <div id="directoryStatus" class="status">Directory not set</div>
-            </div>
             <div class="center-content">
                 <img src="assets/images/favicons/MainLogo.webp" alt="Le Chat Luthier Logo" class="logo">
                 <h1>Le Chat Luthier</h1>
@@ -38,7 +34,6 @@
     <main>
         <!-- Background Music Section -->
         <h2>Background 
-            <button id="add-sound-button" class="add-sound-button" onclick="ModalUploadWindow.openBackgroundUploadModal()">+</button> 
             <input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="BackgroundMusic.setBackgroundVolume(this.value)">
         </h2>
         <section id="background-music-Credit">---</section>
@@ -52,17 +47,14 @@
         </section>
         
         <!-- Ambiance Sounds Section -->
-        <h2>Ambiance Sounds
-            <button id="add-sound-button" class="add-sound-button" onclick="ModalUploadWindow.openAmbianceUploadModal()">+</button> 
-        </h2>
+        <h2>Ambiance Sounds</h2>
         <section id="ambiance" class="section">
         </section>
         <section id="ambianceLocal" class="section">
         </section>
 
         <!-- Soundboard Section -->
-        <h2>Soundboard  
-            <button id="add-sound-button" class="add-sound-button" onclick="ModalUploadWindow.openSoundboardUploadModal()">+</button> 
+        <h2>Soundboard
             <input type="range" min="0" max="100" value="50" class="slider" id="soundboard-volume" oninput="Soundboard.setVolume(this.value)">
         </h2>
         <section id="soundboard" class="section">
@@ -71,53 +63,11 @@
         </section>
     </main>
 
-    <!-- Modal HTML Structures -->
-    <div id="background-upload-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" onclick="ModalUploadWindow.closeBackgroundUploadModal()">&times;</span>
-            <h2>Upload Background File</h2>
-            <input type="file" id="background-file-input" accept=".mp3" />
-            <select id="background-type-selector"> <!-- Selector for battle or exploration -->
-                <option value="battle">Battle</option>
-                <option value="exploration">Exploration</option>
-            </select>
-            <select id="background-subtype-selector"></select>
-            <input type="text" id="new-subtype-input" placeholder="New Subtype" />
-            <button onclick="ModalUploadWindow.uploadBackgroundFile()">Upload</button>
-        </div>
-    </div>
-
-    <div id="ambiance-upload-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" onclick="ModalUploadWindow.closeAmbianceUploadModal()">&times;</span>
-            <h2>Upload Ambiance File</h2>
-            <input type="file" id="ambiance-file-input" accept=".mp3" />
-            <button onclick="ModalUploadWindow.uploadAmbianceFile()">Upload</button>
-        </div>
-    </div>
-
-    <div id="soundboard-upload-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" onclick="ModalUploadWindow.closeSoundboardUploadModal()">&times;</span>
-            <h2>Upload Soundboard File</h2>
-            <input type="file" id="soundboard-file-input" accept=".mp3" />
-            <button onclick="ModalUploadWindow.uploadSoundboardFile()">Upload</button>
-        </div>
-    </div>
-
     <script src="https://www.gstatic.com/firebasejs/9.19.0/firebase-app.js" type="module"></script>
     <script src="https://www.gstatic.com/firebasejs/9.19.0/firebase-auth.js" type="module"></script>
     <script src="login.js" type="module" defer></script>
     <script  type="module">
-        if (typeof window.showDirectoryPicker !== 'function' || true)
-        {
-            const controlTop = document.getElementById('top-left-controls');
-            controlTop.style.display = 'none'; 
-            const buttons = document.querySelectorAll('.add-sound-button'); // Note the period before the class name
-            buttons.forEach(button => {
-                button.style.display = 'none'; // Hide each button
-            });
-        }
+        
         contextSelector.addEventListener('change', function() 
         {
             BackgroundMusic.setContext(this.value)

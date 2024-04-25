@@ -35,7 +35,6 @@ const BackgroundMusic = {
     },
     
     async preloadBackgroundSounds() {
-        console.log("preloadBackgroundSounds : ")
         const existingOptions = new Set(Array.from(contextSelector.options).map(opt => opt.value));
         existingOptions.add(this.DEFAULT_CONTEXT);
         try {
@@ -89,13 +88,9 @@ const BackgroundMusic = {
             this.soundIndex = 0;  // Reset index if it exceeds the array
         }
         const fileToPlay = this.filesToPlay[this.soundIndex++];
-        console.log( this.filesToPlay);
-        console.log(fileToPlay);
-
         if (this.filesToPlay.length == 0) {
             alert("No sounds found for this combination : " + this.type + " " + this.context);
         }
-        console.log("Play : " +  this.type + " " + this.context )
         this.playSound(fileToPlay);
     },
 

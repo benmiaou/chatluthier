@@ -83,7 +83,7 @@ function loadBackgroundMusic() {
     try {
         const backgroundMusicData = fs.readFileSync(backgroundMusicPath, 'utf8');
         backgroundMusic = JSON.parse(backgroundMusicData);
-        console.log('Music loaded successfully:', backgroundMusic);
+        console.log('Music loaded successfully');
     } catch (error) {
         console.error('Error loading backgroundMusic.json:', error);
         backgroundMusic = {}; // Fallback to empty map if there's an error
@@ -103,7 +103,7 @@ function loadAmbianceSounds() {
     try {
         const ambianceSoundsData = fs.readFileSync(ambianceSoundsPath, 'utf8');
         ambianceSounds = JSON.parse(ambianceSoundsData);
-        console.log('Music loaded successfully:', ambianceSounds);
+        console.log('Music loaded successfully');
     } catch (error) {
         console.error('Error loading ambianceSounds.json:', error);
         ambianceSounds = {}; // Fallback to empty map if there's an error
@@ -123,7 +123,7 @@ function loadSoundboard() {
     try {
         const soundboardData = fs.readFileSync(soundboardPath, 'utf8');
         soundboard = JSON.parse(soundboardData);
-        console.log('Music loaded successfully:', soundboard);
+        console.log('Music loaded successfully');
     } catch (error) {
         console.error('Error loading soundboard.json:', error);
         soundboard = {}; // Fallback to empty map if there's an error

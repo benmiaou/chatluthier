@@ -65,7 +65,6 @@ const soundBar = {
         const rect = progressBarContainer.getBoundingClientRect();
         const relativePosition = (positionX - rect.left) /  rect.width;
         const direction = relativePosition < 0.5? -this.PROGRESS : this.PROGRESS;
-        console.log(direction)
         startIncrementing(direction, progressBar, progressBarContainer);
     });
 

@@ -9,7 +9,6 @@ export const LocalDirectory = {
             this.directoryHandle = await window.showDirectoryPicker();
             // Store the directory handle in IndexedDB after obtaining it
             await set('directory', this.directoryHandle);
-            console.log('Directory handle stored in IndexedDB.');
             this.updateStatus("Directory is set and ready.", "green");
             AudioManager.loadLocalSoundFiles();
         } catch (error) {
