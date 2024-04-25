@@ -72,10 +72,13 @@ const AudioManager = {
         if (!Array.isArray(this.backgroundMusicArray)) {
           throw new Error("Input data is not an array.");
         }
+
+        this.context = subtypeSelector.value;
+
         if(this.context !== this.DEFAULT_CONTEXT)
         {
             return this.backgroundMusicArray.filter(sound => 
-            sound.types.includes(this.type) && sound.contexts.includes(this.context)
+                sound.types.includes(this.type) && sound.contexts.includes(this.context)
             );
         }
         else

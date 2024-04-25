@@ -145,5 +145,166 @@
       "types" :  ["intense"],
       "contexts": ["meadow"],
       "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1869276\">Dramatic Fantasy</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/536392/Metalos\">Metalos</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/536392/Metalos\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Kraken_Mare_I_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Kraken Mare I",
+      "types" : ["ambient"],
+      "contexts": ["battle"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1724477\">Kraken Mare I</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+    },
+    {
+      "filename" : "Convergence_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Convergence",
+      "types" : ["intense"],
+      "contexts": ["scary"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1848415\">Convergence</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Cave_of_Dreams_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Cave of Dreams",
+      "types" : ["ambient"],
+      "contexts": ["cave"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1905468\">Cave of Dreams</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Of_Honor_and_Glory_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Of Honor and Glory",
+      "types" : ["moderate", "intense"],
+      "contexts": ["epic"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1724409\">Of Honor and Glory</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Kraken_Awakening_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Kraken Awakening",
+      "types" : ["moderate"],
+      "contexts": ["mystery"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1724407\">Kraken Awakening</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "A_Cozy_Adventure_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "A Cozy Adventure",
+      "types" : ["ambient"],
+      "contexts": ["exterior"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1731972\">A Cozy Adventure</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Theater_of_War_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Theater of War",
+      "types" : ["moderate", "intense"],
+      "contexts": ["battle", "mystery"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1724400\">Theater of War</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "In_Memoriam_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "In Memoriam",
+      "types" : ["ambient"],
+      "contexts": ["mystery", "sadness"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1905469\">In Memoriam</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "World_Funeral_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "World Funeral",
+      "types" : ["moderate"],
+      "contexts": ["mystery", "sadness"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1905460\">World Funeral</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Crypt_of_Insomnia_-_Before_A_Journey.mp3",
+      "display_name" : "Before A Journey",
+      "types" : ["moderate"],
+      "contexts": ["ambient", "forest"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148631\">Before A Journey</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Crypt_of_Insomnia_-_At_The_Edge_of_Silence.mp3",
+      "display_name" : "At The Edge of Silence",
+      "types" : ["ambient", "moderate"],
+      "contexts": ["mystery"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148643\">At The Edge of Silence</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Crypt_of_Insomnia_-_Medieval_Tales.mp3",
+      "display_name" : "Medieval Tales",
+      "types" : ["ambient"],
+      "contexts": ["forest", "campfire", "night"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148645\">Medieval Tales</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Crypt_of_Insomnia_-_Pyres_on_the_Coast.mp3",
+      "display_name" : "Pyres on the Coast",
+      "types" : ["intense"],
+      "contexts": ["ambient", "campfire", "night"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148642\">Pyres on the Coast</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Pint_of_Beer_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Pint of Beer",
+      "types" : ["moderate", "intense"],
+      "contexts": ["tavern"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734038\">Pint of Beer</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Moon_at_the_Window_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Moon at the Window",
+      "types" : ["ambient"],
+      "contexts": ["tavern"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734057\">Moon at the Window</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "The_End_of_the_Journey_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "The End of the Journey",
+      "types" : ["ambient"],
+      "contexts": ["tavern"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734046\">The End of the Journey</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Night_Wanderer_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Night Wanderer",
+      "types" : ["ambient"],
+      "contexts": ["night"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1745858\">Night Wanderer</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Minstrels_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Minstrels",
+      "types" : ["ambient", "moderate"],
+      "contexts": ["tavern"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734041\">Minstrels</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Evening_in_a_Peaceful_Tavern_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Evening in a Peaceful Tavern",
+      "types" : ["ambient"],
+      "contexts": ["tavern"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734047\">Evening in a Peaceful Tavern</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Endless_Mountains_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Endless Mountains",
+      "types" : ["ambient"],
+      "contexts": ["exterior", "mystery", "night"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1743330\">Endless Mountains</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Congealed_Void_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Congealed Void",
+      "types" : ["moderate"],
+      "contexts": ["mystery"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1743328\">Congealed Void</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Circles_of_Harmony_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Circles of Harmony",
+      "types" : ["intense"],
+      "contexts": ["ambient", "mystery"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1743334\">Circles of Harmony</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+    },
+    {
+      "filename" : "Meadow_-_Crypt_of_Insomnia.mp3",
+      "display_name" : "Meadow",
+      "types" : ["ambient"],
+      "contexts": ["meadow"],
+      "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1745183\">Meadow</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
     }
   ]
