@@ -40,7 +40,7 @@ const AudioManager = {
         const existingOptions = new Set(Array.from(subtypeSelector.options).map(opt => opt.value));
         existingOptions.add(this.DEFAULT_CONTEXT);
         try {
-                const response = await fetch(`/backgoundMusic`);
+                const response = await fetch(`/backgroundMusic`);
                 this.backgroundMusicArray = await response.json();
                 this.backgroundMusicArray = this.shuffleArray(this.backgroundMusicArray)
                 for (let music of this.backgroundMusicArray) 
@@ -72,10 +72,13 @@ const AudioManager = {
         if (!Array.isArray(this.backgroundMusicArray)) {
           throw new Error("Input data is not an array.");
         }
+
+        this.context = subtypeSelector.value;
+
         if(this.context !== this.DEFAULT_CONTEXT)
         {
             return this.backgroundMusicArray.filter(sound => 
-            sound.types.includes(this.type) && sound.contexts.includes(this.context)
+                sound.types.includes(this.type) && sound.contexts.includes(this.context)
             );
         }
         else
@@ -90,8 +93,13 @@ const AudioManager = {
             this.soundIndex = 0;  // Reset index if it exceeds the array
         }
         const fileToPlay = this.filesToPlay[this.soundIndex++];
-        console.log( this.filesToPlay)
-        console.log(fileToPlay)
+        console.log( this.filesToPlay);
+        console.log(fileToPlay);
+
+        if (this.filesToPlay.length == 0) {
+            alert("No sounds found for this combination : " + this.type + " " + this.context);
+        }
+
         this.playSound(fileToPlay);
     },
 
