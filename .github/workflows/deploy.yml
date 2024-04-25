@@ -32,12 +32,7 @@ jobs:
       # Step 4: Copy the necessary files to the remote server
       - name: Copy files to remote server
         run: |
-          scp -v -r public ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com:/home/ec2-user/chatluthier
-          scp -v -r assets ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com:/home/ec2-user/chatluthier
-          scp -v server.js ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com:/home/ec2-user/chatluthier
-          scp -v backgroundCredits.json ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com:/home/ec2-user/chatluthier
-          scp -v package-lock.json ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com:/home/ec2-user/chatluthier
-          scp -v package.json ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com:/home/ec2-user/chatluthier
+          scp -v -r ./ ec2-user@ec2-13-60-6-122.eu-north-1.compute.amazonaws.com:/home/ec2-user/chatluthier
       # Step 5: Update server configuration and restart the service
       - name: Update server and restart
         run: |
