@@ -120,7 +120,7 @@
         }
         contextSelector.addEventListener('change', function() 
         {
-            AudioManager.setContext(this.value)
+            BackgroundMusic.setContext(this.value)
         });
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
