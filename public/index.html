@@ -118,6 +118,8 @@
         }
         subtypeSelector.addEventListener('change', function() 
         {
+            AudioManager.filesToPlay =  AudioManager.findSoundsByTypeAndContext();
+            AudioManager.activeBackgroundSound.source.stop();
             AudioManager.subType = this.value;
         });
         if ('serviceWorker' in navigator) {
