@@ -36,26 +36,42 @@ const BackgroundMusic = {
     
     async preloadBackgroundSounds() {
         const existingOptions = new Set(Array.from(contextSelector.options).map(opt => opt.value));
-        existingOptions.add(this.DEFAULT_CONTEXT);
+        const uniqueOptions = new Set(); // Set for unique options excluding "default"
+        
+        uniqueOptions.add(this.DEFAULT_CONTEXT);
+    
         try {
-                const response = await fetch(`/backgroundMusic`);
-                this.backgroundMusicArray = await response.json();
-                this.backgroundMusicArray = this.shuffleArray(this.backgroundMusicArray)
-                for (let music of this.backgroundMusicArray) 
-                {
-                    //Add option comboBox
-                    for (let subType of music.contexts) 
-                    {
-                        if (!existingOptions.has(subType)) 
-                        {
-                            this.addOptionTocontextSelector(subType);
-                            existingOptions.add(subType);
-                        }
+            const response = await fetch(`/backgroundMusic`);
+            this.backgroundMusicArray = await response.json();
+            this.backgroundMusicArray = this.shuffleArray(this.backgroundMusicArray);
+    
+            // Add new contexts to uniqueOptions
+            for (let music of this.backgroundMusicArray) {
+                for (let subType of music.contexts) {
+                    if (!existingOptions.has(subType) && !uniqueOptions.has(subType)) {
+                        uniqueOptions.add(subType);
                     }
                 }
-            } catch (e) {
-                console.error(`Error fetching files from server:`, e);
             }
+    
+            // Convert uniqueOptions to an array and sort alphabetically
+            let sortedOptions = Array.from(uniqueOptions).sort((a, b) => a.localeCompare(b));
+    
+            // Ensure "default" stays at the top
+            if (sortedOptions.includes(this.DEFAULT_CONTEXT)) {
+                sortedOptions = sortedOptions.filter(opt => opt !== this.DEFAULT_CONTEXT);
+                sortedOptions.unshift(this.DEFAULT_CONTEXT);
+            }
+    
+            // Clear the contextSelector and add sorted options
+            contextSelector.innerHTML = ""; // Clear existing options
+            for (let option of sortedOptions) {
+                this.addOptionTocontextSelector(option);
+            }
+    
+        } catch (e) {
+            console.error(`Error fetching files from server:`, e);
+        }
     },
 
     shuffleArray(array) {

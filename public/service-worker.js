@@ -1,15 +1,21 @@
-const CACHE_NAME = 'chat-luthier-cache-v8';
+const CACHE_NAME = 'chat-luthier-cache-v12';
 const urlsToCache = [
   '/',
   '/index.html',
   '/styles.css',
   '/soundBar.js',
   '/localDirectory.js',
-  '/audioManager.js',
+  '/ambianceSounds.js',
+  '/backgroundMusic.js',
+  '/login.js',
+  '/manifest.json',
+  '/modalWindow.js',
+  '/service-worker.js',
+  '/soundboard.js',
   '/offline.html',  
   'site.webmanifest'
 ];
-const assetsToCache = ['ambiance', 'background/battle/default', 'background/exploration/default', 'images/icons', 'images/favicons', 'soundboard'];
+const assetsToCache = ['ambiance', 'background', 'background', 'images/icons', 'images/favicons', 'images/backgrounds', 'soundboard'];
 
 // Function to fetch all files in a directory recursively
 async function fetchDirectoryFiles(directory) {
