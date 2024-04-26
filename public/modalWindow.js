@@ -7,10 +7,10 @@ const ModalUploadWindow = {
         
         backgroundSubtypeSelector.innerHTML = ''; // Clear existing options
         
-        for (let i = 0; i < subtypeSelector.options.length; i++) {
+        for (const element of subtypeSelector.options) {
             const option = document.createElement('option');
-            option.value = subtypeSelector.options[i].value;
-            option.textContent = subtypeSelector.options[i].textContent;
+            option.value = element.value;
+            option.textContent = element.textContent;
             backgroundSubtypeSelector.appendChild(option);
         }
 

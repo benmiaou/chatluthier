@@ -115,8 +115,8 @@ const BackgroundMusic = {
         this.activeBackgroundSound.analyser.getByteTimeDomainData(dataArray);
     
         let sum = 0;
-        for (let i = 0; i < dataArray.length; i++) {
-            const value = (dataArray[i] / 128) - 1;
+        for (const element of dataArray) {
+            const value = (element / 128) - 1;
             sum += value * value;
         }
         const rms = Math.sqrt(sum / dataArray.length);
@@ -142,9 +142,9 @@ const BackgroundMusic = {
 
     updateButton(typeName)
     {
-        result = this.backgroundMusicArray.filter(sound => 
+        let result = this.backgroundMusicArray.filter(sound => 
             sound.types.includes(typeName) && sound.contexts.includes(this.context))
-        button = document.getElementById(typeName+'Button'); 
+        let button = document.getElementById(typeName+'Button'); 
         if (result.length === 0) {
             button.disabled = true; // Disable the button if the array is empty
           } else {
@@ -285,7 +285,7 @@ const BackgroundMusic = {
 
     setBackgroundVolume(volume) {
         const gainValue = volume / 100;
-        if (this.activeBackgroundSound && this.activeBackgroundSound.gainNode) {
+        if (this.activeBackgroundSound?.gainNode) {
             this.activeBackgroundSound.gainNode.gain.value = gainValue;
         }
     },
