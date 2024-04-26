@@ -96,5 +96,15 @@
             "monster"
         ],
         "credit": "Sound Effect from <a href=\\\"https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=76283\\\">Pixabay</a>"
+    },
+    {
+        "filename": "247429-pitched-Just-Chains-pull-Hanging-Jingle-02.mp3",
+        "display_name": "Chains",
+        "imageFile": "chains.webp",
+        "contexts": [
+            "metal",
+            "dungeon"
+        ],
+        "credit": "soundsnap"
     }
 ]
