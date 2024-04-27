@@ -368,3 +368,39 @@ nav a {
     transform: translateX(-50%) rotate(90deg);
 }
 
+/* Styles for the dropdown menu */
+.menu-dropdown {
+    position: relative;  /* Relative positioning to the header */
+}
+
+.menu-button {
+    font-size: 24px;  /* Size of the menu button */
+    background: none;  /* No background color */
+    border: none;  /* No border */
+    cursor: pointer;  /* Change cursor to pointer */
+}
+
+.menu-content {
+    display: none;  /* Initially hidden */
+    position: absolute;  /* Absolute position relative to .menu-dropdown */
+    top: 40px;  /* Adjust top position */
+    right: 0;  /* Align to the right */
+    background: white;  /* Background color */
+    border: 1px solid #ccc;  /* Border around the menu */
+    padding: 10px;  /* Padding for spacing */
+    z-index: 10;  /* Ensure the menu appears on top */
+    transition: all 0.3s;  /* Smooth transition for animation */
+}
+
+.menu-content a, 
+.menu-content button {
+    display: block;  /* Make each item a block element */
+    padding: 8px 12px;  /* Padding for spacing */
+    text-decoration: none;  /* No text decoration for links */
+    color: black;  /* Text color */
+}
+
+.menu-content a:hover, 
+.menu-content button:hover {
+    background: #f1f1f1;  /* Change background on hover */
+}

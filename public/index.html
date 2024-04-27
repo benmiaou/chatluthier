@@ -18,6 +18,8 @@
     <script src="modalWindow.js" defer></script>
     <script   type="module">import { LocalDirectory } from './localDirectory.js';</script>
     <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="googleLogin.js"defer></script>
 </head>
 <body>
     <header>
@@ -26,7 +28,12 @@
                 <img src="assets/images/favicons/MainLogo.webp" alt="Le Chat Luthier Logo" class="logo">
                 <h1>Le Chat Luthier</h1>
             </div>
-            <button  style="display: none" id="google-login-button">Login with Google</button>
+            <div class="menu-dropdown">
+                <button class="menu-button" onclick="toggleMenu()">☰</button>  <!-- The button to toggle the menu -->
+                <div class="menu-content" id="menu-content">  <!-- Hidden menu content -->
+                    <button id="google-login-button">Login with Google</button> 
+                </div>
+            </div>
 
         </div>
     </header>
@@ -63,13 +70,27 @@
         </section>
     </main>
 
-    <script src="https://www.gstatic.com/firebasejs/9.19.0/firebase-app.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.19.0/firebase-auth.js" type="module"></script>
-    <script src="login.js" type="module" defer></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        GoogleLogin.initGoogleIdentityServices();  // Initialize Google Identity Services
+        GoogleLogin.updateLoginButton();  // Ensure the button reflects the correct state
+    });
+
+    function toggleMenu() {
+        var menu = document.getElementById("menu-content");
+        if (menu.style.display === "none" || menu.style.display === "") {
+            menu.style.display = "block";  // Show the menu
+        } else {
+            menu.style.display = "none";  // Hide the menu
+        }
+    }
+    </script>
+
+
     <script  type="module">
-        
         contextSelector.addEventListener('change', function() 
         {
+
             BackgroundMusic.setContext(this.value)
         });
         if ('serviceWorker' in navigator) {
