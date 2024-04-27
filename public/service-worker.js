@@ -41,11 +41,8 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request).then((response) => {
             if (response) {
-                console.log('Fetching from cache');
                 return response; // Return cached content if available
             }
-
-            console.log('Fetching from server');
             // Fetch from network and cache it
             return fetch(event.request).then((fetchedResponse) => {
                 if (fetchedResponse.ok) {
