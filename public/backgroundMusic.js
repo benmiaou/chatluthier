@@ -140,6 +140,11 @@ const BackgroundMusic = {
         }
     },
 
+    // Function to capitalize the first letter of a string
+    capitalizeFirstLetter(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1); // Capitalize first letter, keep rest unchanged
+    },
+
     updateButton(typeName)
     {
         let result = this.backgroundMusicArray.filter(sound => 
@@ -147,8 +152,10 @@ const BackgroundMusic = {
         let button = document.getElementById(typeName+'Button'); 
         if (result.length === 0) {
             button.disabled = true; // Disable the button if the array is empty
+            button.textContent  = "Play " + this.capitalizeFirstLetter(typeName) + " (0)"
           } else {
             button.disabled = false; // Enable the button if the array is not empty
+            button.textContent  = "Play " + this.capitalizeFirstLetter(typeName) + " ("+result.length+")"
           }
     },
 

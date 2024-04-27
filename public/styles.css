@@ -203,7 +203,7 @@ nav a {
 .section {
     padding: 20px;
     display: grid; /* Change display to grid */
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Set columns to auto-fill with a minimum width of 200px */
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); /* Set columns to auto-fill with a minimum width of 200px */
     grid-auto-rows: minmax(50px, auto); /* Set rows to automatically adjust height */
     gap: 20px; /* Add gap between grid items */
     align-items: center;
