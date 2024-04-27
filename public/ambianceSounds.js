@@ -2,6 +2,7 @@ const AmbianceSounds = {
 
     currentAmbiances: {},
     audioContext : null,
+    ambianceSounds : null, 
 
     getAudioContext() {
         if (!this.audioContext) {
@@ -13,8 +14,8 @@ const AmbianceSounds = {
     async loadAmbianceButtons()
     {
         const response = await fetch(`/ambianceSounds`);
-        let ambianceSounds = await response.json();
-        this.generateAmbientButtons(ambianceSounds)
+        this.ambianceSounds = await response.json();
+        this.generateAmbientButtons(this.ambianceSounds)
     },
 
     generateAmbientButtons(ambianceSounds) {

@@ -2,6 +2,7 @@ const Soundboard = {
     soundboardList: {},
     audioContext : null,
     currentvolume : 0.5,
+    soundboardItems : null,
 
     getAudioContext() 
     {
@@ -14,8 +15,8 @@ const Soundboard = {
     async loadSoundboardButtons()
     {
         const response = await fetch(`/soundboard`);
-        soundboardItems = await response.json();
-        this.generateSoundboardButtons(soundboardItems)
+        this.soundboardItems = await response.json();
+        this.generateSoundboardButtons(this.soundboardItems)
     },
 
     generateSoundboardButtons(soundboardItems) 

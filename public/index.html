@@ -16,6 +16,8 @@
     <script src="ambianceSounds.js" defer></script>
     <script src="soundboard.js" defer></script>
     <script src="modalWindow.js" defer></script>
+    <script src="modalCredits.js" defer></script>
+    <script src="credits.js" defer></script>
     <script   type="module">import { LocalDirectory } from './localDirectory.js';</script>
     <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
@@ -31,7 +33,8 @@
             <div class="menu-dropdown">
                 <button class="menu-button" onclick="toggleMenu()">☰</button>  <!-- The button to toggle the menu -->
                 <div class="menu-content" id="menu-content">  <!-- Hidden menu content -->
-                    <button id="google-login-button">Login with Google</button> 
+                    <!-- <button id="google-login-button">Login with Google</button> -->
+                    <button onclick="showAllCredits();  toggleMenu()">Show All Credits</button> <!-- New button to show all credits -->
                 </div>
             </div>
 
@@ -39,6 +42,31 @@
     </header>
 
     <main>
+        <!-- Modal for displaying credit information -->
+        <div id="credit-modal-template" class="credit-modal-template" style="display: none;">
+            <div class="credit-content">
+                <span class="close-btn" onclick="closeModal(this)">&times;</span> <!-- Close button -->
+                <div class="credit-details"></div> <!-- Placeholder for credit information -->
+            </div>
+        </div>
+
+            <!-- Modal ALL credits -->
+
+        <div id="all-credits-display" class="all-credits-modal" tabindex="-1"> <!-- tabindex enables focus -->
+            <div class="modal-header">
+                <h2>Credits</h2>
+                <span class="close-btn" onclick="closeAllCreditsModal()">&times;</span>
+            </div>
+            <div class="modal-body credits-details">
+                <!-- Credits content will be inserted here -->
+            </div>
+        </div>
+        
+
+        </div>
+        <div id="credits-section">
+            <!-- This is where the credits will be displayed -->
+        </div>
         <!-- Background Music Section -->
         <h2>Background 
             <input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="BackgroundMusic.setBackgroundVolume(this.value)">
@@ -55,6 +83,7 @@
         
         <!-- Ambiance Sounds Section -->
         <h2>Ambiance Sounds</h2>
+        <section id="ambiance-Credit">---</section>
         <section id="ambiance" class="section">
         </section>
         <section id="ambianceLocal" class="section">

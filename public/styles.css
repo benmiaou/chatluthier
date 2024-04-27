@@ -259,6 +259,24 @@ nav a {
     width: 80%;
 }
 
+.sound-bar-licence {
+    position: absolute;
+    left: 50%; /* Position the left edge of the text at the center of the container */
+    bottom: 10px; /* Keep it at the bottom with a small gap */
+    transform: translateX(-50%); /* Center horizontally */
+    z-index: 0; /* Keep the text under the bar */
+    text-align: center; /* Align text in the middle */
+
+    padding: 1px 1px; /* Reduced padding to make it smaller */
+    color: black;
+    background-color: rgba(255, 255, 255, 0.7);
+
+    overflow: hidden; /* Ensure the text doesn't overflow */
+    width: 40%; 
+    height: 15px; 
+    font-size: 10px;
+}
+
 .icon {
     position: absolute;
     top: 25%; /* Adjust top positioning to center vertically */
@@ -404,4 +422,39 @@ nav a {
 .menu-content a:hover, 
 .menu-content button:hover {
     background: #f1f1f1;  /* Change background on hover */
+}
+
+.credit-modal-template {
+    position: fixed;
+    top: 10px; /* Position it at the top of the screen */
+    right: 10px; /* Align it to the right */
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
+    color: white;
+    padding: 10px; /* Add some padding */
+    z-index: 1000; /* Ensure it's on top of other elements */
+    display: none; /* Initially hidden */
+    border-radius: 5px;
+  }
+  
+  .credit-content {
+    text-align: left; /* Align text to the left */
+  }
+  
+  .close-btn {
+    float: right; /* Place the close button in the top-right corner */
+    font-size: 20px; /* Increase font size for visibility */
+    cursor: pointer; /* Indicate that it's clickable */
+  }
+
+  .all-credits-modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    background-color:  #222;
+    overflow-y: auto; /* Enables vertical scrolling */
+    z-index: 1000; /* Ensures it appears above other elements */
 }

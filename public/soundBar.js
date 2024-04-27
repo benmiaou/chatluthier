@@ -6,42 +6,58 @@ const soundBar = {
   stepSize: 10, // Step size as a percentage
   lastInvocation: 0, // Time of the last function call
   moved : false,
+  licenseRegex : /<a[^>]*href="https:\/\/creativecommons\.org\/[^>]*>([^<]*)<\/a>/i,
   
   // Function to initialize touch events
-initializeTouchEvents(element) {
-    // Touchstart event to simulate hover on touch devices
-    element.addEventListener('touchstart', () => {
-        element.classList.add('touch-hover'); // Apply hover class on touch
-    });
+    initializeTouchEvents(element) {
+        // Touchstart event to simulate hover on touch devices
+        element.addEventListener('touchstart', () => {
+            element.classList.add('touch-hover'); // Apply hover class on touch
+        });
 
-    // Touchend to reset the effect
-    element.addEventListener('touchend', () => {
-        setTimeout(() => {
-            element.classList.remove('touch-hover'); // Remove hover class after touch ends
-        }, 300); // Match the transition duration
-    });
-},
+        // Touchend to reset the effect
+        element.addEventListener('touchend', () => {
+            setTimeout(() => {
+                element.classList.remove('touch-hover'); // Remove hover class after touch ends
+            }, 300); // Match the transition duration
+        });
+    },
 
-  createProgressBar: function (ambianceSounds) {
+    // Function to extract the license type
+    extractLicense:  function  (html) 
+    {
+        const match = html.match(this.licenseRegex);
+        return match ? match[1] : "";
+    },
+
+  createProgressBar: function (ambianceSound) {
     const progressBarContainer = document.createElement('div');
     progressBarContainer.className = 'progress-bar-container';
-    progressBarContainer.setAttribute('style', 'background-image: url(assets/images/backgrounds/'+ambianceSounds.imageFile+')');
+    progressBarContainer.setAttribute('style', 'background-image: url(assets/images/backgrounds/'+ambianceSound.imageFile+')');
     progressBarContainer.draggable = false;
 
     const progressBar = document.createElement('div');
     progressBar.className = 'progress-bar';
-    progressBar.id = 'progress-bar-' + ambianceSounds.filename;
+    progressBar.id = 'progress-bar-' + ambianceSound.filename;
     progressBar.draggable = false;
     progressBarContainer.appendChild(progressBar);
 
+    let licence = this.extractLicense(ambianceSound.credit);
     // Add text inside the sound bar
     const soundBarText = document.createElement('div');
-    soundBarText.textContent =ambianceSounds.display_name;
+    soundBarText.textContent =ambianceSound.display_name;
     soundBarText.className = 'sound-bar-text';
     soundBarText.draggable = false; // Disable dragging for the text
 
+    // Add text inside the sound bar
+    const soundLicence = document.createElement('div');
+    soundLicence.textContent =licence;
+    soundLicence.className = 'sound-bar-licence';
+    soundLicence.draggable = false; // Disable dragging for the text
+
     const progressBarVolumeMinus = document.createElement('div');
     progressBarVolumeMinus.className = 'progress-bar-volume minus';
+
 
     const progressBarVolumePlus = document.createElement('div');
     progressBarVolumePlus.className = 'progress-bar-volume plus';
@@ -60,13 +76,13 @@ initializeTouchEvents(element) {
     progressBarContainer.appendChild(progressBarVolumePlus);
 
     progressBarContainer.appendChild(soundBarText);
+    if(licence !== "") progressBarContainer.appendChild(soundLicence);
       
-    this.initializeDraggableProgressBar(progressBarContainer ,progressBar);
-
+    this.initializeDraggableProgressBar(progressBarContainer ,progressBar, ambianceSound);
     return progressBarContainer;
   },
 
-  initializeDraggableProgressBar: function (progressBarContainer, progressBar) {
+  initializeDraggableProgressBar: function (progressBarContainer, progressBar, ambianceSound) {
     const getPositionX = (event) => {
         return event.touches ? event.touches[0].clientX : event.clientX;
     };
@@ -78,6 +94,7 @@ initializeTouchEvents(element) {
         intervalId = setInterval(() => {
             this.adjustProgress(direction, progressBar, progressBarContainer);
         }, 100); // Increment every 100ms
+        createModal(ambianceSound.credit); 
     };
 
     const stopIncrementing = () => {
