@@ -121,21 +121,30 @@
 
             BackgroundMusic.setContext(this.value)
         });
-        if ('serviceWorker' in navigator && false) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                .then(registration => {
-                    console.log('Service Worker registered');
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistration()
+            .then((registration) => {
+                if (!registration) {
+                    // If no Service Worker is registered, register a new one
+                    navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered:', registration.scope);
+                        // Reload only if this is the first time the Service Worker is being registered
+                        window.location.reload();
+                    })
+                    .catch((err) => {
+                        console.error('Service Worker registration failed:', err);
+                    });
+                } else {
+                    console.log('Service Worker already registered:', registration.scope);
+                    // If the Service Worker is already registered, fetch sound data
                     fetchSoundData();
-
-                }).catch(err => {
-                    console.log('Service Worker registration failed:', err);
-                    fetchSoundData();
-                });
+                }
             });
         } else {
-            fetchSoundData();
+            fetchSoundData(); // If Service Workers are not supported, continue as usual
         }
+
 
         // Function to generate buttons dynamically based on sound files
         async function fetchSoundData() {

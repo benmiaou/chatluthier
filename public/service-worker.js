@@ -1,138 +1,105 @@
-const CACHE_NAME = 'chat-luthier-cache-v12';
+// service-worker.js - Service Worker script
+const CACHE_NAME = 'site-cache-v1'; // Unique cache name with version
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/soundBar.js',
-  '/localDirectory.js',
-  '/ambianceSounds.js',
-  '/backgroundMusic.js',
-  '/googleLogin.js',
-  '/manifest.json',
-  '/modalWindow.js',
-  '/service-worker.js',
-  '/soundboard.js',
-  '/offline.html',  
-  'site.webmanifest'
+    '/', // Root
+    '/index.html', // Main HTML
+    '/styles.css', // CSS file
+    '/ambianceSounds.js', // JavaScript files
+    '/backgroundMusic.js',
+    '/credits.js',
+    '/googleLogin.js',
+    '/localDirectory.js',
+    '/modalCredits.js',
+    '/modalWindow.js',
+    '/offline.html', // Fallback page
+    '/service-worker.js', // Service Worker script
+    '/site.webmanifest', // Web app manifest
+    '/soundBar.js',
+    '/soundboard.js',
 ];
-const assetsToCache = ['ambiance', 'background', 'background', 'images/icons', 'images/favicons', 'images/backgrounds', 'soundboard'];
 
-// Function to fetch all files in a directory recursively
-async function fetchDirectoryFiles(directory) {
-  const encodedDirectory = encodeURIComponent(directory);
-  const response = await fetch(`http://127.0.0.1:3000/list-files/${encodedDirectory}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch directory: ${directory} with status: ${response.status}`);
-  }
-  const data = await response.json();
-  return data.map(file => `/${directory}/${file}`);
-}
+// List of MP3 files to cache
+const mp3Files = [
+    '/sounds/sound1.mp3',
+    '/sounds/sound2.mp3',
+    '/sounds/sound3.mp3',
+];
 
-self.addEventListener('install', event => {
-    console.log('Service Worker installing.');
-    // Function to fetch and cache a single file
-    async function cacheFile(cache, url) {
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch ${url}, status: ${response.status}`);
-            }
-            await cache.put(url, response);
-        } catch (error) {
-            console.error(`Caching ${url} failed:`, error);
-            throw error; // Re-throw to ensure we can catch it in the outer block
-        }
-    }
 
-    // Function to fetch all files in a directory recursively and cache them
-    async function cacheDirectoryFiles(cache, directory) {
-        const encodedDirectory = encodeURIComponent(directory);
-        try {
-            const response = await fetch(`http://127.0.0.1:3000/list-files/${encodedDirectory}`);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch directory: ${directory} with status: ${response.status}`);
-            }
-            const files = await response.json();
-            const urls = files.map(file => `../assets/${directory}/${file}`);
-            for (const url of urls) {
-                await cacheFile(cache, url); // Cache each file individually
-            }
-        } catch (error) {
-            console.error(`Error caching directory ${directory}:`, error);
-        }
-    }
-
-    // Wait for all assets to be cached
+// Install the Service Worker and cache the specified files
+self.addEventListener('install', (event) => {
     event.waitUntil(
-        (async () => {
-            const cache = await caches.open(CACHE_NAME);
-            // Start by caching static assets individually
-            for (const url of urlsToCache) {
-                await cacheFile(cache, url);
-            }
-            // Then cache assets from directories
-            for (const directory of assetsToCache) {
-                await cacheDirectoryFiles(cache, directory);
-            }
-        })()
+        caches.open(CACHE_NAME).then((cache) => {
+            console.log('Opened cache');
+            return cache.addAll(urlsToCache); // Cache all specified files
+        })
     );
 });
 
-self.addEventListener('fetch', event => {
-  if (event.request.url.includes('/list-sounds/')) {
-      event.respondWith(
-          fetch(event.request)
-          .then(response => {
-              // Check if we received a valid response
-              if (!response || response.status !== 200 || response.type !== 'basic') {
-                  return response;
-              }
+// Handle fetch events to serve cached content or fetch from network
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        caches.match(event.request).then((response) => {
+            if (response) {
+                console.log('Fetching from cache');
+                return response; // Return cached content if available
+            }
 
-              const responseToCache = response.clone();
-              caches.open(CACHE_NAME)
-                  .then(cache => {
-                      cache.put(event.request, responseToCache);
-                  });
+            console.log('Fetching from server');
+            // Fetch from network and cache it
+            return fetch(event.request).then((fetchedResponse) => {
+                if (fetchedResponse.ok) {
+                    const responseClone = fetchedResponse.clone(); // Clone before using
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseClone); // Cache the cloned response
+                    });
 
-              return response;
-          })
-          .catch(() => {
-              return caches.match(event.request)
-                  .then(response => {
-                      return response || new Response(JSON.stringify([]), {
-                          headers: { 'Content-Type': 'application/json' }
-                      });
-                  });
-          })
-      );
-  } else {
-      // handle other fetches as previously
-      event.respondWith(
-          caches.match(event.request)
-          .then(cachedResponse => {
-              return cachedResponse || fetch(event.request);
-          })
-      );
-  }
+                    return fetchedResponse; // Return the fetched response to the client
+                }
+                throw new Error('Network response not okay'); // Handle failed fetch
+            });
+        })
+    );
+});
+// Handle activation by cleaning up old caches
+self.addEventListener('activate', (event) => {
+    const cacheWhitelist = [CACHE_NAME]; // Only keep the current cache
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cacheName) => {
+                    if (!cacheWhitelist.includes(cacheName)) {
+                        return caches.delete(cacheName); // Delete old caches
+                    }
+                    return null;
+                })
+            );
+        })
+    );
 });
 
-self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];  // CACHE_NAME should be the name of the current cache version.
-  console.log('Service Worker activating.');
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            console.log(`Deleting old cache: ${cacheName}`);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
-      console.log('Activate event: old caches are cleared.');
-      // Ensure the updated service worker takes control of all clients.
-      return self.clients.claim();
-    })
-  );
+self.addEventListener('message', (event) => {
+    if (event.data.action === 'cacheAllMp3') {
+        event.waitUntil(
+            fetch('/mp3-list').then((response) => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch MP3 list');
+                }
+                return response.json();
+            }).then((mp3Files) => {
+                return caches.open(CACHE_NAME).then((cache) => {
+                    return Promise.all(
+                        mp3Files.map((file) => {
+                            return fetch(file).then((fetchedResponse) => {
+                                if (fetchedResponse.ok) {
+                                    cache.put(file, fetchedResponse.clone());
+                                }
+                                return fetchedResponse;
+                            });
+                        })
+                    );
+                });
+            })
+        );
+    }
 });

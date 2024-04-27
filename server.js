@@ -54,6 +54,29 @@ app.get('/list-files/:type', (req, res) => {
     });
 });
 
+// List of directories to scan for MP3 files
+const soundDirectories = [
+    path.join(__dirname, 'assets/ambiance'),
+    path.join(__dirname, 'assets/background'),
+    path.join(__dirname, 'assets/soundboard'),
+];
+app.get('/mp3-list', async (req, res) => {
+    try {
+        // Collect MP3 files from all directories
+        const allMp3Files = await Promise.all(
+            soundDirectories.map((dir) => getMp3FilesFromDirectory(dir))
+        );
+
+        // Flatten the arrays from each directory into one list
+        const mp3Files = allMp3Files.flat();
+        
+        res.json(mp3Files); // Return the complete list of MP3 files
+    } catch (error) {
+        res.status(500).send('Error retrieving MP3 files');
+    }
+});
+
+
 app.post('/login', async (req, res) => {
     try {
       const { idToken } = req.body; // Get the ID token from the client
