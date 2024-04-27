@@ -40,6 +40,7 @@ const Soundboard = {
 
     toggleSoundboardSound(soundboardItem, loop, button)
     {
+        createModal(soundboardItem.credit); 
         let sound = this.soundboardList[soundboardItem];
         this.createSound(soundboardItem, loop, button);
     },
