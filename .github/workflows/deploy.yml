@@ -36,7 +36,7 @@ jobs:
       - name: Get the current Git SHA
         id: git_sha
         run: |
-          SHA=$(git rev-parse --short HEAD) # Get the short Git SHA
+          SHA=$(ssh -i chatluthier.pem ec2-user@chatluthier.org "git rev-parse --short HEAD") # Get the short Git SHA
           echo "::set-output name=sha::$SHA" # Store it for later use
       - name: Update the Service Worker cache name
         run: |
