@@ -96,5 +96,46 @@
             "monster"
         ],
         "credit": "Sound Effect from <a href=\\\"https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=76283\\\">Pixabay</a>"
+    },
+    {
+        "filename": "247429-pitched-Just-Chains-pull-Hanging-Jingle-02.mp3",
+        "display_name": "Chains",
+        "imageFile": "chains.webp",
+        "contexts": [
+            "metal",
+            "dungeon"
+        ],
+        "credit": "soundsnap"
+    },
+    {
+        "filename": "crow-64028.mp3",
+        "display_name": "Crows",
+        "imageFile": "crows.webp",
+        "contexts": [
+            "animal",
+            "nature"
+        ],
+        "credit": "Sound Effect from <a href=\"https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=64028\">Pixabay</a>"
+    },
+    {
+        "filename": "386121__ldezem__anvil-lokomo-a-100-kg-forging-extremely-hot-steel-4-times.mp3",
+        "display_name": "Forging",
+        "imageFile": "forge.webp",
+        "contexts": [
+            "metal",
+            "work",
+            "city"
+        ],
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/ldezem/sounds/386121\">Anvil - Lokomo A 100 kg - Forging extremely hot steel 4 times</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/ldezem\">ldezem</a> is marked with <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/publicdomain/zero/1.0/?ref=openverse\">CC0 1.0</a>.</p>"
+    },
+    {
+        "filename": "620324__marb7e__campfire-crackling-loop.mp3",
+        "display_name": "Campfire",
+        "imageFile": "campfire.webp",
+        "contexts": [
+            "outdoor",
+            "camp"
+        ],
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/marb7e/sounds/620324\">Campfire crackling - Loop</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/marb7e\">marb7e</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by/4.0/?ref=openverse\">CC BY 4.0</a>.</p>"
     }
 ]
