@@ -77,12 +77,12 @@ const soundBar = {
 
     progressBarContainer.appendChild(soundBarText);
     if(licence !== "") progressBarContainer.appendChild(soundLicence);
-      
-    this.initializeDraggableProgressBar(progressBarContainer ,progressBar, ambianceSound);
+    var credit = ambianceSound.display_name + " : " + ambianceSound.credit;
+    this.initializeDraggableProgressBar(progressBarContainer ,progressBar, credit);
     return progressBarContainer;
   },
 
-  initializeDraggableProgressBar: function (progressBarContainer, progressBar, ambianceSound) {
+  initializeDraggableProgressBar: function (progressBarContainer, progressBar, credit) {
     const getPositionX = (event) => {
         return event.touches ? event.touches[0].clientX : event.clientX;
     };
@@ -94,7 +94,7 @@ const soundBar = {
         intervalId = setInterval(() => {
             this.adjustProgress(direction, progressBar, progressBarContainer);
         }, 100); // Increment every 100ms
-        createModal(ambianceSound.credit); 
+        createModal(credit); 
     };
 
     const stopIncrementing = () => {

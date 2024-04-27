@@ -14,11 +14,13 @@ function createModal(creditText) {
     // Create a new modal from the template
     const newModal = modalTemplate.cloneNode(true);
     newModal.style.display = "block"; // Display the modal
-    newModal.id = "modal-" + creditText.replace(/\s+/g, '-'); // Create a unique ID based on credit text
+   
 
     // Set the credit text
     const creditDetails = newModal.querySelector(".credit-details");
     creditDetails.innerHTML = creditText;
+    creditText = creditDetails.innerHTML;
+    newModal.id = "modal-" + creditText.replace(/\s+/g, '-'); // Create a unique ID based on credit text
 
     // Position the new modal with a top offset
     const numOfActiveModals = Object.keys(activeModals).length;
