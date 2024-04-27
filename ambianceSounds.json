@@ -137,5 +137,44 @@
             "camp"
         ],
         "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/marb7e/sounds/620324\">Campfire crackling - Loop</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/marb7e\">marb7e</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by/4.0/?ref=openverse\">CC BY 4.0</a>.</p>"
+    },
+    {
+        "filename": "178856__xserra__foot-steps-wood-floor.mp3",
+        "display_name": "Steps on wood",
+        "imageFile": "steps_wood.webp",
+        "contexts": [
+            "wood",
+            "people"
+        ],
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/xserra/sounds/178856\">foot-steps-wood-floor.wav</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/xserra\">xserra</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by/4.0/?ref=openverse\">CC BY 4.0</a>.</p>"
+    },
+    {
+        "filename": "367594__cameronwb__squeaky-windmill.mp3",
+        "display_name": "Squeaky Windmill",
+        "imageFile": "windmill.webp",
+        "contexts": [
+            "scary"
+        ],
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/CameronWB/sounds/367594\">Squeaky Windmill</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/CameronWB\">CameronWB</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0/?ref=openverse\">CC BY-NC 3.0</a>.</p>"
+    },
+    {
+        "filename": "448127__derjuli__a-small-river.mp3",
+        "display_name": "Small river",
+        "imageFile": "river.webp",
+        "contexts": [
+            "water",
+            "nature"
+        ],
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/derjuli/sounds/448127\">A Small river</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/derjuli\">derjuli</a> is marked with <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/publicdomain/zero/1.0/?ref=openverse\">CC0 1.0</a>.</p>"
+    },
+    {
+        "filename": "16726__sverga__birds-in-spring.mp3",
+        "display_name": "Birds",
+        "imageFile": "birds.webp",
+        "contexts": [
+            "animal",
+            "nature"
+        ],
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/sverga/sounds/16726\">birds-in-spring.aif</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/sverga\">sverga</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by/3.0/?ref=openverse\">CC BY 3.0</a>.</p>"
     }
 ]
