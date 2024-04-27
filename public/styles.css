@@ -319,7 +319,8 @@ nav a {
 
     background-color: rgba(100,100,100,0.6);
 }
-.progress-bar-volume:hover {
+.progress-bar-volume:hover,
+.progress-bar-volume.touch-hover {
     opacity: 1;
     transition: opacity 300ms;
 }

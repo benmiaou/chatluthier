@@ -104,9 +104,6 @@ const BackgroundMusic = {
             this.soundIndex = 0;  // Reset index if it exceeds the array
         }
         const fileToPlay = this.filesToPlay[this.soundIndex++];
-        if (this.filesToPlay.length == 0) {
-            alert("No sounds found for this combination : " + this.type + " " + this.context);
-        }
         this.playSound(fileToPlay);
     },
 
@@ -221,9 +218,11 @@ const BackgroundMusic = {
                     };
     
                     this.activeBackgroundSound = { source, gainNode, analyser }; // Store active sound
+                    this.isPlayBackgroundAllowed = true; // Allow playing again
                    // updateGain(); //WIP
                 })
-                .catch(e => console.error('Error decoding audio data:', e));
+               // Allow playing again
+                .catch(e => {console.error('Error decoding audio data:', e);  this.isPlayBackgroundAllowed = true; });
         };
     
         // Determine if it's a file handle or URL
@@ -231,14 +230,14 @@ const BackgroundMusic = {
             fileOrHandle.getFile()
                 .then(file => file.arrayBuffer())
                 .then(arrayBuffer => processAudioBuffer(arrayBuffer))
-                .catch(e => console.error('Error reading local file:', e));
+                .catch(e => {console.error('Error reading local file:', e);  this.isPlayBackgroundAllowed = true; });
         } else {
             const creditTitle = document.getElementById('background-music-Credit'); 
             creditTitle.innerHTML  = fileOrHandle.credit;
             fetch("assets/background/" + fileOrHandle.filename)
                 .then(response => response.arrayBuffer())
                 .then(arrayBuffer => processAudioBuffer(arrayBuffer))
-                .catch(e => console.error('Error fetching audio data:', e));
+                .catch(e => {console.error('Error fetching audio data:', e);  this.isPlayBackgroundAllowed = true; });
         }
     },
 
@@ -265,9 +264,6 @@ const BackgroundMusic = {
         }
          // Disable play to prevent rapid clicks
          this.isPlayBackgroundAllowed = false;
-         setTimeout(() => {
-             this.isPlayBackgroundAllowed = true; // Allow play after 1 second
-         }, 1000); // 1-second delay
 
         const creditTitle = document.getElementById('background-music-Credit'); 
         creditTitle.innerHTML  = "---";
@@ -278,12 +274,19 @@ const BackgroundMusic = {
             this.activeBackgroundSound = null;
             this.backgroundButton.classList.remove('button-play');
             this.backgroundButton.classList.add('button-stop');
-            if (type === this.type) return;
+            if (type === this.type) 
+            {
+                this.isPlayBackgroundAllowed = true; // Allow playing again
+                return;
+            }
         }
         this.type = type;
         this.filesToPlay =  this.findSoundsByTypeAndContext();
         if(this.filesToPlay.length == 0)
+         {
+            this.isPlayBackgroundAllowed = true; // Allow playing again
             return;
+         }
         this.backgroundButton = button;
         button.classList.add('button-play');
         button.classList.remove('button-stop');

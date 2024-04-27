@@ -7,7 +7,7 @@ const urlsToCache = [
   '/localDirectory.js',
   '/ambianceSounds.js',
   '/backgroundMusic.js',
-  '/login.js',
+  '/googleLogin.js',
   '/manifest.json',
   '/modalWindow.js',
   '/service-worker.js',

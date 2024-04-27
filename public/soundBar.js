@@ -7,6 +7,21 @@ const soundBar = {
   lastInvocation: 0, // Time of the last function call
   moved : false,
   
+  // Function to initialize touch events
+initializeTouchEvents(element) {
+    // Touchstart event to simulate hover on touch devices
+    element.addEventListener('touchstart', () => {
+        element.classList.add('touch-hover'); // Apply hover class on touch
+    });
+
+    // Touchend to reset the effect
+    element.addEventListener('touchend', () => {
+        setTimeout(() => {
+            element.classList.remove('touch-hover'); // Remove hover class after touch ends
+        }, 300); // Match the transition duration
+    });
+},
+
   createProgressBar: function (ambianceSounds) {
     const progressBarContainer = document.createElement('div');
     progressBarContainer.className = 'progress-bar-container';
@@ -30,6 +45,16 @@ const soundBar = {
 
     const progressBarVolumePlus = document.createElement('div');
     progressBarVolumePlus.className = 'progress-bar-volume plus';
+
+       // Touchstart event to simulate hover on touch devices
+       progressBarVolumeMinus.addEventListener('touchstart', () => {
+        progressBarVolumeMinus.classList.add('touch-hover'); // Apply hover class on touch
+    });
+
+    // Use the common function to initialize touch events
+    this.initializeTouchEvents(progressBarVolumeMinus);
+    this.initializeTouchEvents(progressBarVolumePlus);
+
 
     progressBarContainer.appendChild(progressBarVolumeMinus);
     progressBarContainer.appendChild(progressBarVolumePlus);
