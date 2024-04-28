@@ -33,42 +33,51 @@ const BackgroundMusic = {
         option.textContent = subType;
         contextSelector.appendChild(option);
     },
-    
-    async preloadBackgroundSounds() {
-        const existingOptions = new Set(Array.from(contextSelector.options).map(opt => opt.value));
+
+    updatecontexts()
+    {
         const uniqueOptions = new Set(); // Set for unique options excluding "default"
-        
         uniqueOptions.add(this.DEFAULT_CONTEXT);
-    
-        try {
-            const response = await fetch(`/backgroundMusic`);
-            this.backgroundMusicArray = await response.json();
-            this.backgroundMusicArray = this.shuffleArray(this.backgroundMusicArray);
-    
-            // Add new contexts to uniqueOptions
-            for (let music of this.backgroundMusicArray) {
-                for (let subType of music.contexts) {
-                    if (!existingOptions.has(subType) && !uniqueOptions.has(subType)) {
-                        uniqueOptions.add(subType);
-                    }
+        // Add new contexts to uniqueOptions
+        for (let music of this.backgroundMusicArray) {
+            for (let subType of music.contexts) {
+                if (!uniqueOptions.has(subType)) {
+                    uniqueOptions.add(subType);
                 }
             }
+        }
+
+        // Convert uniqueOptions to an array and sort alphabetically
+        let sortedOptions = Array.from(uniqueOptions).sort((a, b) => a.localeCompare(b));
+
+        // Ensure "default" stays at the top
+        if (sortedOptions.includes(this.DEFAULT_CONTEXT)) {
+            sortedOptions = sortedOptions.filter(opt => opt !== this.DEFAULT_CONTEXT);
+            sortedOptions.unshift(this.DEFAULT_CONTEXT);
+        }
+
+        // Clear the contextSelector and add sorted options
+        contextSelector.innerHTML = ""; // Clear existing options
+        for (let option of sortedOptions) {
+            this.addOptionTocontextSelector(option);
+        }
+    },
     
-            // Convert uniqueOptions to an array and sort alphabetically
-            let sortedOptions = Array.from(uniqueOptions).sort((a, b) => a.localeCompare(b));
-    
-            // Ensure "default" stays at the top
-            if (sortedOptions.includes(this.DEFAULT_CONTEXT)) {
-                sortedOptions = sortedOptions.filter(opt => opt !== this.DEFAULT_CONTEXT);
-                sortedOptions.unshift(this.DEFAULT_CONTEXT);
+    async preloadBackgroundSounds() {
+
+        try {
+            let response;
+            if (GoogleLogin.userId) 
+            {
+                response = await fetch(`/backgroundMusic?userId=${GoogleLogin.userId}`);
             }
-    
-            // Clear the contextSelector and add sorted options
-            contextSelector.innerHTML = ""; // Clear existing options
-            for (let option of sortedOptions) {
-                this.addOptionTocontextSelector(option);
+            else
+            {
+                response = await fetch(`/backgroundMusic`);
             }
-    
+            this.backgroundMusicArray = await response.json();
+            this.backgroundMusicArray = this.shuffleArray(this.backgroundMusicArray);
+            this.updatecontexts();
         } catch (e) {
             console.error(`Error fetching files from server:`, e);
         }

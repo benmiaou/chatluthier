@@ -76,82 +76,63 @@ app.get('/mp3-list', async (req, res) => {
     }
 });
 
+// Route to update user sounds based on sound type
+app.post('/update-user-sounds', (req, res) => {
+    const { userId, soundsType, sounds } = req.body; // Get userId, soundsType, and sounds from request
 
-app.post('/login', async (req, res) => {
-    try {
-      const { idToken } = req.body; // Get the ID token from the client
-      const decodedToken = await admin.auth().verifyIdToken(idToken);
-      const userId = decodedToken.uid;
-  
-      // Create a JSON with the user ID
-      const userFilePath = path.join(__dirname, 'user_data', `${userId}.json`);
-      fs.writeFileSync(userFilePath, JSON.stringify({ userId }));
-  
-      res.send({ message: 'Login successful' });
-    } catch (error) {
-      console.error('Error verifying token:', error);
-      res.status(401).send({ error: 'Unauthorized' });
+    if (!userId || !soundsType || !sounds) {
+        res.status(400).send('Invalid data'); // Return an error if data is incomplete
+        return;
     }
-  });
 
-// Global variable to store backgroundMusic
-let backgroundMusic = {};
-// Define a route to return the backgroundMusic
+    // Directory to save user data
+    const userDir = path.join(__dirname, 'user_data', userId);
+
+    // Ensure the user directory exists
+    if (!fs.existsSync(userDir)) {
+        fs.mkdirSync(userDir, { recursive: true }); // Create directory if it doesn't exist
+    }
+
+    // Generate the file path based on the soundsType
+    const filePath = path.join(userDir, `${soundsType}.json`); // Use soundsType to create filename
+
+    // Save the sounds data to a JSON file in the user directory
+    fs.writeFileSync(filePath, JSON.stringify(sounds, null, 2)); // Save with pretty formatting
+    res.send('Data saved successfully'); // Confirm the data was saved
+});
+
+// Generalized function to get user-specific or default data
+function getData(userId, filename) {
+    const defaultFilePath = path.join(__dirname, `${filename}.json`);
+
+    if (userId) 
+    {
+        const userFilePath = path.join(__dirname, 'user_data', userId, `${filename}.json`);
+        if(fs.existsSync(userFilePath)) return JSON.parse(fs.readFileSync(userFilePath, 'utf8')); // Return user-specific data
+    } else {
+        return JSON.parse(fs.readFileSync(defaultFilePath, 'utf8')); // Return default data
+    }
+}
+
+// Route for background music with user ID check
 app.get('/backgroundMusic', (req, res) => {
-    res.json(backgroundMusic); // Return the backgroundMusic array as JSON
+    const userId = req.query.userId || req.headers['user-id'] || req.body.userId;
+    const backgroundMusicData = getData(userId, 'backgroundMusic'); // Unified data fetching
+    res.json(backgroundMusicData); // Return the data as JSON
 });
-// Function to load backgroundMusic.json at server startup
-function loadBackgroundMusic() {
-    const backgroundMusicPath = path.join(__dirname, 'backgroundMusic.json');
-    try {
-        const backgroundMusicData = fs.readFileSync(backgroundMusicPath, 'utf8');
-        backgroundMusic = JSON.parse(backgroundMusicData);
-        console.log('Music loaded successfully');
-    } catch (error) {
-        console.error('Error loading backgroundMusic.json:', error);
-        backgroundMusic = {}; // Fallback to empty map if there's an error
-    }
-}
-loadBackgroundMusic();
 
-// Global variable to store ambianceSounds
-let ambianceSounds = {};
-// Define a route to return the ambianceSounds
+// Route for ambiance sounds with user ID check
 app.get('/ambianceSounds', (req, res) => {
-    res.json(ambianceSounds); // Return the ambianceSounds array as JSON
+    const userId = req.query.userId || req.headers['user-id'] || req.body.userId;
+    const ambianceSoundsData = getData(userId, 'ambianceSounds'); // Unified data fetching
+    res.json(ambianceSoundsData); // Return the data as JSON
 });
-// Function to load ambianceSounds.json at server startup
-function loadAmbianceSounds() {
-    const ambianceSoundsPath = path.join(__dirname, 'ambianceSounds.json');
-    try {
-        const ambianceSoundsData = fs.readFileSync(ambianceSoundsPath, 'utf8');
-        ambianceSounds = JSON.parse(ambianceSoundsData);
-        console.log('Music loaded successfully');
-    } catch (error) {
-        console.error('Error loading ambianceSounds.json:', error);
-        ambianceSounds = {}; // Fallback to empty map if there's an error
-    }
-}
-loadAmbianceSounds();
 
-// Global variable to store soundboard
-let soundboard = {};
-// Define a route to return the soundboard array
+// Route for soundboard with user ID check
 app.get('/soundboard', (req, res) => {
-    res.json(soundboard); // Return the soundboard array as JSON
+    const userId = req.query.userId || req.headers['user-id'] || req.body.userId;
+    const soundboardData = getData(userId, 'soundboard'); // Unified data fetching
+    res.json(soundboardData); // Return the data as JSON
 });
-// Function to load backgroundCredits.json at server startup
-function loadSoundboard() {
-    const soundboardPath = path.join(__dirname, 'soundboard.json');
-    try {
-        const soundboardData = fs.readFileSync(soundboardPath, 'utf8');
-        soundboard = JSON.parse(soundboardData);
-        console.log('Music loaded successfully');
-    } catch (error) {
-        console.error('Error loading soundboard.json:', error);
-        soundboard = {}; // Fallback to empty map if there's an error
-    }
-}
-loadSoundboard();
 
 app.listen(3000, '0.0.0.0', () => console.log('Server started on port 3000'));

@@ -458,3 +458,100 @@ nav a {
     overflow-y: auto; /* Enables vertical scrolling */
     z-index: 1000; /* Ensures it appears above other elements */
 }
+
+.edit-sound-modal {
+    display: flex; /* Make sure it's visible */
+    position: fixed; /* Fixed position for full-screen */
+    top: 0;
+    left: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    background: #222; /* Semi-transparent background */
+    z-index: 1000; /* Ensure it's above other elements */
+    overflow-y: auto; /* Allow vertical scrolling */
+}
+
+.edit-sound-modal .modal-header {
+    background-color: #222; /* Dark background for header */
+    color: white; /* White text for contrast */
+    padding: 10px; /* Add padding */
+    text-align: center; /* Center the text */
+}
+
+
+.edit-sound-modal .modal-body {
+    padding: 20px; /* Padding for modal content */
+    background-color: #222; /* Background for modal body */
+    color: rgb(172, 172, 172); /* Text color for readability */
+    overflow-y: auto; /* Enable vertical scrolling */
+    display: flex; /* Use flex layout */
+    flex-direction: row; /* Align items in rows */
+    flex-wrap: wrap; /* Allow items to wrap to new lines */
+}
+
+.type-container {
+    display: flex; /* Flex layout for alignment */
+    align-items: center; /* Align vertically */
+    gap: 10px; /* Space between elements */
+    margin-top: 10px; /* Add some space from the previous line */
+}
+
+.sound-list {
+    display: flex; /* Flex layout */
+    flex-direction: column; /* Align sounds vertically */
+    gap: 10px; /* Space between lines */
+}
+
+.sound-item {
+    border: 1px solid #ddd; /* Border for separation */
+    padding: 10px; /* Padding for content */
+    border-radius: 5px; /* Rounded corners */
+    background-color: #222; /* Light background */
+}
+
+.sound-player-controls {
+    display: flex; /* Align buttons in a row */
+    justify-content: flex-start; /* Align buttons to the start */
+    align-items: center; /* Ensure consistent vertical alignment */
+    gap: 10px; /* Space between buttons */
+    position: relative; /* Ensure icons are positioned within the context of this element */
+}
+
+.sound-player-controls button {
+    display: flex; /* Flex layout for consistent alignment */
+    align-items: center; /* Align content within the button */
+    padding: 10px; /* Padding for a comfortable click */
+    background-color: transparent; /* Default color */
+    color: white; /* White text for contrast */
+    cursor: pointer; /* Change cursor to indicate clickability */
+    transition: background-color 0.3s; /* Smooth transition on hover */
+    z-index: 1; /* Ensure correct stacking order */
+}
+
+.sound-player-controls button:hover {
+    background-color: #0056b3; /* Darker color on hover */
+}
+
+.sound-player-controls .icon {
+    font-size: 18px; /* Set the icon size */
+    position: static; /* Prevents global positioning issues */
+}
+
+.sound-player-controls input[type="range"] {
+    width: 100px; /* Width for progress bar */
+}
+
+.update-button {
+    padding: 10px 20px; /* Padding to make the button comfortable to click */
+    border: none; /* Remove borders for a clean look */
+    border-radius: 5px; /* Rounded corners */
+    background-color: #28a745; /* Green color for the update action */
+    color: white; /* White text for contrast */
+    cursor: pointer; /* Change cursor to pointer for clickability */
+    font-size: 16px; /* Adjust the font size for readability */
+    transition: background-color 0.3s; /* Smooth transition on hover */
+}
+
+.update-button:hover {
+    background-color: #218838; /* Darker shade on hover */
+}

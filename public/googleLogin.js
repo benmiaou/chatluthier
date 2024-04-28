@@ -2,6 +2,8 @@ const GoogleLogin = {
     CLIENT_ID: '793652859374-lvh19kj1d49a33cola5ui3tsj1hsg2li.apps.googleusercontent.com',
     isSignedIn: false,
     Token: "",
+    userId: null, // To store the unique user ID
+
 
     initGoogleIdentityServices() 
     {
@@ -17,7 +19,22 @@ const GoogleLogin = {
         console.log("Google Sign-In response:", response);
         GoogleLogin.idToken = response.credential;
         GoogleLogin.isSignedIn = true;
+
+        // Extract the user ID
+        const payload = JSON.parse(atob(response.credential.split('.')[1]));
+        GoogleLogin.userId = payload.sub;
+        console.log(GoogleLogin.userId)
+
         GoogleLogin.updateLoginButton();
+        BackgroundMusic.preloadBackgroundSounds();
+        Soundboard.loadSoundboardButtons();
+        AmbianceSounds.loadAmbianceButtons();
+
+        // Make the "Edit Music" button visible
+        const editMusicButton = document.querySelector('button[onclick="openEditSoundModal()"]');
+        if (editMusicButton) {
+            editMusicButton.style.display = 'inline-block'; // Make the button visible
+        }
     },
 
     handleLogin() 
@@ -28,7 +45,7 @@ const GoogleLogin = {
     handleLogout() 
     {
         GoogleLogin.isSignedIn = false;
-        GoogleLogin.updateLoginButton();
+        window.location.reload();
     },
 
     updateLoginButton() 
