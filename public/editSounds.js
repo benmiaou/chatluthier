@@ -1,6 +1,9 @@
 let currentEditArray = null; // Global variable to keep track of the current audio
 let currentSoundType = 'backgroundMusic';
-let currentPath = 'background'
+let currentPath = 'background';
+let currentVolume = 0.5;
+let currentAudio = null; // Global variable to keep track of the current audio
+
 // Function to display sound data based on sound type
 function displaySounds(soundType) {
     const soundsList = document.getElementById('sounds-list'); // Container to display sound data
@@ -106,7 +109,6 @@ function displayAllBackgroundMusic() {
         soundsList.appendChild(soundItem);
     });
 }
-let currentAudio = null; // Global variable to keep track of the current audio
 
 function updateSound(index, newContexts, newType) {
     // Update contexts and type for the given index
@@ -167,6 +169,16 @@ function togglePlayPause(playButton, filename, progressBar) {
     }
 }
 
+// Function to set the volume
+function setEditVolume(volume) {
+    const gainValue = volume / 100; // Convert to a range between 0 and 1
+    currentVolume = gainValue; // Update the current volume
+    if (currentAudio) {
+        currentAudio.volume = gainValue; // Set the gain value
+    }
+}
+
+// Function to play a sound
 function playSound(filename, progressBar) {
     if (currentAudio) {
         stopCurrentSound(); // Stop any currently playing sound
@@ -174,7 +186,7 @@ function playSound(filename, progressBar) {
 
     const audio = new Audio(`assets/${currentPath}/${filename}`);
     currentAudio = audio;
-
+    currentAudio.volume = currentVolume
     audio.play(); // Start playing the sound
     updateProgressBar(audio, progressBar); // Update the progress bar
     audio.addEventListener('ended', () => {

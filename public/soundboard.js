@@ -3,6 +3,7 @@ const Soundboard = {
     audioContext : null,
     currentvolume : 0.5,
     soundboardItems : null,
+    selectedContext : "All",
 
     getAudioContext() 
     {
@@ -14,7 +15,15 @@ const Soundboard = {
 
     async loadSoundboardButtons()
     {
-        const response = await fetch(`/soundboard`);
+        let response;
+        if (GoogleLogin.userId) 
+        {
+            response = await fetch(`/soundboard?userId=${GoogleLogin.userId}`);
+        }
+        else
+        {
+            response = await fetch(`/soundboard`);
+        }
         this.soundboardItems = await response.json();
         this.generateSoundboardButtons(this.soundboardItems)
     },

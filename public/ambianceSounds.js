@@ -3,6 +3,7 @@ const AmbianceSounds = {
     currentAmbiances: {},
     audioContext : null,
     ambianceSounds : null, 
+    selectedContext : "All",
 
     getAudioContext() {
         if (!this.audioContext) {
@@ -13,7 +14,15 @@ const AmbianceSounds = {
 
     async loadAmbianceButtons()
     {
-        const response = await fetch(`/ambianceSounds`);
+        let response;
+        if (GoogleLogin.userId) 
+        {
+            response = await fetch(`/ambianceSounds?userId=${GoogleLogin.userId}`);
+        }
+        else
+        {
+            response = await fetch(`/ambianceSounds`);
+        }
         this.ambianceSounds = await response.json();
         this.generateAmbientButtons(this.ambianceSounds)
     },
