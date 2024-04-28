@@ -101,17 +101,40 @@ app.post('/update-user-sounds', (req, res) => {
     res.send('Data saved successfully'); // Confirm the data was saved
 });
 
+// Function to merge arrays, ensuring no duplicates and adding missing entries
+function mergeArrays(serverArray, userArray) {
+    // Create a map to track unique identifiers
+    const userMap = new Map(userArray.map((item) => [item.filename, item])); // Use a unique property like 'id'
+
+    // Loop over the server array and add any missing entries to the user array
+    serverArray.forEach((serverItem) => {
+        if (!userMap.has(serverItem.filename)) {
+            userArray.push(serverItem); // Add missing item to the user array
+        }
+    });
+
+    return userArray; // Return the updated user array
+}
+
 // Generalized function to get user-specific or default data
 function getData(userId, filename) {
     const defaultFilePath = path.join(__dirname, `${filename}.json`);
+    const defaultArray = JSON.parse(fs.readFileSync(defaultFilePath, 'utf8')); // Default server array
 
-    if (userId) 
-    {
+    if (userId) {
         const userFilePath = path.join(__dirname, 'user_data', userId, `${filename}.json`);
-        if(fs.existsSync(userFilePath)) return JSON.parse(fs.readFileSync(userFilePath, 'utf8')); // Return user-specific data
-    } else {
-        return JSON.parse(fs.readFileSync(defaultFilePath, 'utf8')); // Return default data
+        if (fs.existsSync(userFilePath)) {
+            const userArray = JSON.parse(fs.readFileSync(userFilePath, 'utf8')); // User-specific array
+            const mergedArray = mergeArrays(defaultArray, userArray); // Merge with server data
+
+            // Update the user-specific file with merged data
+            fs.writeFileSync(userFilePath, JSON.stringify(mergedArray, null, 2)); 
+
+            return mergedArray; // Return the merged array
+        }
     }
+
+    return defaultArray; // If no user-specific data, return the default array
 }
 
 // Route for background music with user ID check
