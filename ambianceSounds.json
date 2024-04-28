@@ -176,5 +176,24 @@
             "nature"
         ],
         "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/sverga/sounds/16726\">birds-in-spring.aif</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/sverga\">sverga</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by/3.0/?ref=openverse\">CC BY 3.0</a>.</p>"
+    },
+    {
+        "filename": "581834__mrfizzywig__sfx-horse-trot.mp3",
+        "display_name": "Horse (trot)",
+        "imageFile": "horse.webp",
+        "contexts": [
+            "animal"
+        ],
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/MrFizzywig/sounds/581834\">SFX - Horse - Trot.wav</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/MrFizzywig\">MrFizzywig</a> is marked with <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/publicdomain/zero/1.0/?ref=openverse\">CC0 1.0</a>.</p>"
+    },
+    {
+        "filename": "363018__j_o_j__horse-carriage-2-edited.mp3",
+        "display_name": "Carriage",
+        "imageFile": "carriage.webp",
+        "contexts": [
+            "animal",
+            "city"
+        ],
+        "credit": "<a href=\"https://freesound.org/people/j_o_j/sounds/363018/\">horse carriage 2-edited.mp3</a> by <a href=\"https://freesound.org/people/j_o_j/\">j_o_j</a> | License: <a href=\"http://creativecommons.org/licenses/by/3.0/\">Attribution 3.0</a>"
     }
 ]
