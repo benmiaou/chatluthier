@@ -1,8 +1,42 @@
+let currentEditArray = null; // Global variable to keep track of the current audio
+let currentSoundType = 'backgroundMusic';
+let currentPath = 'background'
+// Function to display sound data based on sound type
+function displaySounds(soundType) {
+    const soundsList = document.getElementById('sounds-list'); // Container to display sound data
+
+    soundsList.innerHTML = ''; // Clear existing content
+
+    // Determine which method to call based on the sound type
+    switch (soundType) {
+        case 'backgroundMusic':
+            currentEditArray = BackgroundMusic.backgroundMusicArray; // Display background music
+            currentSoundType = 'backgroundMusic';
+            currentPath = 'background'
+            break;
+        case 'ambianceSounds':
+            currentEditArray = AmbianceSounds.ambianceSounds; // Display ambiance sounds
+            currentSoundType = 'ambianceSounds';
+            currentPath = 'ambiance'
+            break;
+        case 'soundboard':
+            currentEditArray = Soundboard.soundboardItems; // Display soundboard
+            currentSoundType = 'soundboard';
+            currentPath = 'soundboard'
+            break;
+        default:
+            console.error('Unknown sound type'); // Handle unexpected sound types
+    }
+    displayAllBackgroundMusic();
+}
+
 function displayAllBackgroundMusic() {
     const soundsList = document.getElementById('sounds-list');
     soundsList.innerHTML = ''; // Clear existing content
 
-    BackgroundMusic.backgroundMusicArray.forEach((sound, index) => {
+    if(!currentEditArray)
+        currentEditArray = BackgroundMusic.backgroundMusicArray;
+    currentEditArray.forEach((sound, index) => {
         const soundItem = document.createElement('div');
         soundItem.className = 'sound-item'; // Unique class for sound items
 
@@ -19,16 +53,19 @@ function displayAllBackgroundMusic() {
         typeLabel.setAttribute('for', `type-select-${index}`);
 
         const typeSelect = document.createElement('select');
-        const types = ['calm', 'dynamic', 'intense']; // Example sound types
-        types.forEach((type) => {
-            const option = document.createElement('option');
-            option.value = type;
-            option.textContent = type;
-            if (sound.types.includes(type)) {
-                option.selected = true; // Select the current type
-            }
-            typeSelect.appendChild(option);
-        });
+        if(sound.types)
+        {
+            const types = ['calm', 'dynamic', 'intense']; // Example sound types
+            types.forEach((type) => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                if (sound.types.includes(type)) {
+                    option.selected = true; // Select the current type
+                }
+                typeSelect.appendChild(option);
+            });
+        }
         const progressBar = document.createElement('input');
         progressBar.value = 0;
         progressBar.type = "range";
@@ -61,16 +98,11 @@ function displayAllBackgroundMusic() {
         typeContainer.className = 'type-container'; // Apply custom CSS class
         typeContainer.append(typeLabel, typeSelect, updateButton); // Add elements to the new container
 
-       
-
         soundItem.innerHTML = `
             <h3>${sound.display_name}</h3>
             <p><strong>Credit:</strong> ${sound.credit}</p>
         `;
-
         soundItem.append(contextsLabel, contextsInput, typeContainer, playerControls, progressBar); // Add elements to the sound item
-
-
         soundsList.appendChild(soundItem);
     });
 }
@@ -78,13 +110,15 @@ let currentAudio = null; // Global variable to keep track of the current audio
 
 function updateSound(index, newContexts, newType) {
     // Update contexts and type for the given index
-    if (index >= 0 && index < BackgroundMusic.backgroundMusicArray.length) {
+    if (index >= 0 && index < currentEditArray.length) {
         const contexts = newContexts.split(',').map((c) => c.trim()); // Split and trim contexts
-        BackgroundMusic.backgroundMusicArray[index].contexts = contexts;
+        currentEditArray[index].contexts = contexts;
 
-        BackgroundMusic.backgroundMusicArray[index].types = [newType]; // Update the type
+        currentEditArray[index].types = [newType]; // Update the type
         BackgroundMusic.updatecontexts();
-        console.log('Updated sound:', BackgroundMusic.backgroundMusicArray[index]); // Debug output
+        Soundboard.updatecontexts();
+        AmbianceSounds.updatecontexts();
+        console.log('Updated sound:', currentEditArray[index]); // Debug output
     }
 
     displayAllBackgroundMusic(); // Refresh the display
@@ -92,8 +126,8 @@ function updateSound(index, newContexts, newType) {
      if (GoogleLogin.userId) {
         const updatedData = {
             userId: GoogleLogin.userId,
-            sounds: BackgroundMusic.backgroundMusicArray,
-            soundsType : "backgroundMusic",
+            sounds: currentEditArray,
+            soundsType : currentSoundType,
         };
 
         fetch('/update-user-sounds', {
@@ -138,7 +172,7 @@ function playSound(filename, progressBar) {
         stopCurrentSound(); // Stop any currently playing sound
     }
 
-    const audio = new Audio(`assets/background/${filename}`);
+    const audio = new Audio(`assets/${currentPath}/${filename}`);
     currentAudio = audio;
 
     audio.play(); // Start playing the sound

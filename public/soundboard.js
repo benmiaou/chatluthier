@@ -19,6 +19,11 @@ const Soundboard = {
         this.generateSoundboardButtons(this.soundboardItems)
     },
 
+    updatecontexts()
+    {
+
+    },
+
     generateSoundboardButtons(soundboardItems) 
     {
         const section = document.getElementById("soundboard");

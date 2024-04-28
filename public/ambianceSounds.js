@@ -18,6 +18,11 @@ const AmbianceSounds = {
         this.generateAmbientButtons(this.ambianceSounds)
     },
 
+    updatecontexts()
+    {
+
+    },
+
     generateAmbientButtons(ambianceSounds) {
         const section = document.getElementById("ambiance");
         section.innerHTML = ''; // Clear existing content
