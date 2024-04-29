@@ -28,8 +28,8 @@
         "filename": "punch-6-166699.mp3",
         "display_name": "Punch",
         "contexts": [
-            "fight", 
-            "battle", 
+            "fight",
+            "battle",
             "punch"
         ],
         "credit": "Sound Effect by <a href=\"https://pixabay.com/fr/users/floraphonic-38928062/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=166699\">floraphonic</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=166699\">Pixabay</a>"
@@ -43,5 +43,13 @@
             "noise"
         ],
         "credit": "Sound Effect from <a href=\"https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=39308\">Pixabay</a>"
+    },
+    {
+        "filename": "coins27.wav",
+        "display_name": "Coin",
+        "contexts": [
+            "city"
+        ],
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/doudar41/sounds/573356\">Coins27.wav</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/doudar41\">doudar41</a> is marked with <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/publicdomain/zero/1.0/?ref=openverse\">CC0 1.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/zero.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
     }
 ]
