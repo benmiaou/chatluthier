@@ -155,7 +155,7 @@ function updateSound(index, newContexts, newType) {
 }
 
 function togglePlayPause(playButton, filename, progressBar) {
-    if (currentAudio && currentAudio.src.includes(filename)) {
+    if (currentAudio && decodeURIComponent(currentAudio.src).includes(decodeURIComponent(filename))) {
         if (currentAudio.paused) {
             currentAudio.play(); // Resume playing if paused
             playButton.innerHTML = '⏸'; // Change button icon to "Pause"
@@ -195,13 +195,13 @@ function playSound(filename, progressBar) {
 }
 
 function pauseSound(filename) {
-    if (currentAudio && currentAudio.src.includes(filename)) {
+    if (currentAudio && decodeURIComponent(currentAudio.src).includes(decodeURIComponent(filename))) {
         currentAudio.pause(); // Pause the sound
     }
 }
 
 function stopSound(filename) {
-    if (currentAudio && currentAudio.src.includes(filename)) {
+    if (currentAudio && decodeURIComponent(currentAudio.src).includes(decodeURIComponent(filename))) {
         currentAudio.pause();
         currentAudio.currentTime = 0; // Reset to the beginning
         currentAudio = null;
@@ -209,7 +209,7 @@ function stopSound(filename) {
 }
 
 function seekSound(filename, progress) {
-    if (currentAudio && currentAudio.src.includes(filename)) {
+    if (currentAudio && decodeURIComponent(currentAudio.src).includes(decodeURIComponent(filename))) {
         const duration = currentAudio.duration;
         const newTime = (progress / 100) * duration; // Calculate the new playback time
         currentAudio.currentTime = newTime; // Set the audio to the new time
