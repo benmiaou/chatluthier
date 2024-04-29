@@ -31,9 +31,10 @@ self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             console.log('Opened cache');
-            return cache.addAll(urlsToCache); // Cache all specified files
+            return cache.addAll(urlsToCache.concat(mp3Files));
         })
     );
+    self.skipWaiting(); // Force the waiting service worker to become active
 });
 
 // Handle fetch events to serve cached content or fetch from network
@@ -68,13 +69,14 @@ self.addEventListener('fetch', (event) => {
 });
 // Handle activation by cleaning up old caches
 self.addEventListener('activate', (event) => {
-    const cacheWhitelist = [CACHE_NAME]; // Only keep the current cache
     event.waitUntil(
+        clients.claim(), // Takes control of all open clients immediately
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
                     if (!cacheWhitelist.includes(cacheName)) {
-                        return caches.delete(cacheName); // Delete old caches
+                        console.log('Deleting old cache:', cacheName);
+                        return caches.delete(cacheName);
                     }
                     return null;
                 })
