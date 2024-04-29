@@ -38,6 +38,14 @@ self.addEventListener('install', (event) => {
 
 // Handle fetch events to serve cached content or fetch from network
 self.addEventListener('fetch', (event) => {
+    if (event.request.url.includes('https://accounts.google.com/gsi/client')) {
+        // Use a network-first strategy for Google Identity Services
+        event.respondWith(
+            fetch(event.request).catch(function() {
+                return caches.match(event.request);
+            })
+        );
+    } else {
     event.respondWith(
         caches.match(event.request).then((response) => {
             if (response) {
@@ -53,10 +61,10 @@ self.addEventListener('fetch', (event) => {
 
                     return fetchedResponse; // Return the fetched response to the client
                 }
-                throw new Error('Network response not okay'); // Handle failed fetch
             });
         })
     );
+    }
 });
 // Handle activation by cleaning up old caches
 self.addEventListener('activate', (event) => {
