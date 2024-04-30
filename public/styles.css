@@ -69,7 +69,7 @@ header {
     padding: 20px; /* Padding to maintain consistent spacing */
 }
 .logo {
-    width: 50px; /* Adjust size as necessary */
+    width: 100px; 
     height: auto;
     vertical-align: middle;
 }
