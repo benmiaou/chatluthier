@@ -21,6 +21,7 @@
     <script src="editSounds.js" defer></script>
     <script   type="module">import { LocalDirectory } from './localDirectory.js';</script>
     <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="https://accounts.google.com/gsi/style "></script>
     <script src="googleLogin.js"defer></script>
 </head>
 <body>
@@ -125,10 +126,7 @@
     </main>
 
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        GoogleLogin.initGoogleIdentityServices();  // Initialize Google Identity Services
-        GoogleLogin.updateLoginButton();  // Ensure the button reflects the correct state
-    });
+  
 
     function toggleMenu() {
         var menu = document.getElementById("menu-content");
@@ -179,6 +177,8 @@
             await Soundboard.loadSoundboardButtons();
             await BackgroundMusic.preloadBackgroundSounds()
             await LocalDirectory.getDirectory();
+            GoogleLogin.initGoogleIdentityServices();  // Initialize Google Identity Services
+            GoogleLogin.updateLoginButton();  // Ensure the button reflects the correct state
         }
     </script>
 </body>

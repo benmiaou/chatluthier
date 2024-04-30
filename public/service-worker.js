@@ -1,5 +1,5 @@
 // service-worker.js - Service Worker script
-const CACHE_NAME = 'site-cache-v1qsdqsdqsdqsd'; // Unique cache name with version
+const CACHE_NAME = 'site-cache-v1'; // Unique cache name with version
 const urlsToCache = [
     '/', // Root
     '/index.html', // Main HTML
@@ -12,7 +12,6 @@ const urlsToCache = [
     '/modalCredits.js',
     '/modalWindow.js',
     '/offline.html', // Fallback page
-    '/service-worker.js', // Service Worker script
     '/site.webmanifest', // Web app manifest
     '/soundBar.js',
     '/soundboard.js',
