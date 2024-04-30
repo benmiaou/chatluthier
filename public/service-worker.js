@@ -1,5 +1,5 @@
 // service-worker.js - Service Worker script
-const CACHE_NAME = 'site-cache-v1'; // Unique cache name with version
+const CACHE_NAME = 'site-cache-v1qsdqsdqsdqsd'; // Unique cache name with version
 const urlsToCache = [
     '/', // Root
     '/index.html', // Main HTML
@@ -18,12 +18,6 @@ const urlsToCache = [
     '/soundboard.js',
 ];
 
-// List of MP3 files to cache
-const mp3Files = [
-    '/sounds/sound1.mp3',
-    '/sounds/sound2.mp3',
-    '/sounds/sound3.mp3',
-];
 
 
 // Install the Service Worker and cache the specified files
@@ -31,7 +25,7 @@ self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             console.log('Opened cache');
-            return cache.addAll(urlsToCache.concat(mp3Files));
+            return cache.addAll(urlsToCache);
         })
     );
     self.skipWaiting(); // Force the waiting service worker to become active
@@ -69,12 +63,13 @@ self.addEventListener('fetch', (event) => {
 });
 // Handle activation by cleaning up old caches
 self.addEventListener('activate', (event) => {
+    const currentCaches = [CACHE_NAME]; // List of current cache names
     event.waitUntil(
-        clients.claim(), // Takes control of all open clients immediately
+        clients.claim(), // Claims all clients immediately
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cacheName) => {
-                    if (!cacheWhitelist.includes(cacheName)) {
+                    if (!currentCaches.includes(cacheName)) {
                         console.log('Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
@@ -83,30 +78,4 @@ self.addEventListener('activate', (event) => {
             );
         })
     );
-});
-
-self.addEventListener('message', (event) => {
-    if (event.data.action === 'cacheAllMp3') {
-        event.waitUntil(
-            fetch('/mp3-list').then((response) => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch MP3 list');
-                }
-                return response.json();
-            }).then((mp3Files) => {
-                return caches.open(CACHE_NAME).then((cache) => {
-                    return Promise.all(
-                        mp3Files.map((file) => {
-                            return fetch(file).then((fetchedResponse) => {
-                                if (fetchedResponse.ok) {
-                                    cache.put(file, fetchedResponse.clone());
-                                }
-                                return fetchedResponse;
-                            });
-                        })
-                    );
-                });
-            })
-        );
-    }
 });

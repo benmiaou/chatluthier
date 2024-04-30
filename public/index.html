@@ -20,7 +20,6 @@
     <script src="credits.js" defer></script>
     <script src="editSounds.js" defer></script>
     <script   type="module">import { LocalDirectory } from './localDirectory.js';</script>
-    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="googleLogin.js"defer></script>
 </head>
@@ -164,6 +163,7 @@
                     });
                 } else {
                     console.log('Service Worker already registered:', registration.scope);
+                    registration.update();
                     // If the Service Worker is already registered, fetch sound data
                     fetchSoundData();
                 }
