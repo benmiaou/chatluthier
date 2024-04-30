@@ -17,6 +17,26 @@ const BackgroundMusic = {
     creditsMap : null,
     isPlayBackgroundAllowed: true, // Flag to indicate if play is allowed
 
+    setBackgroundSound(sound) {
+        if (this.activeBackgroundSound) {
+            // Stop and clean up the current sound
+            this.activeBackgroundSound.source.onended = null;
+            this.activeBackgroundSound.source.stop();
+            this.activeBackgroundSound = null;
+        }
+    
+        // Set the new active sound if provided
+        if (sound) {
+            this.activeBackgroundSound = sound;
+        }
+    },
+
+    setBackgroundVolume(volume) {
+        const gainValue = volume / 100;
+        if (this.activeBackgroundSound?.gainNode) {
+            this.activeBackgroundSound.gainNode.gain.value = gainValue;
+        }
+    },
 
     getAudioContext() {
         if (!this.audioContext) {
@@ -178,15 +198,13 @@ const BackgroundMusic = {
             {
                 const creditTitle = document.getElementById('background-music-Credit'); 
                 creditTitle.innerHTML  = "---";
-                this.activeBackgroundSound.source.onended = null;
-                this.activeBackgroundSound.source.stop();
-                this.activeBackgroundSound = null;
+                setBackgroundSound(null);
                 this.backgroundButton.classList.remove('button-play');
                 this.backgroundButton.classList.add('button-stop');
             }
             else
             {
-            this.activeBackgroundSound.source.stop();
+                this.activeBackgroundSound.source.stop();
             }
         }
     },
@@ -225,8 +243,7 @@ const BackgroundMusic = {
                         console.log('Sound ended, looping to next.');
                         this.backGroundSoundLoop(); // Set up loop logic
                     };
-    
-                    this.activeBackgroundSound = { source, gainNode, analyser }; // Store active sound
+                    setBackgroundSound({ source, gainNode, analyser }); // Store active sound
                     this.isPlayBackgroundAllowed = true; // Allow playing again
                    // updateGain(); //WIP
                 })
@@ -278,9 +295,7 @@ const BackgroundMusic = {
         creditTitle.innerHTML  = "---";
         if (this.activeBackgroundSound) 
         {
-            this.activeBackgroundSound.source.onended = null;
-            this.activeBackgroundSound.source.stop();
-            this.activeBackgroundSound = null;
+            setBackgroundSound(null);
             this.backgroundButton.classList.remove('button-play');
             this.backgroundButton.classList.add('button-stop');
             if (type === this.type) 
@@ -302,11 +317,6 @@ const BackgroundMusic = {
         this.backGroundSoundLoop();
     },
 
-    setBackgroundVolume(volume) {
-        const gainValue = volume / 100;
-        if (this.activeBackgroundSound?.gainNode) {
-            this.activeBackgroundSound.gainNode.gain.value = gainValue;
-        }
-    },
+
 
 }
