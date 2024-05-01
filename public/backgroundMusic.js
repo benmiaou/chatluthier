@@ -137,18 +137,32 @@ processQueue(sourceBuffer, mediaSource) {
         this.audioElement.onended = callback;
     }
 
-    pause() {
-        this.audioElement.pause();
-    }
-
     play() {
         if (this.audioContext.state === 'suspended') {
             this.audioContext.resume().then(() => {
                 console.log("AudioContext resumed successfully");
-                this.audioElement.play().catch(e => console.error('Error playing audio:', e));
+                return this.audioElement.play();
+            }).then(() => {
+                this.isPlaying = true;
+                console.log("Playback has started successfully.");
+            }).catch(e => {
+                console.error('Error playing audio:', e);
             });
-        } else {
-            this.audioElement.play().catch(e => console.error('Error playing audio:', e));
+        } else if (!this.isPlaying) {
+            this.audioElement.play().then(() => {
+                this.isPlaying = true;
+                console.log("Playback has started successfully.");
+            }).catch(e => {
+                console.error('Error playing audio:', e);
+            });
+        }
+    }
+
+    pause() {
+        if (this.isPlaying) {
+            this.audioElement.pause();
+            this.isPlaying = false;
+            console.log("Playback has been paused.");
         }
     }
 }
