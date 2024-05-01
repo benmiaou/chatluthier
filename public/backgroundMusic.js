@@ -161,6 +161,7 @@ processQueue(sourceBuffer, mediaSource) {
 const BackgroundMusic = {
     DEFAULT_CONTEXT : "default",
     audioContext : null,
+    activeBackgroundSound: null,
     soundFiles: null,
     type: null,
     context : "default",
@@ -175,11 +176,24 @@ const BackgroundMusic = {
     soundIndex : 0,
     creditsMap : null,
     isPlayBackgroundAllowed: true, // Flag to indicate if play is allowed
-    audioManager: new AudioManager(), // Initialize AudioManager
+
+    setBackgroundSound(sound) {
+        if (this.activeBackgroundSound) {
+            // Stop and clean up the current sound
+            this.activeBackgroundSound.source.onended = null;
+            this.activeBackgroundSound.source.stop();
+            this.activeBackgroundSound = null;
+        }
+    
+        // Set the new active sound if provided
+        this.activeBackgroundSound = sound;
+    },
 
     setBackgroundVolume(volume) {
         const gainValue = volume / 100;
-        this.audioManager.setVolume(gainValue)
+        if (this.activeBackgroundSound?.gainNode) {
+            this.activeBackgroundSound.gainNode.gain.value = gainValue;
+        }
     },
 
     init () 
@@ -284,7 +298,37 @@ const BackgroundMusic = {
             this.soundIndex = 0;  // Reset index if it exceeds the array
         }
         const fileToPlay = this.filesToPlay[this.soundIndex++];
-        this.audioManager.playSound(fileToPlay);
+        this.playSound(fileToPlay);
+    },
+
+    adjustVolume() {
+        const dataArray = new Uint8Array(this.activeBackgroundSound.analyser.frequencyBinCount);
+        this.activeBackgroundSound.analyser.getByteTimeDomainData(dataArray);
+    
+        let sum = 0;
+        for (const element of dataArray) {
+            const value = (element / 128) - 1;
+            sum += value * value;
+        }
+        const rms = Math.sqrt(sum / dataArray.length);
+     
+        const desiredRMS = 0.01;
+        const noiseThreshold = desiredRMS / 4; // Threshold to determine what is considered noise
+    
+        if (rms === 0) {
+            this.activeBackgroundSound.gainNode.gain.setValueAtTime(0.1, this.getAudioContext().currentTime);
+            return;
+        }
+        if (rms < noiseThreshold) {
+            this.activeBackgroundSound.gainNode.gain.setValueAtTime(0, this.getAudioContext().currentTime);
+            return;
+        }
+    
+        let newGainValue = Math.min(desiredRMS / rms, 1.5); // Capping the gain to prevent distortion
+        if (isFinite(newGainValue) && newGainValue > 0) {
+            // Smooth transition using exponential ramp to the new gain value
+            this.activeBackgroundSound.gainNode.gain.exponentialRampToValueAtTime(newGainValue, this.getAudioContext().currentTime + 0.1);
+        }
     },
 
     // Function to capitalize the first letter of a string
@@ -313,22 +357,81 @@ const BackgroundMusic = {
         this.updateButton("calm")
         this.updateButton("dynamic")
         this.updateButton("intense")
-        if (this.audioManager.isCurrentlyPlaying()) 
+        if(this.activeBackgroundSound)
         {
-            this.audioManager.pause()
             if(this.filesToPlay.length == 0)
             {
                 const creditTitle = document.getElementById('background-music-Credit'); 
                 creditTitle.innerHTML  = "---";
+                this.setBackgroundSound(null);
                 this.backgroundButton.classList.remove('button-play');
                 this.backgroundButton.classList.add('button-stop');
             }
             else
             {
-                this.backGroundSoundLoop();
+                this.activeBackgroundSound.source.stop();
             }
         }
     },
+
+    playSound(fileOrHandle) {
+        const context = this.getAudioContext();
+        if (context.state === 'suspended') {
+            context.resume();
+        }
+    
+        const source = context.createBufferSource();
+        const gainNode = context.createGain();
+        const analyser = context.createAnalyser();
+    
+        const processAudioBuffer = (arrayBuffer) => {
+            context.decodeAudioData(arrayBuffer)
+                .then(audioBuffer => {
+                    source.buffer = audioBuffer;
+                    source.loop = false;
+                    source.connect(analyser);
+                    analyser.connect(gainNode);
+                    gainNode.connect(context.destination);
+    
+                    const volume = document.getElementById('music-volume').value;
+                    gainNode.gain.value = volume / 100; // Set initial volume
+                    source.start(0);
+    
+                    const updateGain = () => {
+                        this.adjustVolume(); // If you have an adjustVolume function
+                        if (!source.ended) { // Instead of paused, check if source has ended
+                            requestAnimationFrame(updateGain); // Recursively update gain
+                        }
+                    };
+    
+                    source.onended = () => {
+                        console.log('Sound ended, looping to next.');
+                        this.backGroundSoundLoop(); // Set up loop logic
+                    };
+                    this.setBackgroundSound({ source, gainNode, analyser }); // Store active sound
+                    this.isPlayBackgroundAllowed = true; // Allow playing again
+                   // updateGain(); //WIP
+                })
+               // Allow playing again
+                .catch(e => {console.error('Error decoding audio data:', e);  this.isPlayBackgroundAllowed = true; });
+        };
+    
+        // Determine if it's a file handle or URL
+        if (fileOrHandle instanceof FileSystemFileHandle) {
+            fileOrHandle.getFile()
+                .then(file => file.arrayBuffer())
+                .then(arrayBuffer => processAudioBuffer(arrayBuffer))
+                .catch(e => {console.error('Error reading local file:', e);  this.isPlayBackgroundAllowed = true; });
+        } else {
+            const creditTitle = document.getElementById('background-music-Credit'); 
+            creditTitle.innerHTML  = fileOrHandle.credit;
+            fetch("assets/background/" + fileOrHandle.filename)
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => processAudioBuffer(arrayBuffer))
+                .catch(e => {console.error('Error fetching audio data:', e);  this.isPlayBackgroundAllowed = true; });
+        }
+    },
+
 
     // Function to get the filename from a file path or a file handle
     getFilename(fileOrHandle) {
@@ -346,15 +449,18 @@ const BackgroundMusic = {
 
     async playBackgroundSound(type, button) {
         // Prevent overlapping sounds
-       
+        if (!this.isPlayBackgroundAllowed) 
+        {
+            return;
+        }
          // Disable play to prevent rapid clicks
          this.isPlayBackgroundAllowed = false;
 
         const creditTitle = document.getElementById('background-music-Credit'); 
         creditTitle.innerHTML  = "---";
-        if (this.audioManager.isCurrentlyPlaying()) 
+        if (this.activeBackgroundSound) 
         {
-            this.audioManager.pause()
+            this.setBackgroundSound(null);
             this.backgroundButton.classList.remove('button-play');
             this.backgroundButton.classList.add('button-stop');
             if (type === this.type) 
@@ -376,4 +482,5 @@ const BackgroundMusic = {
         this.backGroundSoundLoop();
     },
 }
+
 BackgroundMusic.init();
