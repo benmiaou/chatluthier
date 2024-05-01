@@ -27,6 +27,7 @@ class AudioManager {
             this.fetchAndProcessAudio("assets/background/" + fileOrHandle.filename, this.sourceBuffer, this.mediaSource);
         });
         this.play()
+        console.log("this.play()");
     }
 
     manageBuffering() {
@@ -108,17 +109,17 @@ class AudioManager {
         return totalBuffered > 10;
     }
 
-processQueue(sourceBuffer, mediaSource) {
-    console.log("Processing queue", this.pendingData.length);
-    if (this.pendingData.length > 0 && !sourceBuffer.updating) {
-        console.log("Appending from queue");
-        sourceBuffer.appendBuffer(this.pendingData.shift());
+    processQueue(sourceBuffer, mediaSource) {
+        console.log("Processing queue", this.pendingData.length);
+        if (this.pendingData.length > 0 && !sourceBuffer.updating) {
+            console.log("Appending from queue");
+            sourceBuffer.appendBuffer(this.pendingData.shift());
+        }
+        if (this.pendingData.length === 0 && !sourceBuffer.updating &&  this.readerDone) {
+            mediaSource.endOfStream();
+            console.log("End of Stream");
+        }
     }
-    if (this.pendingData.length === 0 && !sourceBuffer.updating &&  this.readerDone) {
-        mediaSource.endOfStream();
-        console.log("End of Stream");
-    }
-}
 
     setVolume(level) {
         this.audioElement.volume = level;
