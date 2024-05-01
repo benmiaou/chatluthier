@@ -49,14 +49,7 @@ class AudioManager {
                 this.readAndAppend(this.reader, this.sourceBuffer, this.mediaSource);
             }
             if (bufferedEnd - currentTime < 1 && !this.audioElement.paused) {
-                console.log("Buffer underrun: pausing playback.");
-                this.audioElement.pause();
-                setTimeout(() => {
-                    if (bufferedEnd - this.audioElement.currentTime > 3) {  // Check if enough buffer has refilled
-                        console.log("Resuming playback.");
-                        this.audioElement.play();
-                    }
-                }, 1000);  // Check every second
+                console.log("Buffer underrun");
             }
         }
     }
