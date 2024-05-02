@@ -1,58 +1,117 @@
-class AudioManager {
-    constructor() {
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        this.gainNode = this.audioContext.createGain(); // Create a GainNode for volume control
-        this.gainNode.connect(this.audioContext.destination); // Connect the GainNode to the destination
-        this.gainNode.gain.value = 0.5;
-        this.sourceNode = null; // Currently active source node
-        this.audioBuffer = null; // Buffer holding decoded audio data
+const AUDIO_CACHE_NAME = 'audio-cache';
+
+class AudioManager 
+{
+    constructor() 
+    {
+        this.audioElement = document.createElement('audio');
+        this.audioElement.hidden = true;
+        this.audioElement.controls = true; // Optionally add controls
+        document.body.appendChild(this.audioElement); // Append the audio element to the body
+
         this.isPlaying = false;
-        this.startOffset = 0; // Track where playback was paused
+        this.isProcessing = false;
         this.onEndedCallback = null; // Custom callback for when playback ends naturally
-        this.fetchController = new AbortController(); // For cancelling fetch requests
-        this.userStopped = false; // Flag to check if stop was initiated by the user
-        this.isProcessing = false; // Flag to check if a song is currently being processed
+        this.fetchQueue = [];
+        this.isFetching = false;
     }
 
     async playSound(fileOrHandle) {
-        if (this.isProcessing) return; // Early exit if another song is currently being processed
-        this.isProcessing = true; // Set processing flag
-
-        const url = "assets/background/" + fileOrHandle.filename;
-
-        // If something is playing or loading, stop it before starting a new sound
-        this.stop();
-
-        // Fetch and process the audio
+        this.isProcessing = true;
+        if (this.isPlaying) this.stop(); // Stop any currently playing audio
+    
+        const audioUrl = "assets/background/" + fileOrHandle.filename;
+        this.updateCredit(fileOrHandle.credit);
+    
         try {
-            const response = await fetch(url, { signal: this.fetchController.signal });
-            const arrayBuffer = await response.arrayBuffer();
-            this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+            const cache = await caches.open(AUDIO_CACHE_NAME);
+            let response = await cache.match(audioUrl);
+            if (!response) {
+                console.log("Not found in cache. Fetching and streaming...");
+                // Start streaming immediately without waiting for the cache
+                this.audioElement.src = audioUrl;
+                this.audioElement.play().then(() => {
+                    this.isPlaying = true;
+                    console.log("Playback started successfully.");
+                }).catch(error => {
+                    console.error("Error playing audio:", error);
+                });
+                this.enqueueFetch(audioUrl); // Queue the fetch operation
+                // Handle caching in the background
+                fetch(audioUrl).then(async response => {
+                    if (response.ok) {
+                        const cacheResponse = response.clone();
+                        await cache.put(audioUrl, cacheResponse);
+                        console.log("Audio cached : " + audioUrl);
+                    } else {
+                        console.error("Failed to fetch audio file.");
+                    }
+                }).catch(error => {
+                    console.error("Error fetching and caching audio:", error);
+                });
+            } else {
+                console.log("Found in cache. Loading from cache...");
+                // If the audio is in the cache, use it directly
+                this.audioElement.src = URL.createObjectURL(await response.blob());
+                this.audioElement.play().then(() => {
+                    this.isPlaying = true;
+                    console.log("Playback started successfully.");
+                }).catch(error => {
+                    console.error("Error playing audio:", error);
+                });
+            }
 
-            this.createSourceNode();
-            this.sourceNode.start(0, this.startOffset % this.audioBuffer.duration);
-            this.isPlaying = true;
-            this.updateCredit(fileOrHandle.credit);
         } catch (error) {
-            console.error("Error fetching or decoding audio:", error);
+            console.error("Error playing or caching audio:", error);
         }
-        this.isProcessing = false; // Reset processing flag after setup is complete
+    
+        this.audioElement.onended = () => {
+            this.isPlaying = false;
+            if (this.onEndedCallback) {
+                this.onEndedCallback(); // Call the registered callback if set
+            }
+            console.log("Playback finished.");
+            URL.revokeObjectURL(this.audioElement.src); // Clean up the object URL to release memory
+        };
+    
+        this.isProcessing = false;
     }
 
-    createSourceNode() {
-        this.sourceNode = this.audioContext.createBufferSource();
-        this.sourceNode.buffer = this.audioBuffer;
-        this.sourceNode.connect(this.gainNode); // Connect source to gain node instead of directly to destination
-        this.sourceNode.onended = () => {
-            if (!this.userStopped) {
-                this.isPlaying = false;
-                this.startOffset = 0; // Reset start offset when playback finishes naturally
-                if (this.onEndedCallback) {
-                    this.onEndedCallback(); // Call the registered callback if set
-                }
+    preload(fileOrHandle) {
+        const audioUrl = "assets/background/" + fileOrHandle.filename;
+        this.fetchQueue.push(audioUrl);
+        this.processFetchQueue(); // Start processing the queue if not already started
+    }
+    
+    enqueueFetch(audioUrl) {
+        this.fetchQueue.push(audioUrl);
+        this.processFetchQueue(); // Start processing the queue if not already started
+    }
+
+    async processFetchQueue() {
+        console.log("this.isFetching " + this.isFetching)
+        console.log(" this.fetchQueue " + this.fetchQueue)
+        if (this.isFetching || this.fetchQueue.length === 0) {
+            return; // Exit if a fetch is already in process or the queue is empty
+        }
+
+        this.isFetching = true;
+        const url = this.fetchQueue.shift();
+        try {
+            const cache = await caches.open(AUDIO_CACHE_NAME);
+            const response = await fetch(url);
+            if (response.ok) {
+                await cache.put(url, response);
+                console.log("Audio file cached successfully:", url);
+            } else {
+                console.error("Failed to fetch the file for caching:", url);
             }
-            this.userStopped = false; // Reset the flag after handling onended
-        };
+        } catch (error) {
+            console.error("Error fetching and caching audio:", error);
+        } finally {
+            this.isFetching = false;
+            this.processFetchQueue(); // Recursively process the next item in the queue
+        }
     }
 
     setOnEndedCallback(callback) {
@@ -60,36 +119,25 @@ class AudioManager {
     }
 
     pause() {
-        if (!this.isPlaying || !this.sourceNode) return;
-
-        this.sourceNode.stop();
-        this.startOffset += this.audioContext.currentTime;
-        this.isPlaying = false;
+        this.audioElement.pause();
+        console.log("Playback has been paused.");
     }
 
     resume() {
-        if (this.isPlaying || !this.audioBuffer) return;
-
-        this.createSourceNode();
-        this.sourceNode.start(0, this.startOffset % this.audioBuffer.duration);
-        this.isPlaying = true;
+        this.audioElement.play();
+        console.log("Playback has resumed.");
     }
 
     stop() {
-        this.userStopped = true; // Set flag to indicate the stop was user-initiated
-        if (this.sourceNode) {
-            this.sourceNode.stop();
-            this.sourceNode.disconnect();
-            this.sourceNode = null;
-        }
-        this.fetchController.abort(); // Abort any ongoing fetch
-        this.fetchController = new AbortController(); // Reset controller for next request
+        this.audioElement.pause();
+        this.audioElement.currentTime = 0;
         this.isPlaying = false;
-        this.startOffset = 0;
+        console.log("Playback has been stopped.");
     }
 
     setVolume(level) {
-        this.gainNode.gain.value = level; // Adjust the gain value to control the volume
+        this.audioElement.volume = level;
+        console.log(`Volume set to ${level}.`);
     }
 
     isCurrentlyPlaying() {
@@ -103,9 +151,6 @@ class AudioManager {
         }
     }
 }
-
-
-
 
 const BackgroundMusic = {
     DEFAULT_CONTEXT : "default",
@@ -161,8 +206,6 @@ const BackgroundMusic = {
         for (let music of this.backgroundMusicArray) {
             for (let subType of music.contexts) {
                 if (!uniqueOptions.has(subType)) {
-                    console.log(subType)
-                    console.log(music.filename)
                     uniqueOptions.add(subType);
                 }
             }
@@ -232,9 +275,14 @@ const BackgroundMusic = {
         if (this.soundIndex >= this.filesToPlay.length) {
             this.soundIndex = 0;  // Reset index if it exceeds the array
         }
-        const fileToPlay = this.filesToPlay[this.soundIndex++];
+        let fileToPlay = this.filesToPlay[this.soundIndex];
         if(fileToPlay)
             this.audioManager.playSound(fileToPlay);
+
+        //Preload next
+        this.soundIndex++;
+        fileToPlay = this.filesToPlay[this.soundIndex];
+        this.audioManager.preload(fileToPlay)
     },
 
     // Function to capitalize the first letter of a string

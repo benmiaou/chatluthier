@@ -30,34 +30,47 @@ self.addEventListener('install', (event) => {
     self.skipWaiting(); // Force the waiting service worker to become active
 });
 
-// Handle fetch events to serve cached content or fetch from network
 self.addEventListener('fetch', (event) => {
+    // Use a network-first strategy for Google Identity Services
     if (event.request.url.includes('https://accounts.google.com/gsi/client')) {
-        // Use a network-first strategy for Google Identity Services
         event.respondWith(
-            fetch(event.request).catch(function() {
+            fetch(event.request).catch(() => {
                 return caches.match(event.request);
             })
         );
     } else {
-    event.respondWith(
-        caches.match(event.request).then((response) => {
-            if (response) {
-                return response; // Return cached content if available
-            }
-            // Fetch from network and cache it
-            return fetch(event.request).then((fetchedResponse) => {
-                if (fetchedResponse.ok) {
-                    const responseClone = fetchedResponse.clone(); // Clone before using
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseClone); // Cache the cloned response
-                    });
+        // Skip caching for MP3 files
+        if (event.request.url.endsWith('.mp3')) {
+            console.log('Skipping cache for MP3 file:', event.request.url);
+            event.respondWith(fetch(event.request));
+            return;
+        }
 
-                    return fetchedResponse; // Return the fetched response to the client
-                }
-            });
-        })
-    );
+        // Handle range requests specifically for audio or video streaming
+        if (event.request.headers.has('range')) {
+            console.log('Handling range request for:', event.request.url);
+            event.respondWith(fetch(event.request));
+            return;
+        }
+
+        // Use a cache-first strategy for other requests
+        event.respondWith(
+            caches.match(event.request)
+            .then(response => {
+                return response || fetch(event.request).then(response => {
+                    if (!response || response.status !== 200 || response.type !== 'basic') {
+                        return response;
+                    }
+                    // Cache the response if it's not an MP3 file
+                    let responseToCache = response.clone();
+                    caches.open('CACHE_NAME')
+                        .then(cache => {
+                            cache.put(event.request, responseToCache);
+                        });
+                    return response;
+                });
+            })
+        );
     }
 });
 // Handle activation by cleaning up old caches
