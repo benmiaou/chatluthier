@@ -25,9 +25,10 @@ class AudioManager {
             });
             this.updateCredit(fileOrHandle.credit);
             this.fetchAndProcessAudio("assets/background/" + fileOrHandle.filename, this.sourceBuffer, this.mediaSource);
+            console.log("this.play()");
+            this.play()
         });
-        this.play()
-        console.log("this.play()");
+
     }
 
     manageBuffering() {
