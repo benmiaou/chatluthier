@@ -555,3 +555,18 @@ nav a {
 .update-button:hover {
     background-color: #218838; /* Darker shade on hover */
 }
+
+
+/* Direct styling for the audio element if needed */
+#audio-controls, #background-audio {
+    width: 300px; /* Control the width of the audio element */
+    margin: 0 auto; /* Centering the audio element if not in a flex container */
+}
+
+
+.audio-container {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    width: 100%; /* Take full width to ensure centering is effective */
+    padding: 20px 0; /* Add some vertical padding for spacing */
+}

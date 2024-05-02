@@ -96,8 +96,11 @@
         </div>
         <!-- Background Music Section -->
         <h2>Background 
-            <input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="BackgroundMusic.setBackgroundVolume(this.value)">
+              <input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="BackgroundMusic.setBackgroundVolume(this.value)"> 
         </h2>
+        <div class="audio-container">
+            <audio controls id="background-audio"></audio>
+        </div>
         <section id="background-music-Credit">---</section>
         <section id="background-music" class="section">
             <button id="calmButton" onclick="BackgroundMusic.playBackgroundSound('calm', this)"  class="button-stop">Play Calm</button>

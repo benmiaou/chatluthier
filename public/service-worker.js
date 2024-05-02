@@ -2,19 +2,6 @@
 const CACHE_NAME = 'site-cache-v1'; // Unique cache name with version
 const urlsToCache = [
     '/', // Root
-    '/index.html', // Main HTML
-    '/styles.css', // CSS file
-    '/ambianceSounds.js', // JavaScript files
-    '/backgroundMusic.js',
-    '/credits.js',
-    '/googleLogin.js',
-    '/localDirectory.js',
-    '/modalCredits.js',
-    '/modalWindow.js',
-    '/offline.html', // Fallback page
-    '/site.webmanifest', // Web app manifest
-    '/soundBar.js',
-    '/soundboard.js',
 ];
 
 
@@ -40,15 +27,14 @@ self.addEventListener('fetch', (event) => {
         );
     } else {
         // Skip caching for MP3 files
-        if (event.request.url.endsWith('.mp3')) {
-            console.log('Skipping cache for MP3 file:', event.request.url);
+        const url = new URL(event.request.url);
+        if (url.searchParams.has('nocache')) {
             event.respondWith(fetch(event.request));
             return;
         }
 
         // Handle range requests specifically for audio or video streaming
         if (event.request.headers.has('range')) {
-            console.log('Handling range request for:', event.request.url);
             event.respondWith(fetch(event.request));
             return;
         }
@@ -63,7 +49,7 @@ self.addEventListener('fetch', (event) => {
                     }
                     // Cache the response if it's not an MP3 file
                     let responseToCache = response.clone();
-                    caches.open('CACHE_NAME')
+                    caches.open(CACHE_NAME)
                         .then(cache => {
                             cache.put(event.request, responseToCache);
                         });
