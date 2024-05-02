@@ -286,8 +286,7 @@
         "filename": "Pint_of_Beer_-_Crypt_of_Insomnia.mp3",
         "display_name": "Pint of Beer",
         "types": [
-            "dynamic",
-            "intense"
+            "dynamic"
         ],
         "contexts": [
             "tavern"

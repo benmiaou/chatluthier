@@ -95,13 +95,21 @@
             <!-- This is where the credits will be displayed -->
         </div>
         <!-- Background Music Section -->
-        <h2>Background 
-              <input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="BackgroundMusic.setBackgroundVolume(this.value)"> 
-        </h2>
-        <div class="audio-container">
+         <!-- <div class="audio-container">
             <audio controls id="background-audio"></audio>
-        </div>
+        </div> -->
+        <h2>Background 
+            <audio controls id="background-audio"></audio><input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="BackgroundMusic.setBackgroundVolume(this.value)">
+
+        </h2>
         <section id="background-music-Credit">---</section>
+        <div class="progress-and-credits">
+            <div id="progressBar">
+                <div id="progress"></div>
+            </div>
+            <button id="nextButton" onclick="BackgroundMusic.backGroundSoundLoop()">»</button>
+        </div>
+  
         <section id="background-music" class="section">
             <button id="calmButton" onclick="BackgroundMusic.playBackgroundSound('calm', this)"  class="button-stop">Play Calm</button>
             <button id="dynamicButton" onclick="BackgroundMusic.playBackgroundSound('dynamic', this)"  class="button-stop">Play Dynamic</button>
@@ -143,6 +151,28 @@
 
 
     <script  type="module">
+        document.addEventListener('DOMContentLoaded', () => {
+    const audio = document.getElementById('background-audio');
+    const progressBar = document.getElementById('progressBar');
+    const progress = document.getElementById('progress');
+
+    // Function to update the progress bar
+    function updateProgress() {
+        const percentage = (audio.currentTime / audio.duration) * 100;
+        progress.style.width = percentage + '%';
+    }
+
+    // Event listener for time update on audio
+    audio.addEventListener('timeupdate', updateProgress);
+
+    // Optional: Click on progress bar to change position
+    progressBar.addEventListener('click', (e) => {
+        const progressBarWidth = progressBar.clientWidth;
+        const clickPosition = e.offsetX;
+        const timePerPixel = audio.duration / progressBarWidth;
+        audio.currentTime = timePerPixel * clickPosition;
+    });
+});
         contextSelector.addEventListener('change', function() 
         {
 
