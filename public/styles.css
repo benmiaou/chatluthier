@@ -19,6 +19,7 @@ a:hover {
 #background-music-Credit a {
     color: #388497; /* A red color for the credit links */
     text-decoration: none; /* No underline */
+    margin-bottom: 0; /* Reduce or eliminate bottom margin */
 }
 
 #background-music-Credit a:hover {
@@ -569,4 +570,41 @@ nav a {
     justify-content: center; /* Center horizontally */
     width: 100%; /* Take full width to ensure centering is effective */
     padding: 20px 0; /* Add some vertical padding for spacing */
+}
+
+.progress-and-credits {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 50%; /* Adjust this to fit your design */
+    margin: 0 auto; /* Center the container */
+}
+
+#progressBar {
+    flex-grow: 1;  /* Allows the progress bar to take up available space */
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.3);
+    margin-right: 10px; /* Space between progress bar and button */
+}
+
+#progress {
+    height: 100%;
+    background-color: rgba(76, 175, 80, 0.7);
+    width: 0%;  /* Will be controlled via JavaScript */
+}
+
+#nextButton {
+    padding: 0 10px;
+    font-size: 20px;
+    color: #4CAF50; /* Soft green color */
+    background: none; /* Transparent background */
+    border: none; /* No border */
+    cursor: pointer; /* Pointer to indicate it's clickable */
+    transition: color 0.3s; /* Smooth transition for color change */
+}
+
+#nextButton:hover,
+#nextButton:focus {
+    color: #367C39; /* Darker green on hover for better interaction feedback */
 }

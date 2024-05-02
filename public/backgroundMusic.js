@@ -5,10 +5,12 @@ class AudioManager
     constructor() 
     {
         this.audioElement = document.getElementById('background-audio');  // Access the existing audio element
+        this.audioElement.style.display = 'none';
         this.audioElement.controls = true;
         this.audioElement.autoplay = true;
         this.audioElement.volume = 0.5;
         this.audioElement.preload=false;
+        this.audioElement.enable = false;
 
         this.currentButton = null;
 
