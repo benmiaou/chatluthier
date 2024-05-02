@@ -4,10 +4,13 @@ class AudioManager
 {
     constructor() 
     {
-        this.audioElement = document.createElement('audio');
-        this.audioElement.hidden = true;
-        this.audioElement.controls = true; // Optionally add controls
-        document.body.appendChild(this.audioElement); // Append the audio element to the body
+        this.audioElement = document.getElementById('background-audio');  // Access the existing audio element
+        this.audioElement.controls = true;
+        this.audioElement.autoplay = true;
+        this.audioElement.volume = 0.5;
+        this.audioElement.preload=false;
+
+        this.currentButton = null;
 
         this.isPlaying = false;
         this.isProcessing = false;
@@ -18,8 +21,12 @@ class AudioManager
 
     async playSound(fileOrHandle) {
         this.isProcessing = true;
-        if (this.isPlaying) this.stop(); // Stop any currently playing audio
-    
+        this.stop(); // Stop any currently playing audio
+
+        this.currentButton = document.getElementById(fileOrHandle.types[0] + 'Button'); 
+        this.currentButton.classList.add('button-play');
+        this.currentButton.classList.remove('button-stop');
+
         const audioUrl = "assets/background/" + fileOrHandle.filename;
         this.updateCredit(fileOrHandle.credit);
     
@@ -27,35 +34,21 @@ class AudioManager
             const cache = await caches.open(AUDIO_CACHE_NAME);
             let response = await cache.match(audioUrl);
             if (!response) {
-                console.log("Not found in cache. Fetching and streaming...");
                 // Start streaming immediately without waiting for the cache
                 this.audioElement.src = audioUrl;
                 this.audioElement.play().then(() => {
                     this.isPlaying = true;
-                    console.log("Playback started successfully.");
+                    console.log("Playback started successfully from stream.");
                 }).catch(error => {
                     console.error("Error playing audio:", error);
                 });
                 this.enqueueFetch(audioUrl); // Queue the fetch operation
-                // Handle caching in the background
-                fetch(audioUrl).then(async response => {
-                    if (response.ok) {
-                        const cacheResponse = response.clone();
-                        await cache.put(audioUrl, cacheResponse);
-                        console.log("Audio cached : " + audioUrl);
-                    } else {
-                        console.error("Failed to fetch audio file.");
-                    }
-                }).catch(error => {
-                    console.error("Error fetching and caching audio:", error);
-                });
             } else {
-                console.log("Found in cache. Loading from cache...");
                 // If the audio is in the cache, use it directly
                 this.audioElement.src = URL.createObjectURL(await response.blob());
                 this.audioElement.play().then(() => {
                     this.isPlaying = true;
-                    console.log("Playback started successfully.");
+                    console.log("Playback started successfully from cache.");
                 }).catch(error => {
                     console.error("Error playing audio:", error);
                 });
@@ -89,17 +82,16 @@ class AudioManager
     }
 
     async processFetchQueue() {
-        console.log("this.isFetching " + this.isFetching)
-        console.log(" this.fetchQueue " + this.fetchQueue)
         if (this.isFetching || this.fetchQueue.length === 0) {
             return; // Exit if a fetch is already in process or the queue is empty
         }
 
         this.isFetching = true;
         const url = this.fetchQueue.shift();
+        console.log("Cache " + url)
         try {
             const cache = await caches.open(AUDIO_CACHE_NAME);
-            const response = await fetch(url);
+            const response = await fetch(url  + "?nocache=true");
             if (response.ok) {
                 await cache.put(url, response);
                 console.log("Audio file cached successfully:", url);
@@ -129,10 +121,21 @@ class AudioManager
     }
 
     stop() {
-        this.audioElement.pause();
-        this.audioElement.currentTime = 0;
-        this.isPlaying = false;
-        console.log("Playback has been stopped.");
+        if(this.isPlaying)
+        {
+            this.audioElement.pause();
+            this.audioElement.currentTime = 0;
+            this.isPlaying = false;
+            console.log("Playback has been stopped.");
+        }
+       
+        this.updateCredit("---");
+        if(this.currentButton)
+        {
+            this.currentButton.classList.remove('button-play');
+            this.currentButton.classList.add('button-stop');
+            this.currentButton = null;
+        }
     }
 
     setVolume(level) {
@@ -154,21 +157,12 @@ class AudioManager
 
 const BackgroundMusic = {
     DEFAULT_CONTEXT : "default",
-    audioContext : null,
-    soundFiles: null,
     type: null,
     context : "default",
-    categories: {
-        background: {},
-        ambiance: {},
-        soundboard: {}
-    },
-    backgroundMusicFilesToPlay : [],
     backgroundMusicArray : [],
-    backgroundButton: null,
     soundIndex : 0,
-    creditsMap : null,
     audioManager: new AudioManager(), // Initialize AudioManager
+    isClickable : true,
 
     setBackgroundVolume(volume) {
         const gainValue = volume / 100;
@@ -182,12 +176,6 @@ const BackgroundMusic = {
         });
     },
 
-    getAudioContext() {
-        if (!this.audioContext) {
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        return  this.audioContext;
-    },
 
     addOptionTocontextSelector(subType)
     {
@@ -316,10 +304,6 @@ const BackgroundMusic = {
             if(this.filesToPlay.length == 0)
             {
                 this.audioManager.stop();
-                const creditTitle = document.getElementById('background-music-Credit'); 
-                creditTitle.innerHTML  = "---";
-                this.backgroundButton.classList.remove('button-play');
-                this.backgroundButton.classList.add('button-stop');
             }
             else
             {
@@ -344,14 +328,14 @@ const BackgroundMusic = {
 
 
     async playBackgroundSound(type, button) {
-        if(this.audioManager.isProcessing) return;
-        const creditTitle = document.getElementById('background-music-Credit'); 
-        creditTitle.innerHTML  = "---";
+        if(this.audioManager.isProcessing || !this.isClickable) return;
+        this.isClickable = false;
+        setTimeout(() => {
+            this.isClickable = true;
+        }, 500);
         if (this.audioManager.isCurrentlyPlaying()) 
         {
             this.audioManager.stop();
-            this.backgroundButton.classList.remove('button-play');
-            this.backgroundButton.classList.add('button-stop');
             if (type === this.type) 
             {
                 return;
@@ -363,9 +347,6 @@ const BackgroundMusic = {
          {
             return;
          }
-        this.backgroundButton = button;
-        button.classList.add('button-play');
-        button.classList.remove('button-stop');
         this.backGroundSoundLoop();
     },
 }
