@@ -26,8 +26,12 @@ class AudioManager {
             this.updateCredit(fileOrHandle.credit);
             this.fetchAndProcessAudio("assets/background/" + fileOrHandle.filename, this.sourceBuffer, this.mediaSource);
             console.log("this.play()");
-            this.play()
         });
+            // Wait for the 'canplaythrough' event before calling play
+        this.audioElement.addEventListener('canplaythrough', () => {
+            console.log("Audio is fully loaded and ready to play.");
+            this.play();
+         });
 
     }
 
