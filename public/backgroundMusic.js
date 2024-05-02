@@ -1,174 +1,153 @@
-class AudioManager {
-    constructor() {
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const AUDIO_CACHE_NAME = 'audio-cache';
+
+class AudioManager 
+{
+    constructor() 
+    {
         this.audioElement = document.createElement('audio');
-        document.body.appendChild(this.audioElement);  // Ensure the audio element is in the DOM
-        this.pendingData = [];
-        this.readerDone = false; // Initialization of readerDone
-        this.audioElement.addEventListener('timeupdate', () => {
-            this.manageBuffering();
-        });
-        this.audioElement.volume = 0.5;
+        this.audioElement.hidden = true;
+        this.audioElement.controls = true; // Optionally add controls
+        document.body.appendChild(this.audioElement); // Append the audio element to the body
+
+        this.isPlaying = false;
+        this.isProcessing = false;
+        this.onEndedCallback = null; // Custom callback for when playback ends naturally
+        this.fetchQueue = [];
+        this.isFetching = false;
     }
 
-    playSound(fileOrHandle) {
-        this.mediaSource = new MediaSource();
-        this.audioElement.src = URL.createObjectURL(this.mediaSource);
-        this.readerDone = false;
-        this.mediaSource.addEventListener('sourceopen', () => {
-            this.sourceBuffer = this.mediaSource.addSourceBuffer('audio/mpeg');
-            this.sourceBuffer.addEventListener('updateend', () => 
-            {
-                if (!this.sourceBuffer.updating && this.pendingData.length > 0 && !this.isBufferFull(this.sourceBuffer)) {
-                    this.processQueue(this.sourceBuffer, this.mediaSource); // Process the queue after buffer updates
-                }
-            });
-            this.updateCredit(fileOrHandle.credit);
-            this.fetchAndProcessAudio("assets/background/" + fileOrHandle.filename, this.sourceBuffer, this.mediaSource);
-            console.log("this.play()");
-        });
-            // Wait for the 'canplaythrough' event before calling play
-        this.audioElement.addEventListener('canplaythrough', () => {
-            console.log("Audio is fully loaded and ready to play.");
-            this.play();
-         });
-
-    }
-
-    manageBuffering() {
-        const bufferSafeThreshold = 5; // seconds ahead of current time to keep buffered
-        const maxBufferAhead = 30; // maximum seconds to buffer ahead of the current time
-        if (!this.mediaSource || this.mediaSource.readyState === 'ended' || !this.sourceBuffer) return;
+    async playSound(fileOrHandle) {
+        this.isProcessing = true;
+        if (this.isPlaying) this.stop(); // Stop any currently playing audio
     
-        let bufferedEnd = 0;
+        const audioUrl = "assets/background/" + fileOrHandle.filename;
+        this.updateCredit(fileOrHandle.credit);
+    
         try {
-            bufferedEnd = this.sourceBuffer.buffered.length > 0 ? 
-                this.sourceBuffer.buffered.end(this.sourceBuffer.buffered.length - 1) : 0;
-        } catch {
-            return;
+            const cache = await caches.open(AUDIO_CACHE_NAME);
+            let response = await cache.match(audioUrl);
+            if (!response) {
+                console.log("Not found in cache. Fetching and streaming...");
+                // Start streaming immediately without waiting for the cache
+                this.audioElement.src = audioUrl;
+                this.audioElement.play().then(() => {
+                    this.isPlaying = true;
+                    console.log("Playback started successfully.");
+                }).catch(error => {
+                    console.error("Error playing audio:", error);
+                });
+                this.enqueueFetch(audioUrl); // Queue the fetch operation
+                // Handle caching in the background
+                fetch(audioUrl).then(async response => {
+                    if (response.ok) {
+                        const cacheResponse = response.clone();
+                        await cache.put(audioUrl, cacheResponse);
+                        console.log("Audio cached : " + audioUrl);
+                    } else {
+                        console.error("Failed to fetch audio file.");
+                    }
+                }).catch(error => {
+                    console.error("Error fetching and caching audio:", error);
+                });
+            } else {
+                console.log("Found in cache. Loading from cache...");
+                // If the audio is in the cache, use it directly
+                this.audioElement.src = URL.createObjectURL(await response.blob());
+                this.audioElement.play().then(() => {
+                    this.isPlaying = true;
+                    console.log("Playback started successfully.");
+                }).catch(error => {
+                    console.error("Error playing audio:", error);
+                });
+            }
+
+        } catch (error) {
+            console.error("Error playing or caching audio:", error);
         }
     
-        const currentTime = this.audioElement.currentTime;
-        if (bufferedEnd - currentTime < bufferSafeThreshold) {
-            if (bufferedEnd < currentTime + maxBufferAhead && !this.readerDone) {
-                console.log("Buffer running low, fetching more data.");
-                this.readAndAppend(this.reader, this.sourceBuffer, this.mediaSource);
+        this.audioElement.onended = () => {
+            this.isPlaying = false;
+            if (this.onEndedCallback) {
+                this.onEndedCallback(); // Call the registered callback if set
             }
-            if (bufferedEnd - currentTime < 1 && !this.audioElement.paused) {
-                console.log("Buffer underrun");
-            }
-        }
-    }
-
-    fetchAndProcessAudio(url, sourceBuffer, mediaSource) {
-        fetch(url)
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.body.getReader();
-            })
-            .then(reader => {
-                this.reader = reader;  // Store the reader in the class
-                this.readAndAppend(this.reader, sourceBuffer, mediaSource);
-            })
-            .catch(e => console.error('Failed to fetch audio:', e));
-    }
-
-    readAndAppend(reader, sourceBuffer, mediaSource) {
-        reader.read().then(({ done, value }) => {
-            if (done) {
-                this.readerDone = true;  // Set a flag when reader completes
-                this.checkAndTriggerEndOfStream(sourceBuffer, mediaSource);
-                return;
-            }
-            this.queueData(value, sourceBuffer);
-            if (!sourceBuffer.updating) {
-                this.processQueue(sourceBuffer, mediaSource);
-            }
-            // Remove recursive call here to allow managed buffering
-        }).catch(error => console.error('Error reading from stream:', error));
-    }
-    queueData(chunk, sourceBuffer) {
-        if (sourceBuffer.updating || this.pendingData.length > 0) {
-            this.pendingData.push(chunk);
-        } else {
-            sourceBuffer.appendBuffer(chunk);
-        }
-    }
-    checkAndTriggerEndOfStream(sourceBuffer, mediaSource) {
-        if (!sourceBuffer.updating && this.pendingData.length === 0 && this.readerDone) {
-            mediaSource.endOfStream();
-        }
-    }
-
-    isBufferFull(sourceBuffer) {
-        const buffered = sourceBuffer.buffered;
-        if (buffered.length === 0) return false; // No data, buffer is definitely not full
+            console.log("Playback finished.");
+            URL.revokeObjectURL(this.audioElement.src); // Clean up the object URL to release memory
+        };
     
-        // Check if the buffer has 'enough' data queued - this is heuristic
-        let totalBuffered = 0;
-        for (let i = 0; i < buffered.length; i++) {
-            totalBuffered += buffered.end(i) - buffered.start(i);
-        }
-        
-        // Here, '10' is a threshold in seconds you might adjust based on your application's needs
-        return totalBuffered > 10;
+        this.isProcessing = false;
     }
 
-    processQueue(sourceBuffer, mediaSource) {
-        console.log("Processing queue", this.pendingData.length);
-        if (this.pendingData.length > 0 && !sourceBuffer.updating) {
-            console.log("Appending from queue");
-            sourceBuffer.appendBuffer(this.pendingData.shift());
+    preload(fileOrHandle) {
+        const audioUrl = "assets/background/" + fileOrHandle.filename;
+        this.fetchQueue.push(audioUrl);
+        this.processFetchQueue(); // Start processing the queue if not already started
+    }
+    
+    enqueueFetch(audioUrl) {
+        this.fetchQueue.push(audioUrl);
+        this.processFetchQueue(); // Start processing the queue if not already started
+    }
+
+    async processFetchQueue() {
+        console.log("this.isFetching " + this.isFetching)
+        console.log(" this.fetchQueue " + this.fetchQueue)
+        if (this.isFetching || this.fetchQueue.length === 0) {
+            return; // Exit if a fetch is already in process or the queue is empty
         }
-        if (this.pendingData.length === 0 && !sourceBuffer.updating &&  this.readerDone) {
-            mediaSource.endOfStream();
-            console.log("End of Stream");
+
+        this.isFetching = true;
+        const url = this.fetchQueue.shift();
+        try {
+            const cache = await caches.open(AUDIO_CACHE_NAME);
+            const response = await fetch(url);
+            if (response.ok) {
+                await cache.put(url, response);
+                console.log("Audio file cached successfully:", url);
+            } else {
+                console.error("Failed to fetch the file for caching:", url);
+            }
+        } catch (error) {
+            console.error("Error fetching and caching audio:", error);
+        } finally {
+            this.isFetching = false;
+            this.processFetchQueue(); // Recursively process the next item in the queue
         }
+    }
+
+    setOnEndedCallback(callback) {
+        this.onEndedCallback = callback;
+    }
+
+    pause() {
+        this.audioElement.pause();
+        console.log("Playback has been paused.");
+    }
+
+    resume() {
+        this.audioElement.play();
+        console.log("Playback has resumed.");
+    }
+
+    stop() {
+        this.audioElement.pause();
+        this.audioElement.currentTime = 0;
+        this.isPlaying = false;
+        console.log("Playback has been stopped.");
     }
 
     setVolume(level) {
         this.audioElement.volume = level;
+        console.log(`Volume set to ${level}.`);
     }
 
     isCurrentlyPlaying() {
-        return !this.audioElement.paused && !this.audioElement.ended;
+        return this.isPlaying;
     }
-    
+
     updateCredit(credit) {
         const creditTitle = document.getElementById('background-music-Credit');
-        creditTitle.innerHTML = credit;
-    }
-
-    setOnEndedCallback(callback) {
-        this.audioElement.onended = callback;
-    }
-
-    play() {
-        if (this.audioContext.state === 'suspended') {
-            this.audioContext.resume().then(() => {
-                console.log("AudioContext resumed successfully");
-                return this.audioElement.play();
-            }).then(() => {
-                this.isPlaying = true;
-                console.log("Playback has started successfully.");
-            }).catch(e => {
-                console.error('Error playing audio:', e);
-            });
-        } else if (!this.isPlaying) {
-            this.audioElement.play().then(() => {
-                this.isPlaying = true;
-                console.log("Playback has started successfully.");
-            }).catch(e => {
-                console.error('Error playing audio:', e);
-            });
-        }
-    }
-
-    pause() {
-        if (this.isPlaying) {
-            this.audioElement.pause();
-            this.isPlaying = false;
-            console.log("Playback has been paused.");
+        if (creditTitle) {
+            creditTitle.innerHTML = credit;
         }
     }
 }
@@ -296,8 +275,14 @@ const BackgroundMusic = {
         if (this.soundIndex >= this.filesToPlay.length) {
             this.soundIndex = 0;  // Reset index if it exceeds the array
         }
-        const fileToPlay = this.filesToPlay[this.soundIndex++];
-        this.audioManager.playSound(fileToPlay);
+        let fileToPlay = this.filesToPlay[this.soundIndex];
+        if(fileToPlay)
+            this.audioManager.playSound(fileToPlay);
+
+        //Preload next
+        this.soundIndex++;
+        fileToPlay = this.filesToPlay[this.soundIndex];
+        this.audioManager.preload(fileToPlay)
     },
 
     // Function to capitalize the first letter of a string
@@ -330,7 +315,7 @@ const BackgroundMusic = {
         {
             if(this.filesToPlay.length == 0)
             {
-                this.audioManager.pause();
+                this.audioManager.stop();
                 const creditTitle = document.getElementById('background-music-Credit'); 
                 creditTitle.innerHTML  = "---";
                 this.backgroundButton.classList.remove('button-play');
@@ -338,69 +323,11 @@ const BackgroundMusic = {
             }
             else
             {
-                this.audioManager.pause();
+                this.audioManager.stop();
                 this.backGroundSoundLoop();
             }
         }
     },
-
-    playSound(fileOrHandle) {
-        const context = this.getAudioContext();
-        if (context.state === 'suspended') {
-            context.resume();
-        }
-    
-        const source = context.createBufferSource();
-        const gainNode = context.createGain();
-        const analyser = context.createAnalyser();
-    
-        const processAudioBuffer = (arrayBuffer) => {
-            context.decodeAudioData(arrayBuffer)
-                .then(audioBuffer => {
-                    source.buffer = audioBuffer;
-                    source.loop = false;
-                    source.connect(analyser);
-                    analyser.connect(gainNode);
-                    gainNode.connect(context.destination);
-    
-                    const volume = document.getElementById('music-volume').value;
-                    gainNode.gain.value = volume / 100; // Set initial volume
-                    source.start(0);
-    
-                    const updateGain = () => {
-                        this.adjustVolume(); // If you have an adjustVolume function
-                        if (!source.ended) { // Instead of paused, check if source has ended
-                            requestAnimationFrame(updateGain); // Recursively update gain
-                        }
-                    };
-    
-                    source.onended = () => {
-                        console.log('Sound ended, looping to next.');
-                        this.backGroundSoundLoop(); // Set up loop logic
-                    };
-                    this.setBackgroundSound({ source, gainNode, analyser }); // Store active sound
-                   // updateGain(); //WIP
-                })
-               // Allow playing again
-                .catch(e => {console.error('Error decoding audio data:', e); });
-        };
-    
-        // Determine if it's a file handle or URL
-        if (fileOrHandle instanceof FileSystemFileHandle) {
-            fileOrHandle.getFile()
-                .then(file => file.arrayBuffer())
-                .then(arrayBuffer => processAudioBuffer(arrayBuffer))
-                .catch(e => {console.error('Error reading local file:', e);});
-        } else {
-            const creditTitle = document.getElementById('background-music-Credit'); 
-            creditTitle.innerHTML  = fileOrHandle.credit;
-            fetch("assets/background/" + fileOrHandle.filename)
-                .then(response => response.arrayBuffer())
-                .then(arrayBuffer => processAudioBuffer(arrayBuffer))
-                .catch(e => {console.error('Error fetching audio data:', e);});
-        }
-    },
-
 
     // Function to get the filename from a file path or a file handle
     getFilename(fileOrHandle) {
@@ -417,11 +344,12 @@ const BackgroundMusic = {
 
 
     async playBackgroundSound(type, button) {
+        if(this.audioManager.isProcessing) return;
         const creditTitle = document.getElementById('background-music-Credit'); 
         creditTitle.innerHTML  = "---";
         if (this.audioManager.isCurrentlyPlaying()) 
         {
-            this.audioManager.pause();
+            this.audioManager.stop();
             this.backgroundButton.classList.remove('button-play');
             this.backgroundButton.classList.add('button-stop');
             if (type === this.type) 
