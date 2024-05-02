@@ -1,6 +1,9 @@
 class AudioManager {
     constructor() {
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.gainNode = this.audioContext.createGain(); // Create a GainNode for volume control
+        this.gainNode.connect(this.audioContext.destination); // Connect the GainNode to the destination
+        this.gainNode.gain.value = 0.5;
         this.sourceNode = null; // Currently active source node
         this.audioBuffer = null; // Buffer holding decoded audio data
         this.isPlaying = false;
@@ -39,7 +42,7 @@ class AudioManager {
     createSourceNode() {
         this.sourceNode = this.audioContext.createBufferSource();
         this.sourceNode.buffer = this.audioBuffer;
-        this.sourceNode.connect(this.audioContext.destination);
+        this.sourceNode.connect(this.gainNode); // Connect source to gain node instead of directly to destination
         this.sourceNode.onended = () => {
             if (!this.userStopped) {
                 this.isPlaying = false;
@@ -86,9 +89,7 @@ class AudioManager {
     }
 
     setVolume(level) {
-        if (this.audioContext.destination) {
-            this.audioContext.destination.volume = level;
-        }
+        this.gainNode.gain.value = level; // Adjust the gain value to control the volume
     }
 
     isCurrentlyPlaying() {
@@ -102,6 +103,7 @@ class AudioManager {
         }
     }
 }
+
 
 
 
@@ -159,6 +161,8 @@ const BackgroundMusic = {
         for (let music of this.backgroundMusicArray) {
             for (let subType of music.contexts) {
                 if (!uniqueOptions.has(subType)) {
+                    console.log(subType)
+                    console.log(music.filename)
                     uniqueOptions.add(subType);
                 }
             }
