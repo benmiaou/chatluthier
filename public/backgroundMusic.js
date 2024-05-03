@@ -21,11 +21,11 @@ class AudioManager
         this.isFetching = false;
     }
 
-    async playSound(fileOrHandle) {
+    async playSound(fileOrHandle, type) {
         this.isProcessing = true;
         this.stop(); // Stop any currently playing audio
 
-        this.currentButton = document.getElementById(fileOrHandle.types[0] + 'Button'); 
+        this.currentButton = document.getElementById(type + 'Button'); 
         this.currentButton.classList.add('button-play');
         this.currentButton.classList.remove('button-stop');
 
@@ -267,12 +267,13 @@ const BackgroundMusic = {
         }
         let fileToPlay = this.filesToPlay[this.soundIndex];
         if(fileToPlay)
-            this.audioManager.playSound(fileToPlay);
+            this.audioManager.playSound(fileToPlay, this.type);
 
         //Preload next
         this.soundIndex++;
         fileToPlay = this.filesToPlay[this.soundIndex];
-        this.audioManager.preload(fileToPlay)
+        if(fileToPlay)
+            this.audioManager.preload(fileToPlay)
     },
 
     // Function to capitalize the first letter of a string
@@ -329,19 +330,16 @@ const BackgroundMusic = {
     },
 
 
-    async playBackgroundSound(type, button) {
+    async playBackgroundSound(type) {
         if(this.audioManager.isProcessing || !this.isClickable) return;
         this.isClickable = false;
         setTimeout(() => {
             this.isClickable = true;
-        }, 500);
+        }, 250);
         if (this.audioManager.isCurrentlyPlaying()) 
         {
             this.audioManager.stop();
-            if (type === this.type) 
-            {
-                return;
-            }
+            if (type === this.type) return;
         }
         this.type = type;
         this.filesToPlay =  this.findSoundsByTypeAndContext();
