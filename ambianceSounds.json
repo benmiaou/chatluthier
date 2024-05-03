@@ -20,7 +20,7 @@
         "credit": "Sound Effect by <a href=\"https://pixabay.com/fr/users/soundsforyou-4861230/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=113219\">Mikhail</a> from <a href=\"https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=113219\">Pixabay</a>"
     },
     {
-        "filename": "587000__frostcp__heavy-rain-outside-window.wav",
+        "filename": "587000__frostcp__heavy-rain-outside-window.mp3",
         "display_name": "Rain",
         "imageFile": "rain.webp",
         "contexts": [
@@ -39,7 +39,7 @@
         "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/reinsamba/sounds/15692\">tree frog concert.mp3</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/reinsamba\">reinsamba</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by/4.0/?ref=openverse\">CC BY 4.0</a>.</p>"
     },
     {
-        "filename": "544844__samuelgremaud__wind-and-leaves.wav",
+        "filename": "544844__samuelgremaud__wind-and-leaves.mp3",
         "display_name": "Wind (forest)",
         "imageFile": "wind_forest.webp",
         "contexts": [
@@ -49,7 +49,7 @@
         "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/SamuelGremaud/sounds/544844\">WIND AND LEAVES</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/SamuelGremaud\">SamuelGremaud</a> is marked with <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/publicdomain/zero/1.0/?ref=openverse\">CC0 1.0</a>.</p>"
     },
     {
-        "filename": "547473__samuelgremaud__cicadas-9.wav",
+        "filename": "547473__samuelgremaud__cicadas-9.mp3",
         "display_name": "Cicadas",
         "imageFile": "cicadas.webp",
         "contexts": [
@@ -59,7 +59,7 @@
         "credit": "<a href=\"https://freesound.org/people/SamuelGremaud/sounds/547473/\">CICADAS - 9</a> by <a href=\"https://freesound.org/people/SamuelGremaud/\">SamuelGremaud</a> | License: <a href=\"http://creativecommons.org/publicdomain/zero/1.0/\">Creative Commons 0</a>"
     },
     {
-        "filename": "467570__samuelgremaud__pigs-1.wav",
+        "filename": "467570__samuelgremaud__pigs-1.mp3",
         "display_name": "Pigs",
         "imageFile": "pigs.webp",
         "contexts": [
@@ -68,7 +68,7 @@
         "credit": "<a href=\"https://freesound.org/people/SamuelGremaud/sounds/467570/\">PIGS - 1</a> by <a href=\"https://freesound.org/people/SamuelGremaud/\">SamuelGremaud</a> | License: <a href=\"http://creativecommons.org/publicdomain/zero/1.0/\">Creative Commons 0</a>"
     },
     {
-        "filename": "140866__reinsamba__110606_children_at_school.wav",
+        "filename": "140866__reinsamba__110606_children_at_school.mp3",
         "display_name": "Children",
         "imageFile": "children.webp",
         "contexts": [
@@ -88,7 +88,7 @@
         "credit": "Sound Effect from <a href=\"https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=76283\">Pixabay</a>"
     },
     {
-        "filename": "zombis.wav",
+        "filename": "zombis.mp3",
         "display_name": "Zombies",
         "imageFile": "zombies.webp",
         "contexts": [
@@ -176,5 +176,41 @@
             "nature"
         ],
         "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/sverga/sounds/16726\">birds-in-spring.aif</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/sverga\">sverga</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by/3.0/?ref=openverse\">CC BY 3.0</a>.</p>"
+    },
+    {
+        "filename": "546068__diakunik__waterfall.mp3",
+        "display_name": "Waterfall",
+        "imageFile": "waterfall.webp",
+        "contexts": [
+            "water"
+        ],
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/diakunik/sounds/546068\">Waterfall</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/diakunik\">diakunik</a> is marked with <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/publicdomain/zero/1.0/?ref=openverse\">CC0 1.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/zero.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+    },
+    {
+        "filename": "tribal-warsong-drums-147780.mp3",
+        "display_name": "Drums",
+        "imageFile": "drums.webp",
+        "contexts": [
+            "drum"
+        ],
+        "credit": "Sound Effect by <a href=\"https://pixabay.com/fr/users/soundreality-31074404/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=147780\">Jurij</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=147780\">Pixabay</a>"
+    },
+    {
+        "filename": "vikings-in-battle-swords-crossing-shields-bashing-men-yelling-17335.mp3",
+        "display_name": "Battle (small)",
+        "imageFile": "smallBattle.webp",
+        "contexts": [
+            "battle"
+        ],
+        "credit": "Sound Effect from <a href=\"https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=17335\">Pixabay</a>"
+    },
+    {
+        "filename": "throat-singing-in-a-cave-25481.mp3",
+        "display_name": "Throat Singing",
+        "imageFile": "thrSinging.webp",
+        "contexts": [
+            "singing"
+        ],
+        "credit": "Sound Effect from <a href=\"https://pixabay.com/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=25481\">Pixabay</a>"
     }
 ]
