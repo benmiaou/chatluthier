@@ -25,7 +25,8 @@ class AudioManager
 
         const audioUrl = "assets/background/" + fileOrHandle.filename;
         this.updateCredit(fileOrHandle.credit);
-        this.audioPlayer.playSound(audioUrl);
+        await this.audioPlayer.playSound(audioUrl);
+        this.audioPlayer.play();
         this.isProcessing = false;
     }
 
@@ -40,11 +41,11 @@ class AudioManager
         this.audioPlayer.setOnEndedCallback(callback);
     }
 
-    stop() {
+    stop() 
+    {
         if(this.audioPlayer.isPlaying)
         {
             this.audioPlayer.stop();
-            this.isPlaying = false;
             console.log("Playback has been stopped.");
         }
        
@@ -57,16 +58,19 @@ class AudioManager
         }
     }
 
-    setVolume(level) {
+    setVolume(level) 
+    {
         this.audioPlayer.setVolume(level);
         console.log(`Volume set to ${level}.`);
     }
 
-    isCurrentlyPlaying() {
+    isCurrentlyPlaying() 
+    {
         return  this.audioPlayer.isPlaying;
     }
 
-    updateCredit(credit) {
+    updateCredit(credit) 
+    {
         const creditTitle = document.getElementById('background-music-Credit');
         if (creditTitle) {
             creditTitle.innerHTML = credit;

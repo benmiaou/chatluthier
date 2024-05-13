@@ -5,7 +5,7 @@ class AudioPlayer
         this.audioElement = document.createElement('audio');
         this.audioElement.style.display = 'none';
         this.audioElement.controls = true;
-        this.audioElement.autoplay = true;
+        this.audioElement.autoplay = false;
         this.audioElement.volume = 0.5;
         this.audioElement.preload=false;
         this.audioElement.enable = false;
@@ -20,22 +20,10 @@ class AudioPlayer
             if (!response) {
                 // Start streaming immediately without waiting for the cache
                 this.audioElement.src = audioUrl;
-                this.audioElement.play().then(() => {
-                    this.isPlaying = true;
-                    console.log("Playback started successfully from stream.");
-                }).catch(error => {
-                    console.error("Error playing audio:", error);
-                });
                 this.enqueueFetch(audioUrl); // Queue the fetch operation
             } else {
                 // If the audio is in the cache, use it directly
                 this.audioElement.src = URL.createObjectURL(await response.blob());
-                this.audioElement.play().then(() => {
-                    this.isPlaying = true;
-                    console.log("Playback started successfully from cache.");
-                }).catch(error => {
-                    console.error("Error playing audio:", error);
-                });
             }
 
         } catch (error) {
@@ -68,12 +56,19 @@ class AudioPlayer
 
     pause() 
     {
+        this.isPlaying = false;
         this.audioElement.pause();
     }
 
-    resume() 
+    play() 
     {
-        this.audioElement.play();
+        this.isPlaying = true;
+        this.audioElement.play().then(() => 
+        {
+            console.log("Playback started.");
+        }).catch(error => {
+            console.error("Error playing audio:", error);
+        });
     }
 
     getPlayer()
