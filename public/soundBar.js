@@ -4,10 +4,10 @@ class SoundBar
     {
         this.ambianceSound = ambianceSound;
         this.MAX_GAIN = 100;
-        this.PROGRESS = 10;
+        this.PROGRESS = 5;
         this.isDragging = false;
         this.lastX = 0;
-        this.stepSize = 10;
+        this.stepSize = 5;
         this.lastInvocation = 0;
         this.moved = false;
         this.licenseRegex = /<a[^>]*href="https:\/\/creativecommons\.org\/[^>]*>([^<]*)<\/a>/i;
