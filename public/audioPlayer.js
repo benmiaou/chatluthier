@@ -1,13 +1,11 @@
-class AudioPlayer 
-{
-    constructor() 
-    {
+class AudioPlayer {
+    constructor() {
         this.audioElement = document.createElement('audio');
         this.audioElement.style.display = 'none';
         this.audioElement.controls = true;
         this.audioElement.autoplay = false;
         this.audioElement.volume = 0.5;
-        this.audioElement.preload=false;
+        this.audioElement.preload = false;
         this.audioElement.enable = false;
         this.onEndedCallback = null; // Custom callback for when playback ends naturally
         this.isPlaying = false;
@@ -15,12 +13,12 @@ class AudioPlayer
 
     async playSound(audioUrl) {
         try {
-            const cache = await caches.open(AUDIO_CACHE_NAME);
+            const cache = await caches.open('AUDIO_CACHE_NAME');
             let response = await cache.match(audioUrl);
             if (!response) {
                 // Start streaming immediately without waiting for the cache
                 this.audioElement.src = audioUrl;
-                this.enqueueFetch(audioUrl); // Queue the fetch operation
+                PreLoader.enqueueFetch(audioUrl); // Queue the fetch operation
             } else {
                 // If the audio is in the cache, use it directly
                 this.audioElement.src = URL.createObjectURL(await response.blob());
@@ -29,6 +27,7 @@ class AudioPlayer
         } catch (error) {
             console.error("Error playing or caching audio:", error);
         }
+
         this.audioElement.onended = () => {
             this.isPlaying = false;
             if (this.onEndedCallback) {
@@ -43,10 +42,8 @@ class AudioPlayer
         this.onEndedCallback = callback;
     }
 
-    stop() 
-    {
-        if(this.isPlaying)
-        {
+    stop() {
+        if (this.isPlaying) {
             this.audioElement.pause();
             this.audioElement.currentTime = 0;
             this.isPlaying = false;
@@ -54,35 +51,33 @@ class AudioPlayer
         }
     }
 
-    pause() 
-    {
+    pause() {
         this.isPlaying = false;
         this.audioElement.pause();
     }
 
-    play() 
-    {
+    play() {
         this.isPlaying = true;
-        this.audioElement.play().then(() => 
-        {
+        this.audioElement.play().then(() => {
             console.log("Playback started.");
         }).catch(error => {
             console.error("Error playing audio:", error);
         });
     }
 
-    getPlayer()
-    {
+    getPlayer() {
         return this.audioElement;
     }
 
-    setLoop(looping)
-    {
+    setLoop(looping) {
         this.audioElement.loop = looping;
     }
 
-    isCurrentlyPlaying() 
-    {
+    isLooping() {
+        return this.audioElement.loop;
+    }
+
+    isCurrentlyPlaying() {
         return this.isPlaying;
     }
 
@@ -90,5 +85,4 @@ class AudioPlayer
         this.audioElement.volume = level;
         console.log(`Volume set to ${level}.`);
     }
-
 }
