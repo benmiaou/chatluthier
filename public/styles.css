@@ -193,6 +193,12 @@ nav a {
     cursor: not-allowed;
 }
 
+.button-loop {
+    background-color: #487aa8; /* Red for stopped */
+    color: white;
+    display: block; /* Change display to block */
+}
+
 
 /* Icons styling */
 .icon {

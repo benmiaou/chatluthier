@@ -1,114 +1,97 @@
 const Soundboard = {
     soundboardList: {},
-    audioContext : null,
-    currentvolume : 0.5,
-    soundboardItems : null,
-    selectedContext : "All",
+    audioContext: null,
+    currentVolume: 0.5,
+    soundboardItems: null,
+    selectedContext: "All",
 
-    getAudioContext() 
-    {
+    getAudioContext() {
         if (!this.audioContext) {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
-        return  this.audioContext;
+        return this.audioContext;
     },
 
-    async loadSoundboardButtons()
-    {
+    async loadSoundboardButtons() {
         let response;
-        if (GoogleLogin.userId) 
-        {
+        if (GoogleLogin.userId) {
             response = await fetch(`/soundboard?userId=${GoogleLogin.userId}`);
-        }
-        else
-        {
+        } else {
             response = await fetch(`/soundboard`);
         }
         this.soundboardItems = await response.json();
-        this.generateSoundboardButtons(this.soundboardItems)
+        this.generateSoundboardButtons(this.soundboardItems);
     },
 
-    updatecontexts()
-    {
-
+    updateContexts() {
+        // Update context-related logic if any
     },
 
-    generateSoundboardButtons(soundboardItems) 
-    {
+    generateSoundboardButtons(soundboardItems) {
         const section = document.getElementById("soundboard");
         section.innerHTML = '';  // Clear existing content
 
-        soundboardItems.forEach(soundboardItem =>
-        {
-            // Determine if the item is a file handle or a string based on `isLocal`
+        soundboardItems.forEach(soundboardItem => {
+            // Create a button for each soundboard item
             const button = document.createElement('button');
             button.textContent = soundboardItem.display_name;
-            // If not local, the item is treated as a string path
-            button.onclick = () => {
-                this.toggleSoundboardSound(soundboardItem, false, button);
+
+            // Create an AudioPlayer instance
+            let audioPlayer = new AudioPlayer();
+            audioPlayer.playSound("assets/soundboard/" + soundboardItem.filename);
+
+            let clickCount = 0;
+            let clickTimer;
+            // Set the on ended callback for the audio player
+            audioPlayer.setOnEndedCallback(() => {
+                if (!audioPlayer.isLooping()) {
+                    clickCount = 0;
+                    button.classList.remove('button-play');
+                    button.classList.add('button-stop');
+                }
+            });
+            // Function to handle the click event
+            const handleClick = () => {
+                clickCount++;
+                
+                if (clickCount === 1) {
+                    // First click: start playing the audio
+                    audioPlayer.play();
+                    button.classList.add('button-play');
+                    button.classList.remove('button-stop');
+                } else if (clickCount === 2) {
+                    // Second click: set the audio to loop
+                    audioPlayer.setLoop(true);
+                    button.classList.add('button-loop');
+                } else if (clickCount === 3) {
+                    // Third click: stop the audio and reset loop
+                    audioPlayer.setLoop(false);
+                    audioPlayer.stop();
+                    button.classList.remove('button-play', 'button-loop');
+                    button.classList.add('button-stop');
+                    clickCount = 0;  // Reset the click count
+                }
             };
+
+            // Attach the click event handler to the button
+            button.addEventListener('click', handleClick);
+
+            // Set the initial classes for the button
             button.classList.add('button-stop', 'button');
+
+            // Store the audio player instance in the soundboard list
+            this.soundboardList[soundboardItem.display_name] = audioPlayer;
+
+            // Append the button to the section
             section.appendChild(button);
         });
     },
 
-    toggleSoundboardSound(soundboardItem, loop, button)
-    {
-        createModal(soundboardItem.credit); 
-        let sound = this.soundboardList[soundboardItem];
-        this.createSound(soundboardItem, loop, button);
-    },
-
-    createSound(soundboardItem, loop, button, type) 
-    {
-        const context = this.getAudioContext();
-        if (context.state === 'suspended') {
-            context.resume();
-        }
-        
-        const source = context.createBufferSource();
-        const gainNode = context.createGain();
-        gainNode.gain.value = this.currentvolume; // Set the initial volume
-    
-        const processAudioBuffer = (arrayBuffer) => {
-            context.decodeAudioData(arrayBuffer)
-                .then(audioBuffer => {
-                    source.buffer = audioBuffer;
-                    source.loop = loop;
-                    source.connect(gainNode);
-                    gainNode.connect(context.destination);
-                    source.start(0);
-    
-                    source.onended = () => {
-                        delete this.soundboardList[soundboardItem];
-                        if (button) {
-                            button.classList.remove('button-play');
-                            button.classList.add('button-stop');
-                        }
-                    };
-    
-                    this.soundboardList[soundboardItem] = { source, gainNode };
-                    if (button) {
-                        button.classList.add('button-play');
-                        button.classList.remove('button-stop');
-                    }
-                })
-                .catch(e => console.error('Error with decoding audio data:', e));
-        };
-        fetch("assets/soundboard/" + soundboardItem.filename)
-            .then(response => response.arrayBuffer())
-            .then(arrayBuffer => processAudioBuffer(arrayBuffer))
-            .catch(e => console.error('Error fetching or decoding audio data:', e));
-    },
-
     setVolume(volume) {
         const gainValue = volume / 100;
-        this.currentvolume = gainValue;
+        this.currentVolume = gainValue;
         Object.values(this.soundboardList).forEach(sound => {
-            if (sound.gainNode) {
-                sound.gainNode.gain.value = gainValue;
-            }
+            sound.setVolume(gainValue);
         });
     },
-
-}
+};
