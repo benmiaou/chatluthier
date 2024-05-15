@@ -1,9 +1,9 @@
 const soundBar = {
   MAX_GAIN : 100,
-  PROGRESS : 10,
+  PROGRESS : 5,
   isDragging: false,
   lastX: 0, // Last X position, used to calculate movement
-  stepSize: 10, // Step size as a percentage
+  stepSize: 5, // Step size as a percentage
   lastInvocation: 0, // Time of the last function call
   moved : false,
   licenseRegex : /<a[^>]*href="https:\/\/creativecommons\.org\/[^>]*>([^<]*)<\/a>/i,
