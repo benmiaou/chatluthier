@@ -1,100 +1,94 @@
-const soundBar = {
-  MAX_GAIN : 100,
-  PROGRESS : 5,
-  isDragging: false,
-  lastX: 0, // Last X position, used to calculate movement
-  stepSize: 5, // Step size as a percentage
-  lastInvocation: 0, // Time of the last function call
-  moved : false,
-  licenseRegex : /<a[^>]*href="https:\/\/creativecommons\.org\/[^>]*>([^<]*)<\/a>/i,
-  
-  // Function to initialize touch events
+class SoundBar 
+{
+    constructor(ambianceSound) 
+    {
+        this.ambianceSound = ambianceSound;
+        this.MAX_GAIN = 100;
+        this.PROGRESS = 5;
+        this.isDragging = false;
+        this.lastX = 0;
+        this.stepSize = 5;
+        this.lastInvocation = 0;
+        this.moved = false;
+        this.licenseRegex = /<a[^>]*href="https:\/\/creativecommons\.org\/[^>]*>([^<]*)<\/a>/i;
+        this.soudPlayer = new AudioPlayer();
+        this.soudPlayer.playSound("assets/ambiance/" +  this.ambianceSound.filename);
+        this.soudPlayer.setLoop(true);
+        this.soudPlayer.setVolume(0);
+
+        this.progressBarContainer = document.createElement('div');
+        this.progressBarContainer.className = 'progress-bar-container';
+        this.progressBarContainer.setAttribute('style', 'background-image: url(assets/images/backgrounds/' +  this.ambianceSound.imageFile + ')');
+        this.progressBarContainer.draggable = false;
+
+        this.progressBar = document.createElement('div');
+        this.progressBar.className = 'progress-bar';
+        this.progressBar.id = 'progress-bar-' +  this.ambianceSound.filename;
+        this.progressBar.draggable = false;
+        this.progressBarContainer.appendChild( this.progressBar);
+
+        this.license = this.extractLicense( this.ambianceSound.credit);
+        this.soundBarText = document.createElement('div');
+        this.soundBarText.textContent =  this.ambianceSound.display_name;
+        this.soundBarText.className = 'sound-bar-text';
+        this.soundBarText.draggable = false;
+
+        this.soundLicense = document.createElement('div');
+        this.soundLicense.textContent = this.license;
+        this.soundLicense.className = 'sound-bar-licence';
+        this.soundLicense.draggable = false;
+
+        this.progressBarVolumeMinus = document.createElement('div');
+        this. progressBarVolumeMinus.className = 'progress-bar-volume minus';
+        this.progressBarVolumePlus = document.createElement('div');
+        this.progressBarVolumePlus.className = 'progress-bar-volume plus';
+
+        this.initializeTouchEvents(this.progressBarVolumeMinus);
+        this.initializeTouchEvents(this.progressBarVolumePlus);
+
+        this.progressBarContainer.appendChild(this.progressBarVolumeMinus);
+        this.progressBarContainer.appendChild(this.progressBarVolumePlus);
+        this.progressBarContainer.appendChild(this.soundBarText);
+        if (this.license !== "")  this.progressBarContainer.appendChild(this.soundLicense);
+        this.credit = this.ambianceSound.display_name + " : " +  this.ambianceSound.credit;
+        this.initializeDraggableProgressBar();
+    }
+
+    getElement()
+    {
+        return this.progressBarContainer;
+    }
+
     initializeTouchEvents(element) {
-        // Touchstart event to simulate hover on touch devices
         element.addEventListener('touchstart', () => {
-            element.classList.add('touch-hover'); // Apply hover class on touch
+            element.classList.add('touch-hover');
         });
 
-        // Touchend to reset the effect
         element.addEventListener('touchend', () => {
             setTimeout(() => {
-                element.classList.remove('touch-hover'); // Remove hover class after touch ends
-            }, 300); // Match the transition duration
+                element.classList.remove('touch-hover');
+            }, 300);
         });
-    },
+    }
 
-    // Function to extract the license type
-    extractLicense:  function  (html) 
-    {
+    extractLicense(html) {
         const match = html.match(this.licenseRegex);
         return match ? match[1] : "";
-    },
+    }
 
-  createProgressBar: function (ambianceSound) {
-    const progressBarContainer = document.createElement('div');
-    progressBarContainer.className = 'progress-bar-container';
-    progressBarContainer.setAttribute('style', 'background-image: url(assets/images/backgrounds/'+ambianceSound.imageFile+')');
-    progressBarContainer.draggable = false;
-
-    const progressBar = document.createElement('div');
-    progressBar.className = 'progress-bar';
-    progressBar.id = 'progress-bar-' + ambianceSound.filename;
-    progressBar.draggable = false;
-    progressBarContainer.appendChild(progressBar);
-
-    let licence = this.extractLicense(ambianceSound.credit);
-    // Add text inside the sound bar
-    const soundBarText = document.createElement('div');
-    soundBarText.textContent =ambianceSound.display_name;
-    soundBarText.className = 'sound-bar-text';
-    soundBarText.draggable = false; // Disable dragging for the text
-
-    // Add text inside the sound bar
-    const soundLicence = document.createElement('div');
-    soundLicence.textContent =licence;
-    soundLicence.className = 'sound-bar-licence';
-    soundLicence.draggable = false; // Disable dragging for the text
-
-    const progressBarVolumeMinus = document.createElement('div');
-    progressBarVolumeMinus.className = 'progress-bar-volume minus';
-
-
-    const progressBarVolumePlus = document.createElement('div');
-    progressBarVolumePlus.className = 'progress-bar-volume plus';
-
-       // Touchstart event to simulate hover on touch devices
-       progressBarVolumeMinus.addEventListener('touchstart', () => {
-        progressBarVolumeMinus.classList.add('touch-hover'); // Apply hover class on touch
-    });
-
-    // Use the common function to initialize touch events
-    this.initializeTouchEvents(progressBarVolumeMinus);
-    this.initializeTouchEvents(progressBarVolumePlus);
-
-
-    progressBarContainer.appendChild(progressBarVolumeMinus);
-    progressBarContainer.appendChild(progressBarVolumePlus);
-
-    progressBarContainer.appendChild(soundBarText);
-    if(licence !== "") progressBarContainer.appendChild(soundLicence);
-    var credit = ambianceSound.display_name + " : " + ambianceSound.credit;
-    this.initializeDraggableProgressBar(progressBarContainer ,progressBar, credit);
-    return progressBarContainer;
-  },
-
-  initializeDraggableProgressBar: function (progressBarContainer, progressBar, credit) {
+  initializeDraggableProgressBar() {
     const getPositionX = (event) => {
         return event.touches ? event.touches[0].clientX : event.clientX;
     };
 
     let intervalId = null; // To store the interval ID for continuous updates
 
-    const startIncrementing = (direction, progressBar, progressBarContainer) => {
+    const startIncrementing = (direction, progressBar,  progressBarContainer) => {
         this.adjustProgress(direction, progressBar, progressBarContainer);
         intervalId = setInterval(() => {
             this.adjustProgress(direction, progressBar, progressBarContainer);
         }, 100); // Increment every 100ms
-        createModal(credit); 
+        createModal(this.credit); 
     };
 
     const stopIncrementing = () => {
@@ -102,53 +96,57 @@ const soundBar = {
         intervalId = null;
     };
 
-    progressBarContainer.addEventListener('mousedown', (e) => {
+    this.progressBarContainer.addEventListener('mousedown', (e) => {
         const positionX = getPositionX(e);
-        const rect = progressBarContainer.getBoundingClientRect();
+        const rect = this.progressBarContainer.getBoundingClientRect();
         const relativePosition = (positionX - rect.left) /  rect.width;
         const direction = relativePosition < 0.5? -this.PROGRESS : this.PROGRESS;
-        startIncrementing(direction, progressBar, progressBarContainer);
+        startIncrementing(direction, this.progressBar, this.progressBarContainer);
     });
 
-    progressBarContainer.addEventListener('mouseup', () => {
+    this.progressBarContainer.addEventListener('mouseup', () => {
         stopIncrementing();
     });
 
-    progressBarContainer.addEventListener('mouseleave', () => {
+    this.progressBarContainer.addEventListener('mouseleave', () => {
         stopIncrementing();
     });
 
-    progressBarContainer.addEventListener('touchstart', (e) => {
+    this.progressBarContainer.addEventListener('touchstart', (e) => {
         const positionX = getPositionX(e);
-        const rect = progressBarContainer.getBoundingClientRect();
+        const rect = this.progressBarContainer.getBoundingClientRect();
         const relativePosition = (positionX - rect.left) /  rect.width;
         const direction = relativePosition < 0.5? -this.PROGRESS : this.PROGRESS;
-        startIncrementing(direction, progressBar, progressBarContainer);
+        startIncrementing(direction, this.progressBar, this.progressBarContainer);
         e.preventDefault();
     }, { passive: false });
 
-    progressBarContainer.addEventListener('touchend', () => {
+    this.progressBarContainer.addEventListener('touchend', () => {
         stopIncrementing();
     });
 
-    progressBarContainer.addEventListener('touchcancel', () => {
+    this.progressBarContainer.addEventListener('touchcancel', () => {
         stopIncrementing();
     });
-},
+}
 
-adjustProgress: function (adjustment, progressBar, progressBarContainer) {
-    let currentProgress = parseInt(progressBar.style.width, 10) || 0;
-    let newProgress = Math.min(this.MAX_GAIN, Math.max(0, currentProgress + adjustment));
-    progressBar.style.width = newProgress + '%'; // Clamp between 0 and this.MAX_GAIN%
+    adjustProgress(adjustment, progressBar, progressBarContainer) {
+        let currentProgress = parseInt(progressBar.style.width, 10) || 0;
+        let newProgress = Math.min(this.MAX_GAIN, Math.max(0, currentProgress + adjustment));
+        progressBar.style.width = newProgress + '%';
 
-    const event = new CustomEvent('soundBarValueChanged');
-    progressBarContainer.dispatchEvent(event); // Dispatch event when value changes
-},
+        const event = new CustomEvent('soundBarValueChanged');
+        progressBarContainer.dispatchEvent(event);
+        let volume = this.getVolume();
+        this.soudPlayer.setVolume(volume);
+        if(volume > 0)
+            this.soudPlayer.play()
+        else
+            this.soudPlayer.pause()
+    }
 
-
-  getVolumeFromProgressBar: function (progressBarContainer) {
-    const progressBar = progressBarContainer.querySelector('.progress-bar');
-    const widthPercentage = progressBar.style.width || '0%';
-    return parseFloat(widthPercentage) / this.MAX_GAIN; // Convert the percentage string to a float
-  }
-};
+    getVolume() {
+        const widthPercentage = this.progressBar.style.width || '0%';
+        return parseFloat(widthPercentage) / this.MAX_GAIN;
+    }
+}

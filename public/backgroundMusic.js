@@ -4,24 +4,18 @@ class AudioManager
 {
     constructor() 
     {
-        this.audioElement = document.getElementById('background-audio');  // Access the existing audio element
-        this.audioElement.style.display = 'none';
-        this.audioElement.controls = true;
-        this.audioElement.autoplay = true;
-        this.audioElement.volume = 0.5;
-        this.audioElement.preload=false;
-        this.audioElement.enable = false;
-
+        this.audioPlayer = new AudioPlayer();
         this.currentButton = null;
-
-        this.isPlaying = false;
         this.isProcessing = false;
-        this.onEndedCallback = null; // Custom callback for when playback ends naturally
-        this.fetchQueue = [];
-        this.isFetching = false;
     }
 
-    async playSound(fileOrHandle, type) {
+    getPlayer()
+    {
+        return this.audioPlayer.getPlayer();
+    }
+
+    async playSound(fileOrHandle, type) 
+    {
         this.isProcessing = true;
         this.stop(); // Stop any currently playing audio
 
@@ -31,103 +25,27 @@ class AudioManager
 
         const audioUrl = "assets/background/" + fileOrHandle.filename;
         this.updateCredit(fileOrHandle.credit);
-    
-        try {
-            const cache = await caches.open(AUDIO_CACHE_NAME);
-            let response = await cache.match(audioUrl);
-            if (!response) {
-                // Start streaming immediately without waiting for the cache
-                this.audioElement.src = audioUrl;
-                this.audioElement.play().then(() => {
-                    this.isPlaying = true;
-                    console.log("Playback started successfully from stream.");
-                }).catch(error => {
-                    console.error("Error playing audio:", error);
-                });
-                this.enqueueFetch(audioUrl); // Queue the fetch operation
-            } else {
-                // If the audio is in the cache, use it directly
-                this.audioElement.src = URL.createObjectURL(await response.blob());
-                this.audioElement.play().then(() => {
-                    this.isPlaying = true;
-                    console.log("Playback started successfully from cache.");
-                }).catch(error => {
-                    console.error("Error playing audio:", error);
-                });
-            }
-
-        } catch (error) {
-            console.error("Error playing or caching audio:", error);
-        }
-    
-        this.audioElement.onended = () => {
-            this.isPlaying = false;
-            if (this.onEndedCallback) {
-                this.onEndedCallback(); // Call the registered callback if set
-            }
-            console.log("Playback finished.");
-            URL.revokeObjectURL(this.audioElement.src); // Clean up the object URL to release memory
-        };
-    
+        await this.audioPlayer.playSound(audioUrl);
+        this.audioPlayer.play();
         this.isProcessing = false;
     }
 
-    preload(fileOrHandle) {
+    preload(fileOrHandle) 
+    {
         const audioUrl = "assets/background/" + fileOrHandle.filename;
-        this.fetchQueue.push(audioUrl);
-        this.processFetchQueue(); // Start processing the queue if not already started
-    }
-    
-    enqueueFetch(audioUrl) {
-        this.fetchQueue.push(audioUrl);
-        this.processFetchQueue(); // Start processing the queue if not already started
+        PreLoader.enqueueFetch(audioUrl);
     }
 
-    async processFetchQueue() {
-        if (this.isFetching || this.fetchQueue.length === 0) {
-            return; // Exit if a fetch is already in process or the queue is empty
-        }
-
-        this.isFetching = true;
-        const url = this.fetchQueue.shift();
-        console.log("Cache " + url)
-        try {
-            const cache = await caches.open(AUDIO_CACHE_NAME);
-            const response = await fetch(url  + "?nocache=true");
-            if (response.ok) {
-                await cache.put(url, response);
-                console.log("Audio file cached successfully:", url);
-            } else {
-                console.error("Failed to fetch the file for caching:", url);
-            }
-        } catch (error) {
-            console.error("Error fetching and caching audio:", error);
-        } finally {
-            this.isFetching = false;
-            this.processFetchQueue(); // Recursively process the next item in the queue
-        }
+    setOnEndedCallback(callback) 
+    {
+        this.audioPlayer.setOnEndedCallback(callback);
     }
 
-    setOnEndedCallback(callback) {
-        this.onEndedCallback = callback;
-    }
-
-    pause() {
-        this.audioElement.pause();
-        console.log("Playback has been paused.");
-    }
-
-    resume() {
-        this.audioElement.play();
-        console.log("Playback has resumed.");
-    }
-
-    stop() {
-        if(this.isPlaying)
+    stop() 
+    {
+        if(this.audioPlayer.isPlaying)
         {
-            this.audioElement.pause();
-            this.audioElement.currentTime = 0;
-            this.isPlaying = false;
+            this.audioPlayer.stop();
             console.log("Playback has been stopped.");
         }
        
@@ -140,16 +58,19 @@ class AudioManager
         }
     }
 
-    setVolume(level) {
-        this.audioElement.volume = level;
+    setVolume(level) 
+    {
+        this.audioPlayer.setVolume(level);
         console.log(`Volume set to ${level}.`);
     }
 
-    isCurrentlyPlaying() {
-        return this.isPlaying;
+    isCurrentlyPlaying() 
+    {
+        return  this.audioPlayer.isPlaying;
     }
 
-    updateCredit(credit) {
+    updateCredit(credit) 
+    {
         const creditTitle = document.getElementById('background-music-Credit');
         if (creditTitle) {
             creditTitle.innerHTML = credit;
@@ -165,6 +86,11 @@ const BackgroundMusic = {
     soundIndex : 0,
     audioManager: new AudioManager(), // Initialize AudioManager
     isClickable : true,
+
+    getPlayer()
+    {
+        return this.audioManager.getPlayer();
+    },
 
     setBackgroundVolume(volume) {
         const gainValue = volume / 100;

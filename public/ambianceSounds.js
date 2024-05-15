@@ -49,81 +49,11 @@ const AmbianceSounds = {
             container.appendChild(soundBarDiv);
             let isRunning = false;
             // Assuming 'soundBar' is the object exported from 'soundBar.js'
-            const progressBarContainer = soundBar.createProgressBar(ambianceSound);
-            progressBarContainer.addEventListener('soundBarValueChanged', () => 
-            {
-                const sound = this.currentAmbiances[ambianceSound.filename];
-                if(!isRunning && !sound && soundBar.getVolumeFromProgressBar(progressBarContainer) > 0)
-                {
-                    isRunning = true;
-                    this.toggleAmbientSound(ambianceSound, progressBarContainer);
-                }
-                else if(sound && soundBar.getVolumeFromProgressBar(progressBarContainer) == 0)
-                {
-                    isRunning = false;
-                    this.toggleAmbientSound(ambianceSound, progressBarContainer);
-                }
-                else if (sound?.gainNode) 
-                {
-                    sound.gainNode.gain.value = soundBar.getVolumeFromProgressBar(progressBarContainer);
-                }
-            });
-            // Append progress bar container to the container
-            container.appendChild(progressBarContainer);
+            const soundBar = new SoundBar(ambianceSound);
+            container.appendChild(soundBar.getElement());
             
             // Append the container to the section
             section.appendChild(container);
         });
-    },
-
-    toggleAmbientSound(ambianceSound, soundBarContainer) 
-    {
-        let sound = this.currentAmbiances[ambianceSound.filename];
-        if (sound?.source) 
-        {
-            sound.source.stop();
-            delete this.currentAmbiances[ambianceSound.filename];
-        } 
-        // Find the parent container of the button, which should contain the sound bar
-        else  if (soundBarContainer) 
-        {
-            // Retrieve the volume value from the sound bar
-            const soundBarValue = soundBar.getVolumeFromProgressBar(soundBarContainer);
-            // Use the sound bar value as the initial volume
-            this.createSound(ambianceSound, null, 'ambiance', soundBarValue);
-        } 
-        else 
-        {
-            console.error('Sound bar container not found.');
-        }
-    },
-
-    createSound(ambianceSound, initialVolume) 
-    {
-        const context = this.getAudioContext();
-        if (context.state === 'suspended') {
-            context.resume();
-        }
-    
-        const source = context.createBufferSource();
-        const gainNode = context.createGain();
-        gainNode.gain.value = initialVolume; // Set the initial volume
-    
-        const processAudioBuffer = (arrayBuffer) => {
-            context.decodeAudioData(arrayBuffer)
-                .then(audioBuffer => {
-                    source.buffer = audioBuffer;
-                    source.loop = true;
-                    source.connect(gainNode);
-                    gainNode.connect(context.destination);
-                    source.start(0);
-                    this.currentAmbiances[ambianceSound.filename] = { source, gainNode };
-                })
-                .catch(e => console.error('Error with decoding audio data:', e));
-        };
-        fetch("assets/ambiance/" + ambianceSound.filename)
-            .then(response => response.arrayBuffer())
-            .then(arrayBuffer => processAudioBuffer(arrayBuffer))
-            .catch(e => console.error('Error fetching or decoding audio data:', e));
-    },
+    }
 }
