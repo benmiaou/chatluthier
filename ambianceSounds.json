@@ -285,5 +285,15 @@
             "animal"
         ],
         "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/MrFizzywig/sounds/581834\">SFX - Horse - Trot.wav</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/MrFizzywig\">MrFizzywig</a> is marked with <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/publicdomain/zero/1.0/?ref=openverse\">CC0 1.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/zero.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+    },
+    {
+        "filename": "197339__nicstage__steam-10.wav",
+        "display_name": "Machinery",
+        "imageFile": "machinery.webp",
+        "contexts": [
+            "metal",
+            "machine"
+        ],
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/nicStage/sounds/197339\">Steam 10</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/nicStage\">nicStage</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by/4.0/?ref=openverse\">CC BY 4.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
     }
 ]
