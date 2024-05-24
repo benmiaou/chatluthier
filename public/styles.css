@@ -510,6 +510,8 @@ nav a {
 }
 
 .sound-item {
+    flex: 1;
+    margin: 10px;
     border: 1px solid #ddd; /* Border for separation */
     padding: 10px; /* Padding for content */
     border-radius: 5px; /* Rounded corners */
