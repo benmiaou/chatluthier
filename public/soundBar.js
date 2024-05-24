@@ -145,6 +145,10 @@ class SoundBar
             this.soudPlayer.pause()
     }
 
+    setVolume(volume) {
+        this.soudPlayer.setVolume(volume);
+    }
+
     getVolume() {
         const widthPercentage = this.progressBar.style.width || '0%';
         return parseFloat(widthPercentage) / this.MAX_GAIN;

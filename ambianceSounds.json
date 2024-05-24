@@ -276,5 +276,14 @@
             "cave"
         ],
         "credit": "Sound Effect by <a href=\"https://pixabay.com/fr/users/solarmusic-27851065/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=114694\">solarmusic</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=114694\">Pixabay</a>"
+    },
+    {
+        "filename": "581834__mrfizzywig__sfx-horse-trot.wav",
+        "display_name": "Horse trot",
+        "imageFile": "horse.webp",
+        "contexts": [
+            "animal"
+        ],
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/MrFizzywig/sounds/581834\">SFX - Horse - Trot.wav</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/MrFizzywig\">MrFizzywig</a> is marked with <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/publicdomain/zero/1.0/?ref=openverse\">CC0 1.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/zero.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
     }
 ]

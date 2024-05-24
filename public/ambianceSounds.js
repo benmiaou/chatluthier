@@ -1,8 +1,9 @@
 const AmbianceSounds = {
 
+    soundBars: [],
     currentAmbiances: {},
     audioContext : null,
-    ambianceSounds : null, 
+    ambianceSounds : null,
     selectedContext : "All",
 
     getAudioContext() {
@@ -15,7 +16,7 @@ const AmbianceSounds = {
     async loadAmbianceButtons()
     {
         let response;
-        if (GoogleLogin.userId) 
+        if (GoogleLogin.userId)
         {
             response = await fetch(`/ambianceSounds?userId=${GoogleLogin.userId}`);
         }
@@ -25,6 +26,7 @@ const AmbianceSounds = {
         }
         this.ambianceSounds = await response.json();
         this.generateAmbientButtons(this.ambianceSounds)
+        return this.ambianceSounds;
     },
 
     updatecontexts()
@@ -32,26 +34,34 @@ const AmbianceSounds = {
 
     },
 
+    async resetAmbientSounds() {
+        this.soundBars.forEach(soundbar => {
+            soundbar.setVolume(0)
+            soundbar.progressBar.style.width = 0 + '%';
+        })
+    },
+
     generateAmbientButtons(ambianceSounds) {
         const section = document.getElementById("ambiance");
         section.innerHTML = ''; // Clear existing content
-    
+
         ambianceSounds.forEach(ambianceSound => {
             const container = document.createElement('div');
             container.className = 'sound-container';
-    
+
             // Create a div for the sound bar
             const soundBarDiv = document.createElement('div');
             soundBarDiv.id = `sound-bar-${ambianceSound.filename}`; // Set a unique ID for the sound bar
             soundBarDiv.className = 'sound-bar'; // Apply styling to the sound bar
-    
+
             // Append the sound bar div to the container
             container.appendChild(soundBarDiv);
             let isRunning = false;
             // Assuming 'soundBar' is the object exported from 'soundBar.js'
             const soundBar = new SoundBar(ambianceSound);
+            this.soundBars.push(soundBar);
             container.appendChild(soundBar.getElement());
-            
+
             // Append the container to the section
             section.appendChild(container);
         });
