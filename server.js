@@ -162,12 +162,15 @@ app.listen(3000, '0.0.0.0', () => console.log('Server started on port 3000'));
 
 const WebSocket = require('ws');
 
-const wss = new WebSocket.Server({ port : 3001 });
+const ws = new WebSocket.Server({ port : 3001 });
 
-wss.on('connection', function connection(ws) {
+ws.on('connection', function connection(ws) {
 
   ws.on('message', function incoming(message) {
-      console.log(message)
+      let toto = JSON.parse(message)
+      console.log(toto)
+
+      console.log('Received :' + toto.type)
     // Gérer le message entrant
   });
 

@@ -94,6 +94,7 @@
         <h2>Background 
             </audio><input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="BackgroundMusic.setBackgroundVolume(this.value)">
         </h2>
+        <button onclick="sendMessage('MESAAAAAAAAAAGE')">
         <section id="background-music-Credit">---</section>
         <div class="progress-and-credits">
             <div id="progressBar">
@@ -210,28 +211,18 @@
         }
     </script>
     <script>
-                // Create a WebSocket instance
-        // and connect to the server
         const socket = new WebSocket('ws://localhost:3001');
 
-        // Event listener for when
-        //the WebSocket connection is opened
         socket.onopen = function (event) {
             // Alert the user that they are
             // connected to the WebSocket server
-            alert('You are Connected to WebSocket Server');
+            console.log('You are Connected to WebSocket Server');
         };
 
         // Event listener for when a message
         //  is received from the server
         socket.onmessage = function (event) {
-            // Get the output div element
-            const outputDiv = document
-                .getElementById('output');
-            // Append a paragraph with the
-            //  received message to the output div
-            outputDiv
-                .innerHTML += `<p>Received <b>"${event.data}"</b> from server.</p>`;
+            console.log(event.data)
         };
 
         // Event listener for when the
@@ -244,18 +235,8 @@
 
         // Function to send a message
         //  to the WebSocket server
-        function sendMessage() {
-            // Get the message input element
-            const messageInput = document
-                .getElementById('messageInput');
-            // Get the value of
-            // the message input
-            const message = messageInput.value;
-            // Send the message to
-            // the WebSocket server
-            socket.send(message);
-            // Clear the message input
-            messageInput.value = '';
+        function sendMessage(message) {
+            socket.send(JSON.stringify({type: message}) );
         }
 
     </script>
