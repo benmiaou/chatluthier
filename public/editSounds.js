@@ -79,6 +79,9 @@ function displayAllBackgroundMusic() {
             seekSound(sound.filename, progressBar.value); // Allow seeking
         });
 
+        const enableSoundButton = document.createElement('input')
+        enableSoundButton.type = 'checkbox'
+        enableSoundButton.onclick = () => enableSound(index)
 
         const updateButton = document.createElement('button');
         updateButton.className = 'update-button'; // Apply the class to style the button
@@ -121,6 +124,10 @@ function updateSound(index, newContexts, newType) {
         Soundboard.updatecontexts();
         AmbianceSounds.updatecontexts();
         console.log('Updated sound:', currentEditArray[index]); // Debug output
+    }
+
+    function enableSound(index) {
+        
     }
 
     displayAllBackgroundMusic(); // Refresh the display
