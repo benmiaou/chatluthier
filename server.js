@@ -159,3 +159,19 @@ app.get('/soundboard', (req, res) => {
 });
 
 app.listen(3000, '0.0.0.0', () => console.log('Server started on port 3000'));
+
+const WebSocket = require('ws');
+
+const wss = new WebSocket.Server({ port : 3001 });
+
+wss.on('connection', function connection(ws) {
+
+  ws.on('message', function incoming(message) {
+      console.log(message)
+    // Gérer le message entrant
+  });
+
+  ws.on('close', function() {
+    // Gérer la fermeture de la connexion
+  });
+});
