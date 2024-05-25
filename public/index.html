@@ -94,7 +94,6 @@
         <h2>Background 
             </audio><input type="range" min="0" max="100" value="50" class="slider" id="music-volume" oninput="BackgroundMusic.setBackgroundVolume(this.value)">
         </h2>
-        <button onclick="sendMessage('MESAAAAAAAAAAGE')">
         <section id="background-music-Credit">---</section>
         <div class="progress-and-credits">
             <div id="progressBar">
@@ -129,6 +128,10 @@
         <section id="soundboard" class="section">
         </section>
         <section id="soundboardLocal" class="section">
+        </section>
+
+        <section  class="section">
+            <button onclick="sendMessage('MESAAAAAAAAAAGE')">Test socket</button>
         </section>
     </main>
 
@@ -235,8 +238,10 @@
 
         // Function to send a message
         //  to the WebSocket server
-        function sendMessage(message) {
-            socket.send(JSON.stringify({type: message}) );
+        function sendMessage(raw_message) {
+            let formated_message = JSON.stringify({type: raw_message})
+            console.log("Client side: " + formated_message)
+            socket.send(formated_message);
         }
 
     </script>
