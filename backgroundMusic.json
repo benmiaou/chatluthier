@@ -8,7 +8,8 @@
         "contexts": [
             "meadow"
         ],
-        "credit": "Sacred garden by <a href=\"https://pixabay.com/fr/users/guilhermebernardes-24203804/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10377\">Guilherme Bernardes William</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10377\">Pixabay</a>"
+        "credit": "Sacred garden by <a href=\"https://pixabay.com/fr/users/guilhermebernardes-24203804/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10377\">Guilherme Bernardes William</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10377\">Pixabay</a>",
+        "isEnabled": true
     },
     {
         "filename": "knights-of-camelot-8038.mp3",
@@ -19,7 +20,8 @@
         "contexts": [
             "city"
         ],
-        "credit": "Knights of camelot by <a href=\"https://pixabay.com/fr/users/17406877-17406877/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8038\">17406877</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8038\">Pixabay</a>"
+        "credit": "Knights of camelot by <a href=\"https://pixabay.com/fr/users/17406877-17406877/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8038\">17406877</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8038\">Pixabay</a>",
+        "isEnabled": true
     },
     {
         "filename": "Mystery_-_celestial.aeon.project.mp3",
@@ -30,7 +32,8 @@
         "contexts": [
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/728111\">Mystery</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/728111\">Mystery</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Crypt_of_Insomnia_-_Pyres_on_the_Coast.mp3",
@@ -41,7 +44,8 @@
         "contexts": [
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148642\">Pyres on the Coast</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148642\">Pyres on the Coast</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "A_Cozy_Adventure_-_Crypt_of_Insomnia.mp3",
@@ -53,7 +57,8 @@
             "meadow",
             "forest"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1731972\">A Cozy Adventure</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1731972\">A Cozy Adventure</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Together_We_Are_Strong_-_celestial.aeon.project.mp3",
@@ -64,7 +69,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818602\">Together We Are Strong</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818602\">Together We Are Strong</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Kraken_Awakening_-_Crypt_of_Insomnia.mp3",
@@ -75,7 +81,8 @@
         "contexts": [
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1724407\">Kraken Awakening</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1724407\">Kraken Awakening</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Stormfront_-_celestial.aeon.project.mp3",
@@ -87,7 +94,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818599\">Stormfront</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818599\">Stormfront</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Moon_at_the_Window_-_Crypt_of_Insomnia.mp3",
@@ -98,7 +106,8 @@
         "contexts": [
             "city"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734057\">Moon at the Window</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734057\">Moon at the Window</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "a-song-of-wolves-and-dragons-8034.mp3",
@@ -109,7 +118,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "A song of wolves and dragons by <a href=\"https://pixabay.com/fr/users/17406877-17406877/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8034\">17406877</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8034\">Pixabay</a>"
+        "credit": "A song of wolves and dragons by <a href=\"https://pixabay.com/fr/users/17406877-17406877/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8034\">17406877</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8034\">Pixabay</a>",
+        "isEnabled": true
     },
     {
         "filename": "Kraken_Mare_I_-_Crypt_of_Insomnia.mp3",
@@ -120,7 +130,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1724477\">Kraken Mare I</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1724477\">Kraken Mare I</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "New_Dawn_-_celestial.aeon.project.mp3",
@@ -131,7 +142,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818611\">New Dawn</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818611\">New Dawn</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Song_of_Mourning_-_celestial.aeon.project.mp3",
@@ -143,7 +155,8 @@
             "meadow",
             "forest"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/402053\">Song of Mourning</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/402053\">Song of Mourning</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "I_Will_Miss_You_-_celestial.aeon.project.mp3",
@@ -154,7 +167,8 @@
         "contexts": [
             "meadow"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1597275\">I Will Miss You</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1597275\">I Will Miss You</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "397_Homecoming.mp3",
@@ -165,7 +179,8 @@
         "contexts": [
             "city"
         ],
-        "credit": "Music by <a href=\"https://tabletopaudio.com/\">Tabletop Audio</a>"
+        "credit": "Music by <a href=\"https://tabletopaudio.com/\">Tabletop Audio</a>",
+        "isEnabled": true
     },
     {
         "filename": "Of_Honor_and_Glory_-_Crypt_of_Insomnia.mp3",
@@ -176,7 +191,8 @@
         "contexts": [
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1724409\">Of Honor and Glory</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1724409\">Of Honor and Glory</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "To_the_Depths_-_celestial.aeon.project.mp3",
@@ -187,7 +203,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818595\">To the Depths</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818595\">To the Depths</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Crypt_of_Insomnia_-_At_The_Edge_of_Silence.mp3",
@@ -199,7 +216,8 @@
             "meadow",
             "forest"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148643\">At The Edge of Silence</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148643\">At The Edge of Silence</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Crypt_of_Insomnia_-_The_Secret_Room.mp3",
@@ -210,7 +228,8 @@
         "contexts": [
             "meadow"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2138516\">The Secret Room</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2138516\">The Secret Room</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Zangarang_-_celestial.aeon.project.mp3",
@@ -222,7 +241,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818601\">Zangarang</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818601\">Zangarang</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Everrune - Tavern Tales - 03 Hops and Barley.mp3",
@@ -233,7 +253,8 @@
         "contexts": [
             "tavern"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/hops-and-barley\">Hops and Barley</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0\">CC BY-NC 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/hops-and-barley\">Hops and Barley</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0\">CC BY-NC 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Everrune - Tavern Tales - 02 The Knight's Chorus.mp3",
@@ -245,7 +266,8 @@
             "city",
             "tavern"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/the-knights-chorus\">The Knight's Chorus</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0/\">CC BY-NC 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/the-knights-chorus\">The Knight's Chorus</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0/\">CC BY-NC 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Everrune - Tavern Tales - 07 Skal.mp3",
@@ -256,7 +278,8 @@
         "contexts": [
             "tavern"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/sk-l\">Skal!</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0\">CC BY-NC 3.0</a>.</p>\n"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/sk-l\">Skal!</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0\">CC BY-NC 3.0</a>.</p>\n",
+        "isEnabled": true
     },
     {
         "filename": "Broken_-_celestial.aeon.project.mp3",
@@ -267,7 +290,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818598\">Broken</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818598\">Broken</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Crypt_of_Insomnia_-_Lore_and_Myths.mp3",
@@ -280,7 +304,8 @@
             "meadow",
             "forest"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148634\">Lore and Myths</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148634\">Lore and Myths</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Pint_of_Beer_-_Crypt_of_Insomnia.mp3",
@@ -291,7 +316,8 @@
         "contexts": [
             "tavern"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734038\">Pint of Beer</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734038\">Pint of Beer</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Wonderland_(Epic_Background_Music)_-_Energysound_(3).mp3",
@@ -302,7 +328,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1889410\">Wonderland (Epic Background Music)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/542067/Energysound_(3)\">Energysound</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1889410\">Wonderland (Epic Background Music)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/542067/Energysound_(3)\">Energysound</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "561394__migfus20__fantasy-background-music-loop.mp3",
@@ -313,7 +340,8 @@
         "contexts": [
             "city"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/Migfus20/sounds/561394\">Fantasy Background Music (Loop)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/Migfus20\">Migfus20</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by/4.0/?ref=openverse\">CC BY 4.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/Migfus20/sounds/561394\">Fantasy Background Music (Loop)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/Migfus20\">Migfus20</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by/4.0/?ref=openverse\">CC BY 4.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Theater_of_War_-_Crypt_of_Insomnia.mp3",
@@ -324,7 +352,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1724400\">Theater of War</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1724400\">Theater of War</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Hide_and_Seek_-_celestial.aeon.project.mp3",
@@ -335,7 +364,8 @@
         "contexts": [
             "forest"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1598443\">Hide and Seek</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1598443\">Hide and Seek</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Everrune - Tavern Tales - 01 The Hunter's Dance.mp3",
@@ -346,7 +376,8 @@
         "contexts": [
             "tavern"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/the-hunters-dance\">The Hunter's Dance</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0/\">CC BY-NC 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/the-hunters-dance\">The Hunter's Dance</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0/\">CC BY-NC 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Frozen_Silence_-_celestial.aeon.project.mp3",
@@ -358,7 +389,8 @@
             "forest",
             "meadow"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/26427\">Frozen Silence</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/2.5/?ref=openverse\">CC BY-NC-SA 2.5</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/26427\">Frozen Silence</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/2.5/?ref=openverse\">CC BY-NC-SA 2.5</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Cave_of_Dreams_-_Crypt_of_Insomnia.mp3",
@@ -370,7 +402,8 @@
             "cave",
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1905468\">Cave of Dreams</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1905468\">Cave of Dreams</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "the-white-lion-10379.mp3",
@@ -381,7 +414,8 @@
         "contexts": [
             "tension"
         ],
-        "credit": "The white lion by <a href=\"https://pixabay.com/fr/users/guilhermebernardes-24203804/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10379\">Guilherme Bernardes William</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10379\">Pixabay</a>"
+        "credit": "The white lion by <a href=\"https://pixabay.com/fr/users/guilhermebernardes-24203804/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10379\">Guilherme Bernardes William</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10379\">Pixabay</a>",
+        "isEnabled": true
     },
     {
         "filename": "Everrune - Tavern Tales - 05 Pipers in the Pub.mp3",
@@ -392,7 +426,8 @@
         "contexts": [
             "tavern"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/pipers-in-the-pub\">Pipers in the Pub</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0\">CC BY-NC 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/pipers-in-the-pub\">Pipers in the Pub</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0\">CC BY-NC 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "520426__nightwolfcfm__lurker-of-the-depths-cinematic-music.mp3",
@@ -403,7 +438,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/NightWolfCFM/sounds/520426\">Lurker of the Depths (Cinematic Music)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/NightWolfCFM\">NightWolfCFM</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by/4.0/?ref=openverse\">CC BY 4.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/NightWolfCFM/sounds/520426\">Lurker of the Depths (Cinematic Music)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/NightWolfCFM\">NightWolfCFM</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by/4.0/?ref=openverse\">CC BY 4.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "In_Memoriam_-_Crypt_of_Insomnia.mp3",
@@ -414,7 +450,8 @@
         "contexts": [
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1905469\">In Memoriam</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1905469\">In Memoriam</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Battle_Against_Time_-_celestial.aeon.project.mp3",
@@ -425,7 +462,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818606\">Battle Against Time</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818606\">Battle Against Time</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Minstrels_-_Crypt_of_Insomnia.mp3",
@@ -437,7 +475,8 @@
             "tavern",
             "city"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734041\">Minstrels</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734041\">Minstrels</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Dramatic_Fantasy_-_Metalos.mp3",
@@ -448,7 +487,8 @@
         "contexts": [
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1869276\">Dramatic Fantasy</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/536392/Metalos\">Metalos</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/536392/Metalos\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1869276\">Dramatic Fantasy</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/536392/Metalos\">Metalos</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/536392/Metalos\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "battle-of-the-dragons-8037.mp3",
@@ -459,7 +499,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "Battle of the dragons by <a href=\"https://pixabay.com/fr/users/17406877-17406877/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8037\">17406877</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8037\">Pixabay</a>"
+        "credit": "Battle of the dragons by <a href=\"https://pixabay.com/fr/users/17406877-17406877/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8037\">17406877</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8037\">Pixabay</a>",
+        "isEnabled": true
     },
     {
         "filename": "Evening_in_a_Peaceful_Tavern_-_Crypt_of_Insomnia.mp3",
@@ -470,7 +511,8 @@
         "contexts": [
             "tavern"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734047\">Evening in a Peaceful Tavern</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734047\">Evening in a Peaceful Tavern</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Congealed_Void_-_Crypt_of_Insomnia.mp3",
@@ -483,7 +525,8 @@
             "meadow",
             "forest"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1743328\">Congealed Void</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1743328\">Congealed Void</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Crypt_of_Insomnia_-_Before_A_Journey.mp3",
@@ -494,7 +537,8 @@
         "contexts": [
             "forest"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148631\">Before A Journey</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148631\">Before A Journey</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "honor-and-sword-main-11222.mp3",
@@ -505,7 +549,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "Honor and Sword (main) by <a href=\"https://pixabay.com/fr/users/good_b_music-22836301/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=11222\">Zakhar Valaha</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=11222\">Pixabay</a>"
+        "credit": "Honor and Sword (main) by <a href=\"https://pixabay.com/fr/users/good_b_music-22836301/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=11222\">Zakhar Valaha</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=11222\">Pixabay</a>",
+        "isEnabled": true
     },
     {
         "filename": "When_The_Bards_Dance_-_C._Filipe_Alves.mp3",
@@ -517,7 +562,8 @@
             "city",
             "tavern"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/183444\">When The Bards Dance</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/338006/C._Filipe_Alves\">Filipe Alves</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/183444\">When The Bards Dance</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/338006/C._Filipe_Alves\">Filipe Alves</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Cave_-_celestial.aeon.project.mp3",
@@ -528,7 +574,8 @@
         "contexts": [
             "cave"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1321938\">Cave</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1321938\">Cave</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Convergence_-_Crypt_of_Insomnia.mp3",
@@ -539,7 +586,8 @@
         "contexts": [
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1848415\">Convergence</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1848415\">Convergence</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Crypt_of_Insomnia_-_Medieval_Tales.mp3",
@@ -552,7 +600,8 @@
             "meadow",
             "forest"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148645\">Medieval Tales</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2148645\">Medieval Tales</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "sunny-afternoon-108444.mp3",
@@ -563,7 +612,8 @@
         "contexts": [
             "meadow"
         ],
-        "credit": "Sunny afternoon by <a href=\"https://pixabay.com/fr/users/guilhermebernardes-24203804/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=108444\">Guilherme Bernardes William</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=108444\">Pixabay</a>"
+        "credit": "Sunny afternoon by <a href=\"https://pixabay.com/fr/users/guilhermebernardes-24203804/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=108444\">Guilherme Bernardes William</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=108444\">Pixabay</a>",
+        "isEnabled": true
     },
     {
         "filename": "Shoot_-_celestial.aeon.project.mp3",
@@ -574,7 +624,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818596\">Shoot</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818596\">Shoot</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Bards_of_the_Streets_-_Crypt_of_Insomnia.mp3",
@@ -586,7 +637,8 @@
             "city",
             "tavern"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734043\">Bards of the Streets</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734043\">Bards of the Streets</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Driving_the_Top_Down_-_celestial.aeon.project.mp3",
@@ -597,7 +649,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818616\">Driving the Top Down</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818616\">Driving the Top Down</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Breaking_the_Siege_(reprise)_-_celestial.aeon.project.mp3",
@@ -608,7 +661,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/589242\">Breaking the Siege (reprise)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/589242\">Breaking the Siege (reprise)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Yeti_Cave_-_celestial.aeon.project.mp3",
@@ -619,7 +673,8 @@
         "contexts": [
             "cave"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1321946\">Yeti Cave</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1321946\">Yeti Cave</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Everrune - Tavern Tales - 04 Mead and Melodies.mp3",
@@ -630,7 +685,8 @@
         "contexts": [
             "tavern"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/mead-and-melodies\">Mead and Melodies</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0\">CC BY-NC 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/mead-and-melodies\">Mead and Melodies</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0\">CC BY-NC 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "591161__corsart__dungeon-horror-atmosphere.mp3",
@@ -641,7 +697,8 @@
         "contexts": [
             "cave"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/corsart/sounds/591161\">Dungeon Horror Atmosphere</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/corsart\">corsart</a> is marked with <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/publicdomain/zero/1.0/?ref=openverse\">CC0 1.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/corsart/sounds/591161\">Dungeon Horror Atmosphere</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://freesound.org/people/corsart\">corsart</a> is marked with <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/publicdomain/zero/1.0/?ref=openverse\">CC0 1.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "medieval-background-196571.mp3",
@@ -653,7 +710,8 @@
             "city",
             "tavern"
         ],
-        "credit": "Medieval background by <a href=\"https://pixabay.com/fr/users/lucafrancini-19914739/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=196571\">Luca Francini</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=196571\">Pixabay</a>"
+        "credit": "Medieval background by <a href=\"https://pixabay.com/fr/users/lucafrancini-19914739/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=196571\">Luca Francini</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=196571\">Pixabay</a>",
+        "isEnabled": true
     },
     {
         "filename": "Toxic_Zone_-_Crypt_of_Insomnia.mp3",
@@ -665,7 +723,8 @@
             "cave",
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1838939\">Toxic Zone</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1838939\">Toxic Zone</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "The_First_Light_-_celestial.aeon.project.mp3",
@@ -677,7 +736,8 @@
             "meadow",
             "forest"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1598441\">The First Light</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1598441\">The First Light</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Meadow_-_Crypt_of_Insomnia.mp3",
@@ -688,7 +748,8 @@
         "contexts": [
             "meadow"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1745183\">Meadow</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1745183\">Meadow</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Crypt_of_Insomnia_-_Once_Upon_a_Time.mp3",
@@ -701,7 +762,8 @@
             "meadow",
             "forest"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2138513\">Once Upon a Time</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2138513\">Once Upon a Time</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Endless_Mountains_-_Crypt_of_Insomnia.mp3",
@@ -712,7 +774,8 @@
         "contexts": [
             "forest"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1743330\">Endless Mountains</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1743330\">Endless Mountains</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "adventures-of-the-fellowship-8036.mp3",
@@ -725,7 +788,8 @@
             "city",
             "forest"
         ],
-        "credit": "Adventures of the fellowship by <a href=\"https://pixabay.com/fr/users/17406877-17406877/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8036\">17406877</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8036\">Pixabay</a>"
+        "credit": "Adventures of the fellowship by <a href=\"https://pixabay.com/fr/users/17406877-17406877/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8036\">17406877</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=8036\">Pixabay</a>",
+        "isEnabled": true
     },
     {
         "filename": "Night_Wanderer_-_Crypt_of_Insomnia.mp3",
@@ -736,7 +800,8 @@
         "contexts": [
             "meadow"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1745858\">Night Wanderer</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1745858\">Night Wanderer</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Burn_Them_Down_-_celestial.aeon.project.mp3",
@@ -747,7 +812,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/402061\">Burn Them Down</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/402061\">Burn Them Down</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Everrune - Tavern Tales - 06 The Wild Creek.mp3",
@@ -758,7 +824,8 @@
         "contexts": [
             "tavern"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/the-wild-creek\">The Wild Creek</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0\">CC BY-NC 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/the-wild-creek\">The Wild Creek</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0\">CC BY-NC 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "World_Funeral_-_Crypt_of_Insomnia.mp3",
@@ -769,7 +836,8 @@
         "contexts": [
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1905460\">World Funeral</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1905460\">World Funeral</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Circles_of_Harmony_-_Crypt_of_Insomnia.mp3",
@@ -780,7 +848,8 @@
         "contexts": [
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1743334\">Circles of Harmony</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1743334\">Circles of Harmony</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "caves-of-dawn-10376.mp3",
@@ -792,7 +861,8 @@
             "cave",
             "tension"
         ],
-        "credit": "Caves of dawn by <a href=\"https://pixabay.com/fr/users/guilhermebernardes-24203804/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10376\">Guilherme Bernardes William</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10376\">Pixabay</a>"
+        "credit": "Caves of dawn by <a href=\"https://pixabay.com/fr/users/guilhermebernardes-24203804/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10376\">Guilherme Bernardes William</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10376\">Pixabay</a>",
+        "isEnabled": true
     },
     {
         "filename": "Rage_-_celestial.aeon.project.mp3",
@@ -804,7 +874,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818615\">Rage</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/818615\">Rage</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "near-danger-10375.mp3",
@@ -815,7 +886,8 @@
         "contexts": [
             "cave"
         ],
-        "credit": "Near danger by <a href=\"https://pixabay.com/fr/users/guilhermebernardes-24203804/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10375\">Guilherme Bernardes William</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10375\">Pixabay</a>"
+        "credit": "Near danger by <a href=\"https://pixabay.com/fr/users/guilhermebernardes-24203804/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10375\">Guilherme Bernardes William</a> from <a href=\"https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10375\">Pixabay</a>",
+        "isEnabled": true
     },
     {
         "filename": "Summer_meadow_-_vvsdesign.mp3",
@@ -826,7 +898,8 @@
         "contexts": [
             "meadow"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1683750\">Summer Meadow</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/338998/vvsdesign\">vvsmusic</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1683750\">Summer Meadow</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/338998/vvsdesign\">vvsmusic</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Swashing_the_Buck_-_celestial.aeon.project.mp3",
@@ -837,7 +910,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/585845\">Swashing the Buck</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/585845\">Swashing the Buck</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/2740/celestial.aeon.project\">Celestial Aeon Project</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-sa/3.0/?ref=openverse\">CC BY-NC-SA 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "lone-wolf-10374.mp3",
@@ -848,7 +922,8 @@
         "contexts": [
             "tension"
         ],
-        "credit": "Lone wolf by <a href=\"https://pixabay.com/fr/users/guilhermebernardes-24203804/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10374\">Guilherme Bernardes William</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10374\">Pixabay</a>"
+        "credit": "Lone wolf by <a href=\"https://pixabay.com/fr/users/guilhermebernardes-24203804/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10374\">Guilherme Bernardes William</a> from <a href=\"https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=10374\">Pixabay</a>",
+        "isEnabled": true
     },
     {
         "filename": "Everrune - Tavern Tales - 08 Deviled Egg.mp3",
@@ -859,7 +934,8 @@
         "contexts": [
             "tavern"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/deviled-egg\">Deviled Egg</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0\">CC BY-NC 3.0</a>.</p>\n"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com/track/deviled-egg\">Deviled Egg</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://everrune.bandcamp.com\">Everrune</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc/3.0\">CC BY-NC 3.0</a>.</p>\n",
+        "isEnabled": true
     },
     {
         "filename": "The_End_of_the_Journey_-_Crypt_of_Insomnia.mp3",
@@ -870,7 +946,8 @@
         "contexts": [
             "tavern"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734046\">The End of the Journey</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734046\">The End of the Journey</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/467601/Crypt_of_Insomnia\">Crypt of Insomnia</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "In_The_Mind_Of_Our_King___Epic_Orchestral_Strings_Heroic_Story_War_Battle_Trailer_-_Epikton.mp3",
@@ -882,7 +959,8 @@
             "city",
             "meadow"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1787012\">In The Mind Of Our King | Epic Orchestral Strings Heroic Story War Battle Trailer</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/496045/Epikton\">Epikton</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1787012\">In The Mind Of Our King | Epic Orchestral Strings Heroic Story War Battle Trailer</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/496045/Epikton\">Epikton</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Fearless_Warrior___Epic_Cinematic_Running_Strings_Breaking_News_Brave_Daring_Heroic_-_Epikton.mp3",
@@ -893,7 +971,8 @@
         "contexts": [
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1787014\">Fearless Warrior | Epic Cinematic Running Strings Breaking News Brave Daring Heroic</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/496045/Epikton\">Epikton</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1787014\">Fearless Warrior | Epic Cinematic Running Strings Breaking News Brave Daring Heroic</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/496045/Epikton\">Epikton</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Life_Of_Inspiration___Emotional_Music_-_Epikton.mp3",
@@ -904,7 +983,8 @@
         "contexts": [
             "city"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1787481\">Life Of Inspiration | Emotional Music</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/496045/Epikton\">Epikton</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1787481\">Life Of Inspiration | Emotional Music</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/496045/Epikton\">Epikton</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Dawn_Of_The_Machines_(Cinematic_Hybrid_Blockbuster_Movie_Epic_Trailer_Music)_-_Epikton.mp3",
@@ -915,7 +995,8 @@
         "contexts": [
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1786800\">Dawn Of The Machines (Cinematic Hybrid Blockbuster Movie Epic Trailer Music)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/496045/Epikton\">Epikton</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1786800\">Dawn Of The Machines (Cinematic Hybrid Blockbuster Movie Epic Trailer Music)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/496045/Epikton\">Epikton</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Cold_Space___Emotional_Music_-_Epikton.mp3",
@@ -926,7 +1007,8 @@
         "contexts": [
             "cave"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1787462\">Cold Space | Emotional Music</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/496045/Epikton\">Epikton</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1787462\">Cold Space | Emotional Music</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/496045/Epikton\">Epikton</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Lost_in_the_Darkness___Emotional_Music_-_Epikton.mp3",
@@ -937,7 +1019,8 @@
         "contexts": [
             "cave"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1787484\">Lost in the Darkness | Emotional Music</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/496045/Epikton\">Epikton</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1787484\">Lost in the Darkness | Emotional Music</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/496045/Epikton\">Epikton</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Deep_into_the_Darkness___Emotional_Music_-_Epikton.mp3",
@@ -948,7 +1031,8 @@
         "contexts": [
             "cave"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1787486\">Deep into the Darkness | Emotional Music</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/496045/Epikton\">Epikton</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1787486\">Deep into the Darkness | Emotional Music</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/496045/Epikton\">Epikton</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 </a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "403_Steel_Foundry.mp3",
@@ -959,7 +1043,8 @@
         "contexts": [
             "cave"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Steel Foundry</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Tabletop Audio</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 4.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Steel Foundry</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Tabletop Audio</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 4.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "400_Whispering_Caverns.mp3",
@@ -971,7 +1056,8 @@
             "cave",
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Whispering Caverns</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Tabletop Audio</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 4.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Whispering Caverns</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Tabletop Audio</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 4.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "389_Medieval_Market.mp3",
@@ -982,7 +1068,8 @@
         "contexts": [
             "city"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Medieval Market</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Tabletop Audio</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 4.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Medieval Market</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Tabletop Audio</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 4.0</a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "377_Through_the_Woods.mp3",
@@ -993,10 +1080,11 @@
         "contexts": [
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Through the Woods</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Tabletop Audio</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 4.0</a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Through the Woods</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://tabletopaudio.com/\">Tabletop Audio</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 4.0</a>.</p>",
+        "isEnabled": true
     },
     {
-        "filename": "Gr\u00e9goire_Lourme_-_Rage_of_Winning.mp3",
+        "filename": "Grégoire_Lourme_-_Rage_of_Winning.mp3",
         "display_name": "Rage of Winning",
         "types": [
             "intense"
@@ -1004,10 +1092,11 @@
         "contexts": [
             "city"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2158173\">Rage of Winning</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2158173\">Rage of Winning</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
-        "filename": "Gr\u00e9goire_Lourme_-_Epic_Crazy_Violin_(No_Percussion).mp3",
+        "filename": "Grégoire_Lourme_-_Epic_Crazy_Violin_(No_Percussion).mp3",
         "display_name": "Epic Crazy Violin (No Percussion)",
         "types": [
             "intense"
@@ -1016,10 +1105,11 @@
             "forest",
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2154476\">Epic Crazy Violin (No Percussion)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2154476\">Epic Crazy Violin (No Percussion)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
-        "filename": "Gr\u00e9goire_Lourme_-_The_Epic_Justicer_(With_Choir).mp3",
+        "filename": "Grégoire_Lourme_-_The_Epic_Justicer_(With_Choir).mp3",
         "display_name": "The Epic Justicer (With Choir)",
         "types": [
             "intense"
@@ -1027,10 +1117,11 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2145842\">The Epic Justicer (With Choir)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>\n"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2145842\">The Epic Justicer (With Choir)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>\n",
+        "isEnabled": true
     },
     {
-        "filename": "Gr\u00e9goire_Lourme_-_Desert_Nomads_Caravan_(With_Vocals).mp3",
+        "filename": "Grégoire_Lourme_-_Desert_Nomads_Caravan_(With_Vocals).mp3",
         "display_name": "Desert Nomads Caravan (With Vocals)",
         "types": [
             "dynamic"
@@ -1038,10 +1129,11 @@
         "contexts": [
             "desert"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2150184\">Desert Nomads Caravan (With Vocals)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2150184\">Desert Nomads Caravan (With Vocals)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
-        "filename": "Gr\u00e9goire_Lourme_-_Oasis_in_the_Middle_East_(With_Vocals).mp3",
+        "filename": "Grégoire_Lourme_-_Oasis_in_the_Middle_East_(With_Vocals).mp3",
         "display_name": "Oasis in the Middle East (With Vocals)",
         "types": [
             "calm"
@@ -1049,10 +1141,11 @@
         "contexts": [
             "desert"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2150185\">Oasis in the Middle East (With Vocals)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2150185\">Oasis in the Middle East (With Vocals)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
-        "filename": "Gr\u00e9goire_Lourme_-_Ghosts_of_Nightmares.mp3",
+        "filename": "Grégoire_Lourme_-_Ghosts_of_Nightmares.mp3",
         "display_name": "Ghosts of Nightmares",
         "types": [
             "intense"
@@ -1060,10 +1153,11 @@
         "contexts": [
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2125656\">Ghosts of Nightmares</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2125656\">Ghosts of Nightmares</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
-        "filename": "Gr\u00e9goire_Lourme_-_The_Evil_Lullaby.mp3",
+        "filename": "Grégoire_Lourme_-_The_Evil_Lullaby.mp3",
         "display_name": "The Evil Lullaby",
         "types": [
             "dynamic"
@@ -1071,10 +1165,11 @@
         "contexts": [
             "evil"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2125655\">The Evil Lullaby</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2125655\">The Evil Lullaby</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
-        "filename": "Gr\u00e9goire_Lourme_-_Eternal.mp3",
+        "filename": "Grégoire_Lourme_-_Eternal.mp3",
         "display_name": "Eternal",
         "types": [
             "calm"
@@ -1083,10 +1178,11 @@
             "forest",
             "city"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1985765\">Eternal</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1985765\">Eternal</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
-        "filename": "Gr\u00e9goire_Lourme_-_Siege_of_the_Fortress_(No_Choir).mp3",
+        "filename": "Grégoire_Lourme_-_Siege_of_the_Fortress_(No_Choir).mp3",
         "display_name": "Siege of the Fortress (No Choir)",
         "types": [
             "dynamic"
@@ -1094,7 +1190,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2036316\">Siege of the Fortress (No Choir)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2036316\">Siege of the Fortress (No Choir)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Church_Chase_-_gregoire.lourme.mp3",
@@ -1105,7 +1202,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734081\">Church Chase</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734081\">Church Chase</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Candela's_Story_-_gregoire.lourme.mp3",
@@ -1116,7 +1214,8 @@
         "contexts": [
             "city"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734072\">Candela&#039;s Story</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734072\">Candela&#039;s Story</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "Forest_Confrontation_-_gregoire.lourme.mp3",
@@ -1127,7 +1226,8 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734071\">Forest Confrontation</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1734071\">Forest Confrontation</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
         "filename": "The_Sky_Castle_(No_Choir)_-_gregoire.lourme.mp3",
@@ -1138,10 +1238,11 @@
         "contexts": [
             "city"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1924172\">The Sky Castle (No Choir)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1924172\">The Sky Castle (No Choir)</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
-        "filename": "Gr\u00e9goire_Lourme_-_Ambiance_Medievale_Theme_A.mp3",
+        "filename": "Grégoire_Lourme_-_Ambiance_Medievale_Theme_A.mp3",
         "display_name": "Ambiance Medievale Theme A",
         "types": [
             "calm"
@@ -1150,10 +1251,11 @@
             "city",
             "tavern"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2040360\">Ambiance Medievale Theme A</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2040360\">Ambiance Medievale Theme A</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
-        "filename": "Gr\u00e9goire_Lourme_-_Ambiance_Medievale_Theme_B.mp3",
+        "filename": "Grégoire_Lourme_-_Ambiance_Medievale_Theme_B.mp3",
         "display_name": "Ambiance Medievale Theme B",
         "types": [
             "calm"
@@ -1162,10 +1264,11 @@
             "city",
             "forest"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2040358\">Ambiance Medievale Theme B</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2040358\">Ambiance Medievale Theme B</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
-        "filename": "Gr\u00e9goire_Lourme_-_Jeanne_d_Arc.mp3",
+        "filename": "Grégoire_Lourme_-_Jeanne_d_Arc.mp3",
         "display_name": "Jeanne d Arc",
         "types": [
             "calm"
@@ -1173,10 +1276,11 @@
         "contexts": [
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2040352\">Jeanne d Arc</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2040352\">Jeanne d Arc</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
-        "filename": "Gr\u00e9goire_Lourme_-_Au_Coeur_de_la_Bastille.mp3",
+        "filename": "Grégoire_Lourme_-_Au_Coeur_de_la_Bastille.mp3",
         "display_name": "Au Coeur de la Bastille",
         "types": [
             "dynamic"
@@ -1185,10 +1289,11 @@
             "evil",
             "tension"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2040351\">Au Coeur de la Bastille</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/2040351\">Au Coeur de la Bastille</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     },
     {
-        "filename": "Gr\u00e9goire_Lourme_-_To_The_Battlefield.mp3",
+        "filename": "Grégoire_Lourme_-_To_The_Battlefield.mp3",
         "display_name": "To The Battlefield",
         "types": [
             "intense"
@@ -1196,6 +1301,7 @@
         "contexts": [
             "battle"
         ],
-        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1975128\">To The Battlefield</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Gr\u00e9goire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>"
+        "credit": "<p class=\"attribution\">\"<a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/track/1975128\">To The Battlefield</a>\" by <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://www.jamendo.com/artist/560/gregoire.lourme\">Grégoire Lourme</a> is licensed under <a target=\"_blank\" rel=\"noopener noreferrer\" href=\"https://creativecommons.org/licenses/by-nc-nd/3.0/?ref=openverse\">CC BY-NC-ND 3.0 <img src=\"https://mirrors.creativecommons.org/presskit/icons/cc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/by.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nc.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img><img src=\"https://mirrors.creativecommons.org/presskit/icons/nd.svg\" style=\"height: 1em; margin-right: 0.125em; display: inline;\"></img></a>.</p>",
+        "isEnabled": true
     }
 ]

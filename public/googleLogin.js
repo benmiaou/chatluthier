@@ -26,9 +26,10 @@ const GoogleLogin = {
         console.log(GoogleLogin.userId)
 
         GoogleLogin.updateLoginButton();
-        BackgroundMusic.preloadBackgroundSounds();
-        Soundboard.loadSoundboardButtons();
-        AmbianceSounds.loadAmbianceButtons();
+        // TODO Makes enabling crash
+        // BackgroundMusic.preloadBackgroundSounds();
+        // Soundboard.loadSoundboardButtons();
+        // AmbianceSounds.loadAmbianceButtons();
 
         // Make the "Edit Music" button visible
         const editMusicButton = document.querySelector('button[onclick="openEditSoundModal()"]');

@@ -86,6 +86,7 @@ const BackgroundMusic = {
     soundIndex : 0,
     audioManager: new AudioManager(), // Initialize AudioManager
     isClickable : true,
+    isEnabled: true,
 
     getPlayer()
     {
@@ -157,6 +158,9 @@ const BackgroundMusic = {
             }
             this.backgroundMusicArray = await response.json();
             this.backgroundMusicArray = this.shuffleArray(this.backgroundMusicArray);
+            this.backgroundMusicArray = this.backgroundMusicArray.filter(sound =>
+                sound.isEnabled === true
+            )
             this.updatecontexts();
         } catch (e) {
             console.error(`Error fetching files from server:`, e);

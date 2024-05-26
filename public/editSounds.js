@@ -81,12 +81,12 @@ function displayAllBackgroundMusic() {
 
         const enableSoundButton = document.createElement('input')
         enableSoundButton.type = 'checkbox'
-        enableSoundButton.onclick = () => enableSound(index)
+        enableSoundButton.onclick = () => switchSoundAvailability(index)
 
         const updateButton = document.createElement('button');
         updateButton.className = 'update-button'; // Apply the class to style the button
         updateButton.textContent = "Update"; // Set the text for the button
-        updateButton.onclick = () => updateSound(index, contextsInput.value, typeSelect.value); // Set the click event
+        updateButton.onclick = () => updateSound(index, contextsInput.value, typeSelect.value, enableSoundButton.value); // Set the click event
 
         const playerControls = document.createElement('div');
         playerControls.className = 'sound-player-controls'; // Flex layout for player controls
@@ -108,26 +108,30 @@ function displayAllBackgroundMusic() {
             <h3>${sound.display_name}</h3>
             <p><strong>Credit:</strong> ${sound.credit}</p>
         `;
-        soundItem.append(contextsLabel, contextsInput, typeContainer, playerControls, progressBar); // Add elements to the sound item
+        soundItem.append(contextsLabel, contextsInput, typeContainer, playerControls, progressBar, enableSoundButton); // Add elements to the sound item
         soundsList.appendChild(soundItem);
     });
 }
 
-function updateSound(index, newContexts, newType) {
+function switchSoundAvailability(index) {
+    currentEditArray[index].isEnabled = !currentEditArray[index].isEnabled; // Update the type
+}
+
+
+
+function updateSound(index, newContexts, newType, newIsEnabled) {
     // Update contexts and type for the given index
     if (index >= 0 && index < currentEditArray.length) {
         const contexts = newContexts.split(',').map((c) => c.trim()); // Split and trim contexts
         currentEditArray[index].contexts = contexts;
-
+        if (newIsEnabled === 'on') {
+            currentEditArray[index].isEnabled = true;
+        } else { urrentEditArray[index].isEnabled = false }
         currentEditArray[index].types = [newType]; // Update the type
         BackgroundMusic.updatecontexts();
-        Soundboard.updatecontexts();
-        AmbianceSounds.updatecontexts();
+        // Soundboard.updatecontexts();
+        // AmbianceSounds.updatecontexts();
         console.log('Updated sound:', currentEditArray[index]); // Debug output
-    }
-
-    function enableSound(index) {
-        
     }
 
     displayAllBackgroundMusic(); // Refresh the display
