@@ -29,7 +29,7 @@ const AmbianceSounds = {
         return this.ambianceSounds;
     },
 
-    updatecontexts()
+    updateContexts()
     {
 
     },

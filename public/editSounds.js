@@ -15,17 +15,17 @@ function displaySounds(soundType) {
         case 'backgroundMusic':
             currentEditArray = BackgroundMusic.backgroundMusicArray; // Display background music
             currentSoundType = 'backgroundMusic';
-            currentPath = 'background'
+            currentPath = 'background';
             break;
         case 'ambianceSounds':
             currentEditArray = AmbianceSounds.ambianceSounds; // Display ambiance sounds
             currentSoundType = 'ambianceSounds';
-            currentPath = 'ambiance'
+            currentPath = 'ambiance';
             break;
         case 'soundboard':
             currentEditArray = Soundboard.soundboardItems; // Display soundboard
             currentSoundType = 'soundboard';
-            currentPath = 'soundboard'
+            currentPath = 'soundboard';
             break;
         default:
             console.error('Unknown sound type'); // Handle unexpected sound types
@@ -37,38 +37,44 @@ function displayAllBackgroundMusic() {
     const soundsList = document.getElementById('sounds-list');
     soundsList.innerHTML = ''; // Clear existing content
 
-    if(!currentEditArray)
-        currentEditArray = BackgroundMusic.backgroundMusicArray;
+    if (!currentEditArray) currentEditArray = BackgroundMusic.backgroundMusicArray;
+
     currentEditArray.forEach((sound, index) => {
         const soundItem = document.createElement('div');
         soundItem.className = 'sound-item'; // Unique class for sound items
 
         const contextsLabel = document.createElement('label');
         contextsLabel.textContent = "Contexts:";
-        contextsLabel.setAttribute('for', `contexts-input-${index}`);
 
-        const contextsInput = document.createElement('input');
-        contextsInput.type = 'text';
-        contextsInput.value = sound.contexts.join(', '); // Display existing contexts
-
-        const typeLabel = document.createElement('label');
-        typeLabel.textContent = "Type:";
-        typeLabel.setAttribute('for', `type-select-${index}`);
-
-        const typeSelect = document.createElement('select');
-        if(sound.types)
-        {
+        const contextsContainer = document.createElement('div');
+        contextsContainer.className = 'contexts-container';
+        console.log(sound.contexts)
+        sound.contexts.forEach((context, contextIndex) => {
+            const typeSelect = document.createElement('select');
             const types = ['calm', 'dynamic', 'intense']; // Example sound types
             types.forEach((type) => {
+                console.log(context)
                 const option = document.createElement('option');
                 option.value = type;
                 option.textContent = type;
-                if (sound.types.includes(type)) {
+                if (context[0] === type) {
                     option.selected = true; // Select the current type
                 }
                 typeSelect.appendChild(option);
             });
-        }
+
+            const contextInput = document.createElement('input');
+            contextInput.type = 'text';
+            contextInput.value = context[1]; // Display existing context
+
+            contextsContainer.appendChild(typeSelect);
+            contextsContainer.appendChild(contextInput);
+        });
+
+        const addContextButton = document.createElement('button');
+        addContextButton.textContent = "Add Context";
+        addContextButton.onclick = () => addContext(contextsContainer);
+
         const progressBar = document.createElement('input');
         progressBar.value = 0;
         progressBar.type = "range";
@@ -79,11 +85,10 @@ function displayAllBackgroundMusic() {
             seekSound(sound.filename, progressBar.value); // Allow seeking
         });
 
-
         const updateButton = document.createElement('button');
         updateButton.className = 'update-button'; // Apply the class to style the button
         updateButton.textContent = "Update"; // Set the text for the button
-        updateButton.onclick = () => updateSound(index, contextsInput.value, typeSelect.value); // Set the click event
+        updateButton.onclick = () => updateSound(index, contextsContainer); // Set the click event
 
         const playerControls = document.createElement('div');
         playerControls.className = 'sound-player-controls'; // Flex layout for player controls
@@ -97,29 +102,47 @@ function displayAllBackgroundMusic() {
         stopButton.onclick = () => stopSound(sound.filename); // Set the stop action
         
         playerControls.append(playButton, stopButton);
-        const typeContainer = document.createElement('div'); // New container for type and update button
-        typeContainer.className = 'type-container'; // Apply custom CSS class
-        typeContainer.append(typeLabel, typeSelect, updateButton); // Add elements to the new container
 
         soundItem.innerHTML = `
             <h3>${sound.display_name}</h3>
             <p><strong>Credit:</strong> ${sound.credit}</p>
         `;
-        soundItem.append(contextsLabel, contextsInput, typeContainer, playerControls, progressBar); // Add elements to the sound item
+        soundItem.append(contextsLabel, contextsContainer, addContextButton, updateButton, playerControls, progressBar); // Add elements to the sound item
         soundsList.appendChild(soundItem);
     });
 }
 
-function updateSound(index, newContexts, newType) {
-    // Update contexts and type for the given index
-    if (index >= 0 && index < currentEditArray.length) {
-        const contexts = newContexts.split(',').map((c) => c.trim()); // Split and trim contexts
-        currentEditArray[index].contexts = contexts;
+function addContext(contextsContainer) {
+    const typeSelect = document.createElement('select');
+    const types = ['calm', 'dynamic', 'intense']; // Example sound types
+    types.forEach((type) => {
+        const option = document.createElement('option');
+        option.value = type;
+        option.textContent = type;
+        typeSelect.appendChild(option);
+    });
 
-        currentEditArray[index].types = [newType]; // Update the type
-        BackgroundMusic.updatecontexts();
-        Soundboard.updatecontexts();
-        AmbianceSounds.updatecontexts();
+    const contextInput = document.createElement('input');
+    contextInput.type = 'text';
+
+    contextsContainer.appendChild(typeSelect);
+    contextsContainer.appendChild(contextInput);
+}
+
+function updateSound(index, contextsContainer) {
+    if (index >= 0 && index < currentEditArray.length) {
+        const newContexts = [];
+        const children = contextsContainer.children;
+        for (let i = 0; i < children.length; i += 2) {
+            const typeSelect = children[i];
+            const contextInput = children[i + 1];
+            newContexts.push([typeSelect.value, contextInput.value]);
+        }
+        currentEditArray[index].contexts = newContexts;
+
+        BackgroundMusic.updateContexts();
+        Soundboard.updateContexts();
+        AmbianceSounds.updateContexts();
         console.log('Updated sound:', currentEditArray[index]); // Debug output
     }
 
@@ -129,7 +152,7 @@ function updateSound(index, newContexts, newType) {
         const updatedData = {
             userId: GoogleLogin.userId,
             sounds: currentEditArray,
-            soundsType : currentSoundType,
+            soundsType: currentSoundType,
         };
 
         fetch('/update-user-sounds', {
@@ -186,7 +209,7 @@ function playSound(filename, progressBar) {
 
     const audio = new Audio(`assets/${currentPath}/${filename}`);
     currentAudio = audio;
-    currentAudio.volume = currentVolume
+    currentAudio.volume = currentVolume;
     audio.play(); // Start playing the sound
     updateProgressBar(audio, progressBar); // Update the progress bar
     audio.addEventListener('ended', () => {
@@ -229,7 +252,6 @@ function updateProgressBar(audio, progressBar) {
         console.warn('Progress bar not defined'); // Log warning if undefined
         return; // Exit if not defined
     }
-
 
     const updateProgress = () => {
         if (audio.ended) return; // Stop updating if the audio ends

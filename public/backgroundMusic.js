@@ -114,28 +114,29 @@ const BackgroundMusic = {
         contextSelector.appendChild(option);
     },
 
-    updatecontexts()
+    updateContexts()
     {
         const uniqueOptions = new Set(); // Set for unique options excluding "default"
         uniqueOptions.add(this.DEFAULT_CONTEXT);
+    
         // Add new contexts to uniqueOptions
         for (let music of this.backgroundMusicArray) {
-            for (let subType of music.contexts) {
-                if (!uniqueOptions.has(subType)) {
-                    uniqueOptions.add(subType);
+            for (let [type, context] of music.contexts) { 
+                if (!uniqueOptions.has(context)) {
+                    uniqueOptions.add(context);
                 }
             }
         }
-
+    
         // Convert uniqueOptions to an array and sort alphabetically
         let sortedOptions = Array.from(uniqueOptions).sort((a, b) => a.localeCompare(b));
-
+    
         // Ensure "default" stays at the top
         if (sortedOptions.includes(this.DEFAULT_CONTEXT)) {
             sortedOptions = sortedOptions.filter(opt => opt !== this.DEFAULT_CONTEXT);
             sortedOptions.unshift(this.DEFAULT_CONTEXT);
         }
-
+    
         // Clear the contextSelector and add sorted options
         contextSelector.innerHTML = ""; // Clear existing options
         for (let option of sortedOptions) {
@@ -157,7 +158,7 @@ const BackgroundMusic = {
             }
             this.backgroundMusicArray = await response.json();
             this.backgroundMusicArray = this.shuffleArray(this.backgroundMusicArray);
-            this.updatecontexts();
+            this.updateContexts();
         } catch (e) {
             console.error(`Error fetching files from server:`, e);
         }
@@ -173,17 +174,17 @@ const BackgroundMusic = {
 
     findSoundsByTypeAndContext() {
         if (!Array.isArray(this.backgroundMusicArray)) {
-          throw new Error("Input data is not an array.");
+            throw new Error("Input data is not an array.");
         }
-        if(this.context !== this.DEFAULT_CONTEXT)
-        {
-            return this.backgroundMusicArray.filter(sound => 
-            sound.types.includes(this.type) && sound.contexts.includes(this.context)
+    
+        if (this.context !== this.DEFAULT_CONTEXT) {
+            return this.backgroundMusicArray.filter(sound =>
+                sound.contexts.some(([type, context]) => type === this.type && context === this.context)
             );
-        }
-        else
-        {
-            return this.backgroundMusicArray.filter(sound => sound.types.includes(this.type));
+        } else {
+            return this.backgroundMusicArray.filter(sound =>
+                sound.contexts.some(([type]) => type === this.type)
+            );
         }
     },
 
@@ -207,18 +208,19 @@ const BackgroundMusic = {
         return str.charAt(0).toUpperCase() + str.slice(1); // Capitalize first letter, keep rest unchanged
     },
 
-    updateButton(typeName)
-    {
-        let result = this.backgroundMusicArray.filter(sound => 
-            sound.types.includes(typeName) && sound.contexts.includes(this.context))
-        let button = document.getElementById(typeName+'Button'); 
+    updateButton(typeName) {
+        let result = this.backgroundMusicArray.filter(sound =>
+            sound.contexts.some(([type, context]) => type === typeName && context === this.context)
+        );
+    
+        let button = document.getElementById(typeName + 'Button');
         if (result.length === 0) {
             button.disabled = true; // Disable the button if the array is empty
-            button.textContent  = "Play " + this.capitalizeFirstLetter(typeName) + " (0)"
-          } else {
+            button.textContent = "Play " + this.capitalizeFirstLetter(typeName) + " (0)";
+        } else {
             button.disabled = false; // Enable the button if the array is not empty
-            button.textContent  = "Play " + this.capitalizeFirstLetter(typeName) + " ("+result.length+")"
-          }
+            button.textContent = "Play " + this.capitalizeFirstLetter(typeName) + " (" + result.length + ")";
+        }
     },
 
     setContext(newContext)
