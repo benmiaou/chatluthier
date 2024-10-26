@@ -31,20 +31,6 @@ jobs:
       - name: Change domain
         run: |
           ssh -i chatluthier.pem ec2-user@chatluthier.org "cd /home/ec2-user/chatluthier && find . -type f \( -name '*.js' -o -name '*.html' \) -exec sed -i 's|http://127.0.0.1:3000|chatluthier.org|g' {} \; && find . -type f \( -name '*.js' -o -name '*.html' \) -exec sed -i 's|localhost|chatluthier.org|g' {} \;"
-      
-          
-      - name: Get the current Git SHA
-        id: git_sha
-        run: |
-          SHA=$(ssh -i chatluthier.pem ec2-user@chatluthier.org "cd /home/ec2-user/chatluthier && git rev-parse --short HEAD") # Get the short Git SHA
-          echo "::set-output name=sha::$SHA" # Store it for later use
-      - name: Update the Service Worker cache name
-        run: |
-            SHA="${{ steps.git_sha.outputs.sha }}"
-            SW_FILE="public/service-worker.js" # Path to your Service Worker
-            # Update the cache name in the Service Worker
-            ssh -i chatluthier.pem ec2-user@chatluthier.org "cd /home/ec2-user/chatluthier && sed -i 's/const CACHE_NAME = '\''site-cache-v1'\''/const CACHE_NAME = '\''site-cache-${SHA}'\''/' ${SW_FILE}"
-        
 
       - name: Restart server
         run: |
