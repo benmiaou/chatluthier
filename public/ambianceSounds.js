@@ -83,7 +83,7 @@ const AmbianceSounds = {
             const presetNameInput = document.createElement('input');
             presetNameInput.type = 'text';
             presetNameInput.id = 'preset-name';
-            presetNameInput.placeholder = 'Nom du preset';
+            presetNameInput.placeholder = 'Name of the preset';
             presetNameInput.className = 'preset-name-input';
 
             // Button to save the preset

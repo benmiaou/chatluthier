@@ -1,3 +1,5 @@
+// editSounds.js
+
 let currentEditArray = null; // Global variable to keep track of the current audio
 let currentSoundType = 'backgroundMusic';
 let currentPath = 'background';
@@ -11,25 +13,28 @@ function displaySounds(soundType) {
     soundsList.innerHTML = ''; // Clear existing content
 
     // Determine which method to call based on the sound type
-    switch (soundType) {
-        case 'backgroundMusic':
-            currentEditArray = BackgroundMusic.backgroundMusicArray; // Display background music
-            currentSoundType = 'backgroundMusic';
-            currentPath = 'background';
-            break;
-        case 'ambianceSounds':
-            currentEditArray = AmbianceSounds.ambianceSounds; // Display ambiance sounds
-            currentSoundType = 'ambianceSounds';
-            currentPath = 'ambiance';
-            break;
-        case 'soundboard':
-            currentEditArray = Soundboard.soundboardItems; // Display soundboard
-            currentSoundType = 'soundboard';
-            currentPath = 'soundboard';
-            break;
-        default:
-            console.error('Unknown sound type'); // Handle unexpected sound types
+    if (!currentEditArray || currentSoundType !== soundType) {
+        switch (soundType) {
+            case 'backgroundMusic':
+                currentEditArray = BackgroundMusic.backgroundMusicArray; // Display background music
+                currentSoundType = 'backgroundMusic';
+                currentPath = 'background';
+                break;
+            case 'ambianceSounds':
+                currentEditArray = AmbianceSounds.ambianceSounds; // Display ambiance sounds
+                currentSoundType = 'ambianceSounds';
+                currentPath = 'ambiance';
+                break;
+            case 'soundboard':
+                currentEditArray = Soundboard.soundboardItems; // Display soundboard
+                currentSoundType = 'soundboard';
+                currentPath = 'soundboard';
+                break;
+            default:
+                console.error('Unknown sound type'); // Handle unexpected sound types
+        }
     }
+
     displayAllBackgroundMusic();
 }
 
@@ -48,12 +53,14 @@ function displayAllBackgroundMusic() {
 
         const contextsContainer = document.createElement('div');
         contextsContainer.className = 'contexts-container';
-        console.log(sound.contexts)
+
         sound.contexts.forEach((context, contextIndex) => {
+            const contextWrapper = document.createElement('div');
+            contextWrapper.className = 'context-wrapper';
+
             const typeSelect = document.createElement('select');
             const types = ['calm', 'dynamic', 'intense']; // Example sound types
             types.forEach((type) => {
-                console.log(context)
                 const option = document.createElement('option');
                 option.value = type;
                 option.textContent = type;
@@ -67,14 +74,30 @@ function displayAllBackgroundMusic() {
             contextInput.type = 'text';
             contextInput.value = context[1]; // Display existing context
 
-            contextsContainer.appendChild(typeSelect);
-            contextsContainer.appendChild(contextInput);
+            // Create the "Remove Context" button
+            const removeContextButton = document.createElement('button');
+            removeContextButton.textContent = "Remove";
+            removeContextButton.onclick = () => removeContext(contextWrapper);
+
+            // Append elements to the context wrapper
+            contextWrapper.appendChild(typeSelect);
+            contextWrapper.appendChild(contextInput);
+            contextWrapper.appendChild(removeContextButton);
+
+            // Append the context wrapper to the contexts container
+            contextsContainer.appendChild(contextWrapper);
         });
 
         const addContextButton = document.createElement('button');
         addContextButton.textContent = "Add Context";
         addContextButton.onclick = () => addContext(contextsContainer);
 
+        const updateButton = document.createElement('button');
+        updateButton.className = 'update-button'; // Apply the class to style the button
+        updateButton.textContent = "Update"; // Set the text for the button
+        updateButton.onclick = () => updateSound(index, contextsContainer); // Set the click event
+
+        // Player controls and progress bar
         const progressBar = document.createElement('input');
         progressBar.value = 0;
         progressBar.type = "range";
@@ -85,22 +108,17 @@ function displayAllBackgroundMusic() {
             seekSound(sound.filename, progressBar.value); // Allow seeking
         });
 
-        const updateButton = document.createElement('button');
-        updateButton.className = 'update-button'; // Apply the class to style the button
-        updateButton.textContent = "Update"; // Set the text for the button
-        updateButton.onclick = () => updateSound(index, contextsContainer); // Set the click event
-
         const playerControls = document.createElement('div');
         playerControls.className = 'sound-player-controls'; // Flex layout for player controls
-        
+
         const playButton = document.createElement('button');
         playButton.innerHTML = '▶'; // Unicode symbol for play
         playButton.onclick = () => togglePlayPause(playButton, sound.filename, progressBar); // Set the play action
-        
+
         const stopButton = document.createElement('button');
         stopButton.innerHTML = '⏹'; // Unicode symbol for stop
         stopButton.onclick = () => stopSound(sound.filename); // Set the stop action
-        
+
         playerControls.append(playButton, stopButton);
 
         soundItem.innerHTML = `
@@ -112,7 +130,17 @@ function displayAllBackgroundMusic() {
     });
 }
 
+// Function to remove a context
+function removeContext(contextWrapper) {
+    // Remove the context from the UI
+    contextWrapper.parentNode.removeChild(contextWrapper);
+    // The context will be removed from the data when "Update" is clicked
+}
+
 function addContext(contextsContainer) {
+    const contextWrapper = document.createElement('div');
+    contextWrapper.className = 'context-wrapper';
+
     const typeSelect = document.createElement('select');
     const types = ['calm', 'dynamic', 'intense']; // Example sound types
     types.forEach((type) => {
@@ -125,30 +153,54 @@ function addContext(contextsContainer) {
     const contextInput = document.createElement('input');
     contextInput.type = 'text';
 
-    contextsContainer.appendChild(typeSelect);
-    contextsContainer.appendChild(contextInput);
+    // Create the "Remove Context" button
+    const removeContextButton = document.createElement('button');
+    removeContextButton.textContent = "Remove";
+    removeContextButton.onclick = () => removeContext(contextWrapper);
+
+    contextWrapper.appendChild(typeSelect);
+    contextWrapper.appendChild(contextInput);
+    contextWrapper.appendChild(removeContextButton);
+
+    contextsContainer.appendChild(contextWrapper);
 }
 
 function updateSound(index, contextsContainer) {
     if (index >= 0 && index < currentEditArray.length) {
         const newContexts = [];
-        const children = contextsContainer.children;
-        for (let i = 0; i < children.length; i += 2) {
-            const typeSelect = children[i];
-            const contextInput = children[i + 1];
-            newContexts.push([typeSelect.value, contextInput.value]);
+        const contextWrappers = contextsContainer.children;
+
+        for (let i = 0; i < contextWrappers.length; i++) {
+            const contextWrapper = contextWrappers[i];
+            const typeSelect = contextWrapper.querySelector('select');
+            const contextInput = contextWrapper.querySelector('input[type="text"]');
+
+            // Ensure elements are found before accessing their values
+            if (typeSelect && contextInput) {
+                newContexts.push([typeSelect.value, contextInput.value]);
+            } else {
+                console.warn('Type select or context input not found in contextWrapper:', contextWrapper);
+            }
         }
+
         currentEditArray[index].contexts = newContexts;
 
-        BackgroundMusic.updateContexts();
-        Soundboard.updateContexts();
-        AmbianceSounds.updateContexts();
+        // Update the main data arrays
+        if (currentSoundType === 'backgroundMusic') {
+            BackgroundMusic.backgroundMusicArray = currentEditArray;
+        } else if (currentSoundType === 'ambianceSounds') {
+            AmbianceSounds.ambianceSounds = currentEditArray;
+        } else if (currentSoundType === 'soundboard') {
+            Soundboard.soundboardItems = currentEditArray;
+        }
+
         console.log('Updated sound:', currentEditArray[index]); // Debug output
     }
 
     displayAllBackgroundMusic(); // Refresh the display
-     // Send the updated array to the server with the Google User ID
-     if (GoogleLogin.userId) {
+
+    // Send the updated array to the server with the Google User ID
+    if (GoogleLogin.userId) {
         const updatedData = {
             userId: GoogleLogin.userId,
             sounds: currentEditArray,
@@ -162,16 +214,16 @@ function updateSound(index, contextsContainer) {
             },
             body: JSON.stringify(updatedData), // Convert the data to a JSON string
         })
-        .then((response) => {
-            if (response.ok) {
-                console.log('Data sent to server successfully');
-            } else {
-                console.error('Error sending data to server');
-            }
-        })
-        .catch((error) => {
-            console.error('Network error:', error);
-        });
+            .then((response) => {
+                if (response.ok) {
+                    console.log('Data sent to server successfully');
+                } else {
+                    console.error('Error sending data to server');
+                }
+            })
+            .catch((error) => {
+                console.error('Network error:', error);
+            });
     } else {
         console.error('User ID is not available'); // Handle cases where user ID is missing
     }

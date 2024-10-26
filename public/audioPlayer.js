@@ -13,7 +13,7 @@ class AudioPlayer {
 
     async playSound(audioUrl) {
         try {
-            const cache = await caches.open('AUDIO_CACHE_NAME');
+            const cache = await caches.open(AUDIO_CACHE_NAME);
             let response = await cache.match(audioUrl);
             if (!response) {
                 // Start streaming immediately without waiting for the cache
