@@ -11,6 +11,9 @@
     <link rel="icon" href="assets/images/favicons/favicon.ico" type="image/x-icon">
     <link rel="manifest" href="/site.webmanifest">
     <link rel="manifest" href="manifest.json">
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://accounts.google.com/gsi/style" async defer></script>
     <!-- Scripts -->
     <script src="preloader.js" defer></script>
     <script src="audioPlayer.js" defer></script>
@@ -24,9 +27,7 @@
     <script src="editSounds.js" defer></script>
     <script src="googleLogin.js" defer></script>
     <script src="socket-client.js" defer></script>
-    <!-- Google Identity Services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script src="https://accounts.google.com/gsi/style" async defer></script>
+
 </head>
 <body>
     <header>
@@ -87,8 +88,8 @@
         </section>
 
         <!-- Ambiance Sounds Section -->
-        <div style="gap: 20px; display: flex; align-items: center; justify-content: center">
-            <h2>Ambiance Sounds</h2>
+        <div style="gap: 20px; display: flex; align-items: center; justify-content: center;">
+            <h2 style="margin: 0;">Ambiance Sounds</h2>
             <button id="resetAmbient" onclick="AmbianceSounds.resetAmbientSounds()" class="button-stop">Reset Ambiance</button>
         </div>
         <section id="ambiance" class="section"></section>
