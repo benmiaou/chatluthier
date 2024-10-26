@@ -1,5 +1,5 @@
 // service-worker.js - Service Worker script
-const CACHE_NAME = 'site-cache-v1'; // Unique cache name with version
+const CACHE_NAME = 'site-cache-v3'; // Unique cache name with version
 const urlsToCache = [
     '/', // Root
 ];

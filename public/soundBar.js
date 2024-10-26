@@ -147,6 +147,10 @@ class SoundBar
 
     setVolume(volume) {
         this.soudPlayer.setVolume(volume);
+        if(volume > 0)
+            this.soudPlayer.play()
+        else
+            this.soudPlayer.pause()
     }
 
     getVolume() {

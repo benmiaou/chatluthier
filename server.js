@@ -158,6 +158,62 @@ app.get('/soundboard', (req, res) => {
     res.json(soundboardData); // Return the data as JSON
 });
 
+// Utilisez le middleware sur vos endpoints
+app.post('/save-preset', (req, res) => {
+    const { userId, presetName, presetData } = req.body;
+    console.log('save-preset')
+
+    // Vérifier si les données nécessaires sont présentes
+    if (!userId || !presetName || !presetData) {
+        res.status(400).send('Invalid data'); // Retourner une erreur si les données sont incomplètes
+        return;
+    }
+
+    // Répertoire pour sauvegarder les données de l'utilisateur
+    const userDir = path.join(__dirname, 'user_data', userId);
+
+    // S'assurer que le répertoire utilisateur existe
+    if (!fs.existsSync(userDir)) {
+        fs.mkdirSync(userDir, { recursive: true }); // Créer le répertoire s'il n'existe pas
+    }
+
+    // Générer le chemin du fichier pour les presets
+    const filePath = path.join(userDir, 'presets.json'); // Utiliser 'presets.json' pour stocker tous les presets
+
+    let userPresets = {};
+
+    // Si le fichier existe, lire les presets existants
+    if (fs.existsSync(filePath)) {
+        const data = fs.readFileSync(filePath, 'utf8');
+        userPresets = JSON.parse(data);
+    }
+
+    // Ajouter ou mettre à jour le preset
+    userPresets[presetName] = presetData;
+
+    // Sauvegarder les presets mis à jour dans le fichier
+    fs.writeFileSync(filePath, JSON.stringify(userPresets, null, 2)); // Sauvegarder avec un formatage lisible
+
+    res.send('Preset saved successfully'); // Confirmer que les données ont été sauvegardées
+});
+
+app.get('/load-presets', (req, res) => {
+    const userId = req.query.userId;
+    if (userId) {
+        
+        const userFilePath = path.join(__dirname, 'user_data', userId, 'presets.json');
+        if (fs.existsSync(userFilePath)) {
+            const userPresets = JSON.parse(fs.readFileSync(userFilePath, 'utf8')); // Presets spécifiques à l'utilisateur
+            res.json({ presets: userPresets }); // Retourner les presets en tant que JSON
+        } else {
+            // Si le fichier des presets n'existe pas, retourner un objet vide
+            res.json({ presets: {} });
+        }
+    } else {
+        res.status(400).send('User ID is required'); // Gérer le cas où l'ID utilisateur est manquant
+    }
+});
+
 app.listen(3000, '0.0.0.0', () => console.log('Server started on port 3000'));
 
 const WebSocket = require('ws');
