@@ -1,69 +1,227 @@
 const AmbianceSounds = {
-
     soundBars: [],
     currentAmbiances: {},
-    audioContext : null,
-    ambianceSounds : null,
-    selectedContext : "All",
+    audioContext: null,
+    ambianceSounds: null,
+    selectedContext: "All",
+    presets: {}, // Stocker les presets
 
     getAudioContext() {
         if (!this.audioContext) {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
         }
-        return  this.audioContext;
+        return this.audioContext;
     },
 
-    async loadAmbianceButtons()
-    {
+    async loadAmbianceButtons() {
         let response;
-        if (GoogleLogin.userId)
-        {
+        if (GoogleLogin.userId) {
             response = await fetch(`/ambianceSounds?userId=${GoogleLogin.userId}`);
-        }
-        else
-        {
+        } else {
             response = await fetch(`/ambianceSounds`);
         }
         this.ambianceSounds = await response.json();
-        this.generateAmbientButtons(this.ambianceSounds)
+        this.generateAmbientButtons(this.ambianceSounds);
+
+        // Charger les presets après avoir généré les boutons
+        if (GoogleLogin.isSignedIn) {
+            await this.loadPresets();
+        }
         return this.ambianceSounds;
     },
 
-    updateContexts()
-    {
-
+    updateContexts() {
+        // Votre code existant
     },
 
     async resetAmbientSounds() {
         this.soundBars.forEach(soundbar => {
-            soundbar.setVolume(0)
+            soundbar.setVolume(0);
             soundbar.progressBar.style.width = 0 + '%';
-        })
+        });
     },
 
     generateAmbientButtons(ambianceSounds) {
         const section = document.getElementById("ambiance");
-        section.innerHTML = ''; // Clear existing content
+        section.innerHTML = ''; // Effacer le contenu existant
 
         ambianceSounds.forEach(ambianceSound => {
             const container = document.createElement('div');
             container.className = 'sound-container';
 
-            // Create a div for the sound bar
+            // Créer une div pour la barre sonore
             const soundBarDiv = document.createElement('div');
-            soundBarDiv.id = `sound-bar-${ambianceSound.filename}`; // Set a unique ID for the sound bar
-            soundBarDiv.className = 'sound-bar'; // Apply styling to the sound bar
+            soundBarDiv.id = `sound-bar-${ambianceSound.filename}`; // Attribuer un ID unique
+            soundBarDiv.className = 'sound-bar'; // Appliquer le style
 
-            // Append the sound bar div to the container
             container.appendChild(soundBarDiv);
-            let isRunning = false;
-            // Assuming 'soundBar' is the object exported from 'soundBar.js'
             const soundBar = new SoundBar(ambianceSound);
             this.soundBars.push(soundBar);
             container.appendChild(soundBar.getElement());
 
-            // Append the container to the section
             section.appendChild(container);
         });
+
+        // Ajouter les contrôles de preset si l'utilisateur est connecté
+        if (GoogleLogin.isSignedIn) {
+            this.addPresetControls();
+        }
+    },
+
+    addPresetControls() {
+        const presetSection = document.getElementById("preset-controls");
+        if (!presetSection) {
+            // Create the container for preset controls if it doesn't exist
+            const presetControls = document.createElement('div');
+            presetControls.id = "preset-controls";
+
+            // Create a sub-container for the input and button
+            const inputButtonContainer = document.createElement('div');
+            inputButtonContainer.id = 'input-button-container';
+
+            // Text input for the preset name
+            const presetNameInput = document.createElement('input');
+            presetNameInput.type = 'text';
+            presetNameInput.id = 'preset-name';
+            presetNameInput.placeholder = 'Nom du preset';
+            presetNameInput.className = 'preset-name-input';
+
+            // Button to save the preset
+            const savePresetButton = document.createElement('button');
+            savePresetButton.textContent = '+';
+            savePresetButton.id = 'save-preset-button';
+            savePresetButton.className = 'save-preset-button';
+            savePresetButton.onclick = () => this.savePreset();
+
+            // Append the input and button to the container
+            inputButtonContainer.appendChild(presetNameInput);
+            inputButtonContainer.appendChild(savePresetButton);
+
+            // Dropdown to select presets
+            const presetDropdown = document.createElement('select');
+            presetDropdown.id = 'preset-dropdown';
+            presetDropdown.className = 'preset-dropdown';
+            presetDropdown.onchange = () => this.applyPreset(presetDropdown.value);
+
+            // Append elements to the presetControls container
+            presetControls.appendChild(inputButtonContainer);
+            presetControls.appendChild(presetDropdown);
+
+            // Insert the preset controls before the ambiance section
+            const ambianceSection = document.getElementById("ambiance");
+            ambianceSection.parentNode.insertBefore(presetControls, ambianceSection);
+        }
+
+        // Mettre à jour la boîte déroulante des presets
+        this.updatePresetDropdown();
+    },
+
+    async savePreset() {
+        const presetNameInput = document.getElementById('preset-name');
+        const presetName = presetNameInput.value.trim();
+        if (presetName === '') {
+            alert('Veuillez entrer un nom pour le preset.');
+            return;
+        }
+
+        // Récupérer les niveaux de volume actuels
+        const presetData = {};
+        this.soundBars.forEach(soundBar => {
+            presetData[soundBar.ambianceSound.filename] = soundBar.getVolume();
+        });
+
+        // Sauvegarder le preset localement
+        this.presets[presetName] = presetData;
+
+        // Envoyer le preset au serveur
+        if (GoogleLogin.userId) {
+            const dataToSend = {
+                userId: GoogleLogin.userId,
+                presetName: presetName,
+                presetData: presetData,
+            };
+
+            try {
+                const response = await fetch('/save-preset', {
+                    method: 'POST', // Méthode HTTP POST pour envoyer les données au serveur
+                    headers: {
+                        'Content-Type': 'application/json', // Type de contenu JSON
+                    },
+                    body: JSON.stringify(dataToSend), // Convertir les données en chaîne JSON
+                });
+
+                if (response.ok) {
+                    console.log('Preset sauvegardé sur le serveur avec succès');
+                    // Recharger les presets depuis le serveur pour s'assurer qu'ils sont à jour
+                    await this.loadPresets();
+                } else {
+                    console.error('Erreur lors de la sauvegarde du preset sur le serveur');
+                }
+            } catch (error) {
+                console.error('Erreur réseau :', error);
+            }
+        } else {
+            console.error('User ID is not available'); // Gérer les cas où l'ID utilisateur est manquant
+        }
+
+        // Mettre à jour la boîte déroulante
+        this.updatePresetDropdown();
+
+        // Réinitialiser le champ de saisie
+        presetNameInput.value = '';
+    },
+
+    applyPreset(presetName) {
+        if (presetName === '') return;
+        const presetData = this.presets[presetName];
+        if (!presetData) return;
+
+        this.soundBars.forEach(soundBar => {
+            const volume = presetData[soundBar.ambianceSound.filename] || 0;
+            soundBar.setVolume(volume);
+            soundBar.progressBar.style.width = (volume * 100) + '%';
+        });
+    },
+
+    updatePresetDropdown() {
+        const presetDropdown = document.getElementById('preset-dropdown');
+        if (!presetDropdown) return;
+
+        // Effacer les options existantes
+        presetDropdown.innerHTML = '';
+
+        // Ajouter une option par défaut
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Sélectionner un preset';
+        presetDropdown.appendChild(defaultOption);
+
+        // N'afficher les presets que si l'utilisateur est connecté
+        if (GoogleLogin.isSignedIn) {
+            Object.keys(this.presets).forEach(presetName => {
+                const option = document.createElement('option');
+                option.value = presetName;
+                option.textContent = presetName;
+                presetDropdown.appendChild(option);
+            });
+        }
+    },
+
+    async loadPresets() {
+        // Charger les presets depuis le serveur si l'utilisateur est connecté
+        if (GoogleLogin.userId) {
+            try {
+                const response = await fetch(`/load-presets?userId=${GoogleLogin.userId}`);
+                const data = await response.json();
+                this.presets = data.presets || {};
+                this.updatePresetDropdown();
+            } catch (error) {
+                console.error('Erreur lors du chargement des presets depuis le serveur :', error);
+                this.presets = {};
+            }
+        } else {
+            console.error('User ID is not available');
+            this.presets = {};
+        }
     }
-}
+};
