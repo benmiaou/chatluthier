@@ -324,10 +324,15 @@ nav a {
     top: 0;
     bottom: 0;
     opacity: 0;
-    background-color: rgba(100, 100, 100, 0.6);
+    
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
+    background-color: rgba(100,100,100,0.6);
 }
-
 .progress-bar-volume:hover,
 .progress-bar-volume.touch-hover {
     opacity: 1;
@@ -338,14 +343,12 @@ nav a {
     left: 50%;
     right: 0;
 }
-
 .progress-bar-volume.minus {
     left: 0;
     right: 50%;
 }
 
-.progress-bar-volume.minus:before,
-.progress-bar-volume.plus:before {
+.progress-bar-volume.minus:before {
     content: "";
     display: block;
     background-color: white;
@@ -357,6 +360,17 @@ nav a {
     transform: translateX(-50%);
 }
 
+.progress-bar-volume.plus:before {
+    content: "";
+    display: block;
+    background-color: white;
+    height: 2px;
+    width: 20px;
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translateX(-50%);
+}
 .progress-bar-volume.plus:after {
     content: "";
     display: block;

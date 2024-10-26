@@ -39,7 +39,7 @@ class SoundBar
         this.soundLicense.draggable = false;
 
         this.progressBarVolumeMinus = document.createElement('div');
-        this. progressBarVolumeMinus.className = 'progress-bar-volume minus';
+        this.progressBarVolumeMinus.className = 'progress-bar-volume minus';
         this.progressBarVolumePlus = document.createElement('div');
         this.progressBarVolumePlus.className = 'progress-bar-volume plus';
 
