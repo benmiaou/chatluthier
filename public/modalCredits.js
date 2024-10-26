@@ -3,6 +3,7 @@ let activeModals = {};
 const maxActiveModals = 5; // Maximum number of active modals allowed
 
 function createModal(creditText) {
+    console.log(creditText)
     // If more than 5 modals are active, close the oldest one
     if (Object.keys(activeModals).length >= maxActiveModals) {
         closeOldestModal(); // Close the oldest modal to maintain the limit

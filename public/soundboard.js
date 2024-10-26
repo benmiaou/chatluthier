@@ -59,6 +59,7 @@ const Soundboard = {
                     audioPlayer.play();
                     button.classList.add('button-play');
                     button.classList.remove('button-stop');
+                    createModal(soundboardItem.credit); 
                 } else if (clickCount === 2) {
                     // Second click: set the audio to loop
                     audioPlayer.setLoop(true);
