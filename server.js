@@ -118,7 +118,7 @@ function mergeArrays(serverArray, userArray) {
 
 // Generalized function to get user-specific or default data
 function getData(userId, filename) {
-    const defaultFilePath = path.join(__dirname, `${filename}.json`);
+    const defaultFilePath = path.join(__dirname, 'srv_data',`${filename}.json`);
     const defaultArray = JSON.parse(fs.readFileSync(defaultFilePath, 'utf8')); // Default server array
 
     if (userId) {

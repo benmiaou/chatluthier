@@ -64,15 +64,15 @@ function showAllCredits() {
         });
     }
 
-    const modal = document.getElementById("all-credits-display");
+    const modal = document.getElementById("external-modal");
     if (!modal) {
-        console.error("all-credits-display not found!");
+        console.error("external-modal not found!");
         return; // Early exit if modal doesn't exist
     }
 
-    const creditDetails = modal.querySelector(".credits-details");
+    const creditDetails = document.getElementById("external-modal-body");
     if (!creditDetails) {
-        console.error("credits-details class not found!");
+        console.error("external-modal-body class not found!");
         return; // Early exit if the target class is missing
     }
 
@@ -81,6 +81,6 @@ function showAllCredits() {
 }
 
 function closeAllCreditsModal() {
-    const modal = document.getElementById("all-credits-display");
+    const modal = document.getElementById("external-modal-body");
     modal.style.display = "none"; // Hide the modal
 }
