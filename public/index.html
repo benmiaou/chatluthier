@@ -120,6 +120,28 @@
         </h2>
         <section id="soundboard" class="section"></section>
         <section id="soundboardLocal" class="section"></section>
+
+
+        <!-- ID Management Section -->
+        <div id="id-management" class="id-management">
+            <h2>Session Management</h2>
+            <!-- Create ID -->
+            <div class="create-id">
+                <button id="create-id-button">Create Session</button>
+            </div>
+            <!-- Join ID -->
+            <div class="join-id">
+                <input type="text" id="join-id-input" placeholder="Enter Session ID">
+                <button id="join-id-button">Join Session</button>
+            </div>
+            <!-- Display Session ID and Connection Status -->
+            <p id="your-id" style="display: none;">
+                Session ID (<span id="session-status"></span>): <span id="generated-id"></span>
+            </p>
+            <!-- Status Message -->
+            <p id="status-message"></p>
+            <!-- Connection Status will be appended here -->
+        </div>
     </main>
 
     <!-- Global JavaScript Functions -->

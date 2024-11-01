@@ -41,7 +41,7 @@ class AudioManager
         this.audioPlayer.setOnEndedCallback(callback);
     }
 
-    stop() 
+    stop(sendEvent = false) 
     {
         if(this.audioPlayer.isPlaying)
         {
@@ -56,6 +56,7 @@ class AudioManager
             this.currentButton.classList.add('button-stop');
             this.currentButton = null;
         }
+        if(sendEvent) sendBackgroundStopMessage();
     }
 
     setVolume(level) 
@@ -94,7 +95,9 @@ const BackgroundMusic = {
 
     setBackgroundVolume(volume) {
         const gainValue = volume / 100;
-       this.audioManager.setVolume(gainValue);
+        this.audioManager.setVolume(gainValue);
+        // **Send message to other clients about the volume change**
+        sendBackgroundVolumeChangeMessage(gainValue);
     },
 
     init () 
@@ -141,6 +144,49 @@ const BackgroundMusic = {
         contextSelector.innerHTML = ""; // Clear existing options
         for (let option of sortedOptions) {
             this.addOptionTocontextSelector(option);
+        }
+    },
+
+    async stopReceivedBackgroundSound(musicData) 
+    {
+        this.audioManager.stop();
+    },
+
+    async playReceivedBackgroundSound(musicData) {
+        console.log("Playing " + musicData)
+        // Stop current playback
+        if (this.audioManager.isCurrentlyPlaying()) {
+            this.audioManager.stop();
+        }
+    
+        // Update the type and context
+        this.type = musicData.type;
+        this.context = musicData.context;
+        this.filesToPlay = this.findSoundsByTypeAndContext();
+    
+        // Find the specific file to play
+        const fileToPlay = this.filesToPlay.find(file => file.filename === musicData.filename);
+    
+        if (fileToPlay) {
+            // Update soundIndex to the correct position
+            this.soundIndex = this.filesToPlay.indexOf(fileToPlay);
+    
+            // Play the received sound
+            console.log("Playing " + fileToPlay)
+            await this.audioManager.playSound(fileToPlay, this.type);
+    
+            // Update the credit information
+            this.audioManager.updateCredit(musicData.credit);
+        } else {
+            console.error('Received music file not found in playlist:', musicData.filename);
+        }
+    },
+
+    setVolumeFromSocket(level) {
+        this.audioManager.setVolume(level);
+        const volumeSlider = document.getElementById('music-volume');
+        if (volumeSlider) {
+            volumeSlider.value = level*100;
         }
     },
     
@@ -195,6 +241,13 @@ const BackgroundMusic = {
         let fileToPlay = this.filesToPlay[this.soundIndex];
         if(fileToPlay)
             this.audioManager.playSound(fileToPlay, this.type);
+        // **Send message to other clients about the music change**
+        sendBackgroundMusicChangeMessage({
+            filename: fileToPlay.filename,
+            type: this.type,
+            context: this.context,
+            credit: fileToPlay.credit,
+        });
 
         //Preload next
         this.soundIndex++;
@@ -234,7 +287,7 @@ const BackgroundMusic = {
         {
             if(this.filesToPlay.length == 0)
             {
-                this.audioManager.stop();
+                this.audioManager.stop(true);
             }
             else
             {
@@ -259,24 +312,31 @@ const BackgroundMusic = {
 
 
     async playBackgroundSound(type) {
-        if(this.audioManager.isProcessing || !this.isClickable) return;
+        if (this.audioManager.isProcessing || !this.isClickable) return;
         this.isClickable = false;
         setTimeout(() => {
             this.isClickable = true;
         }, 250);
-        if (this.audioManager.isCurrentlyPlaying()) 
-        {
-            this.audioManager.stop();
+        if (this.audioManager.isCurrentlyPlaying()) {
+            this.audioManager.stop(true);
             if (type === this.type) return;
         }
         this.type = type;
-        this.filesToPlay =  this.findSoundsByTypeAndContext();
-        if(this.filesToPlay.length == 0)
-         {
+        this.filesToPlay = this.findSoundsByTypeAndContext();
+        if (this.filesToPlay.length == 0) {
             return;
-         }
+        }
         this.backGroundSoundLoop();
-    },
+    
+        // **Send message to other clients about the music change**
+        const currentFile = this.filesToPlay[this.soundIndex - 1];
+        sendBackgroundMusicChangeMessage({
+            filename: currentFile.filename,
+            type: this.type,
+            context: this.context,
+            credit: currentFile.credit,
+        });
+    }
 }
 
 BackgroundMusic.init();

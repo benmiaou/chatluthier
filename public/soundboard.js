@@ -1,3 +1,5 @@
+// In Soundboard.js
+
 const Soundboard = {
     soundboardList: {},
     audioContext: null,
@@ -50,6 +52,7 @@ const Soundboard = {
                     button.classList.add('button-stop');
                 }
             });
+
             // Function to handle the click event
             const handleClick = () => {
                 clickCount++;
@@ -60,6 +63,11 @@ const Soundboard = {
                     button.classList.add('button-play');
                     button.classList.remove('button-stop');
                     createModal(soundboardItem.credit); 
+
+                    // Send WebSocket message to notify other clients
+                    if (window.sendPlaySoundboardSoundMessage) {
+                        window.sendPlaySoundboardSoundMessage(soundboardItem.filename);
+                    }
                 } else if (clickCount === 2) {
                     // Second click: set the audio to loop
                     audioPlayer.setLoop(true);
@@ -95,4 +103,35 @@ const Soundboard = {
             sound.setVolume(gainValue);
         });
     },
+
+    /**
+     * Plays a soundboard item triggered by a remote message.
+     * @param {string} filename - The filename of the sound to play.
+     */
+    playSoundRemote(filename) {
+        // Find the soundboard item by filename
+        const soundboardItem = this.soundboardItems.find(item => item.filename === filename);
+        if (!soundboardItem) {
+            console.warn(`Soundboard item with filename "${filename}" not found.`);
+            return;
+        }
+
+        const audioPlayer = this.soundboardList[soundboardItem.display_name];
+        if (!audioPlayer) {
+            console.warn(`AudioPlayer for "${soundboardItem.display_name}" not found.`);
+            return;
+        }
+
+        // Play the sound without sending a WebSocket message
+        audioPlayer.play();
+        
+        // Optionally, update the button UI to reflect the play state
+        const buttons = document.querySelectorAll('#soundboard button');
+        buttons.forEach(button => {
+            if (button.textContent === soundboardItem.display_name) {
+                button.classList.add('button-play');
+                button.classList.remove('button-stop');
+            }
+        });
+    }
 };

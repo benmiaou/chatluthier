@@ -675,3 +675,80 @@ footer {
 .footer-content a:hover {
     text-decoration: underline;
 }
+
+/* Session Management Styling */
+.id-management {
+    background-color: #222;
+    border: 1px solid #444;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 5px;
+    color: #fff;
+}
+
+.id-management h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+    color: #fff;
+}
+
+.create-id, .join-id {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#create-id-button, #join-id-button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+    background-color: #4CAF50; /* Match the button-play style */
+    color: white;
+    font-size: 16px;
+    margin: 0 5px;
+    transition: background-color 0.3s;
+}
+
+#create-id-button:hover, #join-id-button:hover {
+    background-color: #367C39; /* Darker green */
+}
+
+#join-id-input {
+    padding: 10px;
+    width: 200px;
+    margin-right: 10px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #333;
+    color: #fff;
+}
+
+#join-id-input::placeholder {
+    color: #bbb;
+}
+
+#status-message {
+    text-align: center;
+    color: #FFD700; /* Gold color for visibility */
+    margin-top: 10px;
+}
+
+#your-id {
+    text-align: center;
+    margin-top: 10px;
+    color: #fff;
+}
+
+#your-id span {
+    font-weight: bold;
+    color: #4CAF50;
+}
+
+#connection-status {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+}

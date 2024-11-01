@@ -138,19 +138,23 @@ class SoundBar
         const event = new CustomEvent('soundBarValueChanged');
         progressBarContainer.dispatchEvent(event);
         let volume = this.getVolume();
-        this.soudPlayer.setVolume(volume);
-        if(volume > 0)
-            this.soudPlayer.play()
-        else
-            this.soudPlayer.pause()
+
+        // Use setVolume to ensure ambiance status is sent
+        this.setVolume(volume);
     }
 
-    setVolume(volume) {
+    setVolume(volume, shouldNotify = true) {
         this.soudPlayer.setVolume(volume);
         if(volume > 0)
             this.soudPlayer.play()
         else
             this.soudPlayer.pause()
+        if (AmbianceSounds && shouldNotify) { // Ensure AmbianceSounds is accessible
+            const currentStatus = AmbianceSounds.getCurrentAmbianceStatus();
+            if (window.sendAmbianceMessage) {
+                window.sendAmbianceMessage(currentStatus);
+            }
+        }
     }
 
     getVolume() {

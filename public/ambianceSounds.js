@@ -175,12 +175,18 @@ const AmbianceSounds = {
         if (presetName === '') return;
         const presetData = this.presets[presetName];
         if (!presetData) return;
-
+    
         this.soundBars.forEach(soundBar => {
             const volume = presetData[soundBar.ambianceSound.filename] || 0;
             soundBar.setVolume(volume);
             soundBar.progressBar.style.width = (volume * 100) + '%';
         });
+    
+        // Send the current ambiance status via WebSocket
+        if (window.sendAmbianceMessage) { // Ensure the function exists
+            const currentStatus = this.getCurrentAmbianceStatus();
+            window.sendAmbianceMessage(currentStatus);
+        }
     },
 
     updatePresetDropdown() {
@@ -223,5 +229,15 @@ const AmbianceSounds = {
             console.error('User ID is not available');
             this.presets = {};
         }
-    }
+    },
+
+    getCurrentAmbianceStatus() {
+        const status = {};
+        this.soundBars.forEach(soundBar => {
+            status[soundBar.ambianceSound.filename] = soundBar.getVolume();
+        });
+        return status;
+    },
 };
+
+

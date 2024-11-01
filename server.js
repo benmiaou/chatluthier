@@ -216,21 +216,100 @@ app.get('/load-presets', (req, res) => {
 
 app.listen(3000, '0.0.0.0', () => console.log('Server started on port 3000'));
 
+
+//SOCKET PART ====================================================================================================
+
+// server.js
+
 const WebSocket = require('ws');
 
-const ws = new WebSocket.Server({ port : 3001 });
+const wsServer = new WebSocket.Server({ port: 3001 });
 
-ws.on('connection', function connection(ws) {
+// Map to keep track of subscribers for each ID
+const subscribers = new Map();  // Map<ID, Set<WebSocket>>
+
+wsServer.on('connection', function connection(ws) {
+  let connectedId = null; // The ID the client is connected to
 
   ws.on('message', function incoming(message) {
-      let toto = JSON.parse(message)
-      console.log(toto)
+    try {
+      const data = JSON.parse(message);
+      console.log('Received:', data);
 
-      console.log('Received :' + toto.type)
-    // Gérer le message entrant
+      switch (data.type) {
+        case 'register':
+          // Client wants to register an ID
+          connectedId = data.id;
+          if (subscribers.has(connectedId)) {
+            ws.send(JSON.stringify({ type: 'error', message: 'ID already registered' }));
+          } else {
+            subscribers.set(connectedId, new Set());
+            subscribers.get(connectedId).add(ws);
+            ws.send(JSON.stringify({ type: 'registered', id: connectedId }));
+            console.log(`Client registered and connected to ID: ${connectedId}`);
+          }
+          break;
+
+        case 'subscribe':
+          // Client wants to subscribe to an ID
+          connectedId = data.id;
+          if (!subscribers.has(connectedId)) {
+            ws.send(JSON.stringify({ type: 'error', message: 'Session ID does not exist.' }));
+            connectedId = null;
+          } else {
+            subscribers.get(connectedId).add(ws);
+            ws.send(JSON.stringify({ type: 'subscribed', id: connectedId }));
+            console.log(`Client subscribed to ID: ${connectedId}`);
+          }
+          break;
+
+        case 'message':
+        case 'ambianceStatusUpdate' :
+        case 'backgroundMusicChange':
+        case 'backgroundMusicVolumeChange':
+        case 'backgroundMusicStop':
+        case 'playSoundboardSound':
+            // Client sends a message to others connected to the same ID
+            if (connectedId) {
+            const subs = subscribers.get(connectedId);
+            if (subs) {
+                subs.forEach(subscriberWs => {
+                if (subscriberWs !== ws && subscriberWs.readyState === WebSocket.OPEN) {
+                    subscriberWs.send(JSON.stringify({
+                    type: data.type,
+                    id: connectedId,
+                    content: data.content,
+                    }));
+                }
+                });
+            }
+            } else {
+            ws.send(JSON.stringify({ type: 'error', message: 'Client not connected to any ID.' }));
+            console.warn('Client not connected to any ID.');
+            }
+        break;
+
+        default:
+          console.warn('Unknown message type:', data.type);
+      }
+    } catch (error) {
+      console.error('Error processing message:', error);
+    }
   });
 
-  ws.on('close', function() {
-    // Gérer la fermeture de la connexion
+  ws.on('close', function () {
+    console.log('Connection closed');
+
+    // Remove client from subscribers
+    if (connectedId) {
+      const subs = subscribers.get(connectedId);
+      if (subs) {
+        subs.delete(ws);
+        if (subs.size === 0) {
+          subscribers.delete(connectedId);
+          console.log(`No more subscribers for ID: ${connectedId}, ID removed.`);
+        }
+      }
+    }
   });
 });
