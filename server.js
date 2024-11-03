@@ -17,7 +17,7 @@ try {
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Middleware for parsing JSON bodies
 // Serve static files from the 'public' directory where 'index.html' is located
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'dist')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*'); // This is for development only!

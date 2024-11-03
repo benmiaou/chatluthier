@@ -1,4 +1,7 @@
-class AudioPlayer {
+import { AUDIO_CACHE_NAME } from './constants.js';
+import { PreLoader } from './preloader.js';
+
+export class AudioPlayer {
     constructor() {
         this.audioElement = document.createElement('audio');
         this.audioElement.style.display = 'none';
@@ -9,6 +12,8 @@ class AudioPlayer {
         this.audioElement.enable = false;
         this.onEndedCallback = null; // Custom callback for when playback ends naturally
         this.isPlaying = false;
+
+        document.body.appendChild(this.audioElement);
     }
 
     async playSound(audioUrl) {
@@ -18,6 +23,7 @@ class AudioPlayer {
             if (!response) {
                 // Start streaming immediately without waiting for the cache
                 this.audioElement.src = audioUrl;
+                console.log(PreLoader);
                 PreLoader.enqueueFetch(audioUrl); // Queue the fetch operation
             } else {
                 // If the audio is in the cache, use it directly

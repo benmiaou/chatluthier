@@ -1,3 +1,5 @@
+/*src/css/styles.css*/
+
 /* Basic reset for styling */
 * {
     margin: 0;
@@ -5,17 +7,18 @@
     box-sizing: border-box;
 }
 
-/* Global font definitions */
 @font-face {
-    font-family: Bagnard;
-    src: url(assets/fonts/BagnardSans.otf);
+    font-family: 'BagnardSans';
+    src: url('../fonts/BagnardSans.otf') format('opentype'); 
+    font-weight: normal;
+    font-style: normal;
 }
 
 body, html {
     height: 100%;
     margin: 0;
     padding: 0;
-    font-family: Bagnard, Arial, sans-serif;
+    font-family: BagnardSans, Arial, sans-serif;
     background-color: #333;
     color: #fff;
 }
@@ -53,7 +56,7 @@ h2 {
 
 /* Button styling */
 button {
-    font-family: Bagnard;
+    font-family: BagnardSans;
     background-color: #555;
     border: none;
     color: white;

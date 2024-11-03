@@ -108,3 +108,5 @@ function closeModal(element) {
     const creditText = creditDetails.innerHTML; // Get the credit text
     closeModalById(creditText); // Close the modal based on the credit text
 }
+
+export { createModal, closeModal };

@@ -1,4 +1,9 @@
-class SoundBar 
+import { AudioPlayer } from './audioPlayer.js'; // Adjust the path based on your directory structure
+import { AmbianceSounds } from './ambianceSounds.js'; // Ensure default export
+import { createModal } from './modalCredits.js'; // Import createModal
+import { sendAmbianceMessage } from './socket-client.js';
+
+export class SoundBar 
 {
     constructor(ambianceSound) 
     {
@@ -151,9 +156,7 @@ class SoundBar
             this.soudPlayer.pause()
         if (AmbianceSounds && shouldNotify) { // Ensure AmbianceSounds is accessible
             const currentStatus = AmbianceSounds.getCurrentAmbianceStatus();
-            if (window.sendAmbianceMessage) {
-                window.sendAmbianceMessage(currentStatus);
-            }
+            sendAmbianceMessage(currentStatus);
         }
     }
 

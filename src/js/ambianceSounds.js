@@ -1,4 +1,9 @@
-const AmbianceSounds = {
+import { GoogleLogin } from './googleLogin.js'; // Newly added import
+import { SoundBar } from './soundBar.js';
+import { sendAmbianceMessage } from './socket-client.js';
+
+
+export const AmbianceSounds = {
     soundBars: [],
     currentAmbiances: {},
     audioContext: null,
@@ -183,10 +188,8 @@ const AmbianceSounds = {
         });
     
         // Send the current ambiance status via WebSocket
-        if (window.sendAmbianceMessage) { // Ensure the function exists
-            const currentStatus = this.getCurrentAmbianceStatus();
-            window.sendAmbianceMessage(currentStatus);
-        }
+        const currentStatus = this.getCurrentAmbianceStatus();
+        sendAmbianceMessage(currentStatus);
     },
 
     updatePresetDropdown() {
@@ -239,5 +242,7 @@ const AmbianceSounds = {
         return status;
     },
 };
+
+
 
 

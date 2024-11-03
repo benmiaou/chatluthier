@@ -1,21 +1,22 @@
-const AUDIO_CACHE_NAME = 'audio-cache';
+// src/js/backgroundMusic.js
 
-class AudioManager 
-{
-    constructor() 
-    {
-        this.audioPlayer = new AudioPlayer();
+import { AudioPlayer } from './audioPlayer.js'; // Adjust the path based on your directory structure
+import { PreLoader } from './preloader.js';
+import { sendBackgroundVolumeChangeMessage, sendBackgroundMusicChangeMessage, sendBackgroundStopMessage } from './socket-client.js';
+import { GoogleLogin } from './googleLogin.js'; // Adjust the path if necessary
+
+export class AudioManager {
+    constructor() {
+        this.audioPlayer = new AudioPlayer(); // Now AudioPlayer is defined
         this.currentButton = null;
         this.isProcessing = false;
     }
 
-    getPlayer()
-    {
+    getPlayer() {
         return this.audioPlayer.getPlayer();
     }
 
-    async playSound(fileOrHandle, type) 
-    {
+    async playSound(fileOrHandle, type) {
         this.isProcessing = true;
         this.stop(); // Stop any currently playing audio
 
@@ -30,28 +31,23 @@ class AudioManager
         this.isProcessing = false;
     }
 
-    preload(fileOrHandle) 
-    {
+    preload(fileOrHandle) {
         const audioUrl = "assets/background/" + fileOrHandle.filename;
         PreLoader.enqueueFetch(audioUrl);
     }
 
-    setOnEndedCallback(callback) 
-    {
+    setOnEndedCallback(callback) {
         this.audioPlayer.setOnEndedCallback(callback);
     }
 
-    stop(sendEvent = false) 
-    {
-        if(this.audioPlayer.isPlaying)
-        {
+    stop(sendEvent = false) {
+        if(this.audioPlayer.isPlaying) {
             this.audioPlayer.stop();
             console.log("Playback has been stopped.");
         }
        
         this.updateCredit("---");
-        if(this.currentButton)
-        {
+        if(this.currentButton) {
             this.currentButton.classList.remove('button-play');
             this.currentButton.classList.add('button-stop');
             this.currentButton = null;
@@ -59,19 +55,16 @@ class AudioManager
         if(sendEvent) sendBackgroundStopMessage();
     }
 
-    setVolume(level) 
-    {
+    setVolume(level) {
         this.audioPlayer.setVolume(level);
         console.log(`Volume set to ${level}.`);
     }
 
-    isCurrentlyPlaying() 
-    {
+    isCurrentlyPlaying() {
         return  this.audioPlayer.isPlaying;
     }
 
-    updateCredit(credit) 
-    {
+    updateCredit(credit) {
         const creditTitle = document.getElementById('background-music-Credit');
         if (creditTitle) {
             creditTitle.innerHTML = credit;
@@ -79,7 +72,7 @@ class AudioManager
     }
 }
 
-const BackgroundMusic = {
+export const BackgroundMusic = {
     DEFAULT_CONTEXT : "default",
     type: null,
     context : "default",
@@ -88,8 +81,7 @@ const BackgroundMusic = {
     audioManager: new AudioManager(), // Initialize AudioManager
     isClickable : true,
 
-    getPlayer()
-    {
+    getPlayer() {
         return this.audioManager.getPlayer();
     },
 
@@ -100,16 +92,13 @@ const BackgroundMusic = {
         sendBackgroundVolumeChangeMessage(gainValue);
     },
 
-    init () 
-    {
+    init () {
         this.audioManager.setOnEndedCallback(() => {
             this.backGroundSoundLoop();
         });
     },
 
-
-    addOptionTocontextSelector(subType)
-    {
+    addOptionTocontextSelector(subType) {
         const contextSelector = document.getElementById('contextSelector');
         const option = document.createElement('option');
         option.value = subType;
@@ -117,8 +106,7 @@ const BackgroundMusic = {
         contextSelector.appendChild(option);
     },
 
-    updateContexts()
-    {
+    updateContexts() {
         const uniqueOptions = new Set(); // Set for unique options excluding "default"
         uniqueOptions.add(this.DEFAULT_CONTEXT);
     
@@ -147,8 +135,7 @@ const BackgroundMusic = {
         }
     },
 
-    async stopReceivedBackgroundSound(musicData) 
-    {
+    async stopReceivedBackgroundSound(musicData) {
         this.audioManager.stop();
     },
 
@@ -191,7 +178,6 @@ const BackgroundMusic = {
     },
     
     async preloadBackgroundSounds() {
-
         try {
             let response;
             if (GoogleLogin.userId) 
@@ -276,21 +262,17 @@ const BackgroundMusic = {
         }
     },
 
-    setContext(newContext)
-    {
+    setContext(newContext) {
         this.context = newContext;
         this.filesToPlay =  this.findSoundsByTypeAndContext();
         this.updateButton("calm")
         this.updateButton("dynamic")
         this.updateButton("intense")
-        if(this.audioManager.isCurrentlyPlaying())
-        {
-            if(this.filesToPlay.length == 0)
-            {
+        if(this.audioManager.isCurrentlyPlaying()) {
+            if(this.filesToPlay.length == 0) {
                 this.audioManager.stop(true);
             }
-            else
-            {
+            else {
                 this.audioManager.stop();
                 this.backGroundSoundLoop();
             }

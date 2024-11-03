@@ -1,4 +1,8 @@
 // editSounds.js
+import { BackgroundMusic } from './backgroundMusic.js';
+import { AmbianceSounds } from './ambianceSounds.js';
+import { SoundBoard } from './soundboard.js';
+
 
 let currentEditArray = null; // Global variable to keep track of the current audio
 let currentSoundType = 'backgroundMusic';
@@ -26,7 +30,7 @@ function displaySounds(soundType) {
                 currentPath = 'ambiance';
                 break;
             case 'soundboard':
-                currentEditArray = Soundboard.soundboardItems; // Display soundboard
+                currentEditArray = SoundBoard.soundboardItems; // Display soundboard
                 currentSoundType = 'soundboard';
                 currentPath = 'soundboard';
                 break;
@@ -191,7 +195,7 @@ function updateSound(index, contextsContainer) {
         } else if (currentSoundType === 'ambianceSounds') {
             AmbianceSounds.ambianceSounds = currentEditArray;
         } else if (currentSoundType === 'soundboard') {
-            Soundboard.soundboardItems = currentEditArray;
+            SoundBoard.soundboardItems = currentEditArray;
         }
 
         console.log('Updated sound:', currentEditArray[index]); // Debug output
@@ -330,3 +334,6 @@ function closeEditSoundModal() {
     const modal = document.getElementById('edit-sound-modal');
     modal.style.display = 'none'; // Hide the modal
 }
+
+
+export {openEditSoundModal, closeEditSoundModal}

@@ -1,3 +1,8 @@
+// src/js/credits.js
+import { BackgroundMusic } from './backgroundMusic.js';
+import { SoundBoard } from './soundboard.js';
+import { AmbianceSounds } from './ambianceSounds.js';
+
 function getCreditsByCategory() {
     const credits = {
         ambianceSounds: [],
@@ -16,8 +21,8 @@ function getCreditsByCategory() {
     }
 
     // Retrieve credits for soundboard items
-    if (Soundboard.soundboardItems) {
-        Soundboard.soundboardItems.forEach(item => {
+    if (SoundBoard.soundboardItems) {
+        SoundBoard.soundboardItems.forEach(item => {
             credits.soundboardItems.push({
                 name: item.display_name,
                 credit: item.credit
@@ -84,3 +89,5 @@ function closeAllCreditsModal() {
     const modal = document.getElementById("external-modal-body");
     modal.style.display = "none"; // Hide the modal
 }
+
+export {showAllCredits}

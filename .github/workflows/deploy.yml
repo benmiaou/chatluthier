@@ -32,6 +32,10 @@ jobs:
         run: |
           ssh -i chatluthier.pem ec2-user@chatluthier.org "cd /home/ec2-user/chatluthier && find . -type f \( -name '*.js' -o -name '*.html' \) -exec sed -i 's|http://127.0.0.1:3000|chatluthier.org|g' {} \; && find . -type f \( -name '*.js' -o -name '*.html' \) -exec sed -i 's|localhost|chatluthier.org|g' {} \;"
 
+      - name: Change domain
+        run: |
+          ssh -i chatluthier.pem ec2-user@chatluthier.org "cd /home/ec2-user/chatluthier && npm install && npm update"
+
       - name: Restart server
         run: |
           ssh ec2-user@chatluthier.org "pm2 restart all"

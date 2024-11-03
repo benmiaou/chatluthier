@@ -1,4 +1,8 @@
 // socket-client.js
+import { BackgroundMusic } from './backgroundMusic.js';
+import { SoundBoard } from './soundboard.js';
+import { AmbianceSounds } from './ambianceSounds.js';
+
 
 // Establish WebSocket connection
 const socketClient = new WebSocket('ws://localhost:3001');
@@ -132,7 +136,7 @@ socketClient.onclose = function (event) {
  * Sends a registration message to create a session.
  * @param {string} id - The session ID to register.
  */
-function registerId(id) {
+export function registerId(id) {
     const message = JSON.stringify({ type: 'register', id: id });
     socketClient.send(message);
     console.log(`Sent register request for ID: ${id}`);
@@ -142,7 +146,7 @@ function registerId(id) {
  * Sends a subscription message to join a session.
  * @param {string} id - The session ID to join.
  */
-function subscribeToId(id) {
+export function subscribeToId(id) {
     const message = JSON.stringify({ type: 'subscribe', id: id });
     socketClient.send(message);
     console.log(`Sent subscribe request for ID: ${id}`);
@@ -152,7 +156,7 @@ function subscribeToId(id) {
  * Sends a general message.
  * @param {string} content - The message content.
  */
-function sendMessage(content) {
+export function sendMessage(content) {
     if (isConnected && clientId) {
         const message = JSON.stringify({
             type: 'message',
@@ -166,6 +170,75 @@ function sendMessage(content) {
         displayStatusMessage('You are not connected to a session.', 'red');
     }
 }
+
+export function sendBackgroundVolumeChangeMessage(gainValue)
+{
+    if (isConnected && clientId) {
+        const message = JSON.stringify({
+            type: 'backgroundMusicVolumeChange',
+            id: clientId,
+            content: gainValue,
+        });
+        socketClient.send(message);
+    }
+}
+
+export function sendBackgroundMusicChangeMessage(musicData)
+{
+    if (isConnected && clientId) {
+        const message = JSON.stringify({
+            type: 'backgroundMusicChange',
+            id: clientId,
+            content: musicData,
+        });
+        socketClient.send(message);
+    }
+}
+
+export function sendBackgroundStopMessage()
+{
+    if (isConnected && clientId) {
+        const message = JSON.stringify({
+            type: 'backgroundMusicStop',
+            id: clientId,
+        });
+        socketClient.send(message);
+    }
+}
+
+/**
+ * Sends an ambiance message.
+ * @param {Object} ambianceStatus - The ambiance status to send.
+ */
+export function sendAmbianceMessage(ambianceStatus) {
+    if (isConnected && clientId) {
+        const message = JSON.stringify({
+            type: 'ambianceStatusUpdate', // Define a new message type
+            id: clientId,
+            content: {
+                ambianceStatus: ambianceStatus
+            },
+        });
+        socketClient.send(message);
+    }
+}
+
+/**
+ * Sends a playSoundboardSound message.
+ * @param {string} filename - The filename of the sound to play.
+ */
+export function sendPlaySoundboardSoundMessage(filename) {
+    if (isConnected && clientId) 
+    {
+        const message = JSON.stringify({
+            type: 'playSoundboardSound',
+            id: clientId,
+            content: { filename: filename }
+        });
+        socketClient.send(message);
+    } 
+}
+
 
 /**
  * Handles received content messages.
@@ -250,26 +323,6 @@ function generateRandomId() {
     return Math.random().toString(36).substr(2, 9);
 }
 
-/**
- * Sends an ambiance message.
- * @param {Object} ambianceStatus - The ambiance status to send.
- */
-function sendAmbianceMessage(ambianceStatus) {
-    if (isConnected && clientId) {
-        const message = JSON.stringify({
-            type: 'ambianceStatusUpdate', // Define a new message type
-            id: clientId,
-            content: {
-                ambianceStatus: ambianceStatus
-            },
-        });
-        socketClient.send(message);
-        console.log('Sent ambiance status update:', ambianceStatus);
-    } else {
-        console.error('Client is not connected to a session.');
-        displayStatusMessage('You are not connected to a session.', 'red');
-    }
-}
 
 /**
  * Handles received ambiance status updates.
@@ -287,33 +340,10 @@ function handleReceivedAmbianceStatus(ambianceStatus) {
 }
 
 /**
- * Sends a playSoundboardSound message.
- * @param {string} filename - The filename of the sound to play.
- */
-function sendPlaySoundboardSoundMessage(filename) {
-    if (isConnected && clientId) {
-        const message = JSON.stringify({
-            type: 'playSoundboardSound',
-            id: clientId,
-            content: { filename: filename }
-        });
-        socketClient.send(message);
-        console.log('Sent playSoundboardSound message:', filename);
-    } else {
-        console.error('Client is not connected to a session.');
-        displayStatusMessage('You are not connected to a session.', 'red');
-    }
-}
-
-/**
  * Handles the 'playSoundboardSound' message type.
  * @param {string} filename - The filename of the sound to play.
  */
-function handleReceivedPlaySoundboardSound(filename) {
-    // Play the sound on this client without sending a WebSocket message
-    if (Soundboard && Soundboard.playSoundRemote) {
-        Soundboard.playSoundRemote(filename);
-    } else {
-        console.warn('Soundboard.playSoundRemote is not available.');
-    }
+function handleReceivedPlaySoundboardSound(filename) 
+{
+        SoundBoard.playSoundRemote(filename);
 }

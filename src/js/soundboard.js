@@ -1,6 +1,10 @@
-// In Soundboard.js
+// src/js/soundboard.js
+import { GoogleLogin } from './googleLogin.js'; // Adjust the path if necessary
+import { AudioPlayer } from './audioPlayer.js';
+import { createModal } from './modalCredits.js'; // Import createModal
+import { sendPlaySoundboardSoundMessage } from './socket-client.js'
 
-const Soundboard = {
+export const SoundBoard = {
     soundboardList: {},
     audioContext: null,
     currentVolume: 0.5,
@@ -65,8 +69,8 @@ const Soundboard = {
                     createModal(soundboardItem.credit); 
 
                     // Send WebSocket message to notify other clients
-                    if (window.sendPlaySoundboardSoundMessage) {
-                        window.sendPlaySoundboardSoundMessage(soundboardItem.filename);
+                    if (sendPlaySoundboardSoundMessage) {
+                        sendPlaySoundboardSoundMessage(soundboardItem.filename);
                     }
                 } else if (clickCount === 2) {
                     // Second click: set the audio to loop
