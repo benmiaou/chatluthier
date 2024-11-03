@@ -30,10 +30,10 @@ jobs:
 
       - name: Change domain
         run: |
-            ssh -i chatluthier.pem ec2-user@chatluthier.org "cd /home/ec2-user/chatluthier && find . -type f \( -name '*.js' -o -name '*.html' \) -exec sed -i 's|http://127.0.0.1:3000|https://chatluthier.org|g' {} \; && find . -type f \( -name '*.js' -o -name '*.html' \) -exec sed -i 's|localhost|chatluthier.org|g' {} \; && find . -type f \( -name '*.js' -o -name '*.html' \) -exec sed -i 's|ws://|wss://|g' {} \;"
-      - name: Change domain
+          ssh ec2-user@chatluthier.org "cd /home/ec2-user/chatluthier && find . -type f \( -name '*.js' -o -name '*.html' \) -exec sed -i 's|http://127.0.0.1:3000|https://chatluthier.org|g' {} \; && find . -type f \( -name '*.js' -o -name '*.html' \) -exec sed -i 's|localhost|chatluthier.org|g' {} \; && find . -type f \( -name '*.js' -o -name '*.html' \) -exec sed -i 's|ws://|wss://|g' {} \;"
+      - name: update
         run: |
-          ssh -i chatluthier.pem ec2-user@chatluthier.org "cd /home/ec2-user/chatluthier && npm install && npm update && npm run build"
+          ssh ec2-user@chatluthier.org "cd /home/ec2-user/chatluthier && npm install && npm update && npm run build"
 
       - name: Restart server
         run: |
