@@ -4,8 +4,19 @@ import { SoundBoard } from './soundboard.js';
 import { AmbianceSounds } from './ambianceSounds.js';
 
 
-// Establish WebSocket connection
-const socketClient = new WebSocket('ws://localhost:3001');
+// Determine the WebSocket URL based on the environment
+let socketUrl;
+
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    // Development environment
+    socketUrl = 'ws://localhost:3001';
+} else {
+    // Production environment
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    socketUrl = `${protocol}//${window.location.host}/ws/`;
+}
+
+const socketClient = new WebSocket(socketUrl);
 
 // Store the ID for this client
 let clientId = null;
