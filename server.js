@@ -2,17 +2,8 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors'); // Import CORS module
-const admin = require('firebase-admin');
 
 const app = express();
-
-try {
-    const serviceAccount = require('./serviceAccountKey.json'); // Your downloaded key
-
-    admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-} catch (e) {}
 
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Middleware for parsing JSON bodies
