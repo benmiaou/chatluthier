@@ -15,6 +15,23 @@ export const GoogleLogin = {
             console.error('Google Identity Services script not loaded.');
             return;
         }
+
+        // Check if there's a saved session
+        this.restoreSession();
+
+        if (this.isSignedIn) {
+            this.updateLoginButton();
+            BackgroundMusic.preloadBackgroundSounds();
+            SoundBoard.loadSoundboardButtons();
+            AmbianceSounds.loadAmbianceButtons();
+
+            // Make the "Edit Music" button visible
+            const editMusicButton = document.getElementById('openEditSoundModal');
+            if (editMusicButton) {
+                editMusicButton.style.display = 'inline-block';
+            }
+        }
+
         google.accounts.id.initialize({
             client_id: this.CLIENT_ID,
             callback: this.handleCredentialResponse.bind(this), // Bind the context here
@@ -35,6 +52,9 @@ export const GoogleLogin = {
         this.userId = payload.sub;
         console.log(this.userId);
 
+        // Save session details in localStorage
+        this.saveSession();
+
         this.updateLoginButton();
         BackgroundMusic.preloadBackgroundSounds();
         SoundBoard.loadSoundboardButtons();
@@ -47,6 +67,7 @@ export const GoogleLogin = {
         }
     },
 
+    // TODO Remove, this is for me deprecated - Guillaume 19/11/2024
     handleLogin() {
         if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
             google.accounts.id.prompt();  // Trigger the Google Sign-In prompt
@@ -56,7 +77,37 @@ export const GoogleLogin = {
     },
 
     handleLogout() {
+        console.log('Clearing out session');
+
         this.isSignedIn = false;
+        this.idToken = "";
+        this.userId = null;
+
+        // Clear session details from localStorage
+        localStorage.removeItem('googleLoginState');
+
+        // Optionally, revoke token
+        if (this.idToken) {
+            fetch(`https://oauth2.googleapis.com/revoke?token=${this.idToken}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            })
+            .then((response) => {
+                if (response.ok) {
+                    console.log('Token successfully revoked.');
+                } else {
+                    console.error('Failed to revoke token.');
+                }
+            })
+            .catch((error) => {
+                console.error('Error revoking token:', error);
+            });
+        }
+
+        // Reload the page or update UI
+        console.log('Session cleared out, reloading')
         window.location.reload();
     },
 
@@ -73,5 +124,29 @@ export const GoogleLogin = {
             // The button is rendered in initGoogleIdentityServices
             // No action needed here
         }
+    },
+
+    saveSession() {
+        const sessionData = {
+            isSignedIn: this.isSignedIn,
+            idToken: this.idToken,
+            userId: this.userId,
+        };
+        console.log('Saving session');
+        localStorage.setItem('googleLoginState', JSON.stringify(sessionData));
+    },
+
+    restoreSession() {
+        const sessionData = localStorage.getItem('googleLoginState');
+        console.log('Restoring session');
+        if (sessionData) {
+            const { isSignedIn, idToken, userId } = JSON.parse(sessionData);
+            if (isSignedIn && idToken && userId) {
+                this.isSignedIn = isSignedIn;
+                this.idToken = idToken;
+                this.userId = userId;
+            }
+        }
+        console.log('Session successfully restored');
     },
 };
