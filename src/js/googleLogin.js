@@ -138,14 +138,17 @@ export const GoogleLogin = {
 
     restoreSession() {
         const sessionData = localStorage.getItem('googleLoginState');
+        if (!sessionData) {
+            console.log("No session found");
+            return; // Exit early if sessionData is null or undefined
+        }
         console.log('Restoring session');
-        if (sessionData) {
-            const { isSignedIn, idToken, userId } = JSON.parse(sessionData);
-            if (isSignedIn && idToken && userId) {
-                this.isSignedIn = isSignedIn;
-                this.idToken = idToken;
-                this.userId = userId;
-            }
+        const { isSignedIn, idToken, userId } = JSON.parse(sessionData);
+        if (isSignedIn && idToken && userId) {
+            this.isSignedIn = isSignedIn;
+            this.idToken = idToken;
+            this.userId = userId;
+            this.updateLoginButton();
         }
         console.log('Session successfully restored');
     },
