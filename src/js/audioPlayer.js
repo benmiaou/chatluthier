@@ -89,6 +89,5 @@ export class AudioPlayer {
 
     setVolume(level) {
         this.audioElement.volume = level;
-        console.log(`Volume set to ${level}.`);
     }
 }

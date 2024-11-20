@@ -57,7 +57,6 @@ export class AudioManager {
 
     setVolume(level) {
         this.audioPlayer.setVolume(level);
-        console.log(`Volume set to ${level}.`);
     }
 
     isCurrentlyPlaying() {

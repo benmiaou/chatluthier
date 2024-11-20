@@ -226,27 +226,19 @@ wsServer.on('connection', function connection(ws) {
     try {
       const data = JSON.parse(message);
       console.log('Received:', data);
+      console.log(`data.type :data.type`);
 
       switch (data.type) {
-        case 'register':
-          // Client wants to register an ID
-          connectedId = data.id;
-          if (subscribers.has(connectedId)) {
-            ws.send(JSON.stringify({ type: 'error', message: 'ID already registered' }));
-          } else {
-            subscribers.set(connectedId, new Set());
-            subscribers.get(connectedId).add(ws);
-            ws.send(JSON.stringify({ type: 'registered', id: connectedId }));
-            console.log(`Client registered and connected to ID: ${connectedId}`);
-          }
-          break;
-
         case 'subscribe':
           // Client wants to subscribe to an ID
+          console.log(`subscribe : ${connectedId}`);
+
           connectedId = data.id;
           if (!subscribers.has(connectedId)) {
-            ws.send(JSON.stringify({ type: 'error', message: 'Session ID does not exist.' }));
-            connectedId = null;
+            subscribers.set(connectedId, new Set());
+            subscribers.get(connectedId).add(ws);
+            ws.send(JSON.stringify({ type: 'subscribed', id: connectedId }));
+            console.log(`Client registered and connected to ID: ${connectedId}`);
           } else {
             subscribers.get(connectedId).add(ws);
             ws.send(JSON.stringify({ type: 'subscribed', id: connectedId }));
@@ -279,7 +271,8 @@ wsServer.on('connection', function connection(ws) {
             console.warn('Client not connected to any ID.');
             }
         break;
-
+        case 'ping':
+        break;
         default:
           console.warn('Unknown message type:', data.type);
       }

@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModalButton = document.getElementById('closeModal');
     const closeEditSoundModalButton = document.getElementById('closeEditSoundModal');
     const showAllCreditsButton = document.getElementById('showAllCredits');
+
     
     if (calmButton) {
         calmButton.addEventListener('click', function() {
@@ -136,6 +137,17 @@ document.addEventListener('DOMContentLoaded', () => {
      } else {
          console.error("Volume slider element with ID 'music-volume' not found.");
      }
+
+    // **Volume Slider Change Event**
+    const soundboardSlider = document.getElementById('soundboard-volume');
+    if (soundboardSlider) {
+        soundboardSlider.addEventListener('input', function(event) {
+            const volume = event.target.value;
+            SoundBoard.setVolume(volume);
+        });
+    } else {
+        console.error("Volume slider element with ID soundboardSlider' not found.");
+    }
 
 
     // Context Selector Change Event
