@@ -211,7 +211,7 @@ function updateSound(index, contextsContainer) {
             soundsType: currentSoundType,
         };
 
-        fetch('/update-user-sounds', {
+        fetch('/api/update-user-sounds', {
             method: 'POST', // HTTP POST method to send data to the server
             headers: {
                 'Content-Type': 'application/json', // JSON content type

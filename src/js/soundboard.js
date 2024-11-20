@@ -21,9 +21,9 @@ export const SoundBoard = {
     async loadSoundboardButtons() {
         let response;
         if (GoogleLogin.userId) {
-            response = await fetch(`/soundboard?userId=${GoogleLogin.userId}`);
+            response = await fetch(`/api/soundboard?userId=${GoogleLogin.userId}`);
         } else {
-            response = await fetch(`/soundboard`);
+            response = await fetch(`/api/soundboard`);
         }
         this.soundboardItems = await response.json();
         this.generateSoundboardButtons(this.soundboardItems);

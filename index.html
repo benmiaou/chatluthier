@@ -14,9 +14,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/images/favicons/favicon-16x16.png">
     <link rel="icon" href="/images/favicons/favicon.ico" type="image/x-icon">
     <link rel="manifest" href="/site.webmanifest">
-    <link rel="manifest" href="/manifest.json">
 
-    <!-- Styles -->
+    <!-- CSS Styles -->
     <link rel="stylesheet" href="/src/css/styles.css">
 </head>
 <body>
@@ -37,9 +36,6 @@
     </header>
 
     <main>
-        <!-- Modal sections -->
-        <!-- Same content as before -->
-
         <!-- Background Music Section -->
         <h2>Background Music
             <input type="range" min="0" max="100" value="50" class="slider" id="music-volume">
@@ -77,14 +73,26 @@
         <section id="soundboardLocal" class="section"></section>
 
         <!-- ID Management Section -->
-        <!-- Same as before -->
+        <div id="id-management">
+            <h2>Session Management</h2>
+            <div class="create-id">
+                <button id="create-id-button">Create Session</button>
+            </div>
+            <div class="join-id">
+                <input type="text" id="join-id-input" placeholder="Enter Session ID">
+                <button id="join-id-button">Join Session</button>
+            </div>
+            <p id="your-id" style="display: none;">
+                Session ID (<span id="session-status"></span>): <span id="generated-id"></span>
+            </p>
+            <p id="status-message"></p>
+        </div>
     </main>
 
-    <!-- Footer -->
     <footer>
         <div class="footer-content">
-            <a href="/privacy.html">Privacy Policy</a>
-            <a href="/about.html">About</a>
+            <a href="/src/pages/privacy.html">Privacy Policy</a>
+            <a href="/src/pages/about.html">About</a>
             <a id="showAllCredits">Credits</a>
         </div>
     </footer>

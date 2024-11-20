@@ -182,11 +182,11 @@ export const BackgroundMusic = {
             let response;
             if (GoogleLogin.userId) 
             {
-                response = await fetch(`/backgroundMusic?userId=${GoogleLogin.userId}`);
+                response = await fetch(`/api/backgroundMusic?userId=${GoogleLogin.userId}`);
             }
             else
             {
-                response = await fetch(`/backgroundMusic`);
+                response = await fetch(`/api/backgroundMusic`);
             }
             this.backgroundMusicArray = await response.json();
             this.backgroundMusicArray = this.shuffleArray(this.backgroundMusicArray);

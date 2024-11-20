@@ -19,11 +19,12 @@ export const AmbianceSounds = {
     },
 
     async loadAmbianceButtons() {
+        console.log('Load Ambiance Buttons');
         let response;
         if (GoogleLogin.userId) {
-            response = await fetch(`/ambianceSounds?userId=${GoogleLogin.userId}`);
+            response = await fetch(`/api/ambianceSounds?userId=${GoogleLogin.userId}`);
         } else {
-            response = await fetch(`/ambianceSounds`);
+            response = await fetch(`/api/ambianceSounds`);
         }
         this.ambianceSounds = await response.json();
         this.generateAmbientButtons(this.ambianceSounds);
@@ -147,7 +148,7 @@ export const AmbianceSounds = {
             };
 
             try {
-                const response = await fetch('/save-preset', {
+                const response = await fetch('/api/save-preset', {
                     method: 'POST', // Méthode HTTP POST pour envoyer les données au serveur
                     headers: {
                         'Content-Type': 'application/json', // Type de contenu JSON
@@ -220,7 +221,7 @@ export const AmbianceSounds = {
         // Charger les presets depuis le serveur si l'utilisateur est connecté
         if (GoogleLogin.userId) {
             try {
-                const response = await fetch(`/load-presets?userId=${GoogleLogin.userId}`);
+                const response = await fetch(`/api/load-presets?userId=${GoogleLogin.userId}`);
                 const data = await response.json();
                 this.presets = data.presets || {};
                 this.updatePresetDropdown();
