@@ -7,9 +7,7 @@
     "build": "webpack --config webpack.config.js",
     "watch": "webpack --watch --config webpack.config.js",
     "start": "webpack --config webpack.config.js && node server.js",
-    "dev": "node server.js",
-    "local": "concurently \"NODE_ENV=local webpack serve --mode development\" \"node server.js\"",
-    "npm:local": "npm run dev",
+    "local": "concurrently \"NODE_ENV=local webpack serve --mode development\" \"node server.js\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {

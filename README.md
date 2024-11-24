@@ -1,11 +1,6 @@
 # chatluthier
 
-## local
+## local development
 
 ### npm
-```npm run local``` or ```npm run npm:local```
-
-### yarn
-```yarn run yarn:local```
-
-
+```npm run local```
