@@ -218,13 +218,72 @@ wsServer.on('connection', (ws) => {
         }
     });
 
-    ws.on('close', () => {
-        if (connectedId && subscribers.has(connectedId)) {
+wsServer.on('connection', function connection(ws) {
+  let connectedId = null; // The ID the client is connected to
+
+  ws.on('message', function incoming(message) {
+    try {
+      const data = JSON.parse(message);
+      console.log('Received:', data);
+      console.log(`data.type :data.type`);
+
+      switch (data.type) {
+        case 'subscribe':
+          // Client wants to subscribe to an ID
+          console.log(`subscribe : ${connectedId}`);
+
+          connectedId = data.id;
+          if (!subscribers.has(connectedId)) {
+            subscribers.set(connectedId, new Set());
+            subscribers.get(connectedId).add(ws);
+            ws.send(JSON.stringify({ type: 'subscribed', id: connectedId }));
+            console.log(`Client registered and connected to ID: ${connectedId}`);
+          } else {
+            subscribers.get(connectedId).add(ws);
+            ws.send(JSON.stringify({ type: 'subscribed', id: connectedId }));
+            console.log(`Client subscribed to ID: ${connectedId}`);
+          }
+          break;
+
+        case 'message':
+        case 'ambianceStatusUpdate' :
+        case 'backgroundMusicChange':
+        case 'backgroundMusicVolumeChange':
+        case 'backgroundMusicStop':
+        case 'playSoundboardSound':
+            // Client sends a message to others connected to the same ID
+            if (connectedId) {
             const subs = subscribers.get(connectedId);
             subs.delete(ws);
             if (subs.size === 0) {
                 subscribers.delete(connectedId);
             }
+            } else {
+            ws.send(JSON.stringify({ type: 'error', message: 'Client not connected to any ID.' }));
+            console.warn('Client not connected to any ID.');
+            }
+        break;
+        case 'ping':
+        break;
+        default:
+          console.warn('Unknown message type:', data.type);
+      }
+    } catch (error) {
+      console.error('Error processing message:', error);
+    }
+  });
+
+  ws.on('close', function () {
+    console.log('Connection closed');
+
+    // Remove client from subscribers
+    if (connectedId) {
+      const subs = subscribers.get(connectedId);
+      if (subs) {
+        subs.delete(ws);
+        if (subs.size === 0) {
+          subscribers.delete(connectedId);
+          console.log(`No more subscribers for ID: ${connectedId}, ID removed.`);
         }
     });
 });

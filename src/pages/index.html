@@ -71,13 +71,29 @@
 
         <!-- Soundboard Section -->
         <h2>Soundboard
-            <input type="range" min="0" max="100" value="50" class="slider" id="soundboard-volume" oninput="Soundboard.setVolume(this.value)">
+            <input type="range" min="0" max="100" value="50" class="slider" id="soundboard-volume">
         </h2>
         <section id="soundboard" class="section"></section>
         <section id="soundboardLocal" class="section"></section>
 
         <!-- ID Management Section -->
-        <!-- Same as before -->
+        <div id="id-management" class="id-management">
+            <h2>Session Management</h2>
+            <!-- Join ID -->
+            <div class="join-id">
+                <input type="text" id="join-id-input" placeholder="Enter Session ID">
+                <button id="join-id-button">Join Session</button>
+                <button id="disconnect-button" style="display: none;">Disconnect</button>
+            </div>
+            <!-- Display Session ID and Connection Status -->
+            <p id="your-id" style="display: none;">
+                Session ID : <span id="generated-id"></span>
+            </p>
+            <!-- Status Message -->
+            <p id="status-message"></p>
+            <!-- Connection Status will be appended here -->
+             
+        </div>
     </main>
 
     <!-- Footer -->

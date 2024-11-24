@@ -703,7 +703,24 @@ footer {
     justify-content: center;
 }
 
-#create-id-button, #join-id-button {
+#disconnect-button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+    background-color: #f44336; /* Match the button-play style */
+    color: white;
+    font-size: 16px;
+    margin: 0 5px;
+    transition: background-color 0.3s;
+}
+
+#disconnect-button:hover {
+    background-color: #9b2820; /* Darker green */
+}
+
+
+#join-id-button {
     padding: 10px 20px;
     cursor: pointer;
     border-radius: 5px;
@@ -715,7 +732,7 @@ footer {
     transition: background-color 0.3s;
 }
 
-#create-id-button:hover, #join-id-button:hover {
+#join-id-button:hover {
     background-color: #367C39; /* Darker green */
 }
 
