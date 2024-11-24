@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeEditSoundModalButton = document.getElementById('closeEditSoundModal');
     const showAllCreditsButton = document.getElementById('showAllCredits');
 
-    
+
     if (calmButton) {
         calmButton.addEventListener('click', function() {
             BackgroundMusic.playBackgroundSound('calm', this);

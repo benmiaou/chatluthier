@@ -12,14 +12,13 @@ const isLocal = process.env.NODE_ENV === 'local';
 
 
 module.exports = {
-    entry: isLocal ? ['webpack-hot-middleware/client', './src/js/main.js']
-            : './src/js/main.js',
+    entry: './src/js/main.js',
     output: {
         filename: 'js/[name].[contenthash].js', // [contenthash] for cache busting
         path: path.resolve(__dirname, 'dist'),
         publicPath: '/', // Set to '/' for absolute paths
     },
-    mode: 'production', // Use 'development' for unminified output
+    mode: isLocal ? 'development' : 'production',
     module: {
         rules: [
             // JavaScript: Use Babel to transpile JS files
@@ -75,7 +74,6 @@ module.exports = {
         ],
     },
     plugins: [
-        isLocal && new webpack.HotModuleReplacementPlugin(), // Enables HMR
         new CleanWebpackPlugin(), // Cleans the dist folder before each build
         new HtmlWebpackPlugin({
             template: './src/pages/index.html', // Source HTML
@@ -95,9 +93,9 @@ module.exports = {
             template: './src/pages/about.html',
             chunks: ['main'],
         }),
-        !isLocal ? new MiniCssExtractPlugin({
-            filename: 'css/[name].[contenthash].css', // e.g., css/styles.abc123.css
-        }) : null,
+        ...(!isLocal ? [new MiniCssExtractPlugin({
+            filename: 'css/[name].[contenthash].css',
+        })] : []),
         new CopyWebpackPlugin({
             patterns: [
                 { from: 'src/images/favicons/', to: 'images/favicons/' }, // Copy favicons
@@ -116,14 +114,20 @@ module.exports = {
             directory: path.join(__dirname, 'dist'),
         },
         compress: true,
+        watchFiles: ['src/**/*'],
         port: 5000,
-        open: true,
-        hot: true, // Enable hot reloading
+        open: false,
+        liveReload: true,
+        hot: false, // Disable HMR
         proxy: {
             '/': {
                 target: 'http://0.0.0.0:3000', // Updated to match backend server port
                 changeOrigin: true,
             },
         },
+    },
+    watchOptions: {
+        poll: 1000, // Check for changes every second
+        ignored: /node_modules/, // Ignore node_modules for performance
     },
 };

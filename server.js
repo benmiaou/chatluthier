@@ -282,7 +282,7 @@ wsServer.on('connection', function connection(ws) {
   });
 
   ws.on('close', function () {
-    console.log('Connection closed');
+    console.log('Socket connection closed');
 
     // Remove client from subscribers
     if (connectedId) {
