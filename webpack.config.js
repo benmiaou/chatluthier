@@ -1,10 +1,15 @@
 // webpack.config.js
 
+const webpack = require('webpack')
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+
+const isLocal = process.env.NODE_ENV === 'c';
+
 
 module.exports = {
     entry: './src/js/main.js', // Correct entry point
@@ -30,7 +35,8 @@ module.exports = {
             // CSS: Extract CSS into separate files
             {
                 test: /\.css$/i,
-                use: [
+                use: !isLocal
+                    ? [
                     {
                         loader: MiniCssExtractPlugin.loader,
                         options: {
@@ -38,7 +44,7 @@ module.exports = {
                         },
                     },
                     'css-loader',
-                ],
+                ] :  ['style-loader', 'css-loader'],
             },
             // Images: Copy image files to the output directory
             {
@@ -67,6 +73,7 @@ module.exports = {
         ],
     },
     plugins: [
+        isLocal && new webpack.HotModuleReplacementPlugin(), // Enables HMR
         new CleanWebpackPlugin(), // Cleans the dist folder before each build
         new HtmlWebpackPlugin({
             template: './src/pages/index.html', // Source HTML
@@ -86,9 +93,9 @@ module.exports = {
             template: './src/pages/about.html',
             chunks: ['main'],
         }),
-        new MiniCssExtractPlugin({
+        !isLocal ? new MiniCssExtractPlugin({
             filename: 'css/[name].[contenthash].css', // e.g., css/styles.abc123.css
-        }),
+        }) : null,
         new CopyWebpackPlugin({
             patterns: [
                 { from: 'src/images/favicons/', to: 'images/favicons/' }, // Copy favicons

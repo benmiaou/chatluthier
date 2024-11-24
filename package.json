@@ -8,7 +8,7 @@
     "watch": "webpack --watch --config webpack.config.js",
     "start": "webpack --config webpack.config.js && node server.js",
     "dev": "node server.js",
-    "local": "npm run dev",
+    "local": "concurently \"NODE_ENV=local webpack serve --mode development\" \"node server.js\"",
     "npm:local": "npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,14 +17,16 @@
     "@babel/preset-env": "^7.26.0",
     "babel-loader": "^8.4.1",
     "clean-webpack-plugin": "^4.0.0",
+    "concurrently": "^9.1.0",
     "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^6.11.0",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.6.3",
     "mini-css-extract-plugin": "^2.9.2",
+    "style-loader": "^4.0.0",
     "webpack": "^5.96.1",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^4.11.1"
+    "webpack-dev-server": "^4.15.2"
   },
   "dependencies": {
     "cors": "^2.8.5",
