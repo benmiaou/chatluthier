@@ -116,7 +116,6 @@ button {
 /* Header styling */
 header {
     background-size: cover;
-    padding: 20px;
     text-align: center;
     position: relative;
     color: #fff;
@@ -127,8 +126,7 @@ header {
     align-items: center;
     justify-content: space-between;
     background-color: rgba(0, 0, 0, 0.5);
-    border-radius: 8px;
-    padding: 20px;
+    padding: 10px;
 }
 
 .top-left-controls {
@@ -138,7 +136,7 @@ header {
 }
 
 .logo {
-    width: 100px;
+    width: 40px;
     height: auto;
     vertical-align: middle;
 }
@@ -772,3 +770,4 @@ footer {
     margin-top: 10px;
     font-weight: bold;
 }
+

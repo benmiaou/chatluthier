@@ -8,11 +8,12 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 
-const isLocal = process.env.NODE_ENV === 'c';
+const isLocal = process.env.NODE_ENV === 'local';
 
 
 module.exports = {
-    entry: './src/js/main.js', // Correct entry point
+    entry: isLocal ? ['webpack-hot-middleware/client', './src/js/main.js']
+            : './src/js/main.js',
     output: {
         filename: 'js/[name].[contenthash].js', // [contenthash] for cache busting
         path: path.resolve(__dirname, 'dist'),
@@ -44,7 +45,8 @@ module.exports = {
                         },
                     },
                     'css-loader',
-                ] :  ['style-loader', 'css-loader'],
+                    'postcss-loader'
+                ] :  ['style-loader', 'css-loader', 'postcss-loader'],
             },
             // Images: Copy image files to the output directory
             {
@@ -114,7 +116,14 @@ module.exports = {
             directory: path.join(__dirname, 'dist'),
         },
         compress: true,
-        port: 3000,
+        port: 5000,
         open: true,
+        hot: true, // Enable hot reloading
+        proxy: {
+            '/': {
+                target: 'http://0.0.0.0:3000', // Updated to match backend server port
+                changeOrigin: true,
+            },
+        },
     },
 };

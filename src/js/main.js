@@ -1,4 +1,5 @@
 // src/js/main.js
+import '../css/tailwind.css';
 
 import '../css/styles.css'; // Adjust the path based on your project structure
 import { GoogleLogin } from './googleLogin.js'; // Adjust the path if necessary
