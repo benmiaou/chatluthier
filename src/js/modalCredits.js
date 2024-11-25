@@ -12,7 +12,7 @@ function createModal(creditText) {
     const modalTemplate = document.getElementById("credit-modal-template");
     const newModal = modalTemplate.cloneNode(true);
     newModal.style.display = "block"; // Display the modal
-    const creditDetails = newModal.querySelector(".credit-details");
+    const creditDetails = newModal.querySelector("#credit-details");
     creditDetails.innerHTML = creditText;
     creditText = creditDetails.innerHTML;
 
@@ -99,7 +99,7 @@ function closeModal(element) {
         return;
     }
 
-    const creditDetails = parentModal.querySelector(".credit-details");
+    const creditDetails = parentModal.querySelector("#credit-details");
     if (!creditDetails) {
         console.error("Credit details not found");
         return;

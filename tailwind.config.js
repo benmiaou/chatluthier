@@ -5,7 +5,8 @@ module.exports = {
             colors: {
                 primary: '#1B263B', // Deep grey zinc
                 secondary: '#27272a', // Smoky Purple
-                accent: '#2C786C', // Greenish-Teal WIP
+                accent: '#065f46', // Greenish-Teal WIP
+                accentLight: '#d1fae5', // Greenish-Teal WIP
                 highlight: '#E8A628', // Golden Yellow WIP
                 neutral: '#2B2B2B', // Muted Gray IP
             },

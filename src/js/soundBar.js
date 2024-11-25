@@ -55,7 +55,7 @@ export class SoundBar
         this.progressBarContainer.appendChild(this.progressBarVolumePlus);
         this.progressBarContainer.appendChild(this.soundBarText);
         if (this.license !== "")  this.progressBarContainer.appendChild(this.soundLicense);
-        this.credit = this.ambianceSound.display_name + " : " +  this.ambianceSound.credit;
+        this.credit = "<span class=\"title\">" + this.ambianceSound.display_name + "</span> <br/> " +  this.ambianceSound.credit;
         this.initializeDraggableProgressBar();
     }
 
