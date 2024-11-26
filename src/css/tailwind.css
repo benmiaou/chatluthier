@@ -12,4 +12,24 @@
     .button {
         @apply text-accent hover:underline font-semibold;
     }
+
+        /* Slider Track */
+    .slider {
+        @apply appearance-none w-full h-1.5 rounded-full;
+background: linear-gradient(to right, #ec4899 0%, #a855f7 50%, #3b82f6 50%, #e2e8f0 50%);
+    }
+
+    /* Slider Thumb */
+    .slider::-webkit-slider-thumb {
+        @apply appearance-none h-4 w-4 rounded-full bg-fontColor shadow-lg cursor-pointer;
+    }
+
+    .slider::-moz-range-thumb {
+        @apply appearance-none h-4 w-4 rounded-full bg-slate-200 shadow-lg cursor-pointer;
+    }
+
+    .slider::-ms-thumb {
+        @apply appearance-none h-4 w-4 rounded-full bg-slate-200 shadow-lg cursor-pointer;
+    }
+
 }

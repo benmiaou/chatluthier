@@ -55,63 +55,9 @@ h2 {
 }
 
 /* Button styling */
-button {
-    font-family: BagnardSans;
-    background-color: #555;
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border-radius: 5px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-}
 
 /* Specific button variations */
-.button-primary {
-    background-color: #008CBA;
-}
 
-.button-secondary {
-    background-color: #f44336;
-}
-
-.button-directory {
-    background-color: #4CAF50;
-    padding: 6px 12px;
-    font-size: 0.9em;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s, box-shadow 0.3s;
-}
-
-.button-directory:hover {
-    background-color: #367C39;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-}
-
-.button-play {
-    background-color: #4CAF50;
-    display: block;
-}
-
-.button-stop {
-    background-color: #f44336;
-    display: block;
-}
-
-.button-stop:disabled {
-    background-color: #803d38;
-    cursor: not-allowed;
-}
-
-.button-loop {
-    background-color: #487aa8;
-    display: block;
-}
 
 /* Header styling */
 header {
@@ -194,11 +140,6 @@ header {
     text-transform: capitalize;
 }
 
-.button .volume-slider {
-    display: block;
-    margin-top: 15px;
-    width: 100%;
-}
 
 /* Progress bar styling */
 .progress-bar-container {
@@ -544,19 +485,6 @@ nav a {
 
 /* Progress bar and next button */
 .progress-and-credits {}
-
-#progressBar {
-    flex-grow: 1;
-    height: 4px;
-    background-color: rgba(255, 255, 255, 0.3);
-    margin-right: 10px;
-}
-
-#progress {
-    height: 100%;
-    background-color: rgba(76, 175, 80, 0.7);
-    width: 0%;
-}
 
 #nextButton {
     padding: 0 10px;

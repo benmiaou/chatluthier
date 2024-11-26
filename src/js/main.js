@@ -35,6 +35,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModalButton = document.getElementById('closeModal');
     const closeEditSoundModalButton = document.getElementById('closeEditSoundModal');
     const showAllCreditsButton = document.getElementById('showAllCredits');
+    const gradientSlider = document.getElementById('music-volume');
+
+    if (gradientSlider) {
+        gradientSlider.addEventListener('input', function () {
+            const value = gradientSlider.value;
+
+        // Update the background
+    gradientSlider.style.background = `
+        linear-gradient(to right, 
+        #ec4899 0%, 
+        #a855f7 ${value}%, 
+        #a855f7 ${value}%, 
+        #3b82f6 ${value}%, 
+        #e2e8f0 ${value}%)
+    `;
+    });}
 
 
     if (calmButton) {
