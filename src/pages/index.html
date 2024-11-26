@@ -20,14 +20,18 @@
     <!-- Webpack will inject CSS here -->
 </head>
 <body>
-    <header class="h-20 mb-2 bg-zinc-800">
+    <header class="h-20 bg-background text-fontColor">
         <div class="flex items-center justify-between px-6 py-2">
             <div class="flex align-middle space-x-4 items-center">
-                <img src="images/favicons/MainLogo.PNG" alt=s"Le Chat Luthier Logo" class="logo">
-                <h1>Le Chat Luthier</h1>
+                <img src="images/favicons/MainLogo.PNG" alt="Le Chat Luthier Logo" class="logo">
+                <h1 class="text-xl font-bold">Le Chat Luthier</h1>
             </div>
             <div class="menu-dropdown">
-                <button class="menu-button" id="toggleMenu">☰</button>
+                <button class="bg-transparent size-16 cursor-pointer text-fontColor" id="toggleMenu">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                </button>
                 <div class="menu-content" id="menu-content">
                     <button id="google-login-button">Login with Google</button>
                     <button id="openEditSoundModal" style="display: none;">Edit Music</button>
@@ -36,109 +40,128 @@
         </div>
     </header>
 
-    <main>
-        <!-- Modal for displaying credit information -->
-        <div id="credit-modal-template"
-             class="mb-5 credit-modal-template fixed top-2 right-2 z-50 hidden bg-accentLight bg-opacity-85 text-white border border-accent border-spacing-1 p-4 rounded-md shadow-lg w-96  max-h-40 overflow-hidden">
-            <!-- Close button -->
-              <span id="closeModal" class="absolute top-0 bottom-0 right-0 px-4 py-3">
-                <svg class="close-btn fill-current h-6 w-6 text-accent" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
-              </span>
-              <div class="text-left truncate text-accent" id="credit-details"></div>
-        </div>
-        <!-- External Modal for displaying external pages -->
-        <div id="external-modal" class="modal">
-            <div class="modal-content">
-                <span class="close-button" id="closeExternalModal">&times;</span>
-                <div id="external-modal-body">
-                    <!-- External HTML content will be loaded here -->
+    <div class="h-1.5 w-full bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-[length:200%_200%] animate-gradient-move"></div>
+
+    <main class="relative min-h-screen pb-20">
+        <div class="main-content bg-neutral">
+            <!-- Modal for displaying credit information -->
+            <div id="credit-modal-template"
+                 class="mb-5 credit-modal-template fixed top-2 right-2 z-50 hidden bg-accentLight bg-opacity-85 text-white border border-accent border-spacing-1 p-4 rounded-md shadow-lg w-96  max-h-40 overflow-hidden">
+                <!-- Close button -->
+                  <span id="closeModal" class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                      <svg class="close-btn fill-current h-6 w-6 text-accent" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+                  </span>
+                  <div class="text-left truncate text-accent" id="credit-details"></div>
+            </div>
+            <!-- External Modal for displaying external pages -->
+            <div id="external-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button" id="closeExternalModal">&times;</span>
+                    <div id="external-modal-body">
+                        <!-- External HTML content will be loaded here -->
+                    </div>
                 </div>
             </div>
-        </div>
-        <!-- Full-screen modal for displaying multiple sounds by line -->
-        <div id="edit-sound-modal" class="edit-sound-modal" style="display: none;">
-            <div class="modal-header">
-                <span class="close-btn" id="closeEditSoundModal">&times;</span> <!-- Close button -->
-                <h2>Edit Sounds</h2>
-                <div class="modal-body" id="sounds-list">
-                    <label for="sound-type">Select Sound Type:</label>
-                    <select id="sound-type" onchange="displaySounds(this.value)">
-                        <option value="backgroundMusic">Background Music</option>
-                        <option value="ambianceSounds">Ambiance Sounds</option>
-                        <option value="soundboard">Soundboard</option>
-                    </select>
-                    <label for="sound-type">Sound Volume</label>
-                    <input type="range" min="0" max="100" value="50" class="slider" id="soundedit-volume" oninput="setEditVolume(this.value)">
-                    <!-- Content generated by displayAllBackgroundMusic will go here -->
+            <!-- Full-screen modal for displaying multiple sounds by line -->
+            <div id="edit-sound-modal" class="edit-sound-modal" style="display: none;">
+                <div class="modal-header">
+                    <span class="close-btn" id="closeEditSoundModal">&times;</span> <!-- Close button -->
+                    <h2>Edit Sounds</h2>
+                    <div class="modal-body" id="sounds-list">
+                        <label for="sound-type">Select Sound Type:</label>
+                        <select id="sound-type" onchange="displaySounds(this.value)">
+                            <option value="backgroundMusic">Background Music</option>
+                            <option value="ambianceSounds">Ambiance Sounds</option>
+                            <option value="soundboard">Soundboard</option>
+                        </select>
+                        <label for="sound-type">Sound Volume</label>
+                        <input type="range" min="0" max="100" value="50" class="slider" id="soundedit-volume" oninput="setEditVolume(this.value)">
+                        <!-- Content generated by displayAllBackgroundMusic will go here -->
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Your existing main content -->
-        <!-- Background Music Section -->
-        <h2>Background Music
-            <input type="range" min="0" max="100" value="50" class="slider" id="music-volume">
-        </h2>
-        <section id="background-music-Credit">---</section>
-        <div class="progress-and-credits">
-            <div id="progressBar">
-                <div id="progress"></div>
+            <!-- Your existing main content -->
+
+            <!-- Ambiance Sounds Section -->
+            <div style="gap: 20px; display: flex; align-items: center; justify-content: center;">
+                <h2 style="margin: 0;">Ambiance Sounds</h2>
+                <button id="resetAmbient" class="button-stop">Reset Ambiance</button>
             </div>
-            <button id="nextButton">»</button>
-        </div>
+            <section id="ambiance" class="section"></section>
+            <section id="ambianceLocal" class="section"></section>
 
-        <section id="background-music" class="section">
-            <button id="calmButton" class="button-stop">Play Calm</button>
-            <button id="dynamicButton" class="button-stop">Play Dynamic</button>
-            <button id="intenseButton" class="button-stop">Play Intense</button>
-            <select id="contextSelector">
-                <option>default</option>
-            </select>
-        </section>
-
-        <!-- Ambiance Sounds Section -->
-        <div style="gap: 20px; display: flex; align-items: center; justify-content: center;">
-            <h2 style="margin: 0;">Ambiance Sounds</h2>
-            <button id="resetAmbient" class="button-stop">Reset Ambiance</button>
-        </div>
-        <section id="ambiance" class="section"></section>
-        <section id="ambianceLocal" class="section"></section>
-
-        <!-- Soundboard Section -->
-        <h2>Soundboard
-            <input type="range" min="0" max="100" value="50" class="slider" id="soundboard-volume">
-        </h2>
-        <section id="soundboard" class="section"></section>
-        <section id="soundboardLocal" class="section"></section>
+            <!-- Soundboard Section -->
+            <h2>Soundboard
+                <input type="range" min="0" max="100" value="50" class="slider" id="soundboard-volume">
+            </h2>
+            <section id="soundboard" class="section"></section>
+            <section id="soundboardLocal" class="section"></section>
 
 
-        <!-- ID Management Section -->
-        <div id="id-management" class="id-management">
-            <h2>Session Management</h2>
-            <!-- Join ID -->
-            <div class="join-id">
-                <input type="text" id="join-id-input" placeholder="Enter Session ID">
-                <button id="join-id-button">Join Session</button>
-                <button id="disconnect-button" style="display: none;">Disconnect</button>
+            <!-- ID Management Section -->
+            <div id="id-management" class="id-management">
+                <h2>Session Management</h2>
+                <!-- Join ID -->
+                <div class="join-id">
+                    <input type="text" id="join-id-input" placeholder="Enter Session ID">
+                    <button id="join-id-button">Join Session</button>
+                    <button id="disconnect-button" style="display: none;">Disconnect</button>
+                </div>
+                <!-- Display Session ID and Connection Status -->
+                <p id="your-id" style="display: none;">
+                    Session ID : <span id="generated-id"></span>
+                </p>
+                <!-- Status Message -->
+                <p id="status-message"></p>
+                <!-- Connection Status will be appended here -->
+
             </div>
-            <!-- Display Session ID and Connection Status -->
-            <p id="your-id" style="display: none;">
-                Session ID : <span id="generated-id"></span>
-            </p>
-            <!-- Status Message -->
-            <p id="status-message"></p>
-            <!-- Connection Status will be appended here -->
-
         </div>
-    </main>
-  <!-- Footer -->
+
+        <!-- Footer -->
     <footer>
-        <div class="footer-content">
+        <div class="footer-content h-20">
             <a href="privacy.html">Privacy Policy</a>
             <a href="about.html">About</a>
             <a id="showAllCredits">Credits</a>
         </div>
     </footer>
+
+    </main>
+
+    <!-- Background Music Section -->
+    <div class="fixed bottom-0 left-0 w-full h-20 bg-background text-fontColor shadow-lg z-50 flex flex-col">
+        <!-- Gradient Animation at the Top -->
+        <div class="h-1.5 w-full bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-[length:200%_200%] animate-gradient-move"></div>
+
+        <!-- Content Area -->
+        <div class="flex justify-between items-center flex-grow px-4">
+            <!-- Left Section: Buttons -->
+            <div class="flex-1 flex justify-center items-center space-x-2 min-w-0">
+                <button id="calmButton" class="px-4 py-2 bg-green-500 hover:bg-green-600 rounded text-sm">Play Calm</button>
+                <button id="dynamicButton" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded text-sm">Play Dynamic</button>
+                <button id="intenseButton" class="px-4 py-2 bg-red-500 hover:bg-red-600 rounded text-sm">Play Intense</button>
+            </div>
+
+            <!-- Center Section: Music Player -->
+            <div class="flex-1 flex flex-col items-center justify-center min-w-0 px-4" id="background-music-Credit">
+                <h2 class="text-sm font-medium mb-1">Background Music</h2>
+                <input type="range" min="0" max="100" value="50" class="slider h-2 bg-gray-600 rounded-full appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500 w-full">
+                <div id="progressBar" class="relative w-full h-2 bg-gray-600 rounded overflow-hidden mt-2">
+                    <div id="progress" class="absolute left-0 top-0 h-full bg-purple-500"></div>
+                </div>
+            </div>
+
+            <!-- Right Section: Theme Selector -->
+            <div class="flex-1 flex justify-center items-center min-w-0">
+                <select id="contextSelector" class="px-3 py-2 bg-gray-700 text-white rounded focus:ring-2 focus:ring-purple-500">
+                    <option>default</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
     <!-- Webpack will inject bundled JS files here -->
 </body>
 </html>

@@ -9,4 +9,7 @@
     #credit-details .title {
         @apply font-bold text-xl;
     }
+    .button {
+        @apply text-accent hover:underline font-semibold;
+    }
 }

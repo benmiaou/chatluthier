@@ -389,12 +389,6 @@ nav a {
     position: relative;
 }
 
-.menu-button {
-    font-size: 24px;
-    background: none;
-    border: none;
-    cursor: pointer;
-}
 
 .menu-content {
     display: none;
@@ -415,7 +409,7 @@ nav a {
     text-decoration: none;
     color: black;
 }
-
+²
 .menu-content a:hover,
 .menu-content button:hover {
     background: #f1f1f1;
@@ -439,7 +433,6 @@ nav a {
     width: 100%;
     height: 100%;
     padding: 20px;
-    background-color: #222;
 }
 
 /* Edit sound modal */
@@ -450,13 +443,11 @@ nav a {
     left: 0;
     width: 100%;
     height: 100%;
-    background: #222;
     z-index: 1000;
     overflow-y: auto;
 }
 
 .edit-sound-modal .modal-header {
-    background-color: #222;
     color: white;
     padding: 10px;
     text-align: center;
@@ -464,7 +455,6 @@ nav a {
 
 .edit-sound-modal .modal-body {
     padding: 20px;
-    background-color: #222;
     color: #acacac;
     overflow-y: auto;
     display: flex;
@@ -492,7 +482,6 @@ nav a {
     border: 1px solid #ddd;
     padding: 10px;
     border-radius: 5px;
-    background-color: #222;
 }
 
 .sound-player-controls {
@@ -531,16 +520,13 @@ nav a {
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    background-color: #28a745;
     color: white;
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s;
 }
 
-.update-button:hover {
-    background-color: #218838;
-}
+.update-button:hover {}
 
 /* Audio controls */
 #audio-controls,
@@ -557,14 +543,7 @@ nav a {
 }
 
 /* Progress bar and next button */
-.progress-and-credits {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    width: 50%;
-    margin: 0 auto;
-}
+.progress-and-credits {}
 
 #progressBar {
     flex-grow: 1;
@@ -582,7 +561,6 @@ nav a {
 #nextButton {
     padding: 0 10px;
     font-size: 20px;
-    color: #4CAF50;
     background: none;
     border: none;
     cursor: pointer;
@@ -590,9 +568,7 @@ nav a {
 }
 
 #nextButton:hover,
-#nextButton:focus {
-    color: #367C39;
-}
+#nextButton:focus {}
 
 /* Preset controls */
 #preset-controls {
@@ -620,7 +596,6 @@ nav a {
     font-size: 20px;
     cursor: pointer;
     border: none;
-    background-color: #28a745;
     color: #fff;
     border-radius: 4px;
     display: flex;
@@ -629,9 +604,7 @@ nav a {
     padding: 0;
 }
 
-#save-preset-button:hover {
-    background-color: #218838;
-}
+#save-preset-button:hover {}
 
 #preset-dropdown {
     padding: 5px;
@@ -642,7 +615,6 @@ nav a {
 
 /* Footer styling */
 footer {
-    background-color: #444;
     padding: 20px 0;
 }
 
@@ -690,16 +662,13 @@ footer {
     cursor: pointer;
     border-radius: 5px;
     border: none;
-    background-color: #f44336; /* Match the button-play style */
     color: white;
     font-size: 16px;
     margin: 0 5px;
     transition: background-color 0.3s;
 }
 
-#disconnect-button:hover {
-    background-color: #9b2820; /* Darker green */
-}
+#disconnect-button:hover {}
 
 
 #join-id-button {
@@ -707,25 +676,19 @@ footer {
     cursor: pointer;
     border-radius: 5px;
     border: none;
-    background-color: #4CAF50; /* Match the button-play style */
     color: white;
     font-size: 16px;
     margin: 0 5px;
     transition: background-color 0.3s;
 }
 
-#join-id-button:hover {
-    background-color: #367C39; /* Darker green */
-}
+#join-id-button:hover {}
 
 #join-id-input {
     padding: 10px;
     width: 200px;
     margin-right: 10px;
     border-radius: 5px;
-    border: 1px solid #555;
-    background-color: #333;
-    color: #fff;
 }
 
 #join-id-input::placeholder {
