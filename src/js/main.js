@@ -14,6 +14,7 @@ import { toggleMenu, initModals, closeExternalModal } from './modalHandler.js';
 import { closeModal } from './modalCredits.js'; // Import createModal
 import { openEditSoundModal,  closeEditSoundModal } from  './editSounds.js';
 import './socket-client.js';
+import { svgPause, svgDefault } from './constants.js'
 
 // Initialize and attach to window if necessary (for inline handlers)
 const audioPlayer = new AudioPlayer();
@@ -53,23 +54,77 @@ document.addEventListener('DOMContentLoaded', () => {
     });}
 
 
-    if (calmButton) {
-        calmButton.addEventListener('click', function() {
-            BackgroundMusic.playBackgroundSound('calm', this);
-        });
+    function handleButtonClick(button, soundType, spanClassToggles, otherButtons, svgPause, svgDefault) {
+        if (button) {
+            button.addEventListener('click', function () {
+                // Play the background sound
+                BackgroundMusic.playBackgroundSound(soundType, this);
+
+                // Reset toggles and SVGs on other buttons
+                otherButtons.forEach(otherButton => {
+                    const otherSpan = otherButton.querySelector('span');
+                    const otherSvg = otherButton.querySelector('svg');
+
+                    // Remove toggled classes
+                    if (otherSpan) {
+                        spanClassToggles.forEach(className => {
+                            otherSpan.classList.remove(className);
+                        });
+                    }
+
+                    // Revert SVG to the default icon
+                    if (otherSvg) {
+                        otherSvg.outerHTML = svgDefault;
+                    }
+                });
+
+                // Toggle classes on the clicked button's span
+                const spanChild = button.querySelector('span');
+                if (spanChild) {
+                    spanClassToggles.forEach(className => {
+                        spanChild.classList.toggle(className);
+                    });
+                }
+
+                // Change the SVG to the "pause" icon
+                const svgChild = button.querySelector('svg');
+                if (svgChild) {
+                    svgChild.outerHTML = svgPause;
+                }
+            });
+        }
     }
 
-    if (dynamicButton) {
-        dynamicButton.addEventListener('click', function() {
-            BackgroundMusic.playBackgroundSound('dynamic', this);
-        });
-    }
+    // Attach event listeners with reset logic for other buttons
+    // Attach event listeners with reset logic and SVG updates
+    handleButtonClick(
+        calmButton,
+        'calm',
+        ['neon', 'animate-gradient-move', 'font-medium', 'font-black'],
+        [dynamicButton, intenseButton],
+        svgPause,
+        svgDefault
+    );
 
-    if (intenseButton) {
-        intenseButton.addEventListener('click', function() {
-            BackgroundMusic.playBackgroundSound('intense', this);
-        });
-    }
+    handleButtonClick(
+        dynamicButton,
+        'dynamic',
+        ['neon', 'animate-gradient-move', 'font-medium', 'font-black'],
+        [calmButton, intenseButton],
+        svgPause,
+        svgDefault
+    );
+
+    handleButtonClick(
+        intenseButton,
+        'intense',
+        ['neon', 'animate-gradient-move', 'font-medium', 'font-black'],
+        [calmButton, dynamicButton],
+        svgPause,
+        svgDefault
+    );
+
+
     if (nextButton) {
         nextButton.addEventListener('click', function() {
             BackgroundMusic.backGroundSoundLoop();

@@ -12,11 +12,14 @@
     .button {
         @apply text-accent hover:underline font-semibold;
     }
+    .neon {
+        @apply bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-[length:200%_200%] bg-clip-text text-transparent;
+    }
 
-        /* Slider Track */
+    /* Slider Track */
     .slider {
         @apply appearance-none w-full h-1.5 rounded-full;
-background: linear-gradient(to right, #ec4899 0%, #a855f7 50%, #3b82f6 50%, #e2e8f0 50%);
+            background: linear-gradient(to right, #ec4899 0%, #a855f7 50%, #3b82f6 50%, #e2e8f0 50%);
     }
 
     /* Slider Thumb */
