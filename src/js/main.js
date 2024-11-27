@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });}
 
 
-    function handleButtonClick(button, soundType, spanClassToggles, otherButtons, svgPause, svgDefault) {
+    function handleSoundBarButtonClick(button, soundType, spanClassToggles, otherButtons, svgPause, svgDefault) {
         if (button) {
             button.addEventListener('click', function () {
                 // Play the background sound
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Attach event listeners with reset logic for other buttons
     // Attach event listeners with reset logic and SVG updates
-    handleButtonClick(
+    handleSoundBarButtonClick(
         calmButton,
         'calm',
         ['neon', 'animate-gradient-move', 'font-medium', 'font-black'],
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         svgDefault
     );
 
-    handleButtonClick(
+    handleSoundBarButtonClick(
         dynamicButton,
         'dynamic',
         ['neon', 'animate-gradient-move', 'font-medium', 'font-black'],
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         svgDefault
     );
 
-    handleButtonClick(
+    handleSoundBarButtonClick(
         intenseButton,
         'intense',
         ['neon', 'animate-gradient-move', 'font-medium', 'font-black'],
