@@ -54,46 +54,64 @@ document.addEventListener('DOMContentLoaded', () => {
     });}
 
 
-    function handleSoundBarButtonClick(button, soundType, spanClassToggles, otherButtons, svgPause, svgDefault) {
-        if (button) {
-            button.addEventListener('click', function () {
-                // Play the background sound
-                BackgroundMusic.playBackgroundSound(soundType, this);
+function handleSoundBarButtonClick(button, soundType, spanClassToggles, otherButtons, svgPause, svgDefault) {
+    if (button) {
+        button.addEventListener('click', function () {
+            // Check if the button is currently active
+            const isActive = button.dataset.active === 'true';
 
-                // Reset toggles and SVGs on other buttons
-                otherButtons.forEach(otherButton => {
-                    const otherSpan = otherButton.querySelector('span');
-                    const otherSvg = otherButton.querySelector('svg');
+            // Reset other buttons
+            otherButtons.forEach(otherButton => {
+                const otherSpan = otherButton.querySelector('span');
+                const otherSvg = otherButton.querySelector('svg');
 
-                    // Remove toggled classes
-                    if (otherSpan) {
-                        spanClassToggles.forEach(className => {
-                            otherSpan.classList.remove(className);
-                        });
-                    }
-
-                    // Revert SVG to the default icon
-                    if (otherSvg) {
-                        otherSvg.outerHTML = svgDefault;
-                    }
-                });
-
-                // Toggle classes on the clicked button's span
-                const spanChild = button.querySelector('span');
-                if (spanChild) {
+                // Remove toggled classes from spans
+                if (otherSpan) {
                     spanClassToggles.forEach(className => {
-                        spanChild.classList.toggle(className);
+                        otherSpan.classList.remove(className);
                     });
                 }
 
-                // Change the SVG to the "pause" icon
-                const svgChild = button.querySelector('svg');
+                // Reset SVG to default
+                if (otherSvg) {
+                    otherSvg.outerHTML = svgDefault;
+                }
+
+                // Reset the `active` state for other buttons
+                otherButton.dataset.active = 'false';
+            });
+
+            // Toggle the current button's state
+            const spanChild = button.querySelector('span');
+            const svgChild = button.querySelector('svg');
+            if (isActive) {
+                // Button was active, deactivate it
+                if (spanChild) {
+                    spanClassToggles.forEach(className => {
+                        spanChild.classList.remove(className);
+                    });
+                }
+                if (svgChild) {
+                    svgChild.outerHTML = svgDefault;
+                }
+                button.dataset.active = 'false';
+            } else {
+                // Button was inactive, activate it
+                if (spanChild) {
+                    spanClassToggles.forEach(className => {
+                        spanChild.classList.add(className);
+                    });
+                }
                 if (svgChild) {
                     svgChild.outerHTML = svgPause;
                 }
-            });
-        }
+                button.dataset.active = 'true';
+            }
+
+            BackgroundMusic.playBackgroundSound(soundType, this);
+        });
     }
+}
 
     // Attach event listeners with reset logic for other buttons
     // Attach event listeners with reset logic and SVG updates
@@ -170,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Integrate the new script functionalities here
     const audio = BackgroundMusic.getPlayer();
     const progressBar = document.getElementById('progressBar');
+    const progressSelector = document.getElementById('progress-selector');
     const progress = document.getElementById('progress');
 
     if (audio) {
@@ -178,6 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (audio.duration) { // Prevent division by zero
                 const percentage = (audio.currentTime / audio.duration) * 100;
                 progress.style.width = percentage + '%';
+                progressSelector.style.left =  percentage - 1 + '%';
             }
         }
 

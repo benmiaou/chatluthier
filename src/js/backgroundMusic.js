@@ -246,6 +246,10 @@ export const BackgroundMusic = {
         return str.charAt(0).toUpperCase() + str.slice(1); // Capitalize first letter, keep rest unchanged
     },
 
+    capitalize(str) {
+        return str.toUpperCase(); // Capitalize first letter, keep rest unchanged
+    },
+
     updateButton(typeName) {
         let result = this.backgroundMusicArray.filter(sound =>
             sound.contexts.some(([type, context]) => type === typeName && context === this.context)
@@ -254,10 +258,12 @@ export const BackgroundMusic = {
         let button = document.getElementById(typeName + 'Button');
         if (result.length === 0) {
             button.disabled = true; // Disable the button if the array is empty
-            button.textContent = "Play " + this.capitalizeFirstLetter(typeName) + " (0)";
+            button.classList.add('disabledMusicButton');
+            button.querySelector('span').textContent = this.capitalize(typeName) + " (0)";
         } else {
             button.disabled = false; // Enable the button if the array is not empty
-            button.textContent = "Play " + this.capitalizeFirstLetter(typeName) + " (" + result.length + ")";
+            button.classList.remove('disabledMusicButton');
+            button.querySelector('span').textContent = this.capitalize(typeName) + " (" + result.length + ")";
         }
     },
 
