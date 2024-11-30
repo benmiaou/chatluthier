@@ -1,23 +1,6 @@
 // src/js/modalHandler.js
 
 /**
- * Toggles the visibility of the menu content.
- */
-function toggleMenu() {
-    const menu = document.getElementById("menu-content");
-    if (!menu) {
-        console.error("Menu element with ID 'menu-content' not found.");
-        return;
-    }
-
-    if (menu.style.display === "none" || menu.style.display === "") {
-        menu.style.display = "block";
-    } else {
-        menu.style.display = "none";
-    }
-}
-
-/**
  * Opens an external modal by fetching content from a given URL.
  * @param {string} url - The URL to fetch the external content from.
  */
@@ -128,4 +111,4 @@ function initModals() {
     document.addEventListener('DOMContentLoaded', attachFooterLinkListeners);
 }
 
-export { toggleMenu, initModals, closeExternalModal };
+export { initModals, closeExternalModal };

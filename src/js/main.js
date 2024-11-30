@@ -10,11 +10,12 @@ import { SoundBoard } from './soundboard.js';
 console.log('SoundBoard:', SoundBoard); // Should log the SoundBoard object with all its methods
 import { showAllCredits } from './credits.js';
 import './modalWindow.js';
-import { toggleMenu, initModals, closeExternalModal } from './modalHandler.js';
+import { initModals, closeExternalModal } from './modalHandler.js';
 import { closeModal } from './modalCredits.js'; // Import createModal
 import { openEditSoundModal,  closeEditSoundModal } from  './editSounds.js';
 import './socket-client.js';
 import { svgPause, svgDefault } from './constants.js'
+import { setupMenu } from './components/menu.js';
 
 // Initialize and attach to window if necessary (for inline handlers)
 const audioPlayer = new AudioPlayer();
@@ -31,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextButton = document.getElementById('nextButton');
     const resetAmbient = document.getElementById('resetAmbient');
     const openEditSoundModalButton = document.getElementById('openEditSoundModal');
-    const toggleMenuButton = document.getElementById('toggleMenu');
     const closeExternalModalButton = document.getElementById('closeExternalModal');
     const closeModalButton = document.getElementById('closeModal');
     const closeEditSoundModalButton = document.getElementById('closeEditSoundModal');
@@ -158,11 +158,6 @@ function handleSoundBarButtonClick(button, soundType, spanClassToggles, otherBut
             openEditSoundModal();
         });
     }
-    if (toggleMenuButton) {
-        toggleMenuButton.addEventListener('click', function() {
-            toggleMenu();
-        });
-    }
     if (closeExternalModalButton) {
         closeExternalModalButton.addEventListener('click', function() {
             closeExternalModal();
@@ -264,6 +259,10 @@ function handleSoundBarButtonClick(button, soundType, spanClassToggles, otherBut
             console.error('Error fetching sound data:', error);
         }
     }
+
+    // Configurer le menu avec les IDs correspondants
+    setupMenu('toggleMenu', 'menuContent');
+
 
     // Call fetchSoundData
     fetchSoundData();

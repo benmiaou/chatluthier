@@ -37,4 +37,21 @@
     .slider::-ms-thumb {
         @apply appearance-none h-4 w-4 border-2 rounded-full bg-purple-500 shadow-lg cursor-pointer;
     }
+
+    .menu-content {
+        @apply bg-slate-100 border border-gray-300 absolute top-10 right-0 z-10 transition duration-300 ease-in-out opacity-0 scale-95 hidden;
+    }
+
+    .menu-content.show {
+        @apply opacity-100 scale-100 block;
+    }
+
+    .menu-item {
+        @apply w-full px-4 py-3 text-gray-700 bg-slate-100 rounded-md shadow-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-transparent focus:bg-gradient-to-r focus:from-pink-500 focus:via-purple-500 focus:to-blue-500;
+    }
+
+    .menu-divider {
+        @apply w-full h-[1px] bg-gray-300;
+    }
+
 }

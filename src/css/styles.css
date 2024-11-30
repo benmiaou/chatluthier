@@ -331,30 +331,15 @@ nav a {
 }
 
 
-.menu-content {
-    display: none;
-    position: absolute;
-    top: 40px;
-    right: 0;
-    background: white;
-    border: 1px solid #ccc;
-    padding: 10px;
-    z-index: 10;
-    transition: all 0.3s;
-}
+.menu-content {}
 
 .menu-content a,
 .menu-content button {
-    display: block;
-    padding: 8px 12px;
-    text-decoration: none;
-    color: black;
+
 }
-²
+
 .menu-content a:hover,
-.menu-content button:hover {
-    background: #f1f1f1;
-}
+.menu-content button:hover {}
 
 /* Credit modal styling */
 .credit-modal-template,
