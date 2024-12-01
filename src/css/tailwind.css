@@ -58,4 +58,11 @@
         @apply flex flex-wrap justify-center gap-2.5;
     }
 
+     .progress-bar-container {
+        @apply relative w-full h-[100px] overflow-hidden bg-cover bg-center rounded-md;
+    }
+
+    .progress-bar-overlay {
+        @apply absolute inset-0 bg-white opacity-30;
+    }
 }

@@ -28,6 +28,10 @@ export class SoundBar
         this.progressBarContainer.style.setProperty('--animation-delay', '0s');
         this.progressBarContainer.draggable = false;
 
+        this.progressBarOverlay = document.createElement('div');
+        this.progressBarOverlay.className = 'progress-bar-overlay';
+        this.progressBarContainer.appendChild( this.progressBarOverlay);
+
         this.progressBar = document.createElement('div');
         this.progressBar.className = 'progress-bar';
         this.progressBar.id = 'progress-bar-' +  this.ambianceSound.filename;
