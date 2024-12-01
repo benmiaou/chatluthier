@@ -20,10 +20,12 @@ export class SoundBar
         this.soudPlayer.playSound("assets/ambiance/" +  this.ambianceSound.filename);
         this.soudPlayer.setLoop(true);
         this.soudPlayer.setVolume(0);
+        this.onVolumeChange = null; // Add this property
 
         this.progressBarContainer = document.createElement('div');
         this.progressBarContainer.className = 'progress-bar-container';
         this.progressBarContainer.setAttribute('style', 'background-image: url(assets/images/backgrounds/' +  this.ambianceSound.imageFile + ')');
+        this.progressBarContainer.style.setProperty('--animation-delay', '0s');
         this.progressBarContainer.draggable = false;
 
         this.progressBar = document.createElement('div');
@@ -158,6 +160,11 @@ export class SoundBar
             const currentStatus = AmbianceSounds.getCurrentAmbianceStatus();
             sendAmbianceMessage(currentStatus);
         }
+            // Trigger onVolumeChange callback
+        if (this.onVolumeChange) {
+            this.onVolumeChange(volume);
+        }
+
     }
 
     getVolume() {

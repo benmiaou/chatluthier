@@ -270,3 +270,12 @@ function handleSoundBarButtonClick(button, soundType, spanClassToggles, otherBut
 
 // Initialize modal functionalities
 initModals();
+
+window.onload = () => {
+    const elements = document.querySelectorAll('.sound-bar');
+    elements.forEach((element) => {
+        element.classList.remove('animate-neon-glow');
+        void element.offsetWidth; // Trigger reflow to reset animation
+        element.classList.add('animate-neon-glow');
+    });
+};

@@ -2,6 +2,7 @@ import { GoogleLogin } from './googleLogin.js'; // Newly added import
 import { SoundBar } from './soundBar.js';
 import { sendAmbianceMessage } from './socket-client.js';
 
+const globalStartTime = Date.now(); // Establish a shared start time
 
 export const AmbianceSounds = {
     soundBars: [],
@@ -46,21 +47,38 @@ export const AmbianceSounds = {
         });
     },
 
-    generateAmbientButtons(ambianceSounds) {
-        const section = document.getElementById("ambiance");
-        section.innerHTML = ''; // Effacer le contenu existant
+generateAmbientButtons(ambianceSounds) {
 
-        ambianceSounds.forEach(ambianceSound => {
-            const container = document.createElement('div');
-            container.className = 'sound-container';
+    const section = document.getElementById("ambiance");
+    section.innerHTML = ''; // Clear existing content
 
-            // Créer une div pour la barre sonore
-            const soundBarDiv = document.createElement('div');
-            soundBarDiv.id = `sound-bar-${ambianceSound.filename}`; // Attribuer un ID unique
-            soundBarDiv.className = 'sound-bar'; // Appliquer le style
+    ambianceSounds.forEach(ambianceSound => {
+        const container = document.createElement('div');
+        container.className = 'sound-container';
 
-            container.appendChild(soundBarDiv);
-            const soundBar = new SoundBar(ambianceSound);
+        // Create a div for the sound bar
+        const soundBarDiv = document.createElement('div');
+        soundBarDiv.id = `sound-bar-${ambianceSound.filename}`; // Assign a unique ID
+        soundBarDiv.className = 'sound-bar'; // Apply style
+
+        container.appendChild(soundBarDiv);
+        const soundBar = new SoundBar(ambianceSound);
+
+        soundBar.onVolumeChange = (volume) => {
+
+            const animationDuration = 2000; // 2-second animation in milliseconds
+            const elapsedTime = (Date.now() - globalStartTime); // Calculate position in animation cycle
+            const delay = `-${elapsedTime % animationDuration}ms`; // Convert to seconds with a negative offset
+
+            if (volume > 0) {
+                soundBar.progressBarContainer.style.animationDelay = delay; // Dynamically adjust delay
+                soundBar.progressBarContainer.classList.add('shadow-neon', 'animate-neon-glow');
+            } else {
+                soundBar.progressBarContainer.classList.remove('shadow-neon', 'animate-neon-glow');
+                soundBar.progressBarContainer.style.removeProperty('--animation-delay');
+            }
+        };
+
             this.soundBars.push(soundBar);
             container.appendChild(soundBar.getElement());
 
