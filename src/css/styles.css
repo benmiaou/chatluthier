@@ -110,17 +110,6 @@ header {
     pointer-events: none;
 }
 
-/* Section styling */
-.section {
-    padding: 20px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-    grid-auto-rows: minmax(50px, auto);
-    gap: 20px;
-    align-items: center;
-    justify-content: center;
-}
-
 /* Sound container and buttons */
 .sound-button {
     flex-basis: calc(33.333% - 10px);
@@ -152,31 +141,6 @@ header {
     transition: width 0.3s ease;
 }
 
-.sound-bar-text,
-.sound-bar-licence {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 0;
-    text-align: center;
-    color: black;
-    font-weight: bold;
-    user-select: none;
-    pointer-events: none;
-}
-
-.sound-bar-text {
-    top: 1px;
-    width: 80%;
-}
-
-.sound-bar-licence {
-    bottom: 5px;
-    width: 40%;
-    height: 15px;
-    font-size: 10px;
-    padding: 1px;
-}
 
 /* Navigation styling */
 nav {
