@@ -20,11 +20,17 @@ export class SoundBar
         this.soudPlayer.playSound("assets/ambiance/" +  this.ambianceSound.filename);
         this.soudPlayer.setLoop(true);
         this.soudPlayer.setVolume(0);
+        this.onVolumeChange = null; // Add this property
 
         this.progressBarContainer = document.createElement('div');
         this.progressBarContainer.className = 'progress-bar-container';
         this.progressBarContainer.setAttribute('style', 'background-image: url(assets/images/backgrounds/' +  this.ambianceSound.imageFile + ')');
+        this.progressBarContainer.style.setProperty('--animation-delay', '0s');
         this.progressBarContainer.draggable = false;
+
+        this.progressBarOverlay = document.createElement('div');
+        this.progressBarOverlay.className = 'progress-bar-overlay';
+        this.progressBarContainer.appendChild( this.progressBarOverlay);
 
         this.progressBar = document.createElement('div');
         this.progressBar.className = 'progress-bar';
@@ -55,7 +61,7 @@ export class SoundBar
         this.progressBarContainer.appendChild(this.progressBarVolumePlus);
         this.progressBarContainer.appendChild(this.soundBarText);
         if (this.license !== "")  this.progressBarContainer.appendChild(this.soundLicense);
-        this.credit = this.ambianceSound.display_name + " : " +  this.ambianceSound.credit;
+        this.credit = "<span class=\"title\">" + this.ambianceSound.display_name + "</span> <br/> " +  this.ambianceSound.credit;
         this.initializeDraggableProgressBar();
     }
 
@@ -158,6 +164,11 @@ export class SoundBar
             const currentStatus = AmbianceSounds.getCurrentAmbianceStatus();
             sendAmbianceMessage(currentStatus);
         }
+            // Trigger onVolumeChange callback
+        if (this.onVolumeChange) {
+            this.onVolumeChange(volume);
+        }
+
     }
 
     getVolume() {

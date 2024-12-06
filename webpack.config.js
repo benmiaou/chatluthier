@@ -1,19 +1,24 @@
 // webpack.config.js
 
+const webpack = require('webpack')
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+
+const isLocal = process.env.NODE_ENV === 'local';
+
+
 module.exports = {
-    entry: './src/js/main.js', // Correct entry point
+    entry: './src/js/main.js',
     output: {
         filename: 'js/[name].[contenthash].js', // [contenthash] for cache busting
         path: path.resolve(__dirname, 'dist'),
         publicPath: '/', // Set to '/' for absolute paths
     },
-    mode: 'production', // Use 'development' for unminified output
+    mode: isLocal ? 'development' : 'production',
     module: {
         rules: [
             // JavaScript: Use Babel to transpile JS files
@@ -30,7 +35,8 @@ module.exports = {
             // CSS: Extract CSS into separate files
             {
                 test: /\.css$/i,
-                use: [
+                use: !isLocal
+                    ? [
                     {
                         loader: MiniCssExtractPlugin.loader,
                         options: {
@@ -38,7 +44,8 @@ module.exports = {
                         },
                     },
                     'css-loader',
-                ],
+                    'postcss-loader'
+                ] :  ['style-loader', 'css-loader', 'postcss-loader'],
             },
             // Images: Copy image files to the output directory
             {
@@ -86,9 +93,9 @@ module.exports = {
             template: './src/pages/about.html',
             chunks: ['main'],
         }),
-        new MiniCssExtractPlugin({
-            filename: 'css/[name].[contenthash].css', // e.g., css/styles.abc123.css
-        }),
+        ...(!isLocal ? [new MiniCssExtractPlugin({
+            filename: 'css/[name].[contenthash].css',
+        })] : []),
         new CopyWebpackPlugin({
             patterns: [
                 { from: 'src/images/favicons/', to: 'images/favicons/' }, // Copy favicons
@@ -107,7 +114,20 @@ module.exports = {
             directory: path.join(__dirname, 'dist'),
         },
         compress: true,
-        port: 3000,
-        open: true,
+        watchFiles: ['src/**/*'],
+        port: 5000,
+        open: false,
+        liveReload: true,
+        hot: false, // Disable HMR
+        proxy: {
+            '/': {
+                target: 'http://0.0.0.0:3000', // Updated to match backend server port
+                changeOrigin: true,
+            },
+        },
+    },
+    watchOptions: {
+        poll: 1000, // Check for changes every second
+        ignored: /node_modules/, // Ignore node_modules for performance
     },
 };

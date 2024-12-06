@@ -90,7 +90,7 @@ export const SoundBoard = {
             button.addEventListener('click', handleClick);
 
             // Set the initial classes for the button
-            button.classList.add('button-stop', 'button');
+            button.classList.add('button-stop', 'sound-board-button');
 
             // Store the audio player instance in the soundboard list
             this.soundboardList[soundboardItem.display_name] = audioPlayer;

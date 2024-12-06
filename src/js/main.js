@@ -1,4 +1,5 @@
 // src/js/main.js
+import '../css/tailwind.css';
 
 import '../css/styles.css'; // Adjust the path based on your project structure
 import { GoogleLogin } from './googleLogin.js'; // Adjust the path if necessary
@@ -9,10 +10,12 @@ import { SoundBoard } from './soundboard.js';
 console.log('SoundBoard:', SoundBoard); // Should log the SoundBoard object with all its methods
 import { showAllCredits } from './credits.js';
 import './modalWindow.js';
-import { toggleMenu, initModals, closeExternalModal } from './modalHandler.js';
+import { initModals, closeExternalModal } from './modalHandler.js';
 import { closeModal } from './modalCredits.js'; // Import createModal
 import { openEditSoundModal,  closeEditSoundModal } from  './editSounds.js';
 import './socket-client.js';
+import { svgPause, svgDefault } from './constants.js'
+import { setupMenu } from './components/menu.js';
 
 // Initialize and attach to window if necessary (for inline handlers)
 const audioPlayer = new AudioPlayer();
@@ -29,30 +32,117 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextButton = document.getElementById('nextButton');
     const resetAmbient = document.getElementById('resetAmbient');
     const openEditSoundModalButton = document.getElementById('openEditSoundModal');
-    const toggleMenuButton = document.getElementById('toggleMenu');
     const closeExternalModalButton = document.getElementById('closeExternalModal');
     const closeModalButton = document.getElementById('closeModal');
     const closeEditSoundModalButton = document.getElementById('closeEditSoundModal');
     const showAllCreditsButton = document.getElementById('showAllCredits');
+    const gradientSlider = document.getElementById('music-volume');
 
-    
-    if (calmButton) {
-        calmButton.addEventListener('click', function() {
-            BackgroundMusic.playBackgroundSound('calm', this);
+    if (gradientSlider) {
+        gradientSlider.addEventListener('input', function () {
+            const value = gradientSlider.value;
+
+        // Update the background
+    gradientSlider.style.background = `
+        linear-gradient(to right, 
+        #ec4899 0%, 
+        #a855f7 ${value}%, 
+        #a855f7 ${value}%, 
+        #3b82f6 ${value}%, 
+        #e2e8f0 ${value}%)
+    `;
+    });}
+
+
+function handleSoundBarButtonClick(button, soundType, spanClassToggles, otherButtons, svgPause, svgDefault) {
+    if (button) {
+        button.addEventListener('click', function () {
+            // Check if the button is currently active
+            const isActive = button.dataset.active === 'true';
+
+            // Reset other buttons
+            otherButtons.forEach(otherButton => {
+                const otherSpan = otherButton.querySelector('span');
+                const otherSvg = otherButton.querySelector('svg');
+
+                // Remove toggled classes from spans
+                if (otherSpan) {
+                    spanClassToggles.forEach(className => {
+                        otherSpan.classList.remove(className);
+                    });
+                }
+
+                // Reset SVG to default
+                if (otherSvg) {
+                    otherSvg.outerHTML = svgDefault;
+                }
+
+                // Reset the `active` state for other buttons
+                otherButton.dataset.active = 'false';
+            });
+
+            // Toggle the current button's state
+            const spanChild = button.querySelector('span');
+            const svgChild = button.querySelector('svg');
+            if (isActive) {
+                // Button was active, deactivate it
+                if (spanChild) {
+                    spanClassToggles.forEach(className => {
+                        spanChild.classList.remove(className);
+                    });
+                }
+                if (svgChild) {
+                    svgChild.outerHTML = svgDefault;
+                }
+                button.dataset.active = 'false';
+            } else {
+                // Button was inactive, activate it
+                if (spanChild) {
+                    spanClassToggles.forEach(className => {
+                        spanChild.classList.add(className);
+                    });
+                }
+                if (svgChild) {
+                    svgChild.outerHTML = svgPause;
+                }
+                button.dataset.active = 'true';
+            }
+
+            BackgroundMusic.playBackgroundSound(soundType, this);
         });
     }
+}
 
-    if (dynamicButton) {
-        dynamicButton.addEventListener('click', function() {
-            BackgroundMusic.playBackgroundSound('dynamic', this);
-        });
-    }
+    // Attach event listeners with reset logic for other buttons
+    // Attach event listeners with reset logic and SVG updates
+    handleSoundBarButtonClick(
+        calmButton,
+        'calm',
+        ['neon', 'animate-gradient-move', 'font-medium', 'font-black'],
+        [dynamicButton, intenseButton],
+        svgPause,
+        svgDefault
+    );
 
-    if (intenseButton) {
-        intenseButton.addEventListener('click', function() {
-            BackgroundMusic.playBackgroundSound('intense', this);
-        });
-    }
+    handleSoundBarButtonClick(
+        dynamicButton,
+        'dynamic',
+        ['neon', 'animate-gradient-move', 'font-medium', 'font-black'],
+        [calmButton, intenseButton],
+        svgPause,
+        svgDefault
+    );
+
+    handleSoundBarButtonClick(
+        intenseButton,
+        'intense',
+        ['neon', 'animate-gradient-move', 'font-medium', 'font-black'],
+        [calmButton, dynamicButton],
+        svgPause,
+        svgDefault
+    );
+
+
     if (nextButton) {
         nextButton.addEventListener('click', function() {
             BackgroundMusic.backGroundSoundLoop();
@@ -66,11 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (openEditSoundModalButton) {
         openEditSoundModalButton.addEventListener('click', function() {
             openEditSoundModal();
-        });
-    }
-    if (toggleMenuButton) {
-        toggleMenuButton.addEventListener('click', function() {
-            toggleMenu();
         });
     }
     if (closeExternalModalButton) {
@@ -98,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Integrate the new script functionalities here
     const audio = BackgroundMusic.getPlayer();
     const progressBar = document.getElementById('progressBar');
+    const progressSelector = document.getElementById('progress-selector');
     const progress = document.getElementById('progress');
 
     if (audio) {
@@ -106,6 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (audio.duration) { // Prevent division by zero
                 const percentage = (audio.currentTime / audio.duration) * 100;
                 progress.style.width = percentage + '%';
+                progressSelector.style.left =  percentage - 1 + '%';
             }
         }
 
@@ -173,9 +260,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Configurer le menu avec les IDs correspondants
+    setupMenu('toggleMenu', 'menuContent');
+
+
     // Call fetchSoundData
     fetchSoundData();
 });
 
 // Initialize modal functionalities
 initModals();
+
+window.onload = () => {
+    const elements = document.querySelectorAll('.sound-bar');
+    elements.forEach((element) => {
+        element.classList.remove('animate-neon-glow');
+        void element.offsetWidth; // Trigger reflow to reset animation
+        element.classList.add('animate-neon-glow');
+    });
+};
