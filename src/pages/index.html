@@ -33,7 +33,7 @@
                 <div id="id-management space-x-4">
                     <div class="">
                         <input type="text" id="join-id-input" placeholder="Enter Session Name" class="px-2 py-1 border border-gray-300 rounded">
-                        <button id="join-id-button" class="button">Join</button>
+                        <button id="join-id-button" class="buttonOutlined">Join</button>
                         <button id="disconnect-button" style="display: none;" class="bg-red-500 text-white px-3 py-1 rounded">Disconnect</button>
                     </div>
                     <p id="your-id" style="display: none;" class="text-sm">
@@ -67,12 +67,18 @@
         <div class="main-content bg-neutral">
             <!-- Modal for displaying credit information -->
             <div id="credit-modal-template"
-                 class="mb-5 credit-modal-template fixed top-2 right-2 z-50 hidden bg-accentLight bg-opacity-85 text-white border border-accent border-spacing-1 p-4 rounded-md shadow-lg w-96  max-h-40 overflow-hidden">
+                 class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 hidden bg-slate-100 bg-opacity-95 text-slate-800  p-4 rounded-md shadow-md w-80 max-h-32 overflow-hidden">
                 <!-- Close button -->
-                  <span id="closeModal" class="absolute top-0 bottom-0 right-0 px-4 py-3">
-                      <svg class="close-btn fill-current h-6 w-6 text-accent" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
-                  </span>
-                  <div class="text-left truncate text-accent" id="credit-details"></div>
+                <span id="closeModal" class="absolute top-2 right-2 cursor-pointer">
+                    <svg class="close-btn fill-current h-5 w-5 text-slate-800 hover:text-gray-200" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <title>Close</title>
+                        <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+                    </svg>
+                </span>
+                <div class="text-left text-sm" id="credit-details">
+                    <!-- Content goes here -->
+                    <p class="truncate">This is the credit information displayed in a concise manner.</p>
+                </div>
             </div>
             <!-- External Modal for displaying external pages -->
             <div id="external-modal" class="modal">
