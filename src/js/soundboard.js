@@ -56,7 +56,7 @@ export const SoundBoard = {
             // Function to handle the click event
             const handleClick = () => {
                 // First click: start playing the audio
-                if(!audioPlayer.isReady())audioPlayer.playSound("assets/soundboard/" + soundboardItem.filename);
+                if(!audioPlayer.isReady())audioPlayer.playSound("assets/soundboard/" + soundboardItem.filename, true);
                
                 audioPlayer.play();
                 button.classList.add('button-primary-active');

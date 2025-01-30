@@ -16,14 +16,14 @@ export class AudioPlayer {
         document.body.appendChild(this.audioElement);
     }
 
-    async playSound(audioUrl) {
+    async playSound(audioUrl, soundbord=false) {
         try {
+            console.log("playSound " + soundbord)
             const cache = await caches.open(AUDIO_CACHE_NAME);
             let response = await cache.match(audioUrl);
-            if (!response) {
+            if (!response || soundbord) {
                 // Start streaming immediately without waiting for the cache
                 this.audioElement.src = audioUrl;
-                console.log(PreLoader);
                 PreLoader.enqueueFetch(audioUrl); // Queue the fetch operation
             } else {
                 // If the audio is in the cache, use it directly
@@ -69,7 +69,6 @@ export class AudioPlayer {
         }).catch(error => {
             console.error("Error playing audio:", error);
             this.audioElement.src = "";
-            constructor();
             this.onEndedCallback();
         });
     }
