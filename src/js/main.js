@@ -1,6 +1,7 @@
 // src/js/main.js
 
-import '../css/styles.css'; // Adjust the path based on your project structure
+import '../css/styles.css'; 
+
 import { GoogleLogin } from './googleLogin.js'; // Adjust the path if necessary
 import { AudioPlayer } from './audioPlayer.js';
 import { AudioManager, BackgroundMusic } from './backgroundMusic.js';
@@ -26,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const calmButton = document.getElementById('calmButton');
     const dynamicButton = document.getElementById('dynamicButton');
     const intenseButton = document.getElementById('intenseButton');
+    const allButton = document.getElementById('allButton');
     const nextButton = document.getElementById('nextButton');
     const resetAmbient = document.getElementById('resetAmbient');
     const openEditSoundModalButton = document.getElementById('openEditSoundModal');
@@ -51,6 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (intenseButton) {
         intenseButton.addEventListener('click', function() {
             BackgroundMusic.playBackgroundSound('intense', this);
+        });
+    }
+    if (allButton) {
+        allButton.addEventListener('click', function() {
+            BackgroundMusic.playBackgroundSound('all', this);
         });
     }
     if (nextButton) {
@@ -98,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Integrate the new script functionalities here
     const audio = BackgroundMusic.getPlayer();
     const progressBar = document.getElementById('progressBar');
-    const progress = document.getElementById('progress');
+    const progress = document.getElementById('sound-progress');
 
     if (audio) {
         // Function to update the progress bar

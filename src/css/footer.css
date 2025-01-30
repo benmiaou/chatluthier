@@ -1,0 +1,20 @@
+/* Footer styling */
+footer {
+    background-color: #444;
+    padding: 20px 0;
+}
+
+.footer-content {
+    text-align: center;
+    color: white;
+}
+
+.footer-content a {
+    margin: 0 15px;
+    color: white;
+    text-decoration: none;
+}
+
+.footer-content a:hover {
+    text-decoration: underline;
+}

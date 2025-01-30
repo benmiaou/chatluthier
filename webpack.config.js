@@ -33,9 +33,6 @@ module.exports = {
                 use: [
                     {
                         loader: MiniCssExtractPlugin.loader,
-                        options: {
-                            publicPath: '../', // Adjust the publicPath relative to CSS
-                        },
                     },
                     'css-loader',
                 ],

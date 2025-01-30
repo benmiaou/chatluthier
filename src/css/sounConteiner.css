@@ -1,0 +1,23 @@
+.sound-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.sound-button {
+    flex-basis: calc(33.333% - 10px);
+    text-align: center;
+}
+
+.button {
+    flex: 1 0 auto;
+    text-align: center;
+    text-transform: capitalize;
+}
+
+.button .volume-slider {
+    display: block;
+    margin-top: 15px;
+    width: 100%;
+}

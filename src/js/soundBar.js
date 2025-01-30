@@ -27,7 +27,7 @@ export class SoundBar
         this.progressBarContainer.draggable = false;
 
         this.progressBar = document.createElement('div');
-        this.progressBar.className = 'progress-bar';
+        this.progressBar.className = 'ambiance-volume-bar'
         this.progressBar.id = 'progress-bar-' +  this.ambianceSound.filename;
         this.progressBar.draggable = false;
         this.progressBarContainer.appendChild( this.progressBar);

@@ -1,0 +1,64 @@
+.progress-bar-volume {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    opacity: 0;
+    
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: rgba(100,100,100,0.6);
+}
+.progress-bar-volume:hover,
+.progress-bar-volume.touch-hover {
+    opacity: 1;
+    transition: opacity 300ms;
+}
+
+.progress-bar-volume.plus {
+    left: 50%;
+    right: 0;
+}
+.progress-bar-volume.minus {
+    left: 0;
+    right: 50%;
+}
+
+.progress-bar-volume.minus:before {
+    content: "";
+    display: block;
+    background-color: white;
+    height: 2px;
+    width: 20px;
+    position: absolute;
+    top: 75%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.progress-bar-volume.plus:before {
+    content: "";
+    display: block;
+    background-color: white;
+    height: 2px;
+    width: 20px;
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.progress-bar-volume.plus:after {
+    content: "";
+    display: block;
+    background-color: white;
+    height: 2px;
+    width: 20px;
+    position: absolute;
+    top: 80%;
+    left: 50%;
+    transform: translateX(-50%) rotate(90deg);
+}

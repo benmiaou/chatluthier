@@ -1,0 +1,53 @@
+.type-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.sound-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sound-item {
+    flex: 1;
+    margin: 10px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #222;
+}
+
+.sound-player-controls {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+
+.sound-player-controls button {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: transparent;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    z-index: 1;
+}
+
+.sound-player-controls button:hover {
+    background-color: #0056b3;
+}
+
+.sound-player-controls .icon {
+    font-size: 18px;
+    position: static;
+}
+
+.sound-player-controls input[type="range"] {
+    width: 100px;
+}

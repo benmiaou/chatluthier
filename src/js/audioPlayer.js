@@ -68,6 +68,9 @@ export class AudioPlayer {
             console.log("Playback started.");
         }).catch(error => {
             console.error("Error playing audio:", error);
+            this.audioElement.src = "";
+            constructor();
+            this.onEndedCallback();
         });
     }
 
@@ -81,6 +84,10 @@ export class AudioPlayer {
 
     isLooping() {
         return this.audioElement.loop;
+    }
+
+    isReady() {
+        return this.audioElement.src !== "";
     }
 
     isCurrentlyPlaying() {

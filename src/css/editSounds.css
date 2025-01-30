@@ -1,0 +1,29 @@
+.edit-sound-modal {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #222;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.edit-sound-modal .modal-header {
+    background-color: #222;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+.edit-sound-modal .modal-body {
+    padding: 20px;
+    background-color: #222;
+    color: #acacac;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+

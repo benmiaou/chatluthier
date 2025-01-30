@@ -44,45 +44,28 @@ export const SoundBoard = {
 
             // Create an AudioPlayer instance
             let audioPlayer = new AudioPlayer();
-            audioPlayer.playSound("assets/soundboard/" + soundboardItem.filename);
-
-            let clickCount = 0;
-            let clickTimer;
+           
             // Set the on ended callback for the audio player
             audioPlayer.setOnEndedCallback(() => {
                 if (!audioPlayer.isLooping()) {
-                    clickCount = 0;
-                    button.classList.remove('button-play');
-                    button.classList.add('button-stop');
+                    button.classList.remove('button-primary-active');
+                    button.classList.add('button-primary');
                 }
             });
 
             // Function to handle the click event
             const handleClick = () => {
-                clickCount++;
-                
-                if (clickCount === 1) {
-                    // First click: start playing the audio
-                    audioPlayer.play();
-                    button.classList.add('button-play');
-                    button.classList.remove('button-stop');
-                    createModal(soundboardItem.credit); 
+                // First click: start playing the audio
+                if(!audioPlayer.isReady())audioPlayer.playSound("assets/soundboard/" + soundboardItem.filename);
+               
+                audioPlayer.play();
+                button.classList.add('button-primary-active');
+                button.classList.remove('button-primary'); 
+                createModal(soundboardItem.credit); 
 
-                    // Send WebSocket message to notify other clients
-                    if (sendPlaySoundboardSoundMessage) {
-                        sendPlaySoundboardSoundMessage(soundboardItem.filename);
-                    }
-                } else if (clickCount === 2) {
-                    // Second click: set the audio to loop
-                    audioPlayer.setLoop(true);
-                    button.classList.add('button-loop');
-                } else if (clickCount === 3) {
-                    // Third click: stop the audio and reset loop
-                    audioPlayer.setLoop(false);
-                    audioPlayer.stop();
-                    button.classList.remove('button-play', 'button-loop');
-                    button.classList.add('button-stop');
-                    clickCount = 0;  // Reset the click count
+                // Send WebSocket message to notify other clients
+                if (sendPlaySoundboardSoundMessage) {
+                    sendPlaySoundboardSoundMessage(soundboardItem.filename);
                 }
             };
 
@@ -90,7 +73,7 @@ export const SoundBoard = {
             button.addEventListener('click', handleClick);
 
             // Set the initial classes for the button
-            button.classList.add('button-stop', 'button');
+            button.classList.add('button-primary', 'button');
 
             // Store the audio player instance in the soundboard list
             this.soundboardList[soundboardItem.display_name] = audioPlayer;
@@ -133,8 +116,8 @@ export const SoundBoard = {
         const buttons = document.querySelectorAll('#soundboard button');
         buttons.forEach(button => {
             if (button.textContent === soundboardItem.display_name) {
-                button.classList.add('button-play');
-                button.classList.remove('button-stop');
+                button.classList.add('button-primary-active');
+                button.classList.remove('button-primary');
             }
         });
     }

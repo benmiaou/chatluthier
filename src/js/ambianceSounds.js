@@ -95,7 +95,7 @@ export const AmbianceSounds = {
             const savePresetButton = document.createElement('button');
             savePresetButton.textContent = '+';
             savePresetButton.id = 'save-preset-button';
-            savePresetButton.className = 'save-preset-button';
+            savePresetButton.className = 'button-primary';
             savePresetButton.onclick = () => this.savePreset();
 
             // Append the input and button to the container

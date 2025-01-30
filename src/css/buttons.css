@@ -1,0 +1,101 @@
+@font-face {
+    font-family: 'BagnardSans';
+    src: url('../fonts/BagnardSans.otf') format('opentype'); 
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+button {
+    font-family: BagnardSans;
+    background-color: #555;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+
+
+
+.button-primary {
+    background-color: #f44336;
+    display: block;
+}
+
+.button-primary:hover {
+    background-color: #f55d52;
+}
+
+.button-primary:disabled {
+    background-color: #803d38;
+    cursor: not-allowed;
+}
+
+.button-primary-active{
+    background-color: #4CAF50;
+    display: block;
+}
+
+.button-primary-active:hover{
+    background-color: #66ad69;
+    display: block;
+}
+
+
+.button-directory {
+    background-color: #4CAF50;
+    padding: 6px 12px;
+    font-size: 0.9em;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.button-directory:hover {
+    background-color: #367C39;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+}
+
+
+
+.button-loop {
+    background-color: #487aa8;
+    display: block;
+}
+
+#nextButton {
+    padding: 0 10px;
+    font-size: 20px;
+    color: #4CAF50;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+#nextButton:hover,
+#nextButton:focus {
+    color: #367C39;
+}
+
+
+.update-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+.update-button:hover {
+    background-color: #218838;
+}

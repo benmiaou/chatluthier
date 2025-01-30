@@ -21,8 +21,8 @@ export class AudioManager {
         this.stop(); // Stop any currently playing audio
 
         this.currentButton = document.getElementById(type + 'Button'); 
-        this.currentButton.classList.add('button-play');
-        this.currentButton.classList.remove('button-stop');
+        this.currentButton.classList.add('button-primary-active');
+        this.currentButton.classList.remove('button-primary');
 
         const audioUrl = "assets/background/" + fileOrHandle.filename;
         this.updateCredit(fileOrHandle.credit);
@@ -48,8 +48,8 @@ export class AudioManager {
        
         this.updateCredit("---");
         if(this.currentButton) {
-            this.currentButton.classList.remove('button-play');
-            this.currentButton.classList.add('button-stop');
+            this.currentButton.classList.remove('button-primary-active');
+            this.currentButton.classList.add('button-primary');
             this.currentButton = null;
         }
         if(sendEvent) sendBackgroundStopMessage();
@@ -72,7 +72,6 @@ export class AudioManager {
 }
 
 export const BackgroundMusic = {
-    DEFAULT_CONTEXT : "default",
     type: null,
     context : "default",
     backgroundMusicArray : [],
@@ -107,8 +106,7 @@ export const BackgroundMusic = {
 
     updateContexts() {
         const uniqueOptions = new Set(); // Set for unique options excluding "default"
-        uniqueOptions.add(this.DEFAULT_CONTEXT);
-    
+
         // Add new contexts to uniqueOptions
         for (let music of this.backgroundMusicArray) {
             for (let [type, context] of music.contexts) { 
@@ -121,17 +119,15 @@ export const BackgroundMusic = {
         // Convert uniqueOptions to an array and sort alphabetically
         let sortedOptions = Array.from(uniqueOptions).sort((a, b) => a.localeCompare(b));
     
-        // Ensure "default" stays at the top
-        if (sortedOptions.includes(this.DEFAULT_CONTEXT)) {
-            sortedOptions = sortedOptions.filter(opt => opt !== this.DEFAULT_CONTEXT);
-            sortedOptions.unshift(this.DEFAULT_CONTEXT);
-        }
+
     
         // Clear the contextSelector and add sorted options
         contextSelector.innerHTML = ""; // Clear existing options
         for (let option of sortedOptions) {
             this.addOptionTocontextSelector(option);
         }
+        this.setContext(sortedOptions[0])
+     
     },
 
     async stopReceivedBackgroundSound(musicData) {
@@ -207,16 +203,9 @@ export const BackgroundMusic = {
         if (!Array.isArray(this.backgroundMusicArray)) {
             throw new Error("Input data is not an array.");
         }
-    
-        if (this.context !== this.DEFAULT_CONTEXT) {
-            return this.backgroundMusicArray.filter(sound =>
-                sound.contexts.some(([type, context]) => type === this.type && context === this.context)
-            );
-        } else {
-            return this.backgroundMusicArray.filter(sound =>
-                sound.contexts.some(([type]) => type === this.type)
-            );
-        }
+        return this.backgroundMusicArray.filter(sound =>
+            sound.contexts.some(([type, context]) => (type === this.type  || this.type === "all") && context === this.context)
+        );
     },
 
     backGroundSoundLoop() {
@@ -248,7 +237,7 @@ export const BackgroundMusic = {
 
     updateButton(typeName) {
         let result = this.backgroundMusicArray.filter(sound =>
-            sound.contexts.some(([type, context]) => type === typeName && context === this.context)
+            sound.contexts.some(([type, context]) => (type === typeName || typeName === "all") && context === this.context)
         );
     
         let button = document.getElementById(typeName + 'Button');
@@ -267,6 +256,7 @@ export const BackgroundMusic = {
         this.updateButton("calm")
         this.updateButton("dynamic")
         this.updateButton("intense")
+        this.updateButton("all")
         if(this.audioManager.isCurrentlyPlaying()) {
             if(this.filesToPlay.length == 0) {
                 this.audioManager.stop(true);

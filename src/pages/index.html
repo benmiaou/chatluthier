@@ -80,15 +80,16 @@
         <section id="background-music-Credit">---</section>
         <div class="progress-and-credits">
             <div id="progressBar">
-                <div id="progress"></div>
+                <div id="sound-progress"></div>
             </div>
             <button id="nextButton">»</button>
         </div>
 
         <section id="background-music" class="section">
-            <button id="calmButton" class="button-stop">Play Calm</button>
-            <button id="dynamicButton" class="button-stop">Play Dynamic</button>
-            <button id="intenseButton" class="button-stop">Play Intense</button>
+            <button id="calmButton" class="button-primary">Play Calm</button>
+            <button id="dynamicButton" class="button-primary">Play Dynamic</button>
+            <button id="intenseButton" class="button-primary">Play Intense</button>
+            <button id="allButton" class="button-primary">Play All</button>
             <select id="contextSelector">
                 <option>default</option>
             </select>
@@ -97,7 +98,7 @@
         <!-- Ambiance Sounds Section -->
         <div style="gap: 20px; display: flex; align-items: center; justify-content: center;">
             <h2 style="margin: 0;">Ambiance Sounds</h2>
-            <button id="resetAmbient" class="button-stop">Reset Ambiance</button>
+            <button id="resetAmbient" class="button-primary">Reset Ambiance</button>
         </div>
         <section id="ambiance" class="section"></section>
         <section id="ambianceLocal" class="section"></section>
@@ -116,8 +117,8 @@
             <!-- Join ID -->
             <div class="join-id">
                 <input type="text" id="join-id-input" placeholder="Enter Session ID">
-                <button id="join-id-button">Join Session</button>
-                <button id="disconnect-button" style="display: none;">Disconnect</button>
+                <button id="join-id-button" class="button-primary">Join Session</button>
+                <button id="disconnect-button" class="button-primary" style="display: none;">Disconnect</button>
             </div>
             <!-- Display Session ID and Connection Status -->
             <p id="your-id" style="display: none;">
