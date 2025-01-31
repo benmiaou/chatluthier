@@ -50,86 +50,122 @@ function displayAllBackgroundMusic() {
 
     currentEditArray.forEach((sound, index) => {
         const soundItem = document.createElement('div');
-        soundItem.className = 'sound-item'; // Unique class for sound items
-
-        const contextsLabel = document.createElement('label');
-        contextsLabel.textContent = "Contexts:";
+        soundItem.className = 'sound-item';
 
         const contextsContainer = document.createElement('div');
         contextsContainer.className = 'contexts-container';
 
-        sound.contexts.forEach((context, contextIndex) => {
+        // Display contexts with "Remove" buttons
+        sound.contexts.forEach((context) => {
             const contextWrapper = document.createElement('div');
-            contextWrapper.className = 'context-wrapper';
+            contextWrapper.style.display = 'flex';
+            contextWrapper.style.justifyContent = 'space-between';
+            contextWrapper.style.alignItems = 'center';
+            contextWrapper.style.gap = '10px';
 
             const typeSelect = document.createElement('select');
-            const types = ['calm', 'dynamic', 'intense']; // Example sound types
+            typeSelect.className = "selector-primary"
+            const types = ['calm', 'dynamic', 'intense'];
             types.forEach((type) => {
                 const option = document.createElement('option');
                 option.value = type;
                 option.textContent = type;
                 if (context[0] === type) {
-                    option.selected = true; // Select the current type
+                    option.selected = true;
                 }
                 typeSelect.appendChild(option);
             });
 
             const contextInput = document.createElement('input');
             contextInput.type = 'text';
-            contextInput.value = context[1]; // Display existing context
+            contextInput.className = "text-input"
+            contextInput.value = context[1];
 
-            // Create the "Remove Context" button
             const removeContextButton = document.createElement('button');
             removeContextButton.textContent = "Remove";
+            removeContextButton.className = "button-primary";
+            removeContextButton.style.width = '100px';
             removeContextButton.onclick = () => removeContext(contextWrapper);
 
-            // Append elements to the context wrapper
             contextWrapper.appendChild(typeSelect);
             contextWrapper.appendChild(contextInput);
             contextWrapper.appendChild(removeContextButton);
-
-            // Append the context wrapper to the contexts container
             contextsContainer.appendChild(contextWrapper);
         });
 
+        // Create "Add Context" button (centered)
+        const buttonWrapper = document.createElement('div');
+        buttonWrapper.style.display = 'flex';
+        buttonWrapper.style.justifyContent = 'center';
+        buttonWrapper.style.alignItems = 'center';
+        buttonWrapper.style.marginTop = '10px';
+
         const addContextButton = document.createElement('button');
         addContextButton.textContent = "Add Context";
+        addContextButton.className = "button-primary";
+        addContextButton.style.width = '120px';
         addContextButton.onclick = () => addContext(contextsContainer);
+        buttonWrapper.appendChild(addContextButton);
+
+        // Create "Update" button (centered)
+        const updateWrapper = document.createElement('div');
+        updateWrapper.style.display = 'flex';
+        updateWrapper.style.justifyContent = 'center';
+        updateWrapper.style.alignItems = 'center';
+        updateWrapper.style.marginTop = '10px';
 
         const updateButton = document.createElement('button');
-        updateButton.className = 'update-button'; // Apply the class to style the button
-        updateButton.textContent = "Update"; // Set the text for the button
-        updateButton.onclick = () => updateSound(index, contextsContainer); // Set the click event
+        updateButton.className = 'update-button';
+        updateButton.textContent = "Update";
+        updateButton.style.width = '100px';
+        updateButton.onclick = () => updateSound(index, contextsContainer);
+        updateWrapper.appendChild(updateButton);
 
         // Player controls and progress bar
+        const playerControls = document.createElement('div');
+        playerControls.style.display = 'flex';
+        playerControls.style.justifyContent = 'center';
+        playerControls.style.alignItems = 'center';
+        playerControls.style.gap = '10px';
+        playerControls.style.marginTop = '10px';
+
+        const playButton = document.createElement('button');
+        playButton.innerHTML = '▶';
+        playButton.style.width = '50px';
+        playButton.style.height = '50px';
+        playButton.style.display = 'flex';
+        playButton.style.justifyContent = 'center';
+        playButton.style.alignItems = 'center';
+        playButton.onclick = () => togglePlayPause(playButton, sound.filename, progressBar);
+
+        const stopButton = document.createElement('button');
+        stopButton.innerHTML = '⏹';
+        stopButton.style.width = '50px';
+        stopButton.style.height = '50px';
+        stopButton.style.display = 'flex';
+        stopButton.style.justifyContent = 'center';
+        stopButton.style.alignItems = 'center';
+        stopButton.onclick = () => stopSound(sound.filename);
+
+        playerControls.appendChild(playButton);
+        playerControls.appendChild(stopButton);
+
+        // Create progress bar
         const progressBar = document.createElement('input');
-        progressBar.value = 0;
         progressBar.type = "range";
         progressBar.min = 0;
         progressBar.max = 100;
+        progressBar.value = 0;
         progressBar.step = 1;
-        progressBar.addEventListener('input', () => {
-            seekSound(sound.filename, progressBar.value); // Allow seeking
-        });
+        progressBar.style.marginTop = '10px';
+        progressBar.addEventListener('input', () => seekSound(sound.filename, progressBar.value));
 
-        const playerControls = document.createElement('div');
-        playerControls.className = 'sound-player-controls'; // Flex layout for player controls
-
-        const playButton = document.createElement('button');
-        playButton.innerHTML = '▶'; // Unicode symbol for play
-        playButton.onclick = () => togglePlayPause(playButton, sound.filename, progressBar); // Set the play action
-
-        const stopButton = document.createElement('button');
-        stopButton.innerHTML = '⏹'; // Unicode symbol for stop
-        stopButton.onclick = () => stopSound(sound.filename); // Set the stop action
-
-        playerControls.append(playButton, stopButton);
-
+        // Append elements to sound item
         soundItem.innerHTML = `
             <h3>${sound.display_name}</h3>
             <p><strong>Credit:</strong> ${sound.credit}</p>
         `;
-        soundItem.append(contextsLabel, contextsContainer, addContextButton, updateButton, playerControls, progressBar); // Add elements to the sound item
+        soundItem.append(contextsContainer, buttonWrapper, updateWrapper, playerControls, progressBar);
         soundsList.appendChild(soundItem);
     });
 }
@@ -144,9 +180,17 @@ function removeContext(contextWrapper) {
 function addContext(contextsContainer) {
     const contextWrapper = document.createElement('div');
     contextWrapper.className = 'context-wrapper';
+    contextWrapper.style.display = 'flex';
+    contextWrapper.style.justifyContent = 'space-between';
+    contextWrapper.style.alignItems = 'center';
+    contextWrapper.style.gap = '10px';
+    contextWrapper.style.marginBottom = '10px'; // Spacing between contexts
 
+    // Create select input for types
     const typeSelect = document.createElement('select');
-    const types = ['calm', 'dynamic', 'intense']; // Example sound types
+    const types = ['calm', 'dynamic', 'intense'];
+    typeSelect.className = "selector-primary"
+    
     types.forEach((type) => {
         const option = document.createElement('option');
         option.value = type;
@@ -154,18 +198,28 @@ function addContext(contextsContainer) {
         typeSelect.appendChild(option);
     });
 
+    // Create input for context description
     const contextInput = document.createElement('input');
     contextInput.type = 'text';
+    contextInput.placeholder = 'Enter context...';
+    contextInput.className = 'text-inpu'
 
-    // Create the "Remove Context" button
+    // Create the "Remove" button
     const removeContextButton = document.createElement('button');
     removeContextButton.textContent = "Remove";
+    removeContextButton.className = 'button-primary';
+    removeContextButton.style.width = '100px';
+    removeContextButton.style.display = 'flex';
+    removeContextButton.style.justifyContent = 'center';
+    removeContextButton.style.alignItems = 'center';
     removeContextButton.onclick = () => removeContext(contextWrapper);
 
+    // Append elements to the context wrapper
     contextWrapper.appendChild(typeSelect);
     contextWrapper.appendChild(contextInput);
     contextWrapper.appendChild(removeContextButton);
 
+    // Add the context to the container
     contextsContainer.appendChild(contextWrapper);
 }
 

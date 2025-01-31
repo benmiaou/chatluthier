@@ -21,19 +21,17 @@ button {
     display: inline-block;
 }
 
-
-
 .button-primary {
-    background-color: #f44336;
+    background-color: var(--main-button-color);
     display: block;
 }
 
 .button-primary:hover {
-    background-color: #f55d52;
+    background-color: var(--main-button-hover-color);
 }
 
 .button-primary:disabled {
-    background-color: #803d38;
+    background-color: var(--main-button-disable-color);
     cursor: not-allowed;
 }
 
@@ -47,43 +45,10 @@ button {
     display: block;
 }
 
-
-.button-directory {
-    background-color: #4CAF50;
-    padding: 6px 12px;
-    font-size: 0.9em;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s, box-shadow 0.3s;
-}
-
-.button-directory:hover {
-    background-color: #367C39;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
-}
-
-
-
 .button-loop {
     background-color: #487aa8;
     display: block;
 }
-
-#nextButton {
-    padding: 0 10px;
-    font-size: 20px;
-    color: #4CAF50;
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: color 0.3s;
-}
-
-#nextButton:hover,
-#nextButton:focus {
-    color: #367C39;
-}
-
 
 .update-button {
     padding: 10px 20px;
@@ -98,4 +63,46 @@ button {
 
 .update-button:hover {
     background-color: #218838;
+}
+
+.text-input{
+    font-family: BagnardSans;
+    padding: 10px;
+    width: 200px;
+    margin-right: 10px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #333;
+    color: #fff;
+}
+
+.text-input::placeholder {
+    color: #bbb;
+}
+
+/* Style the select element */
+.selector-primary {
+    font-family: BagnardSans, Arial, sans-serif; /* Match your site's font */
+    background-color: var(--main-button-color);
+    color: white; /* Text color */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 10px 15px; /* Padding for the dropdown */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s, box-shadow 0.3s; /* Add a hover effect */
+}
+
+/* Hover state */
+.selector-primary:hover {
+    background-color: var(--main-button-hover-color);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); /* Add a shadow */
+}
+
+
+/* Style the dropdown options */
+.selector-primary option {
+    background-color: #555; /* Match the background color of the select */
+    color: white; /* Text color */
+    font-family: BagnardSans, Arial, sans-serif; /* Font family */
 }

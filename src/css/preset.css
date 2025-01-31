@@ -9,18 +9,3 @@
     display: flex;
     align-items: center;
 }
-
-#preset-name {
-    width: 120px;
-    font-size: 12px;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-#preset-dropdown {
-    padding: 5px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    margin: 0 auto;
-}

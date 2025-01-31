@@ -1,0 +1,5 @@
+:root {
+    --main-button-color: #f44336; /* Define main color */
+    --main-button-hover-color: #f55d52; /* Define main color */
+    --main-button-disable-color: #803d38; /* Define main color */
+}

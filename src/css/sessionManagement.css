@@ -22,20 +22,6 @@
     justify-content: center;
 }
 
-#join-id-input {
-    padding: 10px;
-    width: 200px;
-    margin-right: 10px;
-    border-radius: 5px;
-    border: 1px solid #555;
-    background-color: #333;
-    color: #fff;
-}
-
-#join-id-input::placeholder {
-    color: #bbb;
-}
-
 #status-message {
     text-align: center;
     color: #FFD700; /* Gold color for visibility */

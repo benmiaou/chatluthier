@@ -86,11 +86,11 @@ export const AmbianceSounds = {
 
             // Text input for the preset name
             const presetNameInput = document.createElement('input');
+            presetNameInput.className = 'text-input'
             presetNameInput.type = 'text';
             presetNameInput.id = 'preset-name';
             presetNameInput.placeholder = 'Name of the preset';
-            presetNameInput.className = 'preset-name-input';
-
+            
             // Button to save the preset
             const savePresetButton = document.createElement('button');
             savePresetButton.textContent = '+';
@@ -105,7 +105,7 @@ export const AmbianceSounds = {
             // Dropdown to select presets
             const presetDropdown = document.createElement('select');
             presetDropdown.id = 'preset-dropdown';
-            presetDropdown.className = 'preset-dropdown';
+            presetDropdown.className = 'selector-primary';
             presetDropdown.onchange = () => this.applyPreset(presetDropdown.value);
 
             // Append elements to the presetControls container

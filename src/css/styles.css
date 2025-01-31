@@ -1,4 +1,5 @@
 /*src/css/styles.css*/
+@import './variables.css';
 
 /* Basic reset for styling */
 * {
@@ -14,89 +15,15 @@
     font-style: normal;
 }
 
-body, html {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    font-family: BagnardSans, Arial, sans-serif;
-    background-color: #333;
-    color: #fff;
-}
 
-a {
-    color: #3498db;
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.top-left-controls {
-    position: absolute;
-    left: 10px;
-    padding: 20px;
-}
-
-.logo {
-    width: 100px;
-    height: auto;
-    vertical-align: middle;
-}
-
-.status {
-    margin-top: 10px;
-    font-size: 0.9em;
-    color: #FFD700;
-}
-
-.center-content {
-    flex-grow: 1;
-    text-align: center;
-}
-
-.icon {
-    position: absolute;
-    top: 25%;
-    right: 25%;
-    width: 50%;
-    height: 50%;
-    z-index: 3;
-    user-select: none;
-    pointer-events: none;
-}
-
-.section {
-    padding: 20px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-    grid-auto-rows: minmax(50px, auto);
-    gap: 20px;
-    align-items: center;
-    justify-content: center;
-}
-
-
-
+@import './pages.css';
 @import './modal.css';
-@import './nav.css';
 @import './progressBar.css';
 @import './sessionManagement.css';
-@import './soudControls.css';
 @import './sounConteiner.css';
 @import './preset.css';
-@import './audioControl.css';
-@import './backgroundMusicCredits.css';
+@import './credits.css';
 @import './buttons.css';
-@import './creditModal.css';
 @import './dropDownMenu.css';
 @import './editSounds.css';
-@import './footer.css';
-@import './header.css';
 @import './ambianceControls.css';
-@import './contextSelector.css';
