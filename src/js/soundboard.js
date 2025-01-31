@@ -110,6 +110,7 @@ export const SoundBoard = {
         }
 
         // Play the sound without sending a WebSocket message
+        if(!audioPlayer.isReady())audioPlayer.playSound("assets/soundboard/" + soundboardItem.filename, true);
         audioPlayer.play();
         
         // Optionally, update the button UI to reflect the play state

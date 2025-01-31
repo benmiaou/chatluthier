@@ -78,6 +78,7 @@ export const BackgroundMusic = {
     soundIndex : 0,
     audioManager: new AudioManager(), // Initialize AudioManager
     isClickable : true,
+    isFirstSender : false,
 
     getPlayer() {
         return this.audioManager.getPlayer();
@@ -159,6 +160,14 @@ export const BackgroundMusic = {
     
             // Update the credit information
             this.audioManager.updateCredit(musicData.credit);
+
+            this.updateButton("calm")
+            this.updateButton("dynamic")
+            this.updateButton("intense")
+            this.updateButton("all")
+
+            const contextSelector = document.getElementById('contextSelector');
+            contextSelector.value = this.context;  // By value if it exists
         } else {
             console.error('Received music file not found in playlist:', musicData.filename);
         }
@@ -215,7 +224,7 @@ export const BackgroundMusic = {
         let fileToPlay = this.filesToPlay[this.soundIndex];
         if(fileToPlay)
             this.audioManager.playSound(fileToPlay, this.type);
-        // **Send message to other clients about the music change**
+
         sendBackgroundMusicChangeMessage({
             filename: fileToPlay.filename,
             type: this.type,
@@ -298,15 +307,6 @@ export const BackgroundMusic = {
             return;
         }
         this.backGroundSoundLoop();
-    
-        // **Send message to other clients about the music change**
-        const currentFile = this.filesToPlay[this.soundIndex - 1];
-        sendBackgroundMusicChangeMessage({
-            filename: currentFile.filename,
-            type: this.type,
-            context: this.context,
-            credit: currentFile.credit,
-        });
     }
 }
 
