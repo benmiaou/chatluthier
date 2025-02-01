@@ -5,7 +5,6 @@
     font-style: normal;
 }
 
-
 button {
     font-family: BagnardSans;
     background-color: #555;
@@ -99,10 +98,27 @@ button {
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); /* Add a shadow */
 }
 
-
 /* Style the dropdown options */
 .selector-primary option {
     background-color: #555; /* Match the background color of the select */
     color: white; /* Text color */
     font-family: BagnardSans, Arial, sans-serif; /* Font family */
+}
+
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
 }
