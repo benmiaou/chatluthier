@@ -177,7 +177,7 @@ export const BackgroundMusic = {
         this.audioManager.setVolume(level);
         const volumeSlider = document.getElementById('music-volume');
         if (volumeSlider) {
-            volumeSlider.value = level*100;
+            volumeSlider.value = Math.round(level * 100);
         }
     },
     

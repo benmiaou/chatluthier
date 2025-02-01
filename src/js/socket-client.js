@@ -199,7 +199,7 @@ function handleReceivedBackgroundMusicChange(musicData) {
 
 function handleReceivedBackgroundVolumeChange(volumeData) {
     // Update the volume
-    BackgroundMusic.setVolumeFromSocket(volumeData.volume);
+    BackgroundMusic.setVolumeFromSocket(volumeData);
 }
 
 function handleReceivedBackgroundStop() 
