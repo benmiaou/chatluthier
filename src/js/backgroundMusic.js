@@ -84,6 +84,13 @@ export const BackgroundMusic = {
         return this.audioManager.getPlayer();
     },
 
+    setBackgroundVolume(volume) {
+        const gainValue = volume / 100;
+        this.audioManager.setVolume(gainValue);
+        // **Send message to other clients about the volume change**
+        sendBackgroundVolumeChangeMessage(gainValue);
+    },
+
     init () {
         this.audioManager.setOnEndedCallback(() => {
             this.backGroundSoundLoop();
