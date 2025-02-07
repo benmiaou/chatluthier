@@ -294,6 +294,8 @@ const wsServer = new WebSocket.Server({ port: 3001 });
 
 // Map to keep track of subscribers for each ID
 const subscribers = new Map();  // Map<ID, Set<WebSocket>>
+const MAX_MESSAGES_PER_SECOND = 10; // Limite de messages par seconde
+const messageTimestamps = new Map();
 
 wsServer.on('connection', function connection(ws) {
   let connectedId = null; // The ID the client is connected to
@@ -301,8 +303,25 @@ wsServer.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
     try {
       const data = JSON.parse(message);
-      console.log('Received:', data);
-      console.log(`data.type :data.type`);
+      
+      // Limitation du débit
+      const clientId = connectedId;
+      const now = Date.now();
+      const timestamps = messageTimestamps.get(clientId) || [];
+
+      // Filtrer les timestamps plus vieux qu'une seconde
+      const recentTimestamps = timestamps.filter(timestamp => now - timestamp < 1000);
+
+      if (recentTimestamps.length >= MAX_MESSAGES_PER_SECOND) {
+        ws.send(JSON.stringify({ type: 'error', message: 'Rate limit exceeded.' }));
+        console.warn('Rate limit exceeded for client:', clientId);
+        return;
+      }
+
+      // Ajouter le timestamp actuel
+      recentTimestamps.push(now);
+      messageTimestamps.set(clientId, recentTimestamps);
+      console.log('Received:', data.type);
 
       switch (data.type) {
         case 'subscribe':

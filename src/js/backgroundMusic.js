@@ -10,25 +10,36 @@ export class AudioManager {
         this.audioPlayer = new AudioPlayer(); // Now AudioPlayer is defined
         this.currentButton = null;
         this.isProcessing = false;
+        this.debounceTimeout = null; // Debounce timeout for network messages
     }
 
     getPlayer() {
         return this.audioPlayer.getPlayer();
     }
 
-    async playSound(fileOrHandle, type) {
+    async playSound(fileOrHandle, type, initiatedByNetwork = false) {
         this.isProcessing = true;
-        this.stop(); // Stop any currently playing audio
 
-        this.currentButton = document.getElementById(type + 'Button'); 
-        this.currentButton.classList.add('button-primary-active');
-        this.currentButton.classList.remove('button-primary');
+        // Debounce network-initiated playback requests
+        if (initiatedByNetwork && this.debounceTimeout) {
+            clearTimeout(this.debounceTimeout);
+        }
 
-        const audioUrl = "assets/background/" + fileOrHandle.filename;
-        this.updateCredit(fileOrHandle.credit);
-        await this.audioPlayer.playSound(audioUrl);
-        this.audioPlayer.play();
-        this.isProcessing = false;
+        this.debounceTimeout = setTimeout(async () => {
+            this.stop(); // Stop any currently playing audio
+
+            this.currentButton = document.getElementById(type + 'Button');
+            if (this.currentButton) {
+                this.currentButton.classList.add('button-primary-active');
+                this.currentButton.classList.remove('button-primary');
+            }
+
+            const audioUrl = "assets/background/" + fileOrHandle.filename;
+            this.updateCredit(fileOrHandle.credit);
+            await this.audioPlayer.playSound(audioUrl, false, initiatedByNetwork);
+            this.audioPlayer.play();
+            this.isProcessing = false;
+        }, initiatedByNetwork ? 500 : 0); // Debounce delay for network requests
     }
 
     preload(fileOrHandle) {
@@ -45,7 +56,7 @@ export class AudioManager {
             this.audioPlayer.stop();
             console.log("Playback has been stopped.");
         }
-       
+
         this.updateCredit("---");
         if(this.currentButton) {
             this.currentButton.classList.remove('button-primary-active');
@@ -73,12 +84,12 @@ export class AudioManager {
 
 export const BackgroundMusic = {
     type: null,
-    context : "default",
-    backgroundMusicArray : [],
-    soundIndex : 0,
-    audioManager: new AudioManager(), // Initialize AudioManager
-    isClickable : true,
-    isFirstSender : false,
+    context: "default",
+    backgroundMusicArray: [],
+    soundIndex: 0,
+    audioManager: new AudioManager(),
+    isClickable: true,
+    isFirstSender: false,
 
     getPlayer() {
         return this.audioManager.getPlayer();
@@ -87,11 +98,9 @@ export const BackgroundMusic = {
     setBackgroundVolume(volume) {
         const gainValue = volume / 100;
         this.audioManager.setVolume(gainValue);
-        // **Send message to other clients about the volume change**
-        sendBackgroundVolumeChangeMessage(gainValue);
     },
 
-    init () {
+    init() {
         this.audioManager.setOnEndedCallback(() => {
             this.backGroundSoundLoop();
         });
@@ -106,29 +115,24 @@ export const BackgroundMusic = {
     },
 
     updateContexts() {
-        const uniqueOptions = new Set(); // Set for unique options excluding "default"
+        const uniqueOptions = new Set();
 
-        // Add new contexts to uniqueOptions
         for (let music of this.backgroundMusicArray) {
-            for (let [type, context] of music.contexts) { 
+            for (let [type, context] of music.contexts) {
                 if (!uniqueOptions.has(context)) {
                     uniqueOptions.add(context);
                 }
             }
         }
-    
-        // Convert uniqueOptions to an array and sort alphabetically
-        let sortedOptions = Array.from(uniqueOptions).sort((a, b) => a.localeCompare(b));
-    
 
-    
-        // Clear the contextSelector and add sorted options
-        contextSelector.innerHTML = ""; // Clear existing options
+        let sortedOptions = Array.from(uniqueOptions).sort((a, b) => a.localeCompare(b));
+
+        const contextSelector = document.getElementById('contextSelector');
+        contextSelector.innerHTML = "";
         for (let option of sortedOptions) {
             this.addOptionTocontextSelector(option);
         }
-        this.setContext(sortedOptions[0])
-     
+        this.setContext(sortedOptions[0]);
     },
 
     async stopReceivedBackgroundSound(musicData) {
@@ -136,52 +140,44 @@ export const BackgroundMusic = {
     },
 
     async playReceivedBackgroundSound(musicData) {
-        console.log("Playing " + musicData)
-        // Stop current playback
+        console.log("Playing " + musicData);
+
         if (this.audioManager.isCurrentlyPlaying()) {
             this.audioManager.stop();
         }
-    
-        // Update the type and context
+
         this.type = musicData.type;
         this.context = musicData.context;
         this.filesToPlay = this.findSoundsByTypeAndContext();
-    
-        // Find the specific file to play
+
         const fileToPlay = this.filesToPlay.find(file => file.filename === musicData.filename);
-    
+
         if (fileToPlay) {
-            // Update soundIndex to the correct position
             this.soundIndex = this.filesToPlay.indexOf(fileToPlay);
-    
-            // Play the received sound
-            console.log("Playing " + fileToPlay)
-            await this.audioManager.playSound(fileToPlay, this.type);
-    
-            // Update the credit information
+
+            console.log("Playing " + fileToPlay);
+            await this.audioManager.playSound(fileToPlay, this.type, true);
+
             this.audioManager.updateCredit(musicData.credit);
 
-            this.updateButton("calm")
-            this.updateButton("dynamic")
-            this.updateButton("intense")
-            this.updateButton("all")
+            this.updateButton("calm");
+            this.updateButton("dynamic");
+            this.updateButton("intense");
+            this.updateButton("all");
 
             const contextSelector = document.getElementById('contextSelector');
-            contextSelector.value = this.context;  // By value if it exists
+            contextSelector.value = this.context;
         } else {
             console.error('Received music file not found in playlist:', musicData.filename);
         }
     },
-    
+
     async preloadBackgroundSounds() {
         try {
             let response;
-            if (GoogleLogin.userId) 
-            {
+            if (GoogleLogin.userId) {
                 response = await fetch(`/backgroundMusic?userId=${GoogleLogin.userId}`);
-            }
-            else
-            {
+            } else {
                 response = await fetch(`/backgroundMusic`);
             }
             this.backgroundMusicArray = await response.json();
@@ -205,18 +201,19 @@ export const BackgroundMusic = {
             throw new Error("Input data is not an array.");
         }
         return this.backgroundMusicArray.filter(sound =>
-            sound.contexts.some(([type, context]) => (type === this.type  || this.type === "all") && context === this.context)
+            sound.contexts.some(([type, context]) => (type === this.type || this.type === "all") && context === this.context)
         );
     },
 
     backGroundSoundLoop() {
         if (this.soundIndex >= this.filesToPlay.length) {
-            this.soundIndex = 0;  // Reset index if it exceeds the array
+            this.soundIndex = 0;
         }
         let fileToPlay = this.filesToPlay[this.soundIndex];
-        if(fileToPlay)
+        if (fileToPlay) {
             this.audioManager.playSound(fileToPlay, this.type);
-
+        }
+        console.log("sendBackgroundMusicChangeMessage");
         sendBackgroundMusicChangeMessage({
             filename: fileToPlay.filename,
             type: this.type,
@@ -224,64 +221,58 @@ export const BackgroundMusic = {
             credit: fileToPlay.credit,
         });
 
-        //Preload next
         this.soundIndex++;
         fileToPlay = this.filesToPlay[this.soundIndex];
-        if(fileToPlay)
-            this.audioManager.preload(fileToPlay)
+        if (fileToPlay) {
+            this.audioManager.preload(fileToPlay);
+        }
     },
 
-    // Function to capitalize the first letter of a string
     capitalizeFirstLetter(str) {
-        return str.charAt(0).toUpperCase() + str.slice(1); // Capitalize first letter, keep rest unchanged
+        return str.charAt(0).toUpperCase() + str.slice(1);
     },
 
     updateButton(typeName) {
         let result = this.backgroundMusicArray.filter(sound =>
             sound.contexts.some(([type, context]) => (type === typeName || typeName === "all") && context === this.context)
         );
-    
+
         let button = document.getElementById(typeName + 'Button');
         if (result.length === 0) {
-            button.disabled = true; // Disable the button if the array is empty
+            button.disabled = true;
             button.textContent = "Play " + this.capitalizeFirstLetter(typeName) + " (0)";
         } else {
-            button.disabled = false; // Enable the button if the array is not empty
+            button.disabled = false;
             button.textContent = "Play " + this.capitalizeFirstLetter(typeName) + " (" + result.length + ")";
         }
     },
 
     setContext(newContext) {
         this.context = newContext;
-        this.filesToPlay =  this.findSoundsByTypeAndContext();
-        this.updateButton("calm")
-        this.updateButton("dynamic")
-        this.updateButton("intense")
-        this.updateButton("all")
-        if(this.audioManager.isCurrentlyPlaying()) {
-            if(this.filesToPlay.length == 0) {
+        this.filesToPlay = this.findSoundsByTypeAndContext();
+        this.updateButton("calm");
+        this.updateButton("dynamic");
+        this.updateButton("intense");
+        this.updateButton("all");
+        if (this.audioManager.isCurrentlyPlaying()) {
+            if (this.filesToPlay.length == 0) {
                 this.audioManager.stop(true);
-            }
-            else {
+            } else {
                 this.audioManager.stop();
                 this.backGroundSoundLoop();
             }
         }
     },
 
-    // Function to get the filename from a file path or a file handle
     getFilename(fileOrHandle) {
         if (typeof fileOrHandle === 'string') {
-            // If it's a file path, extract the filename
-            return fileOrHandle.split('/').pop(); // Get the last segment
+            return fileOrHandle.split('/').pop();
         } else if (fileOrHandle.name) {
-            // If it's a file handle, use the .name property
             return fileOrHandle.name;
         } else {
             throw new Error('Unknown file type');
         }
     },
-
 
     async playBackgroundSound(type) {
         if (this.audioManager.isProcessing || !this.isClickable) return;
@@ -300,6 +291,6 @@ export const BackgroundMusic = {
         }
         this.backGroundSoundLoop();
     }
-}
+};
 
 BackgroundMusic.init();
