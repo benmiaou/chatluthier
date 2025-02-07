@@ -180,16 +180,20 @@ export const AmbianceSounds = {
         if (presetName === '') return;
         const presetData = this.presets[presetName];
         if (!presetData) return;
-    
-        this.soundBars.forEach(soundBar => {
-            const volume = presetData[soundBar.ambianceSound.filename] || 0;
-            soundBar.setVolume(volume);
-            soundBar.progressBar.style.width = (volume * 100) + '%';
-        });
-    
+        this.applyStatus(presetData);
         // Send the current ambiance status via WebSocket
         const currentStatus = this.getCurrentAmbianceStatus();
         sendAmbianceMessage(currentStatus);
+    
+    },
+
+    applyStatus(statusData)
+    {
+        this.soundBars.forEach(soundBar => {
+            const volume = statusData[soundBar.ambianceSound.filename] || 0;
+            soundBar.setVolume(volume, false);
+            soundBar.progressBar.style.width = (volume * 100) + '%';
+        });
     },
 
     updatePresetDropdown() {

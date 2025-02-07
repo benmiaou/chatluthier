@@ -417,14 +417,7 @@ function hideDisconnectButton() {
  * @param {Object} ambianceStatus - The ambiance status to apply.
  */
 function handleReceivedAmbianceStatus(ambianceStatus) {
-    Object.keys(ambianceStatus).forEach(filename => {
-        const volume = ambianceStatus[filename];
-        const soundBar = AmbianceSounds.soundBars.find(sb => sb.ambianceSound.filename === filename);
-        if (soundBar) {
-            soundBar.setVolume(volume, false); // Apply volume without sending a message
-            soundBar.progressBar.style.width = `${volume * 100}%`;
-        }
-    });
+    AmbianceSounds.applyStatus(ambianceStatus);
 }
 
 /**
