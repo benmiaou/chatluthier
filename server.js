@@ -2,6 +2,52 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors'); // Import CORS module
+const { OAuth2Client } = require('google-auth-library');
+// Replace with your actual client ID from Google Cloud Console
+const CLIENT_ID = '793652859374-lvh19kj1d49a33cola5ui3tsj1hsg2li.apps.googleusercontent.com';
+const client = new OAuth2Client(CLIENT_ID);
+
+// Load admin Google IDs from a file
+let adminGoogleIds = [];
+const adminIdsFilePath = path.join(__dirname, 'adminGoogleIds.json');
+
+function loadAdminGoogleIds() {
+  if (fs.existsSync(adminIdsFilePath)) {
+    try {
+      const data = fs.readFileSync(adminIdsFilePath, 'utf8');
+      adminGoogleIds = JSON.parse(data);
+      console.log('Admin Google IDs reloaded.');
+    } catch (error) {
+      console.error('Error reading adminGoogleIds.json:', error);
+    }
+  } else {
+    console.warn('adminGoogleIds.json does not exist. Initializing with an empty array.');
+  }
+}
+
+// Initial load
+loadAdminGoogleIds();
+
+// Watch for changes to the adminGoogleIds.json file
+fs.watch(adminIdsFilePath, (eventType, filename) => {
+  if (eventType === 'change' && filename) {
+    console.log(`${filename} file changed. Reloading admin Google IDs.`);
+    loadAdminGoogleIds();
+  }
+});
+
+
+// Define a helper function to verify the token
+async function verifyIdToken(token) {
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    // payload.sub is the user ID, payload.email is the user's email, etc.
+    return payload;
+}
+
 
 const app = express();
 
@@ -33,8 +79,7 @@ app.use((req, res, next) => {
 });
 app.get('/list-files/:type', (req, res) => {
     const type = req.params.type;
-    directoryPath = "";
-    directoryPath = path.join(__dirname, 'assets', decodeURIComponent(type));
+    let directoryPath = path.join(__dirname, 'assets', decodeURIComponent(type));
     fs.readdir(directoryPath, (err, files) => {
         if (err) {
             console.error('Error getting directory information:', err); // Log the error
@@ -202,6 +247,37 @@ app.get('/load-presets', (req, res) => {
         }
     } else {
         res.status(400).send('User ID is required'); // Gérer le cas où l'ID utilisateur est manquant
+    }
+});
+
+function isAdminUser(payload) {
+    // Check if the Google user ID (payload.sub) is in your list of admin IDs
+    return adminGoogleIds.includes(payload.sub);
+}
+app.post('/verify-login', async (req, res) => {
+    const { idToken } = req.body; // Ensure your client sends the token in the body
+    if (!idToken) {
+        return res.status(400).json({ error: 'No ID token provided.' });
+    }
+    try {
+        const payload = await verifyIdToken(idToken);
+        const userId = payload.sub;  // The unique Google user ID
+        const email = payload.email;
+
+        // Check if this user should have admin rights
+        const isAdmin = isAdminUser(payload);
+
+        // You can now generate your own session or JWT that includes role info.
+        // For example, you might respond with the user info and role:
+        return res.json({
+            userId,
+            email,
+            isAdmin,
+            // Optionally include other payload details here.
+        });
+    } catch (error) {
+        console.error('Token verification failed:', error);
+        return res.status(401).json({ error: 'Token verification failed.' });
     }
 });
 

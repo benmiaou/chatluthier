@@ -42,30 +42,73 @@ export const GoogleLogin = {
         );
     },
 
+
+    // Define the helper method as a property of the object
+    sendTokenToServer: async function(idToken) {
+        try {
+            const response = await fetch('/verify-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ idToken })
+            });
+            if (!response.ok) {
+                throw new Error('Server verification failed.');
+            }
+            const data = await response.json();
+            return data; // This should contain fields like userId, email, isAdmin, etc.
+        } catch (error) {
+            console.error('Error sending token to server:', error);
+            return null;
+        }
+    },
+      
+
     handleCredentialResponse(response) {
         console.log("Google Sign-In response:", response);
         this.idToken = response.credential;
         this.isSignedIn = true;
-
-        // Extract the user ID
+    
+        // Extract the payload from the token (for local use, e.g. to update UI)
         const payload = JSON.parse(atob(response.credential.split('.')[1]));
         this.userId = payload.sub;
-        console.log(this.userId);
-
+        console.log("Local user ID:", this.userId);
+    
         // Save session details in localStorage
         this.saveSession();
-
+    
+        // Update UI (buttons, sounds, etc.)
         this.updateLoginButton();
         BackgroundMusic.preloadBackgroundSounds();
         SoundBoard.loadSoundboardButtons();
         AmbianceSounds.loadAmbianceButtons();
-
+    
         // Make the "Edit Music" button visible
         const editMusicButton = document.getElementById('openEditSoundModal');
         if (editMusicButton) {
-            editMusicButton.style.display = 'inline-block'; // Make the button visible
+            editMusicButton.style.display = 'inline-block';
         }
+    
+        // *** NEW: Send token to server for verification ***
+        this.sendTokenToServer(this.idToken)
+          .then(serverData => {
+              if (serverData) {
+                  console.log("Server verified data:", serverData);
+                  // For example, if your server returns isAdmin flag:
+                  if (serverData.isAdmin) {
+                      // Enable admin features in the UI
+                      console.log("User is an admin.");
+                  } else {
+                      console.log("User is not an admin.");
+                  }
+              }
+          })
+          .catch(error => {
+              console.error("Failed to verify token on server:", error);
+          });
     },
+    
 
     // TODO Remove, this is for me deprecated - Guillaume 19/11/2024
     handleLogin() {
@@ -149,6 +192,25 @@ export const GoogleLogin = {
             this.idToken = idToken;
             this.userId = userId;
             this.updateLoginButton();
+    
+            // Verify the saved token with the server to ensure it's still valid
+            this.sendTokenToServer(this.idToken)
+                .then(serverData => {
+                    if (serverData) {
+                        console.log("Server verified session data:", serverData);
+                        if (serverData.isAdmin) {
+                            console.log("User is an admin.");
+                            // Optionally, update the UI to show admin-specific features
+                        } else {
+                            console.log("User is not an admin.");
+                        }
+                    } else {
+                        console.warn("Server verification did not return data.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error verifying session token on server:", error);
+                });
         }
         console.log('Session successfully restored');
     },
