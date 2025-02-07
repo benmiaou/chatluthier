@@ -84,11 +84,6 @@ function connectWebSocket() {
                     handleReceivedBackgroundMusicChange(data.content);
                     break;
 
-                case 'backgroundMusicVolumeChange':
-                    console.log(`Received backgroundMusicVolumeChange from ID ${data.id}:`, data.content);
-                    handleReceivedBackgroundVolumeChange(data.content);
-                    break;
-
                 case 'backgroundMusicStop':
                     console.log(`Received backgroundMusicStop from ID ${data.id}:`, data.content);
                     handleReceivedBackgroundStop();
@@ -148,6 +143,7 @@ function disconnectWebSocket() {
 
         // Hide the disconnect button
         hideDisconnectButton();
+        localStorage.removeItem('lastJoinId');
     }
 }
 
@@ -197,11 +193,6 @@ function handleReceivedBackgroundMusicChange(musicData) {
     BackgroundMusic.playReceivedBackgroundSound(musicData);
 }
 
-function handleReceivedBackgroundVolumeChange(volumeData) {
-    // Update the volume
-    BackgroundMusic.setVolumeFromSocket(volumeData);
-}
-
 function handleReceivedBackgroundStop() 
 {
     BackgroundMusic.stopReceivedBackgroundSound();
@@ -241,7 +232,14 @@ export function subscribeToId(id) {
     } else {
         console.error('WebSocket is in an unexpected state. Cannot subscribe to ID.');
     }
+    localStorage.setItem('lastJoinId', id);
 }
+const lastId = localStorage.getItem('lastJoinId');
+if(lastId)
+{
+    subscribeToId(lastId)
+}
+
 /**
  * Sends a general message.
  * @param {string} content - The message content.
@@ -258,18 +256,6 @@ export function sendMessage(content) {
     } else {
         console.error('Client is not connected to a session.');
         displayStatusMessage('You are not connected to a session.', 'red');
-    }
-}
-
-export function sendBackgroundVolumeChangeMessage(gainValue)
-{
-    if (isConnected && clientId) {
-        const message = JSON.stringify({
-            type: 'backgroundMusicVolumeChange',
-            id: clientId,
-            content: gainValue,
-        });
-        socketClient.send(message);
     }
 }
 

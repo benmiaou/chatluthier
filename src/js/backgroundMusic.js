@@ -2,7 +2,7 @@
 
 import { AudioPlayer } from './audioPlayer.js'; // Adjust the path based on your directory structure
 import { PreLoader } from './preloader.js';
-import { sendBackgroundVolumeChangeMessage, sendBackgroundMusicChangeMessage, sendBackgroundStopMessage } from './socket-client.js';
+import { sendBackgroundMusicChangeMessage, sendBackgroundStopMessage } from './socket-client.js';
 import { GoogleLogin } from './googleLogin.js'; // Adjust the path if necessary
 
 export class AudioManager {
@@ -84,13 +84,6 @@ export const BackgroundMusic = {
         return this.audioManager.getPlayer();
     },
 
-    setBackgroundVolume(volume) {
-        const gainValue = volume / 100;
-        this.audioManager.setVolume(gainValue);
-        // **Send message to other clients about the volume change**
-        sendBackgroundVolumeChangeMessage(gainValue);
-    },
-
     init () {
         this.audioManager.setOnEndedCallback(() => {
             this.backGroundSoundLoop();
@@ -170,14 +163,6 @@ export const BackgroundMusic = {
             contextSelector.value = this.context;  // By value if it exists
         } else {
             console.error('Received music file not found in playlist:', musicData.filename);
-        }
-    },
-
-    setVolumeFromSocket(level) {
-        this.audioManager.setVolume(level);
-        const volumeSlider = document.getElementById('music-volume');
-        if (volumeSlider) {
-            volumeSlider.value = Math.round(level * 100);
         }
     },
     
