@@ -2,6 +2,7 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors'); // Import CORS module
+const multer = require('multer');
 const { OAuth2Client } = require('google-auth-library');
 // Replace with your actual client ID from Google Cloud Console
 const CLIENT_ID = '793652859374-lvh19kj1d49a33cola5ui3tsj1hsg2li.apps.googleusercontent.com';
@@ -10,6 +11,7 @@ const client = new OAuth2Client(CLIENT_ID);
 // Load admin Google IDs from a file
 let adminGoogleIds = [];
 const adminIdsFilePath = path.join(__dirname, 'adminGoogleIds.json');
+const upload = multer({ dest: 'uploads/' }); // Temporary upload directory
 
 function loadAdminGoogleIds() {
   if (fs.existsSync(adminIdsFilePath)) {
@@ -313,6 +315,82 @@ app.post('/verify-login', async (req, res) => {
     } catch (error) {
         console.error('Token verification failed:', error);
         return res.status(401).json({ error: 'Token verification failed.' });
+    }
+});
+
+app.post('/add-sound', upload.fields([{ name: 'file' }, { name: 'imageFile' }]), async (req, res) => {
+    const { userId, idToken, category, display_name, contexts, credit } = req.body;
+    const file = req.files['file'][0];
+    const imageFile = req.files['imageFile'] ? req.files['imageFile'][0] : null;
+
+    if (!idToken || !file) {
+        return res.status(400).json({ error: 'Missing ID token or sound file.' });
+    }
+
+    try {
+        const payload = await verifyIdToken(idToken);
+        if (userId != payload.sub) {
+            return res.status(403).json({ error: 'User is not authorized to add sounds.' });
+        }
+
+        // Check if the user is an admin
+        const isAdmin = isAdminUser(payload);
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'User is not authorized to add sounds.' });
+        }
+
+        // Directory to save sound files
+        const assetsDir = path.join(__dirname, 'assets');
+        let soundFilePath, imageFilePath;
+
+        switch (category) {
+            case 'backgroundmusic':
+                soundFilePath = path.join(assetsDir, 'background', file.originalname);
+                break;
+            case 'ambiancesounds':
+                soundFilePath = path.join(assetsDir, 'ambiance', file.originalname);
+                if (imageFile) {
+                    imageFilePath = path.join(assetsDir, 'images', 'backgrounds', imageFile.originalname);
+                }
+                break;
+            case 'soundboard':
+                soundFilePath = path.join(assetsDir, 'soundboard', file.originalname);
+                break;
+            default:
+                return res.status(400).json({ error: 'Invalid sound category.' });
+        }
+
+        // Move the uploaded files to the correct directories
+        fs.renameSync(file.path, soundFilePath);
+        if (imageFile) {
+            fs.renameSync(imageFile.path, imageFilePath);
+        }
+
+        // Update the corresponding JSON file
+        const jsonFilePath = path.join(__dirname, 'srv_data', `${category}.json`);
+        let sounds = [];
+        if (fs.existsSync(jsonFilePath)) {
+            sounds = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
+        }
+
+        const newSound = {
+            filename: file.originalname,
+            display_name: display_name,
+            contexts: contexts.split(',').map(context => context.trim()),
+            credit: credit
+        };
+
+        if (imageFile) {
+            newSound.imageFile = imageFile.originalname;
+        }
+
+        sounds.push(newSound);
+        fs.writeFileSync(jsonFilePath, JSON.stringify(sounds, null, 2));
+
+        return res.json({ message: 'Sound added successfully.' });
+    } catch (error) {
+        console.error('Error adding sound:', error);
+        return res.status(500).json({ error: 'Failed to add sound.' });
     }
 });
 
