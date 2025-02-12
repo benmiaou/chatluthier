@@ -137,6 +137,41 @@ app.post('/update-user-sounds', (req, res) => {
     res.send('Data saved successfully'); // Confirm the data was saved
 });
 
+app.post('/update-main-playlist', async (req, res) => {
+    const {userId, idToken, soundsType, sounds } = req.body;
+
+    if (!idToken) {
+        return res.status(400).json({ error: 'Missing ID token or updated playlist.' });
+    }
+
+    try {
+        const payload = await verifyIdToken(idToken);
+        if(userId != payload.sub){
+            return res.status(403).json({ error: 'User is not authorized to edit the main playlist.' });
+        }
+        // Check if the user is an admin
+        const isAdmin = isAdminUser(payload);
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'User is not authorized to edit the main playlist.' });
+        }
+
+        // Directory to save user data
+        const srvDir = path.join(__dirname, 'srv_data');
+
+        // Generate the file path based on the soundsType
+        const filePath = path.join(srvDir, `${soundsType}.json`); // Use soundsType to create filename
+        console.log("UPDATE : " + filePath);
+
+        // Save the sounds data to a JSON file in the user directory
+        fs.writeFileSync(filePath, JSON.stringify(sounds, null, 2)); // Save with pretty formatting
+
+        return res.json({ message: 'Main playlist updated successfully.' });
+    } catch (error) {
+        console.error('Error updating main playlist:', error);
+        return res.status(500).json({ error: 'Failed to update main playlist.' });
+    }
+});
+
 // Function to merge arrays, ensuring no duplicates and adding missing entries
 function mergeArrays(serverArray, userArray) {
     // Create a map to track unique identifiers

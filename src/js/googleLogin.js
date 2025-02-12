@@ -26,7 +26,7 @@ export const GoogleLogin = {
             AmbianceSounds.loadAmbianceButtons();
 
             // Make the "Edit Music" button visible
-            const editMusicButton = document.getElementById('openEditSoundModal');
+            const editMusicButton = document.getElementById('openEditSoundUserModal');
             if (editMusicButton) {
                 editMusicButton.style.display = 'inline-block';
             }
@@ -40,6 +40,19 @@ export const GoogleLogin = {
             document.getElementById('google-login-button'),
             { theme: 'outline', size: 'medium' } // customization attributes
         );
+    },
+
+    displayAdminFunctions()
+    {
+        // Make the "Edit Music" button visible
+        let button = document.getElementById('openEditSoundAdminModal');
+        if (button) {
+            button.style.display = 'inline-block';
+        }
+        button = document.getElementById('openAddsoundModalAdminButton');
+        if (button) {
+            button.style.display = 'inline-block';
+        }
     },
 
 
@@ -85,7 +98,7 @@ export const GoogleLogin = {
         AmbianceSounds.loadAmbianceButtons();
     
         // Make the "Edit Music" button visible
-        const editMusicButton = document.getElementById('openEditSoundModal');
+        const editMusicButton = document.getElementById('openEditSoundUserModal');
         if (editMusicButton) {
             editMusicButton.style.display = 'inline-block';
         }
@@ -97,8 +110,8 @@ export const GoogleLogin = {
                   console.log("Server verified data:", serverData);
                   // For example, if your server returns isAdmin flag:
                   if (serverData.isAdmin) {
-                      // Enable admin features in the UI
-                      console.log("User is an admin.");
+                    this.displayAdminFunctions()
+                    console.log("User is an admin.");
                   } else {
                       console.log("User is not an admin.");
                   }
@@ -200,7 +213,7 @@ export const GoogleLogin = {
                         console.log("Server verified session data:", serverData);
                         if (serverData.isAdmin) {
                             console.log("User is an admin.");
-                            // Optionally, update the UI to show admin-specific features
+                            this.displayAdminFunctions();
                         } else {
                             console.log("User is not an admin.");
                         }

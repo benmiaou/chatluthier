@@ -128,4 +128,4 @@ function initModals() {
     document.addEventListener('DOMContentLoaded', attachFooterLinkListeners);
 }
 
-export { toggleMenu, initModals, closeExternalModal };
+export { toggleMenu, initModals, closeExternalModal, openExternalModal };

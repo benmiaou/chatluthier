@@ -2,12 +2,14 @@
 import { BackgroundMusic } from './backgroundMusic.js';
 import { AmbianceSounds } from './ambianceSounds.js';
 import { SoundBoard } from './soundboard.js';
+import { GoogleLogin } from './googleLogin.js'; // Newly added import
 
 
 let currentEditArray = null; // Global variable to keep track of the current audio
 let currentSoundType = 'backgroundMusic';
 let currentPath = 'background';
 let currentVolume = 0.5;
+let isAdminPanel = false;
 let currentAudio = null; // Global variable to keep track of the current audio
 
 // Function to display sound data based on sound type
@@ -42,11 +44,29 @@ function displaySounds(soundType) {
     displayAllBackgroundMusic();
 }
 
-function displayAllBackgroundMusic() {
+async function loadBackgroundSounds() {
+    let backgroundMusicArray = []
+    try {
+        let response = await fetch(`/backgroundMusic`);
+        backgroundMusicArray = await response.json();
+    } catch (e) {
+        console.error(`Error fetching files from server:`, e);
+    }
+    return backgroundMusicArray;
+}
+
+async function displayAllBackgroundMusic() {
     const soundsList = document.getElementById('sounds-list');
     soundsList.innerHTML = ''; // Clear existing content
 
-    if (!currentEditArray) currentEditArray = BackgroundMusic.backgroundMusicArray;
+    if(isAdminPanel)
+    {
+        currentEditArray = await  loadBackgroundSounds();
+    }
+    else
+    {
+        currentEditArray = BackgroundMusic.backgroundMusicArray;
+    }
 
     currentEditArray.forEach((sound, index) => {
         const soundItem = document.createElement('div');
@@ -223,6 +243,33 @@ function addContext(contextsContainer) {
     contextsContainer.appendChild(contextWrapper);
 }
 
+function updateMainPlaylist(currentEditArray, currentSoundType) {
+        const updatedData = {
+            userId: GoogleLogin.userId,
+            idToken: GoogleLogin.idToken,
+            sounds: currentEditArray,
+            soundsType: currentSoundType,
+        };
+        fetch('/update-main-playlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                console.log(data.message);
+            } else {
+                console.error('Error updating main playlist:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Network error:', error);
+        });
+    }
+
 function updateSound(index, contextsContainer) {
     if (index >= 0 && index < currentEditArray.length) {
         const newContexts = [];
@@ -259,32 +306,40 @@ function updateSound(index, contextsContainer) {
 
     // Send the updated array to the server with the Google User ID
     if (GoogleLogin.userId) {
-        const updatedData = {
-            userId: GoogleLogin.userId,
-            sounds: currentEditArray,
-            soundsType: currentSoundType,
-        };
+        if(isAdminPanel)
+        {
+            updateMainPlaylist(currentEditArray, currentSoundType)
+        }
+        else
+        {
+            const updatedData = {
+                userId: GoogleLogin.userId,
+                sounds: currentEditArray,
+                soundsType: currentSoundType,
+            };
 
-        fetch('/update-user-sounds', {
-            method: 'POST', // HTTP POST method to send data to the server
-            headers: {
-                'Content-Type': 'application/json', // JSON content type
-            },
-            body: JSON.stringify(updatedData), // Convert the data to a JSON string
-        })
-            .then((response) => {
-                if (response.ok) {
-                    console.log('Data sent to server successfully');
-                } else {
-                    console.error('Error sending data to server');
-                }
+            fetch('/update-user-sounds', {
+                method: 'POST', // HTTP POST method to send data to the server
+                headers: {
+                    'Content-Type': 'application/json', // JSON content type
+                },
+                body: JSON.stringify(updatedData), // Convert the data to a JSON string
             })
-            .catch((error) => {
-                console.error('Network error:', error);
-            });
+                .then((response) => {
+                    if (response.ok) {
+                        console.log('Data sent to server successfully');
+                    } else {
+                        console.error('Error sending data to server');
+                    }
+                })
+                .catch((error) => {
+                    console.error('Network error:', error);
+                });
+        }
     } else {
         console.error('User ID is not available'); // Handle cases where user ID is missing
     }
+       
 }
 
 function togglePlayPause(playButton, filename, progressBar) {
@@ -378,9 +433,17 @@ function updateProgressBar(audio, progressBar) {
     requestAnimationFrame(updateProgress); // Start the update loop
 }
 
-function openEditSoundModal() {
+function openEditSoundModalUser() {
     const modal = document.getElementById('edit-sound-modal');
     modal.style.display = 'flex'; // Show the modal
+    isAdminPanel = false;
+    displayAllBackgroundMusic(); // Populate the content with sounds
+}
+
+function openEditSoundModalAdmin() {
+    const modal = document.getElementById('edit-sound-modal');
+    modal.style.display = 'flex'; // Show the modal
+    isAdminPanel = true;
     displayAllBackgroundMusic(); // Populate the content with sounds
 }
 
@@ -390,4 +453,4 @@ function closeEditSoundModal() {
 }
 
 
-export {openEditSoundModal, closeEditSoundModal}
+export {openEditSoundModalUser, openEditSoundModalAdmin, closeEditSoundModal}
