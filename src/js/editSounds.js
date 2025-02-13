@@ -1,71 +1,74 @@
-// editSounds.js
 import { BackgroundMusic } from './backgroundMusic.js';
 import { AmbianceSounds } from './ambianceSounds.js';
 import { SoundBoard } from './soundboard.js';
-import { GoogleLogin } from './googleLogin.js'; // Newly added import
+import { GoogleLogin } from './googleLogin.js';
 
-
-let currentEditArray = null; // Global variable to keep track of the current audio
+let currentEditArray = null;
 let currentSoundType = 'backgroundMusic';
 let currentPath = 'background';
 let currentVolume = 0.5;
 let isAdminPanel = false;
-let currentAudio = null; // Global variable to keep track of the current audio
+let currentAudio = null;
 
 // Function to display sound data based on sound type
 function displaySounds(soundType) {
-    const soundsList = document.getElementById('sounds-list'); // Container to display sound data
+    const soundsList = document.getElementById('sounds-list');
+    soundsList.innerHTML = '';
 
-    soundsList.innerHTML = ''; // Clear existing content
-
-    // Determine which method to call based on the sound type
     if (!currentEditArray || currentSoundType !== soundType) {
         switch (soundType) {
             case 'backgroundMusic':
-                currentEditArray = BackgroundMusic.backgroundMusicArray; // Display background music
+                currentEditArray = BackgroundMusic.backgroundMusicArray;
                 currentSoundType = 'backgroundMusic';
                 currentPath = 'background';
                 break;
             case 'ambianceSounds':
-                currentEditArray = AmbianceSounds.ambianceSounds; // Display ambiance sounds
+                currentEditArray = AmbianceSounds.ambianceSounds;
                 currentSoundType = 'ambianceSounds';
                 currentPath = 'ambiance';
                 break;
             case 'soundboard':
-                currentEditArray = SoundBoard.soundboardItems; // Display soundboard
+                currentEditArray = SoundBoard.soundboardItems;
                 currentSoundType = 'soundboard';
                 currentPath = 'soundboard';
                 break;
             default:
-                console.error('Unknown sound type'); // Handle unexpected sound types
+                console.error('Unknown sound type');
         }
     }
 
-    displayAllBackgroundMusic();
+    displayAllSounds();
 }
 
-async function loadBackgroundSounds() {
-    let backgroundMusicArray = []
+async function loadSounds(soundType) {
+    let soundsArray = [];
     try {
-        let response = await fetch(`/backgroundMusic`);
-        backgroundMusicArray = await response.json();
+        let response = await fetch(`/${soundType}`);
+        soundsArray = await response.json();
     } catch (e) {
         console.error(`Error fetching files from server:`, e);
     }
-    return backgroundMusicArray;
+    return soundsArray;
 }
 
-async function displayAllBackgroundMusic() {
+async function displayAllSounds() {
     const soundsList = document.getElementById('sounds-list');
-    soundsList.innerHTML = ''; // Clear existing content
+    soundsList.innerHTML = '';
 
-    if(isAdminPanel)
-    {
-        currentEditArray = await  loadBackgroundSounds();
-    }
-    else
-    {
-        currentEditArray = BackgroundMusic.backgroundMusicArray;
+    if (isAdminPanel) {
+        currentEditArray = await loadSounds(currentSoundType);
+    } else {
+        switch (currentSoundType) {
+            case 'backgroundMusic':
+                currentEditArray = BackgroundMusic.backgroundMusicArray;
+                break;
+            case 'ambianceSounds':
+                currentEditArray = AmbianceSounds.ambianceSounds;
+                break;
+            case 'soundboard':
+                currentEditArray = SoundBoard.soundboardItems;
+                break;
+        }
     }
 
     currentEditArray.forEach((sound, index) => {
@@ -75,45 +78,115 @@ async function displayAllBackgroundMusic() {
         const contextsContainer = document.createElement('div');
         contextsContainer.className = 'contexts-container';
 
-        // Display contexts with "Remove" buttons
-        sound.contexts.forEach((context) => {
-            const contextWrapper = document.createElement('div');
-            contextWrapper.style.display = 'flex';
-            contextWrapper.style.justifyContent = 'space-between';
-            contextWrapper.style.alignItems = 'center';
-            contextWrapper.style.gap = '10px';
+        // Display name input
+        const displayNameInput = document.createElement('input');
+        displayNameInput.type = 'text';
+        displayNameInput.className = 'text-input';
+        displayNameInput.value = sound.display_name;
+        displayNameInput.style.marginBottom = '10px';
+        displayNameInput.style.width = 'calc(100% - 22px)'; // Adjust width to fit within container
 
-            const typeSelect = document.createElement('select');
-            typeSelect.className = "selector-primary"
-            const types = ['calm', 'dynamic', 'intense'];
-            types.forEach((type) => {
-                const option = document.createElement('option');
-                option.value = type;
-                option.textContent = type;
-                if (context[0] === type) {
-                    option.selected = true;
-                }
-                typeSelect.appendChild(option);
+        // Credits input
+        const creditsInput = document.createElement('input');
+        creditsInput.type = 'text';
+        creditsInput.className = 'text-input';
+        creditsInput.value = sound.credit;
+        creditsInput.style.marginBottom = '10px';
+        creditsInput.style.width = 'calc(100% - 22px)'; // Adjust width to fit within container
+
+        // Image input for ambiance sounds
+        let imageInput = null;
+        if (currentSoundType === 'ambianceSounds') {
+            const imageContainer = document.createElement('div');
+            imageContainer.style.display = 'flex';
+            imageContainer.style.alignItems = 'center';
+            imageContainer.style.gap = '10px';
+            imageContainer.style.marginBottom = '10px';
+
+            const imageLabel = document.createElement('label');
+            imageLabel.textContent = 'Image:';
+            imageLabel.style.width = '120px';
+
+            imageInput = document.createElement('input');
+            imageInput.type = 'file';
+            imageInput.accept = 'image/*';
+            imageInput.className = 'text-input';
+            imageInput.style.flexGrow = '1';
+            
+            const currentImage = document.createElement('img');
+            currentImage.src = `assets/images/backgrounds/${sound.imageFile}`;
+            currentImage.style.width = '50px';
+            currentImage.style.height = '50px';
+            currentImage.style.marginLeft = '10px';
+
+            imageContainer.appendChild(imageLabel);
+            imageContainer.appendChild(imageInput);
+            imageContainer.appendChild(currentImage);
+            contextsContainer.appendChild(imageContainer);
+        }
+
+        if (currentSoundType === 'backgroundMusic') {
+            sound.contexts.forEach((context) => {
+                const contextWrapper = document.createElement('div');
+                contextWrapper.style.display = 'flex';
+                contextWrapper.style.justifyContent = 'space-between';
+                contextWrapper.style.alignItems = 'center';
+                contextWrapper.style.gap = '10px';
+
+                const typeSelect = document.createElement('select');
+                typeSelect.className = "selector-primary";
+                const types = ['calm', 'dynamic', 'intense'];
+                types.forEach((type) => {
+                    const option = document.createElement('option');
+                    option.value = type;
+                    option.textContent = type;
+                    if (context[0] === type) {
+                        option.selected = true;
+                    }
+                    typeSelect.appendChild(option);
+                });
+
+                const contextInput = document.createElement('input');
+                contextInput.type = 'text';
+                contextInput.className = "text-input";
+                contextInput.value = context[1];
+
+                const removeContextButton = document.createElement('button');
+                removeContextButton.textContent = "Remove";
+                removeContextButton.className = "button-primary";
+                removeContextButton.style.width = '100px';
+                removeContextButton.onclick = () => removeContext(contextWrapper);
+
+                contextWrapper.appendChild(typeSelect);
+                contextWrapper.appendChild(contextInput);
+                contextWrapper.appendChild(removeContextButton);
+                contextsContainer.appendChild(contextWrapper);
             });
+        } else {
+            sound.contexts.forEach((context) => {
+                const contextWrapper = document.createElement('div');
+                contextWrapper.style.display = 'flex';
+                contextWrapper.style.justifyContent = 'space-between';
+                contextWrapper.style.alignItems = 'center';
+                contextWrapper.style.gap = '10px';
 
-            const contextInput = document.createElement('input');
-            contextInput.type = 'text';
-            contextInput.className = "text-input"
-            contextInput.value = context[1];
+                const contextInput = document.createElement('input');
+                contextInput.type = 'text';
+                contextInput.className = "text-input";
+                contextInput.value = context;
 
-            const removeContextButton = document.createElement('button');
-            removeContextButton.textContent = "Remove";
-            removeContextButton.className = "button-primary";
-            removeContextButton.style.width = '100px';
-            removeContextButton.onclick = () => removeContext(contextWrapper);
+                const removeContextButton = document.createElement('button');
+                removeContextButton.textContent = "Remove";
+                removeContextButton.className = "button-primary";
+                removeContextButton.style.width = '100px';
+                removeContextButton.onclick = () => removeContext(contextWrapper);
 
-            contextWrapper.appendChild(typeSelect);
-            contextWrapper.appendChild(contextInput);
-            contextWrapper.appendChild(removeContextButton);
-            contextsContainer.appendChild(contextWrapper);
-        });
+                contextWrapper.appendChild(contextInput);
+                contextWrapper.appendChild(removeContextButton);
+                contextsContainer.appendChild(contextWrapper);
+            });
+        }
 
-        // Create "Add Context" button (centered)
         const buttonWrapper = document.createElement('div');
         buttonWrapper.style.display = 'flex';
         buttonWrapper.style.justifyContent = 'center';
@@ -124,10 +197,9 @@ async function displayAllBackgroundMusic() {
         addContextButton.textContent = "Add Context";
         addContextButton.className = "button-primary";
         addContextButton.style.width = '120px';
-        addContextButton.onclick = () => addContext(contextsContainer);
+        addContextButton.onclick = () => addContext(contextsContainer, currentSoundType);
         buttonWrapper.appendChild(addContextButton);
 
-        // Create "Update" button (centered)
         const updateWrapper = document.createElement('div');
         updateWrapper.style.display = 'flex';
         updateWrapper.style.justifyContent = 'center';
@@ -138,10 +210,9 @@ async function displayAllBackgroundMusic() {
         updateButton.className = 'update-button';
         updateButton.textContent = "Update";
         updateButton.style.width = '100px';
-        updateButton.onclick = () => updateSound(index, contextsContainer);
+        updateButton.onclick = () => updateSound(index, contextsContainer, displayNameInput, creditsInput, imageInput);
         updateWrapper.appendChild(updateButton);
 
-        // Player controls and progress bar
         const playerControls = document.createElement('div');
         playerControls.style.display = 'flex';
         playerControls.style.justifyContent = 'center';
@@ -170,7 +241,6 @@ async function displayAllBackgroundMusic() {
         playerControls.appendChild(playButton);
         playerControls.appendChild(stopButton);
 
-        // Create progress bar
         const progressBar = document.createElement('input');
         progressBar.type = "range";
         progressBar.min = 0;
@@ -180,117 +250,158 @@ async function displayAllBackgroundMusic() {
         progressBar.style.marginTop = '10px';
         progressBar.addEventListener('input', () => seekSound(sound.filename, progressBar.value));
 
-        // Append elements to sound item
         soundItem.innerHTML = `
-            <h3>${sound.display_name}</h3>
-            <p><strong>Credit:</strong> ${sound.credit}</p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="width: 120px;">Display Name:</label>
+                    <input type="text" class="text-input" style="flex-grow: 1;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label style="width: 120px;"><strong>Credit:</strong></label>
+                    <input type="text" class="text-input" style="flex-grow: 1;">
+                </div>
+            </div>
         `;
+
+        // Append the actual input elements to the corresponding placeholders
+        const displayNameLabel = soundItem.querySelector('div:nth-child(1) label');
+        const displayNameInputPlaceholder = soundItem.querySelector('div:nth-child(1) input');
+        displayNameInputPlaceholder.replaceWith(displayNameInput);
+
+        const creditsLabel = soundItem.querySelector('div:nth-child(2) label');
+        const creditsInputPlaceholder = soundItem.querySelector('div:nth-child(2) input');
+        creditsInputPlaceholder.replaceWith(creditsInput);
+
         soundItem.append(contextsContainer, buttonWrapper, updateWrapper, playerControls, progressBar);
         soundsList.appendChild(soundItem);
     });
 }
 
-// Function to remove a context
 function removeContext(contextWrapper) {
-    // Remove the context from the UI
     contextWrapper.parentNode.removeChild(contextWrapper);
-    // The context will be removed from the data when "Update" is clicked
 }
 
-function addContext(contextsContainer) {
+function addContext(contextsContainer, soundType) {
     const contextWrapper = document.createElement('div');
     contextWrapper.className = 'context-wrapper';
     contextWrapper.style.display = 'flex';
     contextWrapper.style.justifyContent = 'space-between';
     contextWrapper.style.alignItems = 'center';
     contextWrapper.style.gap = '10px';
-    contextWrapper.style.marginBottom = '10px'; // Spacing between contexts
+    contextWrapper.style.marginBottom = '10px';
 
-    // Create select input for types
-    const typeSelect = document.createElement('select');
-    const types = ['calm', 'dynamic', 'intense'];
-    typeSelect.className = "selector-primary"
-    
-    types.forEach((type) => {
-        const option = document.createElement('option');
-        option.value = type;
-        option.textContent = type;
-        typeSelect.appendChild(option);
-    });
+    if (soundType === 'backgroundMusic') {
+        const typeSelect = document.createElement('select');
+        typeSelect.className = "selector-primary";
+        const types = ['calm', 'dynamic', 'intense'];
+        types.forEach((type) => {
+            const option = document.createElement('option');
+            option.value = type;
+            option.textContent = type;
+            typeSelect.appendChild(option);
+        });
 
-    // Create input for context description
-    const contextInput = document.createElement('input');
-    contextInput.type = 'text';
-    contextInput.placeholder = 'Enter context...';
-    contextInput.className = 'text-inpu'
+        const contextInput = document.createElement('input');
+        contextInput.type = 'text';
+        contextInput.placeholder = 'Enter context...';
+        contextInput.className = 'text-input';
 
-    // Create the "Remove" button
-    const removeContextButton = document.createElement('button');
-    removeContextButton.textContent = "Remove";
-    removeContextButton.className = 'button-primary';
-    removeContextButton.style.width = '100px';
-    removeContextButton.style.display = 'flex';
-    removeContextButton.style.justifyContent = 'center';
-    removeContextButton.style.alignItems = 'center';
-    removeContextButton.onclick = () => removeContext(contextWrapper);
+        const removeContextButton = document.createElement('button');
+        removeContextButton.textContent = "Remove";
+        removeContextButton.className = 'button-primary';
+        removeContextButton.style.width = '100px';
+        removeContextButton.onclick = () => removeContext(contextWrapper);
 
-    // Append elements to the context wrapper
-    contextWrapper.appendChild(typeSelect);
-    contextWrapper.appendChild(contextInput);
-    contextWrapper.appendChild(removeContextButton);
+        contextWrapper.appendChild(typeSelect);
+        contextWrapper.appendChild(contextInput);
+        contextWrapper.appendChild(removeContextButton);
+    } else {
+        const contextInput = document.createElement('input');
+        contextInput.type = 'text';
+        contextInput.placeholder = 'Enter context...';
+        contextInput.className = 'text-input';
 
-    // Add the context to the container
+        const removeContextButton = document.createElement('button');
+        removeContextButton.textContent = "Remove";
+        removeContextButton.className = 'button-primary';
+        removeContextButton.style.width = '100px';
+        removeContextButton.onclick = () => removeContext(contextWrapper);
+
+        contextWrapper.appendChild(contextInput);
+        contextWrapper.appendChild(removeContextButton);
+    }
+
     contextsContainer.appendChild(contextWrapper);
 }
 
 function updateMainPlaylist(currentEditArray, currentSoundType) {
-        const updatedData = {
-            userId: GoogleLogin.userId,
-            idToken: GoogleLogin.idToken,
-            sounds: currentEditArray,
-            soundsType: currentSoundType,
-        };
-        fetch('/update-main-playlist', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updatedData),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                console.log(data.message);
-            } else {
-                console.error('Error updating main playlist:', data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Network error:', error);
-        });
-    }
+    const updatedData = {
+        userId: GoogleLogin.userId,
+        idToken: GoogleLogin.idToken,
+        sounds: currentEditArray,
+        soundsType: currentSoundType,
+    };
+    fetch('/update-main-playlist', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            console.log(data.message);
+        } else {
+            console.error('Error updating main playlist:', data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Network error:', error);
+    });
+}
 
-function updateSound(index, contextsContainer) {
+function updateSound(index, contextsContainer, displayNameInput, creditsInput, imageInput) {
     if (index >= 0 && index < currentEditArray.length) {
-        const newContexts = [];
+        let newContexts;
         const contextWrappers = contextsContainer.children;
 
-        for (let i = 0; i < contextWrappers.length; i++) {
-            const contextWrapper = contextWrappers[i];
-            const typeSelect = contextWrapper.querySelector('select');
-            const contextInput = contextWrapper.querySelector('input[type="text"]');
+        if (currentSoundType === 'backgroundMusic') {
+            newContexts = [];
+            for (let i = 0; i < contextWrappers.length; i++) {
+                const contextWrapper = contextWrappers[i];
+                const typeSelect = contextWrapper.querySelector('select');
+                const contextInput = contextWrapper.querySelector('input[type="text"]');
 
-            // Ensure elements are found before accessing their values
-            if (typeSelect && contextInput) {
-                newContexts.push([typeSelect.value, contextInput.value]);
-            } else {
-                console.warn('Type select or context input not found in contextWrapper:', contextWrapper);
+                if (typeSelect && contextInput) {
+                    newContexts.push([typeSelect.value, contextInput.value]);
+                } else {
+                    console.warn('Type select or context input not found in contextWrapper:', contextWrapper);
+                }
+            }
+        } else {
+            newContexts = [];
+            for (let i = 0; i < contextWrappers.length; i++) {
+                const contextWrapper = contextWrappers[i];
+                const contextInput = contextWrapper.querySelector('input[type="text"]');
+
+                if (contextInput) {
+                    newContexts.push(contextInput.value);
+                } else {
+                    console.warn('Context input not found in contextWrapper:', contextWrapper);
+                }
             }
         }
 
         currentEditArray[index].contexts = newContexts;
+        currentEditArray[index].display_name = displayNameInput.value; // Update display name
+        currentEditArray[index].credit = creditsInput.value; // Update credits
 
-        // Update the main data arrays
+        if (currentSoundType === 'ambianceSounds' && imageInput && imageInput.files.length > 0) {
+            const file = imageInput.files[0];
+            currentEditArray[index].imageFile = file.name; // Update image file name
+        }
+
         if (currentSoundType === 'backgroundMusic') {
             BackgroundMusic.backgroundMusicArray = currentEditArray;
         } else if (currentSoundType === 'ambianceSounds') {
@@ -299,19 +410,15 @@ function updateSound(index, contextsContainer) {
             SoundBoard.soundboardItems = currentEditArray;
         }
 
-        console.log('Updated sound:', currentEditArray[index]); // Debug output
+        console.log('Updated sound:', currentEditArray[index]);
     }
 
-    displayAllBackgroundMusic(); // Refresh the display
+    displayAllSounds();
 
-    // Send the updated array to the server with the Google User ID
     if (GoogleLogin.userId) {
-        if(isAdminPanel)
-        {
-            updateMainPlaylist(currentEditArray, currentSoundType)
-        }
-        else
-        {
+        if (isAdminPanel) {
+            updateMainPlaylist(currentEditArray, currentSoundType);
+        } else {
             const updatedData = {
                 userId: GoogleLogin.userId,
                 sounds: currentEditArray,
@@ -319,79 +426,76 @@ function updateSound(index, contextsContainer) {
             };
 
             fetch('/update-user-sounds', {
-                method: 'POST', // HTTP POST method to send data to the server
+                method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', // JSON content type
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(updatedData), // Convert the data to a JSON string
+                body: JSON.stringify(updatedData),
             })
-                .then((response) => {
-                    if (response.ok) {
-                        console.log('Data sent to server successfully');
-                    } else {
-                        console.error('Error sending data to server');
-                    }
-                })
-                .catch((error) => {
-                    console.error('Network error:', error);
-                });
+            .then((response) => {
+                if (response.ok) {
+                    console.log('Data sent to server successfully');
+                } else {
+                    console.error('Error sending data to server');
+                }
+            })
+            .catch((error) => {
+                console.error('Network error:', error);
+            });
         }
     } else {
-        console.error('User ID is not available'); // Handle cases where user ID is missing
+        console.error('User ID is not available');
     }
-       
 }
 
 function togglePlayPause(playButton, filename, progressBar) {
     if (currentAudio && decodeURIComponent(currentAudio.src).includes(decodeURIComponent(filename))) {
         if (currentAudio.paused) {
-            currentAudio.play(); // Resume playing if paused
-            playButton.innerHTML = '⏸'; // Change button icon to "Pause"
+            currentAudio.play();
+            playButton.innerHTML = '⏸';
         } else {
-            currentAudio.pause(); // Pause if playing
-            playButton.innerHTML = '▶'; // Change button icon to "Play"
+            currentAudio.pause();
+            playButton.innerHTML = '▶';
         }
     } else {
-        playSound(filename, progressBar); // Play the sound if not playing
-        playButton.innerHTML = '⏸'; // Change button icon to "Pause"
+        playSound(filename, progressBar);
+        playButton.innerHTML = '⏸';
     }
 }
 
-// Function to set the volume
 function setEditVolume(volume) {
-    const gainValue = volume / 100; // Convert to a range between 0 and 1
-    currentVolume = gainValue; // Update the current volume
+    const gainValue = volume / 100;
+    currentVolume = gainValue;
     if (currentAudio) {
-        currentAudio.volume = gainValue; // Set the gain value
+        currentAudio.volume = gainValue;
     }
 }
 
-// Function to play a sound
 function playSound(filename, progressBar) {
     if (currentAudio) {
-        stopCurrentSound(); // Stop any currently playing sound
+        stopCurrentSound();
     }
 
     const audio = new Audio(`assets/${currentPath}/${filename}`);
     currentAudio = audio;
     currentAudio.volume = currentVolume;
-    audio.play(); // Start playing the sound
-    updateProgressBar(audio, progressBar); // Update the progress bar
+    audio.play();
+    updateProgressBar(audio, progressBar);
     audio.addEventListener('ended', () => {
-        currentAudio = null; // Reset when the sound ends
+        currentAudio = null;
     });
 }
 
 function pauseSound(filename) {
     if (currentAudio && decodeURIComponent(currentAudio.src).includes(decodeURIComponent(filename))) {
-        currentAudio.pause(); // Pause the sound
+        currentAudio.pause();
     }
 }
 
 function stopSound(filename) {
     if (currentAudio && decodeURIComponent(currentAudio.src).includes(decodeURIComponent(filename))) {
         currentAudio.pause();
-        currentAudio.currentTime = 0; // Reset to the beginning
+        currentAudio.currentTime = 0;
         currentAudio = null;
     }
 }
@@ -399,58 +503,57 @@ function stopSound(filename) {
 function seekSound(filename, progress) {
     if (currentAudio && decodeURIComponent(currentAudio.src).includes(decodeURIComponent(filename))) {
         const duration = currentAudio.duration;
-        const newTime = (progress / 100) * duration; // Calculate the new playback time
-        currentAudio.currentTime = newTime; // Set the audio to the new time
+        const newTime = (progress / 100) * duration;
+        currentAudio.currentTime = newTime;
     }
 }
 
 function stopCurrentSound() {
     if (currentAudio) {
         currentAudio.pause();
-        currentAudio.currentTime = 0; // Reset to the beginning
-        currentAudio = null; // Reset the current audio
+        currentAudio.currentTime = 0;
+        currentAudio = null;
     }
 }
 
 function updateProgressBar(audio, progressBar) {
     if (!progressBar) {
-        console.warn('Progress bar not defined'); // Log warning if undefined
-        return; // Exit if not defined
+        console.warn('Progress bar not defined');
+        return;
     }
 
     const updateProgress = () => {
-        if (audio.ended) return; // Stop updating if the audio ends
+        if (audio.ended) return;
 
         let progress = (audio.currentTime / audio.duration) * 100;
-        if (isNaN(progress) || progress === 0) { // Handle invalid progress values
-            progress = 0; // Set to zero if NaN or invalid
+        if (isNaN(progress) || progress === 0) {
+            progress = 0;
         }
-        progressBar.value = progress; // Update the progress bar
+        progressBar.value = progress;
 
-        requestAnimationFrame(updateProgress); // Continue updating
+        requestAnimationFrame(updateProgress);
     };
 
-    requestAnimationFrame(updateProgress); // Start the update loop
+    requestAnimationFrame(updateProgress);
 }
 
 function openEditSoundModalUser() {
     const modal = document.getElementById('edit-sound-modal');
-    modal.style.display = 'flex'; // Show the modal
+    modal.style.display = 'flex';
     isAdminPanel = false;
-    displayAllBackgroundMusic(); // Populate the content with sounds
+    displayAllSounds();
 }
 
 function openEditSoundModalAdmin() {
     const modal = document.getElementById('edit-sound-modal');
-    modal.style.display = 'flex'; // Show the modal
+    modal.style.display = 'flex';
     isAdminPanel = true;
-    displayAllBackgroundMusic(); // Populate the content with sounds
+    displayAllSounds();
 }
 
 function closeEditSoundModal() {
     const modal = document.getElementById('edit-sound-modal');
-    modal.style.display = 'none'; // Hide the modal
+    modal.style.display = 'none';
 }
 
-
-export {openEditSoundModalUser, openEditSoundModalAdmin, closeEditSoundModal}
+export { openEditSoundModalUser, openEditSoundModalAdmin, closeEditSoundModal, displaySounds };

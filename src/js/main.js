@@ -12,7 +12,7 @@ import { showAllCredits } from './credits.js';
 import './modalWindow.js';
 import { toggleMenu, initModals, closeExternalModal } from './modalHandler.js';
 import { closeModal } from './modalCredits.js'; // Import createModal
-import { openEditSoundModalUser, openEditSoundModalAdmin,  closeEditSoundModal } from  './editSounds.js';
+import { openEditSoundModalUser, openEditSoundModalAdmin,  closeEditSoundModal, displaySounds } from  './editSounds.js';
 import { openAddSoundModal,  closeAddSoundModal } from  './addSound.js';
 import './socket-client.js';
 
@@ -186,6 +186,11 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.error("Context selector element with ID 'contextSelector' not found.");
     }
+
+    document.getElementById('soundTypeSelector').addEventListener('change', function() {
+        const selectedSoundType = this.value;
+        displaySounds(selectedSoundType);
+    });
 
     // Function to generate buttons dynamically based on sound files
     async function fetchSoundData() {

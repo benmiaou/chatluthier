@@ -343,18 +343,22 @@ app.post('/add-sound', upload.fields([{ name: 'file' }, { name: 'imageFile' }]),
         const assetsDir = path.join(__dirname, 'assets');
         let soundFilePath, imageFilePath;
 
+        // Replace spaces with underscores in filenames
+        const sanitizedFileName = file.originalname.replace(/ /g, '_');
+        const sanitizedImageFileName = imageFile ? imageFile.originalname.replace(/ /g, '_') : null;
+
         switch (category) {
             case 'backgroundmusic':
-                soundFilePath = path.join(assetsDir, 'background', file.originalname);
+                soundFilePath = path.join(assetsDir, 'background', sanitizedFileName);
                 break;
             case 'ambiancesounds':
-                soundFilePath = path.join(assetsDir, 'ambiance', file.originalname);
+                soundFilePath = path.join(assetsDir, 'ambiance', sanitizedFileName);
                 if (imageFile) {
-                    imageFilePath = path.join(assetsDir, 'images', 'backgrounds', imageFile.originalname);
+                    imageFilePath = path.join(assetsDir, 'images', 'backgrounds', sanitizedImageFileName);
                 }
                 break;
             case 'soundboard':
-                soundFilePath = path.join(assetsDir, 'soundboard', file.originalname);
+                soundFilePath = path.join(assetsDir, 'soundboard', sanitizedFileName);
                 break;
             default:
                 return res.status(400).json({ error: 'Invalid sound category.' });
@@ -374,14 +378,14 @@ app.post('/add-sound', upload.fields([{ name: 'file' }, { name: 'imageFile' }]),
         }
 
         const newSound = {
-            filename: file.originalname,
+            filename: sanitizedFileName,
             display_name: display_name,
             contexts: contexts.split(',').map(context => context.trim()),
             credit: credit
         };
 
         if (imageFile) {
-            newSound.imageFile = imageFile.originalname;
+            newSound.imageFile = sanitizedImageFileName;
         }
 
         sounds.push(newSound);
