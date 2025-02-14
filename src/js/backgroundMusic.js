@@ -17,11 +17,11 @@ export class AudioManager {
         return this.audioPlayer.getPlayer();
     }
 
-    async playSound(fileOrHandle, type, initiatedByNetwork = false) {
+    async playSound(fileOrHandle, type) {
         this.isProcessing = true;
 
         // Debounce network-initiated playback requests
-        if (initiatedByNetwork && this.debounceTimeout) {
+        if (this.debounceTimeout) {
             clearTimeout(this.debounceTimeout);
         }
 
@@ -36,10 +36,10 @@ export class AudioManager {
 
             const audioUrl = "assets/background/" + fileOrHandle.filename;
             this.updateCredit(fileOrHandle.credit);
-            await this.audioPlayer.playSound(audioUrl, false, initiatedByNetwork);
+            await this.audioPlayer.playSound(audioUrl, false);
             this.audioPlayer.play();
             this.isProcessing = false;
-        }, initiatedByNetwork ? 500 : 0); // Debounce delay for network requests
+        },100); // Debounce delay for network requests
     }
 
     preload(fileOrHandle) {
@@ -156,7 +156,7 @@ export const BackgroundMusic = {
             this.soundIndex = this.filesToPlay.indexOf(fileToPlay);
 
             console.log("Playing " + fileToPlay);
-            await this.audioManager.playSound(fileToPlay, this.type, true);
+            await this.audioManager.playSound(fileToPlay, this.type);
 
             this.audioManager.updateCredit(musicData.credit);
 
