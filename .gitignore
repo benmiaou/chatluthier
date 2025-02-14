@@ -139,3 +139,5 @@ user_data
 .idea*
 
 adminGoogleIds.json
+srv_dat
+package-lock.json
