@@ -134,7 +134,7 @@ dist
 deploy.bat
 serviceAccountKey.json
 user_data
-
+backup.bat
 # Jetbrains
 .idea*
 
@@ -143,3 +143,4 @@ srv_data
 package-lock.json
 assets
 uploads
+backups
