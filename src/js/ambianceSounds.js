@@ -26,6 +26,7 @@ export const AmbianceSounds = {
             response = await fetch(`/ambianceSounds`);
         }
         this.ambianceSounds = await response.json();
+        console.log(this.ambianceSounds)
         this.generateAmbientButtons(this.ambianceSounds);
 
         // Charger les presets après avoir généré les boutons
@@ -33,10 +34,6 @@ export const AmbianceSounds = {
             await this.loadPresets();
         }
         return this.ambianceSounds;
-    },
-
-    updateContexts() {
-        // Votre code existant
     },
 
     async resetAmbientSounds() {
@@ -47,6 +44,7 @@ export const AmbianceSounds = {
     },
 
     generateAmbientButtons(ambianceSounds) {
+        this.soundBars = [];
         const section = document.getElementById("ambiance");
         section.innerHTML = ''; // Effacer le contenu existant
 
@@ -66,7 +64,6 @@ export const AmbianceSounds = {
 
             section.appendChild(container);
         });
-
         // Ajouter les contrôles de preset si l'utilisateur est connecté
         if (GoogleLogin.isSignedIn) {
             this.addPresetControls();
