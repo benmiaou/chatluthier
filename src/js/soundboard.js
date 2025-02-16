@@ -19,15 +19,40 @@ export const SoundBoard = {
     },
 
     async loadSoundboardButtons() {
-        let response;
-        if (GoogleLogin.userId) {
-            response = await fetch(`/soundboard?userId=${GoogleLogin.userId}`);
-        } else {
-            response = await fetch(`/soundboard`);
+        try {
+            // Load the main soundboard file
+            let mainResponse = await fetch('/soundboard');
+            let mainSoundboardItems = await mainResponse.json();
+    
+            // If the user is logged in, load the user-specific soundboard file
+            let userSoundboardItems = [];
+            if (GoogleLogin.userId) {
+                let userResponse = await fetch(`/soundboard?userId=${GoogleLogin.userId}`);
+                userSoundboardItems = await userResponse.json();
+            }
+    
+            // Merge the user-specific changes with the main soundboard items
+            const soundboardItems = mainSoundboardItems.map(mainSound => {
+                const userSound = userSoundboardItems.find(userSound => userSound.filename === mainSound.filename);
+                if (userSound) {
+                    // Apply user-specific contexts and isEnabled status
+                    return {
+                        ...mainSound,
+                        contexts: userSound.contexts,
+                        isEnabled: userSound.isEnabled
+                    };
+                }
+                return mainSound;
+            });
+    
+            // Generate soundboard buttons using the merged soundboard items
+            this.soundboardItems = soundboardItems;
+            this.generateSoundboardButtons(this.soundboardItems);
+        } catch (e) {
+            console.error(`Error fetching files from server:`, e);
         }
-        this.soundboardItems = await response.json();
-        this.generateSoundboardButtons(this.soundboardItems);
     },
+    
 
     updateContexts() {
         // Update context-related logic if any
@@ -38,6 +63,11 @@ export const SoundBoard = {
         section.innerHTML = '';  // Clear existing content
 
         soundboardItems.forEach(soundboardItem => {
+            if (soundboardItem.isEnabled === undefined) {
+                soundboardItem.isEnabled = true;
+            }
+        
+            if (!soundboardItem.isEnabled) return;
             // Create a button for each soundboard item
             const button = document.createElement('button');
             button.textContent = soundboardItem.display_name;

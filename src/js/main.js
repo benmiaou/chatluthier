@@ -12,7 +12,8 @@ import { showAllCredits } from './credits.js';
 import './modalWindow.js';
 import { toggleMenu, initModals, closeExternalModal } from './modalHandler.js';
 import { closeModal } from './modalCredits.js'; // Import createModal
-import { openEditSoundModalUser, openEditSoundModalAdmin,  closeEditSoundModal, displaySounds } from  './editSounds.js';
+import { openEditSoundModalAdmin,  closeEditSoundModalAdmin, displaySoundsAdmin, isAdminEditVisible } from  './editSoundsAdmin.js';
+import { openEditSoundModalUser, closeEditSoundModalUser, displaySoundsUser } from  './editSoundsUser.js';
 import { openAddSoundModal,  closeAddSoundModal } from  './addSound.js';
 import './socket-client.js';
 
@@ -106,8 +107,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (closeEditSoundModalButton) {
         closeEditSoundModalButton.addEventListener('click', function() {
-            closeEditSoundModal();
-            closeAddSoundModal();
+            closeEditSoundModalAdmin();
+            closeEditSoundModalUser();
+            BackgroundMusic.preloadBackgroundSounds();
+            SoundBoard.loadSoundboardButtons();
+            AmbianceSounds.loadAmbianceButtons();
         });
     }
     if (closeAddSoundModalButton) {
@@ -189,7 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('soundTypeSelector').addEventListener('change', function() {
         const selectedSoundType = this.value;
-        displaySounds(selectedSoundType);
+        if(isAdminEditVisible)
+            displaySoundsAdmin(selectedSoundType);
+        else
+            displaySoundsUser(selectedSoundType);
     });
 
     // Function to generate buttons dynamically based on sound files

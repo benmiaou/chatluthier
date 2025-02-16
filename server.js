@@ -115,10 +115,10 @@ app.get('/mp3-list', async (req, res) => {
 });
 
 // Route to update user sounds based on sound type
-app.post('/update-user-sounds', (req, res) => {
-    const { userId, soundsType, sounds } = req.body; // Get userId, soundsType, and sounds from request
+app.post('/update-user-sound', (req, res) => {
+    const { userId, soundsType, filename, isEnabled, contexts } = req.body; // Get userId, soundsType, filename, isEnabled, and contexts from request
 
-    if (!userId || !soundsType || !sounds) {
+    if (!userId || !soundsType || !filename) {
         res.status(400).send('Invalid data'); // Return an error if data is incomplete
         return;
     }
@@ -134,9 +134,30 @@ app.post('/update-user-sounds', (req, res) => {
     // Generate the file path based on the soundsType
     const filePath = path.join(userDir, `${soundsType}.json`); // Use soundsType to create filename
 
-    // Save the sounds data to a JSON file in the user directory
-    fs.writeFileSync(filePath, JSON.stringify(sounds, null, 2)); // Save with pretty formatting
-    res.send('Data saved successfully'); // Confirm the data was saved
+    // Read the existing sounds data from the file
+    let existingSounds = [];
+    if (fs.existsSync(filePath)) {
+        existingSounds = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    }
+
+    // Find the sound to update by filename
+    const soundIndex = existingSounds.findIndex(sound => sound.filename === filename);
+    if (soundIndex !== -1) {
+        // Update the contexts and isEnabled status for the specific sound
+        existingSounds[soundIndex].contexts = contexts;
+        existingSounds[soundIndex].isEnabled = isEnabled;
+    } else {
+        // Add the new sound if it doesn't exist
+        existingSounds.push({
+            filename: filename,
+            isEnabled: isEnabled,
+            contexts: contexts
+        });
+    }
+
+    // Save the updated sounds data back to the file
+    fs.writeFileSync(filePath, JSON.stringify(existingSounds, null, 2)); // Save with pretty formatting
+    res.send('Data updated successfully'); // Confirm the data was updated
 });
 
 app.post('/update-main-playlist', async (req, res) => {
@@ -197,13 +218,7 @@ function getData(userId, filename) {
     if (userId) {
         const userFilePath = path.join(__dirname, 'user_data', userId, `${filename}.json`);
         if (fs.existsSync(userFilePath)) {
-            const userArray = JSON.parse(fs.readFileSync(userFilePath, 'utf8')); // User-specific array
-            const mergedArray = mergeArrays(defaultArray, userArray); // Merge with server data
-
-            // Update the user-specific file with merged data
-            fs.writeFileSync(userFilePath, JSON.stringify(mergedArray, null, 2)); 
-
-            return mergedArray; // Return the merged array
+            return JSON.parse(fs.readFileSync(userFilePath, 'utf8')); // User-specific array
         }
     }
 

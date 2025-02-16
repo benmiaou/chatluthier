@@ -174,14 +174,35 @@ export const BackgroundMusic = {
 
     async preloadBackgroundSounds() {
         try {
-            let response;
+            // Load the main background music file
+            let mainResponse = await fetch('/backgroundMusic');
+            let mainBackgroundMusic = await mainResponse.json();
+    
+            // If the user is logged in, load the user-specific background music file
+            let userBackgroundMusic = [];
             if (GoogleLogin.userId) {
-                response = await fetch(`/backgroundMusic?userId=${GoogleLogin.userId}`);
-            } else {
-                response = await fetch(`/backgroundMusic`);
+                let userResponse = await fetch(`/backgroundMusic?userId=${GoogleLogin.userId}`);
+                userBackgroundMusic = await userResponse.json();
             }
-            this.backgroundMusicArray = await response.json();
-            this.backgroundMusicArray = this.shuffleArray(this.backgroundMusicArray);
+    
+            // Merge the user-specific changes with the main background music
+            const backgroundMusicArray = mainBackgroundMusic.map(mainSound => {
+                const userSound = userBackgroundMusic.find(userSound => userSound.filename === mainSound.filename);
+                if (userSound) {
+                    // Apply user-specific contexts and isEnabled status
+                    return {
+                        ...mainSound,
+                        contexts: userSound.contexts,
+                        isEnabled: userSound.isEnabled
+                    };
+                }
+                return mainSound;
+            });
+    
+            // Shuffle the merged background music array
+            this.backgroundMusicArray = this.shuffleArray(backgroundMusicArray);
+    
+            // Update contexts using the merged background music array
             this.updateContexts();
         } catch (e) {
             console.error(`Error fetching files from server:`, e);
@@ -200,9 +221,16 @@ export const BackgroundMusic = {
         if (!Array.isArray(this.backgroundMusicArray)) {
             throw new Error("Input data is not an array.");
         }
-        return this.backgroundMusicArray.filter(sound =>
-            sound.contexts.some(([type, context]) => (type === this.type || this.type === "all") && context === this.context)
-        );
+    
+        return this.backgroundMusicArray.filter(sound => {
+            // Check if the sound's contexts match the type and context
+            return sound.contexts.some(([type, context]) => {
+                const typeMatches = type === this.type || this.type === "all";
+                const contextMatches = context === this.context;
+                const isEnabledMatches = sound.isEnabled !== false; // Ensure the sound is enabled
+                return typeMatches && contextMatches && isEnabledMatches;
+            });
+        });
     },
 
     backGroundSoundLoop() {
@@ -234,9 +262,10 @@ export const BackgroundMusic = {
 
     updateButton(typeName) {
         let result = this.backgroundMusicArray.filter(sound =>
+            (sound.isEnabled || sound.isEnabled === undefined) && // Check if the sound is enabled
             sound.contexts.some(([type, context]) => (type === typeName || typeName === "all") && context === this.context)
         );
-
+    
         let button = document.getElementById(typeName + 'Button');
         if (result.length === 0) {
             button.disabled = true;

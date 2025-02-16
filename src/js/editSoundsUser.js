@@ -7,11 +7,10 @@ let currentEditArray = null;
 let currentSoundType = 'backgroundMusic';
 let currentPath = 'background';
 let currentVolume = 0.5;
-let isAdminPanel = false;
 let currentAudio = null;
 
 // Function to display sound data based on sound type
-function displaySounds(soundType) {
+function displaySoundsUser(soundType) {
     const soundsList = document.getElementById('sounds-list');
     soundsList.innerHTML = '';
 
@@ -40,35 +39,20 @@ function displaySounds(soundType) {
     displayAllSounds();
 }
 
-async function loadSounds(soundType) {
-    let soundsArray = [];
-    try {
-        let response = await fetch(`/${soundType}`);
-        soundsArray = await response.json();
-    } catch (e) {
-        console.error(`Error fetching files from server:`, e);
-    }
-    return soundsArray;
-}
-
-async function displayAllSounds() {
+function displayAllSounds() {
     const soundsList = document.getElementById('sounds-list');
     soundsList.innerHTML = '';
 
-    if (isAdminPanel) {
-        currentEditArray = await loadSounds(currentSoundType);
-    } else {
-        switch (currentSoundType) {
-            case 'backgroundMusic':
-                currentEditArray = BackgroundMusic.backgroundMusicArray;
-                break;
-            case 'ambianceSounds':
-                currentEditArray = AmbianceSounds.ambianceSounds;
-                break;
-            case 'soundboard':
-                currentEditArray = SoundBoard.soundboardItems;
-                break;
-        }
+    switch (currentSoundType) {
+        case 'backgroundMusic':
+            currentEditArray = BackgroundMusic.backgroundMusicArray;
+            break;
+        case 'ambianceSounds':
+            currentEditArray = AmbianceSounds.ambianceSounds;
+            break;
+        case 'soundboard':
+            currentEditArray = SoundBoard.soundboardItems;
+            break;
     }
 
     currentEditArray.forEach((sound, index) => {
@@ -78,52 +62,15 @@ async function displayAllSounds() {
         const contextsContainer = document.createElement('div');
         contextsContainer.className = 'contexts-container';
 
-        // Display name input
-        const displayNameInput = document.createElement('input');
-        displayNameInput.type = 'text';
-        displayNameInput.className = 'text-input';
-        displayNameInput.value = sound.display_name;
-        displayNameInput.style.marginBottom = '10px';
-        displayNameInput.style.width = 'calc(100% - 22px)'; // Adjust width to fit within container
+        // Display name
+        const displayName = document.createElement('div');
+        displayName.textContent = `Display Name: ${sound.display_name}`;
+        displayName.style.marginBottom = '10px';
 
-        // Credits input
-        const creditsInput = document.createElement('input');
-        creditsInput.type = 'text';
-        creditsInput.className = 'text-input';
-        creditsInput.value = sound.credit;
-        creditsInput.style.marginBottom = '10px';
-        creditsInput.style.width = 'calc(100% - 22px)'; // Adjust width to fit within container
-
-        // Image input for ambiance sounds
-        let imageInput = null;
-        if (currentSoundType === 'ambianceSounds') {
-            const imageContainer = document.createElement('div');
-            imageContainer.style.display = 'flex';
-            imageContainer.style.alignItems = 'center';
-            imageContainer.style.gap = '10px';
-            imageContainer.style.marginBottom = '10px';
-
-            const imageLabel = document.createElement('label');
-            imageLabel.textContent = 'Image:';
-            imageLabel.style.width = '120px';
-
-            imageInput = document.createElement('input');
-            imageInput.type = 'file';
-            imageInput.accept = 'image/*';
-            imageInput.className = 'text-input';
-            imageInput.style.flexGrow = '1';
-            
-            const currentImage = document.createElement('img');
-            currentImage.src = `assets/images/backgrounds/${sound.imageFile}`;
-            currentImage.style.width = '50px';
-            currentImage.style.height = '50px';
-            currentImage.style.marginLeft = '10px';
-
-            imageContainer.appendChild(imageLabel);
-            imageContainer.appendChild(imageInput);
-            imageContainer.appendChild(currentImage);
-            contextsContainer.appendChild(imageContainer);
-        }
+        // Credits
+        const credits = document.createElement('div');
+        credits.innerHTML = `Credit: ${sound.credit}`;
+        credits.style.marginBottom = '10px';
 
         if (currentSoundType === 'backgroundMusic') {
             sound.contexts.forEach((context) => {
@@ -200,18 +147,12 @@ async function displayAllSounds() {
         addContextButton.onclick = () => addContext(contextsContainer, currentSoundType);
         buttonWrapper.appendChild(addContextButton);
 
-        const updateWrapper = document.createElement('div');
-        updateWrapper.style.display = 'flex';
-        updateWrapper.style.justifyContent = 'center';
-        updateWrapper.style.alignItems = 'center';
-        updateWrapper.style.marginTop = '10px';
-
         const updateButton = document.createElement('button');
         updateButton.className = 'update-button';
         updateButton.textContent = "Update";
         updateButton.style.width = '100px';
-        updateButton.onclick = () => updateSound(index, contextsContainer, displayNameInput, creditsInput, imageInput);
-        updateWrapper.appendChild(updateButton);
+        updateButton.onclick = () => updateSound(index, contextsContainer);
+        buttonWrapper.appendChild(updateButton);
 
         const playerControls = document.createElement('div');
         playerControls.style.display = 'flex';
@@ -250,29 +191,20 @@ async function displayAllSounds() {
         progressBar.style.marginTop = '10px';
         progressBar.addEventListener('input', () => seekSound(sound.filename, progressBar.value));
 
-        soundItem.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <label style="width: 120px;">Display Name:</label>
-                    <input type="text" class="text-input" style="flex-grow: 1;">
-                </div>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <label style="width: 120px;"><strong>Credit:</strong></label>
-                    <input type="text" class="text-input" style="flex-grow: 1;">
-                </div>
-            </div>
-        `;
+        const enableToggleWrapper = document.createElement('div');
+        enableToggleWrapper.style.display = 'flex';
+        enableToggleWrapper.style.justifyContent = 'center';
+        enableToggleWrapper.style.alignItems = 'center';
+        enableToggleWrapper.style.marginTop = '10px';
 
-        // Append the actual input elements to the corresponding placeholders
-        const displayNameLabel = soundItem.querySelector('div:nth-child(1) label');
-        const displayNameInputPlaceholder = soundItem.querySelector('div:nth-child(1) input');
-        displayNameInputPlaceholder.replaceWith(displayNameInput);
+        const enableToggle = document.createElement('button');
+        enableToggle.textContent = sound.isEnabled !== false ? 'Disable' : 'Enable';
+        enableToggle.className = 'button-primary';
+        enableToggle.style.width = '100px';
+        enableToggle.onclick = () => toggleEnableSound(index, enableToggle);
+        enableToggleWrapper.appendChild(enableToggle);
 
-        const creditsLabel = soundItem.querySelector('div:nth-child(2) label');
-        const creditsInputPlaceholder = soundItem.querySelector('div:nth-child(2) input');
-        creditsInputPlaceholder.replaceWith(creditsInput);
-
-        soundItem.append(contextsContainer, buttonWrapper, updateWrapper, playerControls, progressBar);
+        soundItem.append(displayName, credits, contextsContainer, buttonWrapper, playerControls, progressBar, enableToggleWrapper);
         soundsList.appendChild(soundItem);
     });
 }
@@ -334,42 +266,15 @@ function addContext(contextsContainer, soundType) {
     contextsContainer.appendChild(contextWrapper);
 }
 
-function updateMainPlaylist(currentEditArray, currentSoundType) {
-    const updatedData = {
-        userId: GoogleLogin.userId,
-        idToken: GoogleLogin.idToken,
-        sounds: currentEditArray,
-        soundsType: currentSoundType,
-    };
-    fetch('/update-main-playlist', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedData),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            console.log(data.message);
-        } else {
-            console.error('Error updating main playlist:', data.error);
-        }
-    })
-    .catch(error => {
-        console.error('Network error:', error);
-    });
-}
-
-function updateSound(index, contextsContainer, displayNameInput, creditsInput, imageInput) {
+async function updateSound(index, contextsContainer) {
     if (index >= 0 && index < currentEditArray.length) {
         let newContexts;
         const contextWrappers = contextsContainer.children;
 
         if (currentSoundType === 'backgroundMusic') {
             newContexts = [];
-            for (let i = 0; i < contextWrappers.length; i++) {
-                const contextWrapper = contextWrappers[i];
+            for (const element of contextWrappers) {
+                const contextWrapper = element;
                 const typeSelect = contextWrapper.querySelector('select');
                 const contextInput = contextWrapper.querySelector('input[type="text"]');
 
@@ -381,8 +286,8 @@ function updateSound(index, contextsContainer, displayNameInput, creditsInput, i
             }
         } else {
             newContexts = [];
-            for (let i = 0; i < contextWrappers.length; i++) {
-                const contextWrapper = contextWrappers[i];
+            for (const element of contextWrappers) {
+                const contextWrapper = element;
                 const contextInput = contextWrapper.querySelector('input[type="text"]');
 
                 if (contextInput) {
@@ -394,13 +299,6 @@ function updateSound(index, contextsContainer, displayNameInput, creditsInput, i
         }
 
         currentEditArray[index].contexts = newContexts;
-        currentEditArray[index].display_name = displayNameInput.value; // Update display name
-        currentEditArray[index].credit = creditsInput.value; // Update credits
-
-        if (currentSoundType === 'ambianceSounds' && imageInput && imageInput.files.length > 0) {
-            const file = imageInput.files[0];
-            currentEditArray[index].imageFile = file.name; // Update image file name
-        }
 
         if (currentSoundType === 'backgroundMusic') {
             BackgroundMusic.backgroundMusicArray = currentEditArray;
@@ -411,40 +309,42 @@ function updateSound(index, contextsContainer, displayNameInput, creditsInput, i
         }
 
         console.log('Updated sound:', currentEditArray[index]);
+
+        // Send only the changes for the specific index
+        const updatedData = {
+            userId: GoogleLogin.userId,
+            filename: currentEditArray[index].filename,
+            isEnabled: currentEditArray[index].isEnabled,
+            contexts: newContexts,
+            soundsType: currentSoundType,
+        };
+
+        fetch('/update-user-sound', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedData),
+        })
+        .then((response) => {
+            if (response.ok) {
+                console.log('Changes sent to server successfully');
+            } else {
+                console.error('Error sending changes to server');
+            }
+        })
+        .catch((error) => {
+            console.error('Network error:', error);
+        });
     }
 
     displayAllSounds();
+}
 
-    if (GoogleLogin.userId) {
-        if (isAdminPanel) {
-            updateMainPlaylist(currentEditArray, currentSoundType);
-        } else {
-            const updatedData = {
-                userId: GoogleLogin.userId,
-                sounds: currentEditArray,
-                soundsType: currentSoundType,
-            };
-
-            fetch('/update-user-sounds', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updatedData),
-            })
-            .then((response) => {
-                if (response.ok) {
-                    console.log('Data sent to server successfully');
-                } else {
-                    console.error('Error sending data to server');
-                }
-            })
-            .catch((error) => {
-                console.error('Network error:', error);
-            });
-        }
-    } else {
-        console.error('User ID is not available');
+function toggleEnableSound(index, enableToggle) {
+    if (index >= 0 && index < currentEditArray.length) {
+        currentEditArray[index].isEnabled = !currentEditArray[index].isEnabled;
+        enableToggle.textContent = currentEditArray[index].isEnabled ? 'Disable' : 'Enable';
     }
 }
 
@@ -463,14 +363,6 @@ function togglePlayPause(playButton, filename, progressBar) {
     }
 }
 
-function setEditVolume(volume) {
-    const gainValue = volume / 100;
-    currentVolume = gainValue;
-    if (currentAudio) {
-        currentAudio.volume = gainValue;
-    }
-}
-
 function playSound(filename, progressBar) {
     if (currentAudio) {
         stopCurrentSound();
@@ -484,12 +376,6 @@ function playSound(filename, progressBar) {
     audio.addEventListener('ended', () => {
         currentAudio = null;
     });
-}
-
-function pauseSound(filename) {
-    if (currentAudio && decodeURIComponent(currentAudio.src).includes(decodeURIComponent(filename))) {
-        currentAudio.pause();
-    }
 }
 
 function stopSound(filename) {
@@ -540,20 +426,12 @@ function updateProgressBar(audio, progressBar) {
 function openEditSoundModalUser() {
     const modal = document.getElementById('edit-sound-modal');
     modal.style.display = 'flex';
-    isAdminPanel = false;
     displayAllSounds();
 }
 
-function openEditSoundModalAdmin() {
-    const modal = document.getElementById('edit-sound-modal');
-    modal.style.display = 'flex';
-    isAdminPanel = true;
-    displayAllSounds();
-}
-
-function closeEditSoundModal() {
+function closeEditSoundModalUser() {
     const modal = document.getElementById('edit-sound-modal');
     modal.style.display = 'none';
 }
 
-export { openEditSoundModalUser, openEditSoundModalAdmin, closeEditSoundModal, displaySounds };
+export { displaySoundsUser, openEditSoundModalUser, closeEditSoundModalUser };

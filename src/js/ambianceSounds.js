@@ -19,20 +19,43 @@ export const AmbianceSounds = {
     },
 
     async loadAmbianceButtons() {
-        let response;
+        // Load the main ambiance sounds file
+        let mainResponse = await fetch('/ambianceSounds');
+        let mainAmbianceSounds = await mainResponse.json();
+    
+        // If the user is logged in, load the user-specific ambiance sounds file
+        let userAmbianceSounds = [];
         if (GoogleLogin.userId) {
-            response = await fetch(`/ambianceSounds?userId=${GoogleLogin.userId}`);
-        } else {
-            response = await fetch(`/ambianceSounds`);
+            let userResponse = await fetch(`/ambianceSounds?userId=${GoogleLogin.userId}`);
+            userAmbianceSounds = await userResponse.json();
         }
-        this.ambianceSounds = await response.json();
-        console.log(this.ambianceSounds)
+    
+        // Merge the user-specific changes with the main ambiance sounds
+        const ambianceSounds = mainAmbianceSounds.map(mainSound => {
+            const userSound = userAmbianceSounds.find(userSound => userSound.filename === mainSound.filename);
+            if (userSound) {
+                // Apply user-specific contexts and isEnabled status
+                return {
+                    ...mainSound,
+                    contexts: userSound.contexts,
+                    isEnabled: userSound.isEnabled
+                };
+            }
+            return mainSound;
+        });
+    
+        // Log the merged ambiance sounds
+        console.log(ambianceSounds);
+    
+        // Generate ambient buttons using the merged ambiance sounds
+        this.ambianceSounds = ambianceSounds;
         this.generateAmbientButtons(this.ambianceSounds);
-
-        // Charger les presets après avoir généré les boutons
+    
+        // Load presets after generating the buttons
         if (GoogleLogin.isSignedIn) {
             await this.loadPresets();
         }
+    
         return this.ambianceSounds;
     },
 
@@ -49,19 +72,26 @@ export const AmbianceSounds = {
         section.innerHTML = ''; // Effacer le contenu existant
 
         ambianceSounds.forEach(ambianceSound => {
+            // Ensure isEnabled is true by default if not set
+            if (ambianceSound.isEnabled === undefined) {
+                ambianceSound.isEnabled = true;
+            }
+        
+            if (!ambianceSound.isEnabled) return;
+        
             const container = document.createElement('div');
             container.className = 'sound-container';
-
-            // Créer une div pour la barre sonore
+        
+            // Create a div for the sound bar
             const soundBarDiv = document.createElement('div');
-            soundBarDiv.id = `sound-bar-${ambianceSound.filename}`; // Attribuer un ID unique
-            soundBarDiv.className = 'sound-bar'; // Appliquer le style
-
+            soundBarDiv.id = `sound-bar-${ambianceSound.filename}`; // Assign a unique ID
+            soundBarDiv.className = 'sound-bar'; // Apply style
+        
             container.appendChild(soundBarDiv);
             const soundBar = new SoundBar(ambianceSound);
             this.soundBars.push(soundBar);
             container.appendChild(soundBar.getElement());
-
+        
             section.appendChild(container);
         });
         // Ajouter les contrôles de preset si l'utilisateur est connecté
