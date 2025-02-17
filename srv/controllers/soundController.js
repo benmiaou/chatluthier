@@ -83,12 +83,6 @@ async function addSound(req, res) {
         sounds.push(newSound);
         fs.writeFileSync(jsonFilePath, JSON.stringify(sounds, null, 2));
 
-        // Clean up: Delete the files from the uploads directory
-        fs.unlinkSync(file.path);
-        if (imageFile) {
-            fs.unlinkSync(imageFile.path);
-        }
-
         return res.json({ message: 'Sound added successfully.' });
     } catch (error) {
         console.error('Error adding sound:', error);
