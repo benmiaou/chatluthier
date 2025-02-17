@@ -15,6 +15,9 @@ import { closeModal } from './modalCredits.js'; // Import createModal
 import { openEditSoundModalAdmin,  closeEditSoundModalAdmin, displaySoundsAdmin, isAdminEditVisible } from  './editSoundsAdmin.js';
 import { openEditSoundModalUser, closeEditSoundModalUser, displaySoundsUser } from  './editSoundsUser.js';
 import { openAddSoundModal,  closeAddSoundModal } from  './addSound.js';
+import { openRequestSoundModal, closeRequestSoundModal } from  './requestSound.js';
+import { openRequestSoundModalAdmin, closeRequestSoundModalAdmin } from  './requestSoundsProcess.js';
+
 import './socket-client.js';
 
 // Initialize and attach to window if necessary (for inline handlers)
@@ -32,15 +35,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const allButton = document.getElementById('allButton');
     const nextButton = document.getElementById('nextButton');
     const resetAmbient = document.getElementById('resetAmbient');
+    const requestsoundButton = document.getElementById('requestsoundButton');
     const openEditSoundModalAdminButton = document.getElementById('openEditSoundAdminModal');
     const openEditSoundModalUserButton = document.getElementById('openEditSoundUserModal');
-    const openAddsoundModalAdminButton = document.getElementById('openAddsoundModalAdminButton');
+    const openAddSoundModalAdminButton = document.getElementById('openAddSoundModalAdminButton');
     const toggleMenuButton = document.getElementById('toggleMenu');
     const closeExternalModalButton = document.getElementById('closeExternalModal');
     const closeModalButton = document.getElementById('closeModal');
     const closeEditSoundModalButton = document.getElementById('closeEditSoundModal');
     const closeAddSoundModalButton = document.getElementById('closeAddSoundModal');
+    const closeRequestsoundButton = document.getElementById('closeRequestsoundButton');
     const showAllCreditsButton = document.getElementById('showAllCredits');
+    const openRequestSoundModalAdminButton = document.getElementById('openRequestSoundModalAdminButton');
+    const closeRequestSoundModalButton = document.getElementById('closeRequestSoundModalButton');
 
     
     if (calmButton) {
@@ -85,9 +92,19 @@ document.addEventListener('DOMContentLoaded', () => {
             openEditSoundModalAdmin();
         });
     }
-    if (openAddsoundModalAdminButton) {
-        openAddsoundModalAdminButton.addEventListener('click', function() {
+    if (openAddSoundModalAdminButton) {
+        openAddSoundModalAdminButton.addEventListener('click', function() {
             openAddSoundModal();
+        });
+    }
+    if (requestsoundButton) {
+        requestsoundButton.addEventListener('click', function() {
+            openRequestSoundModal();
+        });
+    }
+    if (closeRequestsoundButton) {
+        closeRequestsoundButton.addEventListener('click', function() {
+            closeRequestSoundModal();
         });
     }
     if (toggleMenuButton) {
@@ -122,6 +139,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (showAllCreditsButton) {
         showAllCreditsButton.addEventListener('click', function() {
             showAllCredits();
+        });
+    }
+    if (openRequestSoundModalAdminButton) {
+        openRequestSoundModalAdminButton.addEventListener('click', function() {
+            openRequestSoundModalAdmin();
+        });
+    }
+    if (closeRequestSoundModalButton) {
+        closeRequestSoundModalButton.addEventListener('click', function() {
+            closeRequestSoundModalAdmin();
         });
     }
     

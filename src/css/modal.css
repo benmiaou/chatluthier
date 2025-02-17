@@ -43,7 +43,7 @@
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-    z-index: 1000;
+    z-index: 1000; /* Base z-index for modals */
     padding-top: 20px; /* Optional: Add some padding at the top */
     box-sizing: border-box; /* Include padding in the element's total width and height */
 }
@@ -57,4 +57,14 @@
     max-width: 600px; /* Maximum width for the modal content */
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     position: relative;
+}
+
+/* Specific z-index for request-sound-modal-admin */
+#request-sound-modal-admin {
+    z-index: 1005; /* Higher than the base modal z-index */
+}
+
+/* Specific z-index for add-sound-modal */
+#add-sound-modal {
+    z-index: 1010; /* Highest z-index to appear over other modals */
 }

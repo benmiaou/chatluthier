@@ -413,6 +413,135 @@ app.post('/add-sound', upload.fields([{ name: 'file' }, { name: 'imageFile' }]),
     }
 });
 
+// Directory to save requests
+const requestsDir = path.join(__dirname, 'requests');
+if (!fs.existsSync(requestsDir)) {
+    fs.mkdirSync(requestsDir, { recursive: true }); // Create directory if it doesn't exist
+}
+
+// File to store requests
+const requestsFile = path.join(requestsDir, 'requests.json');
+if (!fs.existsSync(requestsFile)) {
+    fs.writeFileSync(requestsFile, JSON.stringify([]), 'utf8'); // Initialize with an empty array
+}
+
+// Endpoint to handle sound requests
+app.post('/request-sound', (req, res) => {
+    const { category, file, contexts } = req.body;
+    // Validate required fields
+    if (!category || !file || !contexts) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Read existing requests
+    let requests = [];
+    try {
+        const data = fs.readFileSync(requestsFile, 'utf8');
+        requests = JSON.parse(data);
+    } catch (error) {
+        console.error('Error reading requests file:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
+    // Create a new request object
+    const newRequest = {
+        category,
+        file,
+        contexts,
+        timestamp: new Date().toISOString()
+    };
+
+    // Add the new request to the array
+    requests.push(newRequest);
+
+    // Write the updated requests back to the file
+    try {
+        fs.writeFileSync(requestsFile, JSON.stringify(requests, null, 2), 'utf8');
+        res.status(201).json({ message: 'Sound request added successfully' });
+    } catch (error) {
+        console.error('Error writing to requests file:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Endpoint for admin to retrieve requests
+app.get('/get-requests', async (req, res) => {
+    const idToken = req.headers.authorization?.split(' ')[1];
+    if (!idToken) {
+        return res.status(400).json({ error: 'Missing ID token' });
+    }
+
+    try {
+        const payload = await verifyIdToken(idToken);
+        // Assuming admin users have a specific role or claim in the token
+        const isAdmin = isAdminUser(payload);
+
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
+        // Read existing requests
+        let requests = [];
+        try {
+            const data = fs.readFileSync(requestsFile, 'utf8');
+            requests = JSON.parse(data);
+        } catch (error) {
+            console.error('Error reading requests file:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+
+        res.json(requests);
+    } catch (error) {
+        console.error('Error verifying ID token:', error);
+        res.status(401).json({ error: 'Invalid ID token' });
+    }
+});
+
+// Endpoint to update (remove) a request
+app.post('/close-request', async (req, res) => {
+    const { idToken, requestId } = req.body;
+    console.log("close-request requestId : " + requestId);
+    // Validate required fields
+    if (!idToken || !requestId) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    try {
+        const payload = await verifyIdToken(idToken);
+        // Assuming admin users have a specific role or claim in the token
+        const isAdmin = isAdminUser(payload);
+
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
+        // Read existing requests
+        let requests = [];
+        try {
+            const data = fs.readFileSync(requestsFile, 'utf8');
+            requests = JSON.parse(data);
+        } catch (error) {
+            console.error('Error reading requests file:', error);
+            return res.status(500).json({ error: 'Internal Server Error' });
+        }
+
+        // Find the request by ID and remove it
+        requests = requests.filter(request => request.timestamp !== requestId);
+
+        // Write the updated requests back to the file
+        try {
+            fs.writeFileSync(requestsFile, JSON.stringify(requests, null, 2), 'utf8');
+            res.status(200).json({ message: 'Request removed successfully' });
+        } catch (error) {
+            console.error('Error writing to requests file:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    } catch (error) {
+        console.error('Error verifying ID token:', error);
+        res.status(401).json({ error: 'Invalid ID token' });
+    }
+});
+
 app.listen(3000, '0.0.0.0', () => console.log('Server started on port 3000'));
 
 

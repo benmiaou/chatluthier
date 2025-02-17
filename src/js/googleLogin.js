@@ -9,6 +9,7 @@ export const GoogleLogin = {
     isSignedIn: false,
     Token: "",
     userId: null, // To store the unique user ID
+    userMail: "",
 
     initGoogleIdentityServices() {
         if (typeof google === 'undefined') {
@@ -49,7 +50,11 @@ export const GoogleLogin = {
         if (button) {
             button.style.display = 'inline-block';
         }
-        button = document.getElementById('openAddsoundModalAdminButton');
+        button = document.getElementById('openAddSoundModalAdminButton');
+        if (button) {
+            button.style.display = 'inline-block';
+        }
+        button = document.getElementById('openRequestSoundModalAdminButton');
         if (button) {
             button.style.display = 'inline-block';
         }
@@ -86,6 +91,7 @@ export const GoogleLogin = {
         // Extract the payload from the token (for local use, e.g. to update UI)
         const payload = JSON.parse(atob(response.credential.split('.')[1]));
         this.userId = payload.sub;
+        this.userMail = payload.email;
         console.log("Local user ID:", this.userId);
     
         // Save session details in localStorage
@@ -138,6 +144,8 @@ export const GoogleLogin = {
         this.isSignedIn = false;
         this.idToken = "";
         this.userId = null;
+        this.userMail = "";
+
 
         // Clear session details from localStorage
         localStorage.removeItem('googleLoginState');
@@ -187,6 +195,7 @@ export const GoogleLogin = {
             isSignedIn: this.isSignedIn,
             idToken: this.idToken,
             userId: this.userId,
+            userMail : this.userMail
         };
         console.log('Saving session');
         localStorage.setItem('googleLoginState', JSON.stringify(sessionData));
@@ -199,11 +208,12 @@ export const GoogleLogin = {
             return; // Exit early if sessionData is null or undefined
         }
         console.log('Restoring session');
-        const { isSignedIn, idToken, userId } = JSON.parse(sessionData);
-        if (isSignedIn && idToken && userId) {
+        const { isSignedIn, idToken, userId, userMail } = JSON.parse(sessionData);
+        if (isSignedIn && idToken && userId && userMail) {
             this.isSignedIn = isSignedIn;
             this.idToken = idToken;
             this.userId = userId;
+            this.userMail = userMail;
             this.updateLoginButton();
     
             // Verify the saved token with the server to ensure it's still valid

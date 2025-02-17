@@ -30,10 +30,12 @@
             <div class="menu-dropdown">
                 <button class="menu-button" id="toggleMenu">☰</button>
                 <div class="menu-content" id="menu-content">
+                    <button id="requestsoundButton">Request a sound</button>
                     <button id="google-login-button">Login with Google</button>
                     <button id="openEditSoundUserModal" style="display: none;">Edit Music</button>
                     <button id="openEditSoundAdminModal" style="display: none;">Edit Music GLOBAL (ADMIN)</button>
-                    <button id="openAddsoundModalAdminButton" style="display: none;">Add sound (ADMIN)</button>
+                    <button id="openAddSoundModalAdminButton" style="display: none;">Add sound (ADMIN)</button>
+                    <button id="openRequestSoundModalAdminButton" style="display: none;">Review sound (ADMIN)</button>
                 </div>
             </div>
         </div>
@@ -74,8 +76,26 @@
         <div id="add-sound-modal" class="add-sound-modal" style="display: none;">
             <div class="modal-header">
                 <span class="close-btn" id="closeAddSoundModal">&times;</span> <!-- Close button -->
-                <h2>Add Sounds</h2>
+                <h2>Add Sound</h2>
                 <div class="modal-body" id="add-sound-form-container">
+                </div>
+            </div>
+        </div>
+         <!-- Full-screen modal for displaying multiple sounds by line -->
+         <div id="request-sound-modal" class="add-sound-modal" style="display: none;">
+            <div class="modal-header">
+                <span class="close-btn" id="closeRequestsoundButton">&times;</span> <!-- Close button -->
+                <h2>Request Sound</h2>
+                <div class="modal-body" id="request-sound-form-container">
+                </div>
+            </div>
+        </div>
+         <!-- Full-screen modal for displaying multiple sounds by line -->
+         <div id="request-sound-modal-admin" class="add-sound-modal" style="display: none;">
+            <div class="modal-header">
+                <span class="close-btn" id="closeRequestSoundModalButton">&times;</span> <!-- Close button -->
+                <h2>Request :</h2>
+                <div class="modal-body" id="request-sound-form-container-admin">
                 </div>
             </div>
         </div>
