@@ -14,6 +14,10 @@ async function verifyIdToken(token) {
     return ticket.getPayload();
 }
 
+async function verifyjwt(accessToken) {
+    return jwt.verify(accessToken, accessTokenSecret);
+}
+
 async function verifyLogin(req, res) {
     const { idToken } = req.body;
     if (!idToken) {
@@ -23,7 +27,7 @@ async function verifyLogin(req, res) {
         const payload = await verifyIdToken(idToken);
         const userId = payload.sub;
         const email = payload.email;
-        const isAdmin = isAdminUser(payload);
+        const isAdmin = isAdminUser(userId);
 
         const accessToken = jwt.sign({ userId, email, isAdmin }, accessTokenSecret, { expiresIn: '1h' });
         const refreshToken = jwt.sign({ userId, email, isAdmin }, refreshTokenSecret, { expiresIn: '7d' });
@@ -85,4 +89,5 @@ module.exports = {
     refreshToken,
     checkSession,
     logout,
+    verifyjwt,
 };

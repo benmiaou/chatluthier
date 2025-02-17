@@ -341,8 +341,6 @@ function addContext(contextsContainer, soundType) {
 
 function updateMainPlaylist(currentEditArray, currentSoundType) {
     const updatedData = {
-        userId: GoogleLogin.userId,
-        idToken: GoogleLogin.idToken,
         sounds: currentEditArray,
         soundsType: currentSoundType,
     };
@@ -352,6 +350,7 @@ function updateMainPlaylist(currentEditArray, currentSoundType) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(updatedData),
+        credentials: 'include', 
     })
     .then(response => response.json())
     .then(data => {

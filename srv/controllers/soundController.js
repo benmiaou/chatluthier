@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { verifyIdToken } = require('./authController');
+const { verifyjwt } = require('./authController');
 const { isAdminUser } = require('../utils/tokenUtils');
 
 function getData(userId, filename) {
@@ -18,19 +18,16 @@ function getData(userId, filename) {
 }
 
 async function updateMainPlaylist(req, res) {
-    const { userId, idToken, soundsType, sounds } = req.body;
-
-    if (!idToken) {
+    const { soundsType, sounds } = req.body;
+    const accessToken = req.cookies.accessToken;
+    if (!accessToken) {
         return res.status(400).json({ error: 'Missing ID token or updated playlist.' });
     }
 
     try {
-        const payload = await verifyIdToken(idToken);
-        if (userId != payload.sub) {
-            return res.status(403).json({ error: 'User is not authorized to edit the main playlist.' });
-        }
-
-        const isAdmin = isAdminUser(payload);
+        const payload = await verifyjwt(accessToken);
+        const userId = payload.userId;
+        const isAdmin = isAdminUser(userId);
         if (!isAdmin) {
             return res.status(403).json({ error: 'User is not authorized to edit the main playlist.' });
         }

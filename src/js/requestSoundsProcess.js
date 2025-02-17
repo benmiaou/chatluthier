@@ -75,20 +75,10 @@ function displayRequest(request) {
 
 // Function to retrieve and display requests
 async function fetchAndDisplayRequests() {
-    const token = GoogleLogin.idToken;
-
-    if (!token) {
-        console.error('Token is not available');
-        alert('Token is not available. Please log in again.');
-        return;
-    }
-
     try {
         const response = await fetch('/get-requests', {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            credentials: 'include', 
         });
         const requests = await response.json();
         if (response.ok) {
@@ -110,7 +100,6 @@ async function fetchAndDisplayRequests() {
 // Function to update (remove) a request
 async function closeRequest(requestId) {
     const updatedData = {
-        idToken: GoogleLogin.idToken,
         requestId: requestId,
         };
 
@@ -121,6 +110,7 @@ async function closeRequest(requestId) {
                 'Content-Type': 'application/json',
             },
             body:  JSON.stringify(updatedData),
+            credentials: 'include', 
         });
 
         const data = await response.json();

@@ -1,13 +1,13 @@
 const jwt = require('jsonwebtoken');
-const { accessTokenSecret } = require('./config/secrets')();
+const { verifyjwt } = require('./authController');
 
-function authenticateToken(req, res, next) {
+async function authenticateToken(req, res, next) {
     const accessToken = req.cookies.accessToken;
     if (!accessToken) {
         return res.status(401).json({ error: 'Unauthorized' });
     }
     try {
-        const payload = jwt.verify(accessToken, accessTokenSecret);
+        const payload = await verifyjwt(accessToken);
         req.user = payload;
         next();
     } catch (error) {

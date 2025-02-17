@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const { verifyIdToken } = require('./authController');
 const { isAdminUser } = require('../utils/tokenUtils');
+const { verifyjwt } = require('./authController');
 
 const requestsDir = path.join(__dirname, '..', 'requests');
 const requestsFile = path.join(requestsDir, 'requests.json');
@@ -48,15 +48,16 @@ async function addSoundRequest(req, res) {
 }
 
 async function getRequests(req, res) {
-    const idToken = req.headers.authorization?.split(' ')[1];
-    if (!idToken) {
+    const accessToken = req.cookies.accessToken;
+    if (!accessToken) {
         return res.status(400).json({ error: 'Missing ID token' });
     }
 
     try {
-        const payload = await verifyIdToken(idToken);
-        const isAdmin = isAdminUser(payload);
-
+        const payload = await verifyjwt(accessToken)
+        const userId = payload.userId;
+        const isAdmin = isAdminUser(userId);
+        console.log("isAdmin : " + isAdmin)
         if (!isAdmin) {
             return res.status(403).json({ error: 'Unauthorized' });
         }
@@ -78,14 +79,16 @@ async function getRequests(req, res) {
 }
 
 async function closeRequest(req, res) {
-    const { idToken, requestId } = req.body;
-    if (!idToken || !requestId) {
+    const { requestId } = req.body;
+    const accessToken = req.cookies.accessToken;
+    if (!accessToken || !requestId) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
     try {
-        const payload = await verifyIdToken(idToken);
-        const isAdmin = isAdminUser(payload);
+        const payload = await verifyjwt(accessToken);
+        const userId = payload.userId;
+        const isAdmin = isAdminUser(userId);
 
         if (!isAdmin) {
             return res.status(403).json({ error: 'Unauthorized' });
