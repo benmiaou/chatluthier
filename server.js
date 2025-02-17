@@ -3,11 +3,31 @@ const fs = require('fs');
 const path = require('path');
 const cors = require('cors'); // Import CORS module
 const multer = require('multer');
+const cookieParser = require('cookie-parser');
 const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 // Replace with your actual client ID from Google Cloud Console
 const CLIENT_ID = '793652859374-lvh19kj1d49a33cola5ui3tsj1hsg2li.apps.googleusercontent.com';
 const client = new OAuth2Client(CLIENT_ID);
+
+// Function to load secrets from the Tokens file
+function loadSecrets() {
+    const filePath = path.join(__dirname, 'Tokens');
+    try {
+        const data = fs.readFileSync(filePath, 'utf8');
+        const secrets = JSON.parse(data);
+        return {
+            accessTokenSecret: secrets.ACCESS_TOKEN_SECRET,
+            refreshTokenSecret: secrets.REFRESH_TOKEN_SECRET,
+        };
+    } catch (error) {
+        console.error('Error loading secrets:', error);
+        throw new Error('Failed to load secrets');
+    }
+}
+
+// Load secrets
+const { accessTokenSecret, refreshTokenSecret } = loadSecrets();
 
 // Load admin Google IDs from a file
 let adminGoogleIds = [];
@@ -39,7 +59,6 @@ fs.watch(adminIdsFilePath, (eventType, filename) => {
   }
 });
 
-
 // Define a helper function to verify the token
 async function verifyIdToken(token) {
     const ticket = await client.verifyIdToken({
@@ -51,12 +70,10 @@ async function verifyIdToken(token) {
     return payload;
 }
 
-
 const app = express();
-
+app.use(cookieParser());
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Middleware for parsing JSON bodies
-// Serve static files from the 'public' directory where 'index.html' is located
 app.use(express.static(path.join(__dirname, 'dist')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use((req, res, next) => {
@@ -319,12 +336,8 @@ app.post('/verify-login', async (req, res) => {
         const email = payload.email;
         const isAdmin = isAdminUser(payload);
 
-        // Generate a JWT token with user info
-        const accessToken = jwt.sign({ userId, email, isAdmin }, 'your_jwt_secret', { expiresIn: '1h' });
-        const refreshToken = jwt.sign({ userId, email, isAdmin }, 'your_jwt_refresh_secret', { expiresIn: '7d' });
-
-        // Store refresh token securely (e.g., in a database)
-        // For simplicity, we'll send it back to the client
+        const accessToken = jwt.sign({ userId, email, isAdmin }, accessTokenSecret, { expiresIn: '1h' });
+        const refreshToken = jwt.sign({ userId, email, isAdmin }, refreshTokenSecret, { expiresIn: '7d' });
 
         res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
         res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
@@ -342,14 +355,39 @@ app.post('/refresh-token', (req, res) => {
         return res.status(401).json({ error: 'No refresh token provided.' });
     }
     try {
-        const payload = jwt.verify(refreshToken, 'your_jwt_refresh_secret');
-        const accessToken = jwt.sign({ userId: payload.userId, email: payload.email, isAdmin: payload.isAdmin }, 'your_jwt_secret', { expiresIn: '1h' });
+        const payload = jwt.verify(refreshToken, refreshTokenSecret);
+        const accessToken = jwt.sign({ userId: payload.userId, email: payload.email, isAdmin: payload.isAdmin }, accessTokenSecret, { expiresIn: '1h' });
         res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
         return res.json({ accessToken });
     } catch (error) {
         console.error('Refresh token verification failed:', error);
         return res.status(401).json({ error: 'Refresh token verification failed.' });
     }
+});
+
+app.get('/check-session', (req, res) => {
+    const accessToken = req.cookies.accessToken;
+    if (!accessToken) {
+        return res.status(401).json({ isSignedIn: false });
+    }
+    try {
+        const payload = jwt.verify(accessToken, accessTokenSecret);
+        return res.json({
+            isSignedIn: true,
+            userId: payload.userId,
+            email: payload.email,
+            isAdmin: payload.isAdmin,
+        });
+    } catch (error) {
+        console.error('Session verification failed:', error);
+        return res.status(401).json({ isSignedIn: false });
+    }
+});
+
+app.post('/logout', (req, res) => {
+    res.clearCookie('accessToken', { httpOnly: true, secure: true });
+    res.clearCookie('refreshToken', { httpOnly: true, secure: true });
+    return res.json({ message: 'Logged out successfully' });
 });
 
 app.post('/add-sound', upload.fields([{ name: 'file' }, { name: 'imageFile' }]), async (req, res) => {

@@ -135,6 +135,8 @@ deploy.bat
 serviceAccountKey.json
 user_data
 backup.bat
+copyFiles.bat
+Tokens
 # Jetbrains
 .idea*
 
