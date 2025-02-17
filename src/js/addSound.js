@@ -291,8 +291,6 @@ async function handleAddSoundFormSubmit(event) {
     formData.append('display_name', displayName);
     formData.append('contexts', contexts);
     formData.append('credit', credit);
-    formData.append('userId', GoogleLogin.userId);
-    formData.append('idToken', GoogleLogin.idToken);
 
     if (category === 'ambiancesounds') {
         const imageFile = imageInput.files[0];
@@ -302,7 +300,8 @@ async function handleAddSoundFormSubmit(event) {
     try {
         const response = await fetch('/add-sound', {
             method: 'POST',
-            body: formData
+            body: formData,
+            credentials: 'include', 
         });
 
         const data = await response.json();

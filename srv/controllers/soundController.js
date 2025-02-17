@@ -17,6 +17,80 @@ function getData(userId, filename) {
     return defaultArray;
 }
 
+async function addSound(req, res) {
+    const { category, display_name, contexts, credit } = req.body;
+    const accessToken = req.cookies.accessToken;
+    const file = req.files['file'][0];
+    const imageFile = req.files['imageFile'] ? req.files['imageFile'][0] : null;
+
+    if (!accessToken) {
+        return res.status(400).json({ error: 'Missing ID token or updated playlist.' });
+    }
+
+    try {
+        const payload = await verifyjwt(accessToken);
+        const userId = payload.userId;
+        const isAdmin = isAdminUser(userId);
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'User is not authorized to edit the main playlist.' });
+        }
+
+        const assetsDir = path.join(__dirname, '../..', 'assets');
+        let soundFilePath, imageFilePath;
+
+        const sanitizedFileName = file.originalname.replace(/ /g, '_');
+        const sanitizedImageFileName = imageFile ? imageFile.originalname.replace(/ /g, '_') : null;
+
+        switch (category) {
+            case 'backgroundmusic':
+                soundFilePath = path.join(assetsDir, 'background', sanitizedFileName);
+                break;
+            case 'ambiancesounds':
+                soundFilePath = path.join(assetsDir, 'ambiance', sanitizedFileName);
+                if (imageFile) {
+                    imageFilePath = path.join(assetsDir, 'images', 'backgrounds', sanitizedImageFileName);
+                }
+                break;
+            case 'soundboard':
+                soundFilePath = path.join(assetsDir, 'soundboard', sanitizedFileName);
+                break;
+            default:
+                return res.status(400).json({ error: 'Invalid sound category.' });
+        }
+
+        fs.renameSync(file.path, soundFilePath);
+        if (imageFile) {
+            fs.renameSync(imageFile.path, imageFilePath);
+        }
+
+        const jsonFilePath = path.join(__dirname, '..', 'srv_data', `${category}.json`);
+        let sounds = [];
+        if (fs.existsSync(jsonFilePath)) {
+            sounds = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
+        }
+
+        const newSound = {
+            filename: sanitizedFileName,
+            display_name: display_name,
+            contexts: contexts.split(',').map(context => context.trim()),
+            credit: credit
+        };
+
+        if (imageFile) {
+            newSound.imageFile = sanitizedImageFileName;
+        }
+
+        sounds.push(newSound);
+        fs.writeFileSync(jsonFilePath, JSON.stringify(sounds, null, 2));
+
+        return res.json({ message: 'Sound added successfully.' });
+    } catch (error) {
+        console.error('Error adding sound:', error);
+        return res.status(500).json({ error: 'Failed to add sound.' });
+    }
+}
+
+
 async function updateMainPlaylist(req, res) {
     const { soundsType, sounds } = req.body;
     const accessToken = req.cookies.accessToken;
@@ -129,4 +203,5 @@ module.exports = {
     updateUserSound,
     savePreset,
     loadPresets,
+    addSound,
 };
