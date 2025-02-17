@@ -62,6 +62,22 @@ export const GoogleLogin = {
             return null;
         }
     },
+    
+    loginInitUI()
+    {
+        console.log("loginInitUI")
+         // Update UI (buttons, sounds, etc.)
+         this.updateLoginButton();
+         BackgroundMusic.preloadBackgroundSounds();
+         SoundBoard.loadSoundboardButtons();
+         AmbianceSounds.loadAmbianceButtons();
+ 
+         // Make the "Edit Music" button visible
+         const editMusicButton = document.getElementById('openEditSoundUserModal');
+         if (editMusicButton) {
+             editMusicButton.style.display = 'inline-block';
+         }
+    },
 
     handleCredentialResponse(response) {
         this.isSignedIn = true;
@@ -71,17 +87,7 @@ export const GoogleLogin = {
         this.userId = payload.sub;
         this.userMail = payload.email;
 
-        // Update UI (buttons, sounds, etc.)
-        this.updateLoginButton();
-        BackgroundMusic.preloadBackgroundSounds();
-        SoundBoard.loadSoundboardButtons();
-        AmbianceSounds.loadAmbianceButtons();
-
-        // Make the "Edit Music" button visible
-        const editMusicButton = document.getElementById('openEditSoundUserModal');
-        if (editMusicButton) {
-            editMusicButton.style.display = 'inline-block';
-        }
+        this.loginInitUI();
 
         // Send token to server for verification
         this.sendTokenToServer(response.credential)
@@ -160,6 +166,7 @@ export const GoogleLogin = {
                 this.isSignedIn = true;
                 this.userId = data.userId;
                 this.userMail = data.userMail;
+                this.loginInitUI();
                 this.updateLoginButton();
                 if (data.isAdmin) {
                     this.displayAdminFunctions();

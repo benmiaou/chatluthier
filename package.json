@@ -6,8 +6,8 @@
   "scripts": {
     "build": "webpack --config webpack.config.js",
     "watch": "webpack --watch --config webpack.config.js",
-    "start": "webpack --config webpack.config.js && node server.js",
-    "dev": "node server.js",
+    "start": "webpack --config webpack.config.js && node srv/server.js",
+    "dev": "node srv/server.js",
     "local": "npm run dev",
     "npm:local": "npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
