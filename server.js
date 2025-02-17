@@ -4,6 +4,7 @@ const path = require('path');
 const cors = require('cors'); // Import CORS module
 const multer = require('multer');
 const { OAuth2Client } = require('google-auth-library');
+const jwt = require('jsonwebtoken');
 // Replace with your actual client ID from Google Cloud Console
 const CLIENT_ID = '793652859374-lvh19kj1d49a33cola5ui3tsj1hsg2li.apps.googleusercontent.com';
 const client = new OAuth2Client(CLIENT_ID);
@@ -306,30 +307,48 @@ function isAdminUser(payload) {
     // Check if the Google user ID (payload.sub) is in your list of admin IDs
     return adminGoogleIds.includes(payload.sub);
 }
+
 app.post('/verify-login', async (req, res) => {
-    const { idToken } = req.body; // Ensure your client sends the token in the body
+    const { idToken } = req.body;
     if (!idToken) {
         return res.status(400).json({ error: 'No ID token provided.' });
     }
     try {
         const payload = await verifyIdToken(idToken);
-        const userId = payload.sub;  // The unique Google user ID
+        const userId = payload.sub;
         const email = payload.email;
-
-        // Check if this user should have admin rights
         const isAdmin = isAdminUser(payload);
 
-        // You can now generate your own session or JWT that includes role info.
-        // For example, you might respond with the user info and role:
-        return res.json({
-            userId,
-            email,
-            isAdmin,
-            // Optionally include other payload details here.
-        });
+        // Generate a JWT token with user info
+        const accessToken = jwt.sign({ userId, email, isAdmin }, 'your_jwt_secret', { expiresIn: '1h' });
+        const refreshToken = jwt.sign({ userId, email, isAdmin }, 'your_jwt_refresh_secret', { expiresIn: '7d' });
+
+        // Store refresh token securely (e.g., in a database)
+        // For simplicity, we'll send it back to the client
+
+        res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
+        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
+
+        return res.json({ userId, email, isAdmin });
     } catch (error) {
         console.error('Token verification failed:', error);
         return res.status(401).json({ error: 'Token verification failed.' });
+    }
+});
+
+app.post('/refresh-token', (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+        return res.status(401).json({ error: 'No refresh token provided.' });
+    }
+    try {
+        const payload = jwt.verify(refreshToken, 'your_jwt_refresh_secret');
+        const accessToken = jwt.sign({ userId: payload.userId, email: payload.email, isAdmin: payload.isAdmin }, 'your_jwt_secret', { expiresIn: '1h' });
+        res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
+        return res.json({ accessToken });
+    } catch (error) {
+        console.error('Refresh token verification failed:', error);
+        return res.status(401).json({ error: 'Refresh token verification failed.' });
     }
 });
 

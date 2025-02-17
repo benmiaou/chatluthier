@@ -41,6 +41,12 @@ export const GoogleLogin = {
             document.getElementById('google-login-button'),
             { theme: 'outline', size: 'medium' } // customization attributes
         );
+
+        setInterval(() => {
+            if (this.isSignedIn) {
+                this.refreshAccessToken();
+            }
+        }, 50 * 60 * 1000); // Refresh every 50 minutes
     },
 
     displayAdminFunctions()
@@ -187,6 +193,25 @@ export const GoogleLogin = {
         } else {
             // The button is rendered in initGoogleIdentityServices
             // No action needed here
+        }
+    },
+
+    async refreshAccessToken() {
+        try {
+            const response = await fetch('/refresh-token', {
+                method: 'POST',
+                credentials: 'include', // Include cookies in the request
+            });
+            if (!response.ok) {
+                throw new Error('Failed to refresh access token.');
+            }
+            const data = await response.json();
+            this.idToken = data.accessToken;
+            this.isSignedIn = true;
+            this.updateLoginButton();
+        } catch (error) {
+            console.error('Error refreshing access token:', error);
+            this.handleLogout();
         }
     },
 

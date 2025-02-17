@@ -36,6 +36,22 @@ async function displayAllSounds() {
 
 
     currentEditArray.forEach((sound, index) => {
+        if(sound.isEnabled === undefined)
+            sound.isEnabled = true;
+
+        // Sort currentEditArray by display_name in alphabetical order
+        currentEditArray.sort((a, b) => {
+            const nameA = a.display_name.toUpperCase(); // Ignore case
+            const nameB = b.display_name.toUpperCase(); // Ignore case
+            if (nameA < nameB) {
+                return -1;
+            }
+            if (nameA > nameB) {
+                return 1;
+            }
+            return 0;
+        });
+
         const soundItem = document.createElement('div');
         soundItem.className = 'sound-item';
 
@@ -217,16 +233,21 @@ async function displayAllSounds() {
 
         const enableToggleWrapper = document.createElement('div');
         enableToggleWrapper.style.display = 'flex';
-        enableToggleWrapper.style.justifyContent = 'center';
+        enableToggleWrapper.style.justifyContent = 'center'; 
         enableToggleWrapper.style.alignItems = 'center';
         enableToggleWrapper.style.marginTop = '10px';
-
-        const enableToggle = document.createElement('button');
-        enableToggle.textContent = sound.isEnabled !== false ? 'Disable' : 'Enable';
-        enableToggle.className = 'button-primary';
-        enableToggle.style.width = '100px';
-        enableToggle.onclick = () => toggleEnableSound(index, enableToggle);
-        enableToggleWrapper.appendChild(enableToggle);
+        
+        const enableLabel = document.createElement('label');
+        enableLabel.textContent = 'Enabled: ';
+        enableLabel.style.marginRight = '10px';
+        
+        const enableCheckbox = document.createElement('input');
+        enableCheckbox.type = 'checkbox';
+        enableCheckbox.checked = sound.isEnabled !== false;
+        enableCheckbox.onclick = () => toggleEnableSound(index, enableCheckbox, soundItem);
+        
+        enableToggleWrapper.appendChild(enableLabel);
+        enableToggleWrapper.appendChild(enableCheckbox);
 
 
         soundItem.innerHTML = `
@@ -243,16 +264,21 @@ async function displayAllSounds() {
         `;
 
         // Append the actual input elements to the corresponding placeholders
-        const displayNameLabel = soundItem.querySelector('div:nth-child(1) label');
         const displayNameInputPlaceholder = soundItem.querySelector('div:nth-child(1) input');
         displayNameInputPlaceholder.replaceWith(displayNameInput);
 
-        const creditsLabel = soundItem.querySelector('div:nth-child(2) label');
         const creditsInputPlaceholder = soundItem.querySelector('div:nth-child(2) input');
         creditsInputPlaceholder.replaceWith(creditsInput);
 
-        soundItem.append(contextsContainer, buttonWrapper, updateWrapper, playerControls, progressBar, enableToggleWrapper);
+        soundItem.append(contextsContainer, buttonWrapper, enableToggleWrapper, updateWrapper, playerControls, progressBar);
         soundsList.appendChild(soundItem);
+
+         // Adjust the styling of the soundItem based on its enabled state
+         if (currentEditArray[index].isEnabled) {
+            soundItem.style.filter = 'grayscale(0)';
+        } else {
+            soundItem.style.filter = 'grayscale(50%)';
+        }
     });
 }
 
@@ -504,10 +530,17 @@ function closeEditSoundModalAdmin() {
     isAdminEditVisible = false;
 }
 
-function toggleEnableSound(index, enableToggle) {
+function toggleEnableSound(index, enableCheckbox, soundItem) {
     if (index >= 0 && index < currentEditArray.length) {
-        currentEditArray[index].isEnabled = !currentEditArray[index].isEnabled;
-        enableToggle.textContent = currentEditArray[index].isEnabled ? 'Disable' : 'Enable';
+        currentEditArray[index].isEnabled = enableCheckbox.checked;
+
+        // Adjust the styling of the soundItem based on its enabled state
+        if (currentEditArray[index].isEnabled) {
+            soundItem.style.filter = 'grayscale(0)';
+        } else {
+            soundItem.style.filter = 'grayscale(50%)';
+        }
     }
 }
+
 export {  openEditSoundModalAdmin, closeEditSoundModalAdmin, displaySoundsAdmin, isAdminEditVisible };

@@ -54,8 +54,22 @@ function displayAllSounds() {
             currentEditArray = SoundBoard.soundboardItems;
             break;
     }
+    // Sort currentEditArray by display_name in alphabetical order
+    currentEditArray.sort((a, b) => {
+        const nameA = a.display_name.toUpperCase(); // Ignore case
+        const nameB = b.display_name.toUpperCase(); // Ignore case
+        if (nameA < nameB) {
+            return -1;
+        }
+        if (nameA > nameB) {
+            return 1;
+        }
+        return 0;
+    });
 
     currentEditArray.forEach((sound, index) => {
+        if(sound.isEnabled === undefined)
+            sound.isEnabled = true;
         const soundItem = document.createElement('div');
         soundItem.className = 'sound-item';
 
@@ -147,12 +161,29 @@ function displayAllSounds() {
         addContextButton.onclick = () => addContext(contextsContainer, currentSoundType);
         buttonWrapper.appendChild(addContextButton);
 
+        const enableToggleWrapper = document.createElement('div');
+        enableToggleWrapper.style.display = 'flex';
+        enableToggleWrapper.style.justifyContent = 'center';
+        enableToggleWrapper.style.alignItems = 'center';
+        enableToggleWrapper.style.marginTop = '10px';
+
+        const enableLabel = document.createElement('label');
+        enableLabel.textContent = 'Enabled: ';
+        enableLabel.style.marginRight = '10px';
+
+        const enableCheckbox = document.createElement('input');
+        enableCheckbox.type = 'checkbox';
+        enableCheckbox.checked = sound.isEnabled !== false;
+        enableCheckbox.onclick = () => toggleEnableSound(index, enableCheckbox, soundItem);
+
+        enableToggleWrapper.appendChild(enableLabel);
+        enableToggleWrapper.appendChild(enableCheckbox);
+
         const updateButton = document.createElement('button');
         updateButton.className = 'update-button';
         updateButton.textContent = "Update";
         updateButton.style.width = '100px';
         updateButton.onclick = () => updateSound(index, contextsContainer);
-        buttonWrapper.appendChild(updateButton);
 
         const playerControls = document.createElement('div');
         playerControls.style.display = 'flex';
@@ -191,20 +222,7 @@ function displayAllSounds() {
         progressBar.style.marginTop = '10px';
         progressBar.addEventListener('input', () => seekSound(sound.filename, progressBar.value));
 
-        const enableToggleWrapper = document.createElement('div');
-        enableToggleWrapper.style.display = 'flex';
-        enableToggleWrapper.style.justifyContent = 'center';
-        enableToggleWrapper.style.alignItems = 'center';
-        enableToggleWrapper.style.marginTop = '10px';
-
-        const enableToggle = document.createElement('button');
-        enableToggle.textContent = sound.isEnabled !== false ? 'Disable' : 'Enable';
-        enableToggle.className = 'button-primary';
-        enableToggle.style.width = '100px';
-        enableToggle.onclick = () => toggleEnableSound(index, enableToggle);
-        enableToggleWrapper.appendChild(enableToggle);
-
-        soundItem.append(displayName, credits, contextsContainer, buttonWrapper, playerControls, progressBar, enableToggleWrapper);
+        soundItem.append(displayName, credits, contextsContainer, buttonWrapper, enableToggleWrapper, updateButton, playerControls, progressBar);
         soundsList.appendChild(soundItem);
     });
 }
@@ -341,13 +359,18 @@ async function updateSound(index, contextsContainer) {
     displayAllSounds();
 }
 
-function toggleEnableSound(index, enableToggle) {
+function toggleEnableSound(index, enableCheckbox, soundItem) {
     if (index >= 0 && index < currentEditArray.length) {
-        currentEditArray[index].isEnabled = !currentEditArray[index].isEnabled;
-        enableToggle.textContent = currentEditArray[index].isEnabled ? 'Disable' : 'Enable';
+        currentEditArray[index].isEnabled = enableCheckbox.checked;
+
+        // Adjust the styling of the soundItem based on its enabled state
+        if (currentEditArray[index].isEnabled) {
+            soundItem.style.filter = 'grayscale(0)';
+        } else {
+            soundItem.style.filter = 'grayscale(50%)';
+        }
     }
 }
-
 function togglePlayPause(playButton, filename, progressBar) {
     if (currentAudio && decodeURIComponent(currentAudio.src).includes(decodeURIComponent(filename))) {
         if (currentAudio.paused) {
