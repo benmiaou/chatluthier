@@ -308,7 +308,7 @@ async function handleAddSoundFormSubmit(event) {
         if (response.ok) {
             console.log('Success:', data);
             alert('New sound entry added successfully!');
-            // Optionally, clear the form or update the UI
+            displayAddSoundForm();
         } else {
             console.error('Error:', data);
             alert('There was an error adding the sound entry.');
