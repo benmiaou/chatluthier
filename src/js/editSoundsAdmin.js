@@ -376,7 +376,8 @@ function updateMainPlaylist(currentEditArray, currentSoundType) {
     .then(response => response.json())
     .then(data => {
         if (data.message) {
-            console.log(data.message);
+            console.log('Changes sent to server successfully');
+            displayAllSounds();
         } else {
             console.error('Error updating main playlist:', data.error);
         }
@@ -444,7 +445,6 @@ function updateSound(index, contextsContainer, displayNameInput, creditsInput, i
     } else {
         console.error('User ID is not available');
     }
-    displayAllSounds();
 }
 
 function deleteSound(index) {
