@@ -274,7 +274,8 @@ async function displayAllSounds() {
         deleteButton.textContent = "Delete";
         deleteButton.style.alignItems = 'center';
         deleteButton.style.width = '100px';
-
+        deleteButton.onclick = () => deleteSound(index);
+        
         // Create a div for the progress bar
         const progressBarContainer = document.createElement('div');
         progressBarContainer.style.marginTop = '10px';
