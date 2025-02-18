@@ -137,9 +137,9 @@ function displayAddSoundForm() {
         const selectedCategory = categorySelect.value;
         contextsContainer.innerHTML = ''; // Clear existing context editor
 
-        if (selectedCategory === 'backgroundmusic') {
+        if (selectedCategory === 'backgroundMusic') {
             displayBackgroundMusicContextEditor();
-        } else if (selectedCategory === 'ambiancesounds') {
+        } else if (selectedCategory === 'ambianceSounds') {
             displayAmbianceSoundsContextEditor();
         } else if (selectedCategory === 'soundboard') {
             displaySoundboardContextEditor();
@@ -155,7 +155,7 @@ function displayAddSoundForm() {
         addContextButton.textContent = 'Add Context';
         addContextButton.className = "button-primary";
         addContextButton.style.marginBottom = '20px';
-        addContextButton.onclick = () => addContext('backgroundmusic');
+        addContextButton.onclick = () => addContext('backgroundMusic');
         contextsContainer.appendChild(addContextButton);
     }
 
@@ -276,7 +276,7 @@ async function handleAddSoundFormSubmit(event) {
         return;
     }
 
-    if (category === 'ambiancesounds') {
+    if (category === 'ambianceSounds') {
         const imageInput = document.getElementById('imageInput');
         if (imageInput.files.length === 0) {
             alert('Please select an image file.');
@@ -292,7 +292,7 @@ async function handleAddSoundFormSubmit(event) {
     formData.append('contexts', contexts);
     formData.append('credit', credit);
 
-    if (category === 'ambiancesounds') {
+    if (category === 'ambianceSounds') {
         const imageFile = imageInput.files[0];
         formData.append('imageFile', imageFile);
     }

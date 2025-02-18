@@ -110,10 +110,10 @@ async function addSound(req, res) {
         const sanitizedImageFileName = imageFile ? imageFile.originalname.replace(/ /g, '_') : null;
 
         switch (category) {
-            case 'backgroundmusic':
+            case 'backgroundMusic':
                 soundFilePath = path.join(assetsDir, 'background', sanitizedFileName);
                 break;
-            case 'ambiancesounds':
+            case 'ambianceSounds':
                 soundFilePath = path.join(assetsDir, 'ambiance', sanitizedFileName);
                 if (imageFile) {
                     imageFilePath = path.join(assetsDir, 'images', 'backgrounds', sanitizedImageFileName);
