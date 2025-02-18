@@ -58,7 +58,7 @@ async function deleteSound(req, res) {
         if (fs.existsSync(soundFilePath)) {
             fs.unlinkSync(soundFilePath);
         } else {
-            return res.status(404).json({ error: 'Sound file not found.' });
+          console.error('Sound file not found.'+ soundFilePath);
         }
 
         // Remove the image file if applicable
@@ -71,7 +71,7 @@ async function deleteSound(req, res) {
         if (fs.existsSync(jsonFilePath)) {
             sounds = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
         } else {
-            return res.status(404).json({ error: 'json file not found.' });
+            console.error('json file not found.' + jsonFilePath);
         }
 
         const updatedSounds = sounds.filter(sound => sound.filename !== filename);
