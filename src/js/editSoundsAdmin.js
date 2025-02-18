@@ -34,9 +34,8 @@ async function displayAllSounds() {
     soundsList.innerHTML = '';
     currentEditArray = await loadSounds(currentSoundType);
 
-
     currentEditArray.forEach((sound, index) => {
-        if(sound.isEnabled === undefined)
+        if (sound.isEnabled === undefined)
             sound.isEnabled = true;
 
         // Sort currentEditArray by display_name in alphabetical order
@@ -202,6 +201,7 @@ async function displayAllSounds() {
 
         const playButton = document.createElement('button');
         playButton.innerHTML = '▶';
+        playButton.className = "button-primary";
         playButton.style.width = '50px';
         playButton.style.height = '50px';
         playButton.style.display = 'flex';
@@ -211,6 +211,7 @@ async function displayAllSounds() {
 
         const stopButton = document.createElement('button');
         stopButton.innerHTML = '⏹';
+        stopButton.className = "button-primary";
         stopButton.style.width = '50px';
         stopButton.style.height = '50px';
         stopButton.style.display = 'flex';
@@ -230,25 +231,23 @@ async function displayAllSounds() {
         progressBar.style.marginTop = '10px';
         progressBar.addEventListener('input', () => seekSound(sound.filename, progressBar.value));
 
-
         const enableToggleWrapper = document.createElement('div');
         enableToggleWrapper.style.display = 'flex';
-        enableToggleWrapper.style.justifyContent = 'center'; 
+        enableToggleWrapper.style.justifyContent = 'center';
         enableToggleWrapper.style.alignItems = 'center';
         enableToggleWrapper.style.marginTop = '10px';
-        
+
         const enableLabel = document.createElement('label');
         enableLabel.textContent = 'Enabled: ';
         enableLabel.style.marginRight = '10px';
-        
+
         const enableCheckbox = document.createElement('input');
         enableCheckbox.type = 'checkbox';
         enableCheckbox.checked = sound.isEnabled !== false;
         enableCheckbox.onclick = () => toggleEnableSound(index, enableCheckbox, soundItem);
-        
+
         enableToggleWrapper.appendChild(enableLabel);
         enableToggleWrapper.appendChild(enableCheckbox);
-
 
         soundItem.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 10px;">
@@ -270,11 +269,32 @@ async function displayAllSounds() {
         const creditsInputPlaceholder = soundItem.querySelector('div:nth-child(2) input');
         creditsInputPlaceholder.replaceWith(creditsInput);
 
-        soundItem.append(contextsContainer, buttonWrapper, enableToggleWrapper, updateWrapper, playerControls, progressBar);
+        const deleteButton = document.createElement('button');
+        deleteButton.className = "button-primary";
+        deleteButton.textContent = "Delete";
+        deleteButton.style.alignItems = 'center';
+        deleteButton.style.width = '100px';
+
+        // Create a div for the progress bar
+        const progressBarContainer = document.createElement('div');
+        progressBarContainer.style.marginTop = '10px';
+        progressBarContainer.appendChild(progressBar);
+
+        // Create a div for the delete button
+        const deleteButtonContainer = document.createElement('div');
+        deleteButtonContainer.style.marginTop = '10px';
+        deleteButtonContainer.style.textAlign = 'center';
+        deleteButtonContainer.style.display = 'flex';
+        deleteButtonContainer.style.justifyContent = 'center'; 
+        deleteButtonContainer.style.alignItems = 'center';
+        deleteButtonContainer.appendChild(deleteButton);
+
+        // Append elements to the soundItem
+        soundItem.append(contextsContainer, buttonWrapper, enableToggleWrapper, updateWrapper, playerControls, progressBarContainer, deleteButtonContainer);
         soundsList.appendChild(soundItem);
 
-         // Adjust the styling of the soundItem based on its enabled state
-         if (currentEditArray[index].isEnabled) {
+        // Adjust the styling of the soundItem based on its enabled state
+        if (currentEditArray[index].isEnabled) {
             soundItem.style.filter = 'grayscale(0)';
         } else {
             soundItem.style.filter = 'grayscale(50%)';
@@ -350,7 +370,7 @@ function updateMainPlaylist(currentEditArray, currentSoundType) {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(updatedData),
-        credentials: 'include', 
+        credentials: 'include',
     })
     .then(response => response.json())
     .then(data => {
@@ -419,11 +439,41 @@ function updateSound(index, contextsContainer, displayNameInput, creditsInput, i
 
     displayAllSounds();
 
-    if (GoogleLogin.userId) 
+    if (GoogleLogin.userId)
     {
         updateMainPlaylist(currentEditArray, currentSoundType);
     } else {
         console.error('User ID is not available');
+    }
+}
+
+function deleteSound(index) {
+    if (index >= 0 && index < currentEditArray.length) {
+        const soundToDelete = currentEditArray[index];
+        fetch('/delete-sound', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                soundType: currentSoundType,
+                filename: soundToDelete.filename,
+            }),
+            credentials: 'include',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                console.log(data.message);
+                currentEditArray.splice(index, 1);
+                displayAllSounds();
+            } else {
+                console.error('Error deleting sound:', data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Network error:', error);
+        });
     }
 }
 

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getData, updateMainPlaylist, updateUserSound, savePreset, loadPresets, addSound } = require('../controllers/soundController');
+const { getData, updateMainPlaylist, updateUserSound, savePreset, loadPresets, addSound, deleteSound } = require('../controllers/soundController');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
@@ -24,7 +24,7 @@ router.get('/soundboard', (req, res) => {
 
 router.post('/save-preset', savePreset);
 router.get('/load-presets', loadPresets);
-
+router.post('/delete-sound', deleteSound);
 router.post('/update-main-playlist', updateMainPlaylist);
 router.post('/update-user-sound', updateUserSound);
 router.post('/add-sound', upload.fields([{ name: 'file' }, { name: 'imageFile' }]), addSound); // Add the addSound route

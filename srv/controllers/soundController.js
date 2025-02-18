@@ -17,6 +17,72 @@ function getData(userId, filename) {
     return defaultArray;
 }
 
+async function deleteSound(req, res) {
+    const { soundType, filename } = req.body;
+    const accessToken = req.cookies.accessToken;
+
+    if (!accessToken) {
+        return res.status(400).json({ error: 'Missing ID token.' });
+    }
+
+    try {
+        const payload = await verifyjwt(accessToken);
+        const userId = payload.userId;
+        const isAdmin = isAdminUser(userId);
+        if (!isAdmin) {
+            return res.status(403).json({ error: 'User is not authorized to delete sounds.' });
+        }
+
+        const assetsDir = path.join(__dirname, '../..', 'assets');
+        let soundFilePath, imageFilePath, jsonFilePath;
+
+        switch (soundType) {
+            case 'backgroundMusic':
+                soundFilePath = path.join(assetsDir, 'background', filename);
+                jsonFilePath = path.join(__dirname, '..', 'srv_data', 'backgroundmusic.json');
+                break;
+            case 'ambianceSounds':
+                soundFilePath = path.join(assetsDir, 'ambiance', filename);
+                imageFilePath = path.join(assetsDir, 'images', 'backgrounds', filename.replace(/\.[^/.]+$/, '.png')); // Assuming image has the same name with .png extension
+                jsonFilePath = path.join(__dirname, '..', 'srv_data', 'ambiancesounds.json');
+                break;
+            case 'soundboard':
+                soundFilePath = path.join(assetsDir, 'soundboard', filename);
+                jsonFilePath = path.join(__dirname, '..', 'srv_data', 'soundboard.json');
+                break;
+            default:
+                return res.status(400).json({ error: 'Invalid sound category.' });
+        }
+
+        // Remove the sound file
+        if (fs.existsSync(soundFilePath)) {
+            fs.unlinkSync(soundFilePath);
+        } else {
+            return res.status(404).json({ error: 'Sound file not found.' });
+        }
+
+        // Remove the image file if applicable
+        if (imageFilePath && fs.existsSync(imageFilePath)) {
+            fs.unlinkSync(imageFilePath);
+        }
+
+        // Update the JSON data
+        let sounds = [];
+        if (fs.existsSync(jsonFilePath)) {
+            sounds = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
+        }
+
+        const updatedSounds = sounds.filter(sound => sound.filename !== filename);
+        fs.writeFileSync(jsonFilePath, JSON.stringify(updatedSounds, null, 2));
+
+        return res.json({ message: 'Sound deleted successfully.' });
+    } catch (error) {
+        console.error('Error deleting sound:', error);
+        return res.status(500).json({ error: 'Failed to delete sound.' });
+    }
+}
+
+
 async function addSound(req, res) {
     const { category, display_name, contexts, credit } = req.body;
     const accessToken = req.cookies.accessToken;
@@ -204,4 +270,5 @@ module.exports = {
     savePreset,
     loadPresets,
     addSound,
+    deleteSound,
 };
