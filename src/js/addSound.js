@@ -28,9 +28,9 @@ function displayAddSoundForm() {
     categorySelect.id = 'category';
     categorySelect.required = true;
     categorySelect.style.marginBottom = '20px';
-    ['Background Music', 'Ambiance Sounds', 'Soundboard'].forEach(category => {
+    ['backgroundMusic', 'ambianceSounds', 'Soundboard'].forEach(category => {
         const option = document.createElement('option');
-        option.value = category.replace(' ', '').toLowerCase();
+        option.value = category;
         option.textContent = category;
         categorySelect.appendChild(option);
     });
