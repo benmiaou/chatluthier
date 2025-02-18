@@ -39,12 +39,12 @@ async function deleteSound(req, res) {
         switch (soundType) {
             case 'backgroundMusic':
                 soundFilePath = path.join(assetsDir, 'background', filename);
-                jsonFilePath = path.join(__dirname, '..', 'srv_data', 'backgroundmusic.json');
+                jsonFilePath = path.join(__dirname, '..', 'srv_data', 'backgroundMusic.json');
                 break;
             case 'ambianceSounds':
                 soundFilePath = path.join(assetsDir, 'ambiance', filename);
                 imageFilePath = path.join(assetsDir, 'images', 'backgrounds', filename.replace(/\.[^/.]+$/, '.png')); // Assuming image has the same name with .png extension
-                jsonFilePath = path.join(__dirname, '..', 'srv_data', 'ambiancesounds.json');
+                jsonFilePath = path.join(__dirname, '..', 'srv_data', 'ambianceSounds.json');
                 break;
             case 'soundboard':
                 soundFilePath = path.join(assetsDir, 'soundboard', filename);
@@ -70,6 +70,8 @@ async function deleteSound(req, res) {
         let sounds = [];
         if (fs.existsSync(jsonFilePath)) {
             sounds = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
+        } else {
+            return res.status(404).json({ error: 'json file not found.' });
         }
 
         const updatedSounds = sounds.filter(sound => sound.filename !== filename);
