@@ -347,6 +347,7 @@ async function updateSound(index, contextsContainer) {
         .then((response) => {
             if (response.ok) {
                 console.log('Changes sent to server successfully');
+                displayAllSounds();
             } else {
                 console.error('Error sending changes to server');
             }
@@ -355,8 +356,6 @@ async function updateSound(index, contextsContainer) {
             console.error('Network error:', error);
         });
     }
-
-    displayAllSounds();
 }
 
 function toggleEnableSound(index, enableCheckbox, soundItem) {
