@@ -275,7 +275,7 @@ async function displayAllSounds() {
         deleteButton.style.alignItems = 'center';
         deleteButton.style.width = '100px';
         deleteButton.onclick = () => deleteSound(index);
-        
+
         // Create a div for the progress bar
         const progressBarContainer = document.createElement('div');
         progressBarContainer.style.marginTop = '10px';
@@ -438,14 +438,13 @@ function updateSound(index, contextsContainer, displayNameInput, creditsInput, i
         console.log('Updated sound:', currentEditArray[index]);
     }
 
-    displayAllSounds();
-
     if (GoogleLogin.userId)
     {
         updateMainPlaylist(currentEditArray, currentSoundType);
     } else {
         console.error('User ID is not available');
     }
+    displayAllSounds();
 }
 
 function deleteSound(index) {
