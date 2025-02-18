@@ -15,6 +15,25 @@ function displaySoundsAdmin(soundType) {
     currentSoundType = soundType;
     const soundsList = document.getElementById('sounds-list');
     soundsList.innerHTML = '';
+
+    switch (soundType) {
+        case 'backgroundMusic':
+            currentSoundType = 'backgroundMusic';
+            currentPath = 'background';
+            break;
+        case 'ambianceSounds':
+            currentSoundType = 'ambianceSounds';
+            currentPath = 'ambiance';
+            break;
+        case 'soundboard':
+            currentSoundType = 'soundboard';
+            currentPath = 'soundboard';
+            break;
+        default:
+            console.error('Unknown sound type');
+    }
+
+
     displayAllSounds();
 }
 
@@ -286,7 +305,7 @@ async function displayAllSounds() {
         deleteButtonContainer.style.marginTop = '10px';
         deleteButtonContainer.style.textAlign = 'center';
         deleteButtonContainer.style.display = 'flex';
-        deleteButtonContainer.style.justifyContent = 'center'; 
+        deleteButtonContainer.style.justifyContent = 'center';
         deleteButtonContainer.style.alignItems = 'center';
         deleteButtonContainer.appendChild(deleteButton);
 
