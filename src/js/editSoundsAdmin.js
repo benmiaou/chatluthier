@@ -377,7 +377,6 @@ function updateMainPlaylist(currentEditArray, currentSoundType) {
     .then(data => {
         if (data.message) {
             console.log('Changes sent to server successfully');
-            displayAllSounds();
         } else {
             console.error('Error updating main playlist:', data.error);
         }
