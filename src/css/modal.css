@@ -29,7 +29,7 @@
     overflow-y: auto;
     padding: 20px;
     box-sizing: border-box;
-    background-color: #444;
+    background-color: var(--main-background-color);
 }
 
 /* Modal Container */

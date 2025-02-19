@@ -1,5 +1,17 @@
 :root {
-    --main-button-color: #f44336; /* Define main color */
-    --main-button-hover-color: #f55d52; /* Define main color */
-    --main-button-disable-color: #803d38; /* Define main color */
+    --main-button-color: #923A3A; /* Define main color */
+    --main-button-hover-color: #7a302e; /* Define main color */
+    --main-button-disable-color: #5b2522; /* Define main color */
+    --main-button-active-color: #b04a4a;
+    --main-button-active-hover-color: #994040;
+    --main-progressbar: rgba(146, 58, 58, 0.7);
+    --main-background-color: #222222;
+    --main-background-color-secondary: #333333;
+    --main-background-color-transparency: rgba(100, 100, 100, 0.6);
+    --main-border: #ee951f; /* Gold color for visibility */
+    --main-text: #ffffff;
+    --main-text-placeholder : #a8a8a8;
+    --main-text-info: #FFD700;
+    --link-color: #388497;
+    --fontfamilly: BagnardSans, Arial, sans-serif;
 }

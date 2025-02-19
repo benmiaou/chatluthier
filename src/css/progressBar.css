@@ -2,12 +2,12 @@
 #progressBar {
     flex-grow: 1;
     height: 4px;
-    background-color: rgba(255, 255, 255, 0.3);
+    background-color: var(--main-progressbar);
     margin-right: 10px;
 }
 
 #sound-progress {
     height: 100%;
-    background-color: rgba(76, 175, 80, 0.7);
+    background-color: var(--main-border);
     width: 0%;
 }

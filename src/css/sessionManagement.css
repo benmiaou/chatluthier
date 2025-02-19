@@ -1,18 +1,18 @@
 /* Session Management Styling */
 .id-management {
-    background-color: #222;
-    border: 1px solid #444;
+    background-color: var(--main-background-color);
+    border: 1px solid var(--main-background-color-secondary);
     padding: 20px;
     margin: 20px;
     border-radius: 5px;
-    color: #fff;
+    color: var(--main-text);
 }
 
 .id-management h2 {
     margin-top: 0;
     margin-bottom: 15px;
     text-align: center;
-    color: #fff;
+    color: var(--main-text);
 }
 
 .create-id, .join-id {
@@ -24,19 +24,19 @@
 
 #status-message {
     text-align: center;
-    color: #FFD700; /* Gold color for visibility */
+    color: var(--main-text-info);
     margin-top: 10px;
 }
 
 #your-id {
     text-align: center;
     margin-top: 10px;
-    color: #fff;
+    color: var(--main-text);
 }
 
 #your-id span {
     font-weight: bold;
-    color: #4CAF50;
+    color: var(--main-button-active-color);
 }
 
 #connection-status {

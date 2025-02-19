@@ -6,10 +6,10 @@
 }
 
 button {
-    font-family: BagnardSans;
-    background-color: #555;
+    font-family: var(--fontfamilly);
+    background-color: var(--main-background-color);
     border: none;
-    color: white;
+    color: var(--main-text);
     padding: 10px 20px;
     font-size: 16px;
     margin: 4px 2px;
@@ -35,17 +35,12 @@ button {
 }
 
 .button-primary-active{
-    background-color: #4CAF50;
+    background-color: var(--main-button-active-color);
     display: block;
 }
 
 .button-primary-active:hover{
-    background-color: #66ad69;
-    display: block;
-}
-
-.button-loop {
-    background-color: #487aa8;
+    background-color: var(--main-button-active-hover-color);
     display: block;
 }
 
@@ -53,37 +48,37 @@ button {
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
-    background-color: #28a745;
-    color: white;
+    background-color:  var(--main-button-active-color);
+    color: var(--main-text);
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s;
 }
 
 .update-button:hover {
-    background-color: #218838;
+    background-color: var(--main-button-active-color-hover);
 }
 
 .text-input{
-    font-family: BagnardSans;
+    font-family: var(--fontfamilly);
     padding: 10px;
     width: 200px;
     margin-right: 10px;
     border-radius: 5px;
-    border: 1px solid #555;
-    background-color: #333;
-    color: #fff;
+    border: 1px solid var(--main-background-color);
+    background-color: var(--main-background-color-secondary);
+    color: var(--main-text);
 }
 
 .text-input::placeholder {
-    color: #bbb;
+    color: var(--main-text-placeholder);
 }
 
 /* Style the select element */
 .selector-primary {
-    font-family: BagnardSans, Arial, sans-serif; /* Match your site's font */
+    font-family: var(--fontfamilly); /* Match your site's font */
     background-color: var(--main-button-color);
-    color: white; /* Text color */
+    color:  var(--main-text); /* Text color */
     border: none; /* Remove default border */
     border-radius: 5px; /* Rounded corners */
     padding: 10px 15px; /* Padding for the dropdown */
@@ -100,13 +95,13 @@ button {
 
 /* Style the dropdown options */
 .selector-primary option {
-    background-color: #555; /* Match the background color of the select */
-    color: white; /* Text color */
-    font-family: BagnardSans, Arial, sans-serif; /* Font family */
+    background-color: var(--main-background-color); /* Match the background color of the select */
+    color:  var(--main-text);
+    font-family:var(--fontfamilly); /* Font family */
 }
 
 .close-button {
-    color: #aaa;
+    color:  var(--main-button-color);
     position: absolute;
     top: 10px;
     right: 20px;
@@ -118,7 +113,7 @@ button {
 
 .close-button:hover,
 .close-button:focus {
-    color: #000;
+    color:  var(--main-button-hover-color);
     text-decoration: none;
     cursor: pointer;
 }
