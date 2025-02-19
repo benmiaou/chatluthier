@@ -61,9 +61,10 @@ export const AmbianceSounds = {
 
     async resetAmbientSounds() {
         this.soundBars.forEach(soundbar => {
-            soundbar.setVolume(0);
+            soundbar.setVolume(0, false);
             soundbar.progressBar.style.width = 0 + '%';
-        });
+        })
+        sendAmbianceMessage(this.getCurrentAmbianceStatus());
     },
 
     generateAmbientButtons(ambianceSounds) {

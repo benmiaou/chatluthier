@@ -57,6 +57,8 @@ export class SoundBar
         if (this.license !== "")  this.progressBarContainer.appendChild(this.soundLicense);
         this.credit = this.ambianceSound.display_name + " : " +  this.ambianceSound.credit;
         this.initializeDraggableProgressBar();
+        this.debounceTimeout = null;
+        this.debounceDelay = 300; // Adjust the delay as needed (in milliseconds)
     }
 
     getElement()
@@ -156,8 +158,20 @@ export class SoundBar
             this.soudPlayer.pause()
         if (AmbianceSounds && shouldNotify) { // Ensure AmbianceSounds is accessible
             const currentStatus = AmbianceSounds.getCurrentAmbianceStatus();
-            sendAmbianceMessage(currentStatus);
+            this.debouncedSendAmbianceMessage(currentStatus);
         }
+    }
+
+    debouncedSendAmbianceMessage(currentStatus) {
+        // Clear the previous timeout if it exists
+        if (this.debounceTimeout) {
+            clearTimeout(this.debounceTimeout);
+        }
+
+        // Set a new timeout to call sendAmbianceMessage after the delay
+        this.debounceTimeout = setTimeout(() => {
+            sendAmbianceMessage(currentStatus);
+        }, this.debounceDelay);
     }
 
     getVolume() {
