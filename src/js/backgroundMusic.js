@@ -90,6 +90,7 @@ export const BackgroundMusic = {
     audioManager: new AudioManager(),
     isClickable: true,
     isFirstSender: false,
+    userControl : true,
 
     getPlayer() {
         return this.audioManager.getPlayer();
@@ -136,10 +137,12 @@ export const BackgroundMusic = {
     },
 
     async stopReceivedBackgroundSound(musicData) {
+        this.userControl = false;
         this.audioManager.stop();
     },
 
     async playReceivedBackgroundSound(musicData) {
+        this.userControl = false;
         console.log("Playing " + musicData);
 
         if (this.audioManager.isCurrentlyPlaying()) {
@@ -233,7 +236,15 @@ export const BackgroundMusic = {
         });
     },
 
+    nextButtonCallBack()
+    {
+        this.userControl = true;
+        this.backGroundSoundLoop() 
+    },
+
     backGroundSoundLoop() {
+        if(!this.userControl)
+            return;
         if (this.soundIndex >= this.filesToPlay.length) {
             this.soundIndex = 0;
         }
@@ -277,6 +288,7 @@ export const BackgroundMusic = {
     },
 
     setContext(newContext) {
+        this.userControl = true;
         this.context = newContext;
         this.filesToPlay = this.findSoundsByTypeAndContext();
         this.updateButton("calm");
@@ -318,6 +330,7 @@ export const BackgroundMusic = {
         if (this.filesToPlay.length == 0) {
             return;
         }
+        this.userControl = true;
         this.backGroundSoundLoop();
     }
 };

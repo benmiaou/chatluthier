@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (nextButton) {
         nextButton.addEventListener('click', function() {
-            BackgroundMusic.backGroundSoundLoop();
+            BackgroundMusic.nextButtonCallBack();
         });
     }
     if (resetAmbient) {
