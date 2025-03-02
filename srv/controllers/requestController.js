@@ -55,9 +55,8 @@ async function getRequests(req, res) {
 
     try {
         const payload = await verifyjwt(accessToken)
-        const userId = payload.userId;
-        const isAdmin = isAdminUser(userId);
-        console.log("isAdmin : " + isAdmin)
+        const email = payload.email;
+        const isAdmin = isAdminUser(email);
         if (!isAdmin) {
             return res.status(403).json({ error: 'Unauthorized' });
         }
@@ -87,8 +86,8 @@ async function closeRequest(req, res) {
 
     try {
         const payload = await verifyjwt(accessToken);
-        const userId = payload.userId;
-        const isAdmin = isAdminUser(userId);
+        const email = payload.email;
+        const isAdmin = isAdminUser(email);
 
         if (!isAdmin) {
             return res.status(403).json({ error: 'Unauthorized' });

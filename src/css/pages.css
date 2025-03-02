@@ -42,7 +42,7 @@ body, html {
 }
 
 a {
-    color: #3498db;
+    color: var(--link-color);
     text-decoration: none;
 }
 
