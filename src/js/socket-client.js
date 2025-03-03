@@ -1,4 +1,3 @@
-// socket-client.js
 import { BackgroundMusic } from './backgroundMusic.js';
 import { SoundBoard } from './soundboard.js';
 import { AmbianceSounds } from './ambianceSounds.js';
@@ -13,9 +12,7 @@ let shouldAttemptReconnect = true; // Flag to control auto-reconnect
 let heartbeatInterval = null;
 const heartbeatIntervalTime = 30000; // 30 seconds
 
-
 function connectWebSocket() {
-
     // Determine the WebSocket URL based on the environment
     let socketUrl;
 
@@ -35,10 +32,21 @@ function connectWebSocket() {
         console.log('Connected to WebSocket Server');
         isConnected = true;
 
-        const lastId = localStorage.getItem('lastJoinId');
-        if(lastId)
-        {
-            subscribeToId(lastId)
+         // Check the URL for a session ID
+         const urlParams = new URLSearchParams(window.location.search);
+         const urlId = urlParams.get('sessionId');
+         if (urlId) {
+             subscribeToId(urlId);
+             // Remove the session ID from the URL
+             urlParams.delete('sessionId');
+             const newUrl = window.location.pathname + '?' + urlParams.toString();
+             window.history.replaceState({}, document.title, newUrl);
+         }
+         else{
+            const lastId = localStorage.getItem('lastJoinId');
+            if (lastId) {
+                subscribeToId(lastId);
+            } 
         }
 
         // Start the heartbeat mechanism
@@ -67,8 +75,6 @@ function connectWebSocket() {
             console.log('Auto-reconnect disabled.');
         }
     };
-
-
 
     // Event listener for when a message is received from the server
     socketClient.onmessage = function (event) {
@@ -138,6 +144,7 @@ function disconnectWebSocket() {
         displayStatusMessage('Disconnected from the session.', 'red');
         document.getElementById('generated-id').textContent = '';
         document.getElementById('your-id').style.display = 'none';
+        document.getElementById('copy-invite-button').style.display = 'none';
 
         // Show session controls
         showSessionControls();
@@ -182,6 +189,8 @@ function handleSubscribed(data) {
     document.getElementById('generated-id').textContent = data.id;
     document.getElementById('your-id').style.display = 'block';
 
+    document.getElementById('copy-invite-button').style.display = 'inline-block';
+
     // Hide session creation/joining buttons and input
     hideSessionControls();
 
@@ -189,16 +198,28 @@ function handleSubscribed(data) {
     showDisconnectButton();
 }
 
+// Add event listener to the copy invitation link button
+document.getElementById('copy-invite-button').addEventListener('click', () => {
+    const sessionId = document.getElementById('generated-id').textContent;
+    const inviteLink = `${window.location.origin}?sessionId=${sessionId}`;
+
+    // Copy the link to the clipboard
+    navigator.clipboard.writeText(inviteLink).then(() => {
+        displayStatusMessage('Invitation link copied to clipboard!', 'green');
+    }).catch(err => {
+        console.error('Failed to copy invitation link: ', err);
+        displayStatusMessage('Failed to copy invitation link.', 'red');
+    });
+});
+
 function handleReceivedBackgroundMusicChange(musicData) {
     // Update the BackgroundMusic playback
     BackgroundMusic.playReceivedBackgroundSound(musicData);
 }
 
-function handleReceivedBackgroundStop() 
-{
+function handleReceivedBackgroundStop() {
     BackgroundMusic.stopReceivedBackgroundSound();
 }
-
 
 /**
  * Sends a subscription message to join a session.
@@ -255,8 +276,7 @@ export function sendMessage(content) {
     }
 }
 
-export function sendBackgroundMusicChangeMessage(musicData)
-{
+export function sendBackgroundMusicChangeMessage(musicData) {
     if (isConnected && clientId) {
         const message = JSON.stringify({
             type: 'backgroundMusicChange',
@@ -267,8 +287,7 @@ export function sendBackgroundMusicChangeMessage(musicData)
     }
 }
 
-export function sendBackgroundStopMessage()
-{
+export function sendBackgroundStopMessage() {
     if (isConnected && clientId) {
         const message = JSON.stringify({
             type: 'backgroundMusicStop',
@@ -300,17 +319,15 @@ export function sendAmbianceMessage(ambianceStatus) {
  * @param {string} filename - The filename of the sound to play.
  */
 export function sendPlaySoundboardSoundMessage(filename) {
-    if (isConnected && clientId) 
-    {
+    if (isConnected && clientId) {
         const message = JSON.stringify({
             type: 'playSoundboardSound',
             id: clientId,
             content: { filename: filename }
         });
         socketClient.send(message);
-    } 
+    }
 }
-
 
 /**
  * Handles received content messages.
@@ -391,7 +408,7 @@ document.getElementById('join-id-input').addEventListener('input', () => {
 // Event listener for the disconnect button
 document.getElementById('disconnect-button').addEventListener('click', () => {
     disconnectWebSocket();
-    hideDisconnectButton()
+    hideDisconnectButton();
 });
 
 function showDisconnectButton() {
@@ -420,7 +437,6 @@ function handleReceivedAmbianceStatus(ambianceStatus) {
  * Handles the 'playSoundboardSound' message type.
  * @param {string} filename - The filename of the sound to play.
  */
-function handleReceivedPlaySoundboardSound(filename) 
-{
-        SoundBoard.playSoundRemote(filename);
+function handleReceivedPlaySoundboardSound(filename) {
+    SoundBoard.playSoundRemote(filename);
 }
