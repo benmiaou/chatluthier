@@ -35,9 +35,10 @@ function connectWebSocket() {
         console.log('Connected to WebSocket Server');
         isConnected = true;
 
-        // If we have a session ID, re-subscribe to it
-        if (clientId) {
-            subscribeToId(clientId);
+        const lastId = localStorage.getItem('lastJoinId');
+        if(lastId)
+        {
+            subscribeToId(lastId)
         }
 
         // Start the heartbeat mechanism
@@ -233,11 +234,6 @@ export function subscribeToId(id) {
         console.error('WebSocket is in an unexpected state. Cannot subscribe to ID.');
     }
     localStorage.setItem('lastJoinId', id);
-}
-const lastId = localStorage.getItem('lastJoinId');
-if(lastId)
-{
-    subscribeToId(lastId)
 }
 
 /**
