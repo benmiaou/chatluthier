@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spotify Integration Demo - Chat Luthier</title>
+    <link rel="stylesheet" href="../css/spotify.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .demo-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .demo-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .demo-button {
+            background: #1db954;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .demo-button:hover {
+            background: #1ed760;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>Spotify Integration Demo</h1>
+        <p>This page demonstrates the Spotify integration features for Chat Luthier.</p>
+        
+        <div class="demo-section">
+            <h2>Authentication</h2>
+            <div id="auth-status" class="status disconnected">Not connected to Spotify</div>
+            <button id="connect-btn" class="demo-button">Connect to Spotify</button>
+            <button id="disconnect-btn" class="demo-button" style="display: none;">Disconnect</button>
+        </div>
+        
+        <div class="demo-section">
+            <h2>Mood-Based Music</h2>
+            <p>Click a mood button to play music that matches the atmosphere:</p>
+            <button id="calm-btn" class="demo-button">🎵 Calm</button>
+            <button id="dynamic-btn" class="demo-button">🎵 Dynamic</button>
+            <button id="intense-btn" class="demo-button">🎵 Intense</button>
+            <button id="all-btn" class="demo-button">🎵 All</button>
+        </div>
+        
+        <div class="demo-section">
+            <h2>Playback Controls</h2>
+            <button id="play-btn" class="demo-button">▶️ Play</button>
+            <button id="pause-btn" class="demo-button">⏸️ Pause</button>
+            <button id="next-btn" class="demo-button">⏭️ Next</button>
+            <button id="prev-btn" class="demo-button">⏮️ Previous</button>
+        </div>
+        
+        <div class="demo-section">
+            <h2>Volume Control</h2>
+            <input type="range" id="volume-slider" min="0" max="100" value="50" style="width: 200px;">
+            <span id="volume-label">50%</span>
+        </div>
+        
+        <div class="demo-section">
+            <h2>Current Track</h2>
+            <div id="track-info">No track playing</div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>Playlists</h2>
+            <select id="playlist-select">
+                <option value="">Select a playlist...</option>
+            </select>
+            <button id="play-playlist-btn" class="demo-button">Play Selected Playlist</button>
+        </div>
+        
+        <div class="demo-section">
+            <h2>Logs</h2>
+            <div id="logs" style="background: #f8f9fa; padding: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { spotifyService } from '../js/spotifyService.js';
+        import { spotifyConfig } from '../js/spotifyConfig.js';
+        
+        // Demo functionality
+        class SpotifyDemo {
+            constructor() {
+                this.init();
+                this.setupEventListeners();
+                this.updateStatus();
+            }
+            
+            init() {
+                // Initialize with demo config
+                spotifyService.init('demo-client-id', window.location.origin);
+                
+                // Set up callbacks
+                spotifyService.onTrackChange = this.onTrackChange.bind(this);
+                spotifyService.onPlaybackStateChange = this.onPlaybackStateChange.bind(this);
+                spotifyService.onError = this.onError.bind(this);
+                
+                // Check for auth callback
+                if (spotifyService.handleAuthCallback()) {
+                    this.log('Authentication successful');
+                    this.updateStatus();
+                }
+            }
+            
+            setupEventListeners() {
+                document.getElementById('connect-btn').addEventListener('click', () => {
+                    window.location.href = spotifyService.getAuthUrl();
+                });
+                
+                document.getElementById('disconnect-btn').addEventListener('click', async () => {
+                    await spotifyService.disconnect();
+                    this.updateStatus();
+                });
+                
+                // Mood buttons
+                document.getElementById('calm-btn').addEventListener('click', () => this.playMood('calm'));
+                document.getElementById('dynamic-btn').addEventListener('click', () => this.playMood('dynamic'));
+                document.getElementById('intense-btn').addEventListener('click', () => this.playMood('intense'));
+                document.getElementById('all-btn').addEventListener('click', () => this.playMood('all'));
+                
+                // Playback controls
+                document.getElementById('play-btn').addEventListener('click', () => spotifyService.resume());
+                document.getElementById('pause-btn').addEventListener('click', () => spotifyService.pause());
+                document.getElementById('next-btn').addEventListener('click', () => spotifyService.next());
+                document.getElementById('prev-btn').addEventListener('click', () => spotifyService.previous());
+                
+                // Volume control
+                const volumeSlider = document.getElementById('volume-slider');
+                volumeSlider.addEventListener('input', (e) => {
+                    const volume = e.target.value;
+                    document.getElementById('volume-label').textContent = volume + '%';
+                    spotifyService.setVolume(volume);
+                });
+                
+                // Playlist
+                document.getElementById('play-playlist-btn').addEventListener('click', () => {
+                    const playlistUri = document.getElementById('playlist-select').value;
+                    if (playlistUri) {
+                        spotifyService.playPlaylist(playlistUri);
+                    }
+                });
+            }
+            
+            async playMood(mood) {
+                if (!spotifyService.isAuthenticated()) {
+                    this.log('Please connect to Spotify first');
+                    return;
+                }
+                
+                this.log(`Playing ${mood} mood music...`);
+                try {
+                    await spotifyService.playByMood(mood);
+                    this.log(`Started playing ${mood} mood music`);
+                } catch (error) {
+                    this.log(`Error playing ${mood} mood: ${error.message}`);
+                }
+            }
+            
+            onTrackChange(track) {
+                const trackInfo = document.getElementById('track-info');
+                trackInfo.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <img src="${track.album.images[0]?.url || ''}" alt="Album Art" style="width: 60px; height: 60px; border-radius: 5px;">
+                        <div>
+                            <div style="font-weight: bold;">${track.name}</div>
+                            <div style="color: #666;">${track.artists.map(a => a.name).join(', ')}</div>
+                            <div style="color: #999; font-size: 0.9em;">${track.album.name}</div>
+                        </div>
+                    </div>
+                `;
+                this.log(`Now playing: ${track.name} by ${track.artists.map(a => a.name).join(', ')}`);
+            }
+            
+            onPlaybackStateChange(state) {
+                this.log(`Playback state changed: ${state ? (state.paused ? 'Paused' : 'Playing') : 'Stopped'}`);
+            }
+            
+            onError(message) {
+                this.log(`Error: ${message}`, 'error');
+            }
+            
+            updateStatus() {
+                const statusDiv = document.getElementById('auth-status');
+                const connectBtn = document.getElementById('connect-btn');
+                const disconnectBtn = document.getElementById('disconnect-btn');
+                
+                if (spotifyService.isAuthenticated()) {
+                    statusDiv.textContent = 'Connected to Spotify';
+                    statusDiv.className = 'status connected';
+                    connectBtn.style.display = 'none';
+                    disconnectBtn.style.display = 'inline-block';
+                    
+                    if (spotifyService.isPlayerReady()) {
+                        this.loadPlaylists();
+                    }
+                } else {
+                    statusDiv.textContent = 'Not connected to Spotify';
+                    statusDiv.className = 'status disconnected';
+                    connectBtn.style.display = 'inline-block';
+                    disconnectBtn.style.display = 'none';
+                }
+            }
+            
+            async loadPlaylists() {
+                try {
+                    const playlists = await spotifyService.getUserPlaylists();
+                    const select = document.getElementById('playlist-select');
+                    
+                    // Clear existing options
+                    select.innerHTML = '<option value="">Select a playlist...</option>';
+                    
+                    // Add playlist options
+                    playlists.forEach(playlist => {
+                        const option = document.createElement('option');
+                        option.value = playlist.uri;
+                        option.textContent = playlist.name;
+                        select.appendChild(option);
+                    });
+                    
+                    this.log(`Loaded ${playlists.length} playlists`);
+                } catch (error) {
+                    this.log(`Error loading playlists: ${error.message}`);
+                }
+            }
+            
+            log(message, type = 'info') {
+                const logsDiv = document.getElementById('logs');
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = document.createElement('div');
+                logEntry.style.color = type === 'error' ? '#dc3545' : '#28a745';
+                logEntry.textContent = `[${timestamp}] ${message}`;
+                logsDiv.appendChild(logEntry);
+                logsDiv.scrollTop = logsDiv.scrollHeight;
+            }
+        }
+        
+        // Initialize demo when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SpotifyDemo();
+        });
+    </script>
+</body>
+</html>
