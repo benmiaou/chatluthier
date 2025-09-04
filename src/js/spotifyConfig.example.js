@@ -5,7 +5,7 @@ export const spotifyConfig = {
     // Spotify API credentials
     // Get your Client ID from: https://developer.spotify.com/dashboard
     clientId: 'abc123def456ghi789jkl012mno345pqr678stu901', // Replace with your actual Spotify Client ID
-    redirectUri: window.location.origin, // Current domain as redirect URI
+    redirectUri: 'http://127.0.0.1:3000', // Current domain as redirect URI
     
     // Default playlists for different moods (optional)
     defaultPlaylists: {

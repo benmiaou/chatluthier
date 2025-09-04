@@ -2,6 +2,7 @@
 
 import { spotifyService } from './spotifyService.js';
 import { spotifyConfig, getConfig } from './spotifyConfig.js';
+import { spotifyAuthManager } from './spotifyAuthManager.js';
 
 export class SpotifyUI {
     constructor() {
@@ -28,30 +29,44 @@ export class SpotifyUI {
         this.init();
     }
 
-    init() {
-        // Check for auth callback
-        if (spotifyService.handleAuthCallback()) {
-            this.updateUI();
-        }
+    async init() {
+        // Initialize Spotify service first
+        await spotifyService.init(getConfig('clientId'), getConfig('redirectUri'));
         
-        // Set up event listeners
-        this.setupEventListeners();
-        
-        // Initialize Spotify service
-        spotifyService.init(getConfig('clientId'), getConfig('redirectUri'));
+        // Don't handle auth callback here - let main.js handle it
+        // Just check current state
+        const isAuthenticated = spotifyService.isAuthenticated();
+        console.log('SpotifyUI init - is authenticated:', isAuthenticated);
         
         // Set up callbacks
         spotifyService.onTrackChange = this.onTrackChange.bind(this);
         spotifyService.onPlaybackStateChange = this.onPlaybackStateChange.bind(this);
         spotifyService.onError = this.onError.bind(this);
+        
+        // Set up event listeners
+        this.setupEventListeners();
+        
+        // Listen to auth state changes
+        spotifyAuthManager.addListener((authState) => {
+            this.handleAuthStateChange(authState);
+        });
+        
+        // Update UI if already authenticated
+        if (isAuthenticated) {
+            await this.updateUI();
+        }
     }
 
     setupEventListeners() {
-        // Handle auth callback on page load
-        window.addEventListener('load', () => {
-            if (spotifyService.handleAuthCallback()) {
-                this.updateUI();
-            }
+        // Listen for Spotify authentication events
+        window.addEventListener('spotifyAuthenticated', async (event) => {
+            console.log('SpotifyUI: Spotify authenticated event received:', event.detail);
+            await this.updateUI();
+        });
+        
+        window.addEventListener('spotifyAuthError', (event) => {
+            console.error('SpotifyUI: Spotify auth error event received:', event.detail);
+            this.onError(`Authentication failed: ${event.detail.error}`);
         });
     }
 
@@ -103,8 +118,18 @@ export class SpotifyUI {
         statusText.className = 'spotify-status';
         statusText.textContent = 'Connected to Spotify';
         
+        // Add music source toggle button
+        const musicSourceToggle = document.createElement('button');
+        musicSourceToggle.className = 'button-primary spotify-music-toggle-btn';
+        musicSourceToggle.innerHTML = '<i class="fas fa-music"></i> Switch to Site Music';
+        musicSourceToggle.addEventListener('click', () => {
+            // Dispatch custom event to trigger music source toggle
+            window.dispatchEvent(new CustomEvent('toggleMusicSource'));
+        });
+        
         loginSection.appendChild(this.loginButton);
         loginSection.appendChild(statusText);
+        loginSection.appendChild(musicSourceToggle);
         this.container.appendChild(loginSection);
     }
 
@@ -245,7 +270,16 @@ export class SpotifyUI {
             volumeLabel.textContent = `${volume}%`;
         }
         
+        // Set Spotify volume
         await spotifyService.setVolume(volume);
+        
+        // Also update background music volume to match
+        const backgroundMusicVolumeSlider = document.getElementById('music-volume');
+        if (backgroundMusicVolumeSlider) {
+            backgroundMusicVolumeSlider.value = volume;
+            // Trigger the change event to update background music volume
+            backgroundMusicVolumeSlider.dispatchEvent(new Event('change'));
+        }
     }
 
     // Handle playlist selection
@@ -285,6 +319,19 @@ export class SpotifyUI {
                 playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
                 this.isPlaying = false;
             }
+        }
+    }
+
+    // Handle auth state changes
+    handleAuthStateChange(authState) {
+        console.log('SpotifyUI: Auth state changed:', authState);
+        
+        if (authState.state === 'connected') {
+            // Update UI to show authenticated state
+            this.updateUI();
+        } else if (authState.state === 'disconnected' || authState.state === 'error') {
+            // Update UI to show disconnected state
+            this.updateUI();
         }
     }
 
@@ -454,3 +501,6 @@ export class SpotifyUI {
 
 // Export singleton instance
 export const spotifyUI = new SpotifyUI();
+
+// Make it globally accessible for main.js
+window.spotifyUI = spotifyUI;

@@ -80,3 +80,6 @@ export function loadConfig() {
 
 // Initialize config
 loadConfig();
+
+// Log the redirect URI being used for debugging
+console.log('Spotify redirect URI:', window.location.origin);

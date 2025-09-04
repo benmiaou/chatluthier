@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     if (spotifyToggleButton) {
-        spotifyToggleButton.addEventListener('click', function() {
+        spotifyToggleButton.addEventListener('click', async function() {
             // If not authenticated, connect to Spotify
             if (!spotifyService.isAuthenticated()) {
                 try {
@@ -186,8 +186,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     spotifyToggleButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
                     spotifyToggleButton.disabled = true;
                     
+                    // Get the auth URL (await the Promise)
+                    const authUrl = await spotifyService.getAuthUrl();
+                    console.log('Redirecting to Spotify auth:', authUrl);
+                    
                     // Redirect to Spotify auth
-                    window.location.href = spotifyService.getAuthUrl();
+                    window.location.href = authUrl;
                     return; // Don't continue, page will redirect
                 } catch (error) {
                     console.error('Error connecting to Spotify:', error);
@@ -242,27 +246,27 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error("Audio player instance not found from BackgroundMusic.getPlayer().");
     }
 
-     // **Volume Slider Change Event**
-     const volumeSlider = document.getElementById('music-volume');
-     if (volumeSlider) {
-         volumeSlider.addEventListener('input', function(event) {
+          // **Volume Slider Change Event**
+      const volumeSlider = document.getElementById('music-volume');
+      if (volumeSlider) {
+          volumeSlider.addEventListener('change', function(event) {
+              const volume = event.target.value;
+              BackgroundMusic.setBackgroundVolume(volume);
+          });
+      } else {
+          console.error("Volume slider element with ID 'music-volume' not found.");
+      }
+
+         // **Volume Slider Change Event**
+     const soundboardSlider = document.getElementById('soundboard-volume');
+     if (soundboardSlider) {
+         soundboardSlider.addEventListener('change', function(event) {
              const volume = event.target.value;
-             BackgroundMusic.setBackgroundVolume(volume);
+             SoundBoard.setVolume(volume);
          });
      } else {
-         console.error("Volume slider element with ID 'music-volume' not found.");
+         console.error("Volume slider element with ID 'soundboard-volume' not found.");
      }
-
-    // **Volume Slider Change Event**
-    const soundboardSlider = document.getElementById('soundboard-volume');
-    if (soundboardSlider) {
-        soundboardSlider.addEventListener('input', function(event) {
-            const volume = event.target.value;
-            SoundBoard.setVolume(volume);
-        });
-    } else {
-        console.error("Volume slider element with ID soundboardSlider' not found.");
-    }
 
 
     // Context Selector Change Event
@@ -301,26 +305,36 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('progressBar').style.display = 'block';
             document.getElementById('nextButton').style.display = 'block';
             
+            // Show background music manager
+            const backgroundMusicSection = document.getElementById('background-music');
+            if (backgroundMusicSection) {
+                backgroundMusicSection.style.display = 'block';
+            }
+            
             console.log('Switched to Site Music');
         } else {
-            // Switch to Spotify - automatically connect if not authenticated
-            if (!spotifyService.isAuthenticated()) {
-                try {
-                    // Show loading state
-                    musicSourceToggle.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
-                    musicSourceToggle.disabled = true;
-                    
-                    // Redirect to Spotify auth
-                    window.location.href = spotifyService.getAuthUrl();
-                    return; // Don't continue, page will redirect
-                } catch (error) {
-                    console.error('Error connecting to Spotify:', error);
-                    alert('Failed to connect to Spotify. Please try again.');
-                    musicSourceToggle.innerHTML = '<i class="fab fa-spotify"></i> Switch to Spotify';
-                    musicSourceToggle.disabled = false;
-                    return;
-                }
-            }
+                         // Switch to Spotify - automatically connect if not authenticated
+             if (!spotifyService.isAuthenticated()) {
+                 try {
+                     // Show loading state
+                     musicSourceToggle.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+                     musicSourceToggle.disabled = true;
+                     
+                     // Get the auth URL (await the Promise)
+                     const authUrl = await spotifyService.getAuthUrl();
+                     console.log('Redirecting to Spotify auth from music source toggle:', authUrl);
+                     
+                     // Redirect to Spotify auth
+                     window.location.href = authUrl;
+                     return; // Don't continue, page will redirect
+                 } catch (error) {
+                     console.error('Error connecting to Spotify:', error);
+                     alert('Failed to connect to Spotify. Please try again.');
+                     musicSourceToggle.innerHTML = '<i class="fab fa-spotify"></i> Switch to Spotify';
+                     musicSourceToggle.disabled = false;
+                     return;
+                 }
+             }
             
             // If already authenticated, switch to Spotify
             useSpotify = true;
@@ -331,6 +345,22 @@ document.addEventListener('DOMContentLoaded', () => {
             // Hide site music controls when using Spotify
             document.getElementById('progressBar').style.display = 'none';
             document.getElementById('nextButton').style.display = 'none';
+            
+            // Hide background music manager
+            const backgroundMusicSection = document.getElementById('background-music');
+            if (backgroundMusicSection) {
+                backgroundMusicSection.style.display = 'none';
+            }
+            
+            // Sync background music volume with Spotify volume
+            const backgroundMusicVolumeSlider = document.getElementById('music-volume');
+            if (backgroundMusicVolumeSlider) {
+                const currentVolume = backgroundMusicVolumeSlider.value;
+                // Update Spotify volume to match current background music volume
+                if (spotifyService.isAuthenticated()) {
+                    spotifyService.setVolume(currentVolume);
+                }
+            }
             
             console.log('Switched to Spotify');
         }
@@ -352,6 +382,22 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('progressBar').style.display = 'none';
             document.getElementById('nextButton').style.display = 'none';
             
+            // Hide background music manager
+            const backgroundMusicSection = document.getElementById('background-music');
+            if (backgroundMusicSection) {
+                backgroundMusicSection.style.display = 'none';
+            }
+            
+            // Sync background music volume with Spotify volume
+            const backgroundMusicVolumeSlider = document.getElementById('music-volume');
+            if (backgroundMusicVolumeSlider) {
+                const currentVolume = backgroundMusicVolumeSlider.value;
+                // Update Spotify volume to match current background music volume
+                if (spotifyService.isAuthenticated()) {
+                    spotifyService.setVolume(currentVolume);
+                }
+            }
+            
             // Update Spotify toggle button text if authenticated
             if (spotifyService.isAuthenticated()) {
                 const spotifyToggleButton = document.getElementById('spotify-toggle-button');
@@ -363,7 +409,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Check if returning from Spotify auth and auto-switch
-    function checkSpotifyAuthReturn() {
+    async function checkSpotifyAuthReturn() {
+        console.log('Main.js: Checking Spotify auth return...');
+        
+        // Check if we have search params (returning from auth)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('code') || urlParams.has('state')) {
+            console.log('Main.js: Found auth callback params, processing...');
+            
+            try {
+                // Handle the auth callback
+                const authResult = await spotifyService.handleAuthCallback();
+                if (authResult) {
+                    console.log('Main.js: Spotify auth successful');
+                    // The spotifyAuthenticated event will handle UI updates
+                } else {
+                    console.log('Main.js: Spotify auth failed or incomplete');
+                }
+            } catch (error) {
+                console.error('Main.js: Error handling Spotify auth callback:', error);
+            }
+        } else {
+            console.log('Main.js: No search params in URL, skipping auth callback');
+        }
+        
+        // Check if we should auto-switch to Spotify mode
         if (spotifyService.isAuthenticated() && !useSpotify) {
             // User just returned from Spotify auth, auto-switch to Spotify mode
             useSpotify = true;
@@ -374,6 +444,22 @@ document.addEventListener('DOMContentLoaded', () => {
             // Hide site music controls
             document.getElementById('progressBar').style.display = 'none';
             document.getElementById('nextButton').style.display = 'none';
+            
+            // Hide background music manager
+            const backgroundMusicSection = document.getElementById('background-music');
+            if (backgroundMusicSection) {
+                backgroundMusicSection.style.display = 'none';
+            }
+            
+            // Sync background music volume with Spotify volume
+            const backgroundMusicVolumeSlider = document.getElementById('music-volume');
+            if (backgroundMusicVolumeSlider) {
+                const currentVolume = backgroundMusicVolumeSlider.value;
+                // Update Spotify volume to match current background music volume
+                if (spotifyService.isAuthenticated()) {
+                    spotifyService.setVolume(currentVolume);
+                }
+            }
             
             // Update Spotify toggle button text
             const spotifyToggleButton = document.getElementById('spotify-toggle-button');
@@ -389,6 +475,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    // Function to update Spotify status display
+    function updateSpotifyStatusDisplay() {
+        const isAuthenticated = spotifyService.isAuthenticated();
+        console.log('Main.js: Updating Spotify status display, authenticated:', isAuthenticated);
+        
+        if (isAuthenticated) {
+            // Update UI to show Spotify is connected
+            if (spotifyToggleButton) {
+                spotifyToggleButton.innerHTML = '<i class="fab fa-spotify"></i> Toggle Spotify';
+                spotifyToggleButton.disabled = false;
+            }
+        } else {
+            // Update UI to show Spotify is disconnected
+            if (spotifyToggleButton) {
+                spotifyToggleButton.innerHTML = '<i class="fab fa-spotify"></i> Connect to Spotify';
+                spotifyToggleButton.disabled = false;
+            }
+        }
+    }
+    
     // Function to generate buttons dynamically based on sound files
     async function fetchSoundData() {
         try {
@@ -398,11 +504,17 @@ document.addEventListener('DOMContentLoaded', () => {
             GoogleLogin.initGoogleIdentityServices();
             GoogleLogin.updateLoginButton();
             
+            // Initialize Spotify UI
+            await spotifyUI.init();
+            
             // Load music source preference
             loadMusicSourcePreference();
             
+            // Check current Spotify auth status
+            updateSpotifyStatusDisplay();
+            
             // Check if returning from Spotify auth
-            checkSpotifyAuthReturn();
+            await checkSpotifyAuthReturn();
         } catch (error) {
             console.error('Error fetching sound data:', error);
         }
@@ -410,6 +522,104 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Call fetchSoundData
     fetchSoundData();
+    
+    // Handle Spotify auth callback when page loads
+    window.addEventListener('load', async () => {
+        console.log('Main.js: Page loaded');
+        console.log('Main.js: Current URL:', window.location.href);
+        console.log('Main.js: Current search params:', window.location.search);
+        
+        // Wait a bit for everything to initialize
+        setTimeout(async () => {
+            console.log('Main.js: Page loaded, checking for Spotify auth callback...');
+            await checkSpotifyAuthReturn();
+        }, 100);
+    });
+    
+    // Listen for Spotify authentication events
+    window.addEventListener('spotifyAuthenticated', async (event) => {
+        console.log('Main.js: Spotify authenticated event received');
+        
+        // Update the music source preference to Spotify
+        useSpotify = true;
+        localStorage.setItem('music_source_preference', 'spotify');
+        
+        // Update UI elements
+        if (musicSourceLabel) musicSourceLabel.textContent = 'Spotify';
+        if (musicSourceToggle) {
+            musicSourceToggle.innerHTML = '<i class="fas fa-music"></i> Switch to Site Music';
+            musicSourceToggle.classList.add('button-primary-active');
+        }
+        
+        // Hide site music controls
+        const progressBar = document.getElementById('progressBar');
+        const nextButton = document.getElementById('nextButton');
+        if (progressBar) progressBar.style.display = 'none';
+        if (nextButton) nextButton.style.display = 'none';
+        
+        // Hide background music manager
+        const backgroundMusicSection = document.getElementById('background-music');
+        if (backgroundMusicSection) {
+            backgroundMusicSection.style.display = 'none';
+        }
+        
+        // Sync background music volume with Spotify volume
+        const backgroundMusicVolumeSlider = document.getElementById('music-volume');
+        if (backgroundMusicVolumeSlider) {
+            const currentVolume = backgroundMusicVolumeSlider.value;
+            // Update Spotify volume to match current background music volume
+            if (spotifyService.isAuthenticated()) {
+                spotifyService.setVolume(currentVolume);
+            }
+        }
+        
+        // Update Spotify toggle button
+        if (spotifyToggleButton) {
+            spotifyToggleButton.innerHTML = '<i class="fab fa-spotify"></i> Toggle Spotify';
+            spotifyToggleButton.disabled = false;
+        }
+        
+        // Update status display
+        updateSpotifyStatusDisplay();
+        
+        // Show success message
+        if (window.spotifyUI && window.spotifyUI.container) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'spotify-success';
+            successDiv.textContent = '✅ Successfully connected to Spotify!';
+            successDiv.style.color = 'green';
+            successDiv.style.padding = '10px';
+            successDiv.style.margin = '10px 0';
+            successDiv.style.backgroundColor = '#e8f5e8';
+            successDiv.style.borderRadius = '4px';
+            successDiv.style.textAlign = 'center';
+            successDiv.style.fontWeight = 'bold';
+            
+            window.spotifyUI.container.insertBefore(successDiv, window.spotifyUI.container.firstChild);
+            
+            // Remove success message after 5 seconds
+            setTimeout(() => {
+                if (successDiv.parentNode) {
+                    successDiv.parentNode.removeChild(successDiv);
+                }
+            }, 5000);
+        }
+        
+        console.log('Main.js: UI updated after Spotify authentication');
+    });
+    
+         window.addEventListener('spotifyAuthError', (event) => {
+         console.error('Main.js: Spotify auth error event received:', event.detail);
+         
+         // Show user-friendly error message
+         const errorMessage = event.detail?.error || 'Unknown error';
+         alert(`Spotify Authentication Error: ${errorMessage}`);
+     });
+     
+     // Listen for music source toggle from Spotify UI
+     window.addEventListener('toggleMusicSource', () => {
+         toggleMusicSource();
+     });
 });
 
 // Initialize modal functionalities

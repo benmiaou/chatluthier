@@ -24,7 +24,22 @@ npm run build
 npm run dev
 ```
 
-Visit `http://localhost:3000/`
+### Development with Hot Reloading
+For development with automatic code refresh:
+```bash
+npm run dev:full
+```
+
+This will start:
+- **Frontend**: Webpack dev server on `http://localhost:3000` with hot reloading
+- **Backend**: Express server on `http://localhost:3001`
+
+### Production
+For production build:
+```bash
+npm run build
+npm start
+```
 
 ## Spotify Integration
 
@@ -42,10 +57,12 @@ Chat Luthier now supports Spotify integration for background music! Connect your
 
 ## Scripts
 
-- `npm run build` - Build the project with webpack
-- `npm run dev` - Start the development server
-- `npm run local` - Start the local server
+- `npm run build` - Build the project for production
+- `npm run dev` - Start the frontend development server with hot reloading
+- `npm run dev:full` - Start both frontend and backend for development
+- `npm run local` - Start the full development environment
 - `npm run watch` - Watch for changes and rebuild
+- `npm start` - Start the production server
 
 
 

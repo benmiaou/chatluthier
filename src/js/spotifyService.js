@@ -1,5 +1,7 @@
 // src/js/spotifyService.js
 
+import { spotifyAuthManager } from './spotifyAuthManager.js';
+
 export class SpotifyService {
     constructor() {
         this.accessToken = null;
@@ -19,25 +21,76 @@ export class SpotifyService {
         this.onTrackChange = null;
         this.onPlaybackStateChange = null;
         this.onError = null;
+        
+        // Listen to auth state changes
+        spotifyAuthManager.addListener((authState) => {
+            this.handleAuthStateChange(authState);
+        });
+    }
+
+    // Handle auth state changes
+    handleAuthStateChange(authState) {
+        console.log('SpotifyService: Auth state changed:', authState);
+        
+        if (authState.state === 'connected') {
+            // Get token from auth manager
+            const token = localStorage.getItem('spotify_access_token');
+            if (token && token !== this.accessToken) {
+                this.accessToken = token;
+                this.initializePlayer();
+            }
+        } else if (authState.state === 'disconnected' || authState.state === 'error') {
+            this.accessToken = null;
+            this.deviceId = null;
+            if (this.player) {
+                this.player.disconnect();
+                this.player = null;
+            }
+        }
     }
 
     // Initialize Spotify service
     async init(clientId, redirectUri) {
+        console.log('Initializing Spotify service with clientId:', clientId, 'redirectUri:', redirectUri);
+        
         this.clientId = clientId;
         this.redirectUri = redirectUri;
+        
+        // Initialize auth manager
+        await spotifyAuthManager.init();
         
         // Check if we have a stored token
         const storedToken = localStorage.getItem('spotify_access_token');
         if (storedToken) {
+            console.log('Found stored token, length:', storedToken.length);
             this.accessToken = storedToken;
-            await this.initializePlayer();
+            
+            // Try to initialize player with stored token
+            try {
+                await this.initializePlayer();
+                console.log('Player initialized with stored token');
+            } catch (error) {
+                console.error('Failed to initialize player with stored token:', error);
+                // Token might be expired, remove it
+                spotifyAuthManager.clearAuth();
+            }
+        } else {
+            console.log('No stored token found');
         }
         
         this.isInitialized = true;
+        console.log('Spotify service initialization complete');
     }
 
-    // Get Spotify authorization URL
-    getAuthUrl() {
+    // Check if we're in the middle of an auth flow
+    isInAuthFlow() {
+        const existingState = localStorage.getItem('spotify_auth_state');
+        const existingCodeVerifier = localStorage.getItem('spotify_code_verifier');
+        return !!(existingState && existingCodeVerifier);
+    }
+
+    // Get Spotify authorization URL using PKCE flow
+    async getAuthUrl() {
         const scopes = [
             'user-read-private',
             'user-read-email',
@@ -49,33 +102,100 @@ export class SpotifyService {
             'streaming'
         ];
 
+        // Check if we already have a pending auth flow
+        const existingState = localStorage.getItem('spotify_auth_state');
+        const existingCodeVerifier = localStorage.getItem('spotify_code_verifier');
+        
+        console.log('SpotifyService: PKCE data check - existing state:', existingState, 'existing verifier:', existingCodeVerifier ? 'found' : 'not found');
+        
+        let codeVerifier, codeChallenge, state;
+        
+        if (existingState && existingCodeVerifier) {
+            // Reuse existing PKCE data if we have it
+            console.log('SpotifyService: Reusing existing PKCE data - state:', existingState);
+            codeVerifier = existingCodeVerifier;
+            state = existingState;
+            // Generate challenge from existing verifier
+            codeChallenge = await this.generateCodeChallenge(codeVerifier);
+        } else {
+            // Generate new PKCE challenge
+            console.log('SpotifyService: Generating new PKCE data');
+            // Clear any existing PKCE data first
+            localStorage.removeItem('spotify_code_verifier');
+            localStorage.removeItem('spotify_auth_state');
+            
+            codeVerifier = this.generateCodeVerifier();
+            codeChallenge = await this.generateCodeChallenge(codeVerifier);
+            
+            // Store code verifier for later use
+            localStorage.setItem('spotify_code_verifier', codeVerifier);
+            
+            // Generate state for CSRF protection
+            state = 'spotify_auth_' + Math.random().toString(36).substring(7);
+            localStorage.setItem('spotify_auth_state', state);
+            
+            console.log('SpotifyService: Generated new PKCE data - state:', state, 'verifier length:', codeVerifier.length);
+        }
+
         const params = new URLSearchParams({
             client_id: this.clientId,
-            response_type: 'token',
+            response_type: 'code',
             redirect_uri: this.redirectUri,
             scope: scopes.join(' '),
-            show_dialog: 'false'
+            state: state,
+            code_challenge_method: 'S256',
+            code_challenge: codeChallenge
         });
 
-        return `https://accounts.spotify.com/authorize?${params.toString()}`;
+        const authUrl = `https://accounts.spotify.com/authorize?${params.toString()}`;
+        console.log('SpotifyService: Generated PKCE auth URL:', authUrl);
+        return authUrl;
+    }
+
+    // Generate PKCE code verifier
+    generateCodeVerifier() {
+        const array = new Uint8Array(32);
+        crypto.getRandomValues(array);
+        return btoa(String.fromCharCode(...array))
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=/g, '');
+    }
+
+    // Generate PKCE code challenge
+    async generateCodeChallenge(codeVerifier) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(codeVerifier);
+        const digest = await crypto.subtle.digest('SHA-256', data);
+        
+        return btoa(String.fromCharCode(...new Uint8Array(digest)))
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_')
+            .replace(/=/g, '');
     }
 
     // Handle authentication callback
-    handleAuthCallback() {
-        const hash = window.location.hash.substring(1);
-        const params = new URLSearchParams(hash);
+    async handleAuthCallback() {
+        console.log('SpotifyService: handleAuthCallback called');
         
-        if (params.has('access_token')) {
-            this.accessToken = params.get('access_token');
-            localStorage.setItem('spotify_access_token', this.accessToken);
+        // Delegate to auth manager
+        const result = await spotifyAuthManager.handleCallback();
+        
+        if (result) {
+            // Get the token from auth manager
+            const token = localStorage.getItem('spotify_access_token');
+            console.log('SpotifyService: Auth successful, token length:', token ? token.length : 0);
             
-            // Remove hash from URL
-            window.history.replaceState({}, document.title, window.location.pathname);
+            // Update our access token
+            this.accessToken = token;
             
-            this.initializePlayer();
-            return true;
+            // Dispatch a custom event to notify the UI
+            window.dispatchEvent(new CustomEvent('spotifyAuthenticated', {
+                detail: { token: token }
+            }));
         }
-        return false;
+        
+        return result;
     }
 
     // Initialize Spotify Web Playback SDK
@@ -151,15 +271,15 @@ export class SpotifyService {
                 return;
             }
 
+            // Define the callback function BEFORE loading the script
+            window.onSpotifyWebPlaybackSDKReady = () => {
+                console.log('Spotify Web Playback SDK ready');
+                resolve();
+            };
+
             const script = document.createElement('script');
             script.src = 'https://sdk.scdn.co/spotify-player.js';
             script.async = true;
-            
-            script.onload = () => {
-                window.onSpotifyWebPlaybackSDKReady = () => {
-                    resolve();
-                };
-            };
             
             script.onerror = () => reject(new Error('Failed to load Spotify SDK'));
             document.head.appendChild(script);
@@ -420,12 +540,52 @@ export class SpotifyService {
         this.deviceId = null;
         this.currentTrack = null;
         this.isPlaying = false;
-        localStorage.removeItem('spotify_access_token');
+        spotifyAuthManager.clearAuth();
+    }
+    
+    // Clear PKCE data (use with caution)
+    clearPKCEData() {
+        localStorage.removeItem('spotify_code_verifier');
+        localStorage.removeItem('spotify_auth_state');
+        console.log('SpotifyService: PKCE data cleared');
     }
 
     // Check if user is authenticated
     isAuthenticated() {
-        return !!this.accessToken;
+        const authState = spotifyAuthManager.getAuthState();
+        const hasToken = authState.isAuthenticated && !!this.accessToken;
+        console.log('isAuthenticated check - authState:', authState.state, 'hasToken:', hasToken, 'token length:', this.accessToken ? this.accessToken.length : 0);
+        return hasToken;
+    }
+    
+    // Check if token is valid by making a test API call
+    async validateToken() {
+        if (!this.accessToken) {
+            console.log('No token to validate');
+            return false;
+        }
+        
+        try {
+            const response = await fetch('https://api.spotify.com/v1/me', {
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`
+                }
+            });
+            
+            if (response.ok) {
+                console.log('Token is valid');
+                return true;
+            } else {
+                console.log('Token validation failed, status:', response.status);
+                // Token is invalid, remove it
+                this.accessToken = null;
+                spotifyAuthManager.clearAuth();
+                return false;
+            }
+        } catch (error) {
+            console.error('Error validating token:', error);
+            return false;
+        }
     }
 
     // Check if player is ready
