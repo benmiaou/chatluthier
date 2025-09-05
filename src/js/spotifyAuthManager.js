@@ -30,20 +30,35 @@ class SpotifyAuthManager {
     }
 
     // Set authentication state
-    setAuthState(state, token = null) {
+    setAuthState(state, tokenData = null) {
         const previousState = this.authState;
         this.authState = state;
         
         switch (state) {
             case 'connected':
                 this.isAuthenticated = true;
-                if (token) {
-                    localStorage.setItem('spotify_access_token', token);
+                if (tokenData) {
+                    if (typeof tokenData === 'string') {
+                        // Backward compatibility - just access token
+                        localStorage.setItem('spotify_access_token', tokenData);
+                    } else {
+                        // New format - full token data
+                        localStorage.setItem('spotify_access_token', tokenData.accessToken);
+                        if (tokenData.refreshToken) {
+                            localStorage.setItem('spotify_refresh_token', tokenData.refreshToken);
+                        }
+                        if (tokenData.expiresIn) {
+                            const expiresAt = Date.now() + (tokenData.expiresIn * 1000);
+                            localStorage.setItem('spotify_token_expires_at', expiresAt.toString());
+                        }
+                    }
                 }
                 break;
             case 'disconnected':
                 this.isAuthenticated = false;
                 localStorage.removeItem('spotify_access_token');
+                localStorage.removeItem('spotify_refresh_token');
+                localStorage.removeItem('spotify_token_expires_at');
                 break;
             case 'error':
                 this.isAuthenticated = false;
@@ -144,7 +159,11 @@ class SpotifyAuthManager {
                 console.log('AuthManager: Search params removed from URL');
                 
                 this.callbackProcessed = true; // Mark callback as processed
-                this.setAuthState('connected', tokenResult.accessToken);
+                this.setAuthState('connected', {
+                    accessToken: tokenResult.accessToken,
+                    refreshToken: tokenResult.refreshToken,
+                    expiresIn: tokenResult.expiresIn
+                });
                 return true;
             } else {
                 console.error('AuthManager: Token exchange failed:', tokenResult.error);
@@ -196,7 +215,9 @@ class SpotifyAuthManager {
                 console.log('AuthManager: Token exchange successful');
                 return {
                     success: true,
-                    accessToken: result.access_token
+                    accessToken: result.access_token,
+                    refreshToken: result.refresh_token,
+                    expiresIn: result.expires_in
                 };
             } else {
                 console.error('AuthManager: Token exchange failed:', result.error);
@@ -213,6 +234,62 @@ class SpotifyAuthManager {
                 error: error.message
             };
         }
+    }
+
+    // Refresh access token using refresh token
+    async refreshAccessToken() {
+        const refreshToken = localStorage.getItem('spotify_refresh_token');
+        if (!refreshToken) {
+            console.log('AuthManager: No refresh token available');
+            return false;
+        }
+
+        try {
+            console.log('AuthManager: Refreshing access token...');
+            
+            const response = await fetch('/api/spotify/refresh', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    refresh_token: refreshToken
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                console.log('AuthManager: Token refresh successful');
+                this.setAuthState('connected', {
+                    accessToken: result.access_token,
+                    refreshToken: result.refresh_token || refreshToken, // Keep old refresh token if new one not provided
+                    expiresIn: result.expires_in
+                });
+                return true;
+            } else {
+                console.error('AuthManager: Token refresh failed:', result.error);
+                this.setAuthState('disconnected');
+                return false;
+            }
+            
+        } catch (error) {
+            console.error('AuthManager: Error refreshing token:', error);
+            this.setAuthState('disconnected');
+            return false;
+        }
+    }
+
+    // Check if token is expired or about to expire
+    isTokenExpired() {
+        const expiresAt = localStorage.getItem('spotify_token_expires_at');
+        if (!expiresAt) return true; // No expiration info, assume expired
+        
+        const now = Date.now();
+        const expires = parseInt(expiresAt);
+        const buffer = 5 * 60 * 1000; // 5 minutes buffer
+        
+        return now >= (expires - buffer);
     }
 
     // Clear authentication

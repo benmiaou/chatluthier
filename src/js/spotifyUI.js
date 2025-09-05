@@ -17,13 +17,16 @@ export class SpotifyUI {
         this.nowPlaying = null;
         this.controls = null;
         this.playlistSelector = null;
-        this.volumeControl = null;
+        this.searchInput = null;
+        this.searchResults = null;
+        // Volume control removed - using main Background Music volume slider instead
         
         // Bind methods
         this.handleLogin = this.handleLogin.bind(this);
         this.handlePlayback = this.handlePlayback.bind(this);
-        this.handleVolumeChange = this.handleVolumeChange.bind(this);
+        // Volume control removed - using main Background Music volume slider instead
         this.handlePlaylistChange = this.handlePlaylistChange.bind(this);
+        this.handleSearch = this.handleSearch.bind(this);
         
         // Initialize
         this.init();
@@ -86,11 +89,13 @@ export class SpotifyUI {
         // Create controls section
         this.createControlsSection();
         
+        // Create search section
+        this.createSearchSection();
+        
         // Create playlist selector
         this.createPlaylistSelector();
         
-        // Create volume control
-        this.createVolumeControl();
+        // Volume control removed - using main Background Music volume slider instead
         
         // Inject into the page (after background music section)
         const backgroundMusicSection = document.getElementById('background-music');
@@ -104,7 +109,7 @@ export class SpotifyUI {
     createNowPlayingSection() {
         const nowPlayingSection = document.createElement('div');
         nowPlayingSection.className = 'spotify-now-playing';
-        nowPlayingSection.style.display = 'none';
+        nowPlayingSection.style.display = 'block';
         
         const title = document.createElement('h3');
         title.textContent = 'Now Playing';
@@ -121,7 +126,7 @@ export class SpotifyUI {
     createControlsSection() {
         const controlsSection = document.createElement('div');
         controlsSection.className = 'spotify-controls';
-        controlsSection.style.display = 'none';
+        controlsSection.style.display = 'block';
         
         
         this.controls = document.createElement('div');
@@ -153,10 +158,32 @@ export class SpotifyUI {
         this.container.appendChild(controlsSection);
     }
 
+    createSearchSection() {
+        const searchSection = document.createElement('div');
+        searchSection.className = 'spotify-search';
+        searchSection.style.display = 'block';
+        
+        // Search input
+        this.searchInput = document.createElement('input');
+        this.searchInput.type = 'text';
+        this.searchInput.placeholder = 'Search tracks, artists, albums...';
+        this.searchInput.className = 'spotify-search-input';
+        this.searchInput.addEventListener('input', this.handleSearch);
+        
+        // Search results container
+        this.searchResults = document.createElement('div');
+        this.searchResults.className = 'spotify-search-results';
+        this.searchResults.style.display = 'none';
+        
+        searchSection.appendChild(this.searchInput);
+        searchSection.appendChild(this.searchResults);
+        this.container.appendChild(searchSection);
+    }
+
     createPlaylistSelector() {
         const playlistSection = document.createElement('div');
         playlistSection.className = 'spotify-playlist-selector';
-        playlistSection.style.display = 'none';
+        playlistSection.style.display = 'block';
         
         const title = document.createElement('h3');
         title.textContent = 'Playlists';
@@ -176,31 +203,7 @@ export class SpotifyUI {
         this.container.appendChild(playlistSection);
     }
 
-    createVolumeControl() {
-        const volumeSection = document.createElement('div');
-        volumeSection.className = 'spotify-volume-control';
-        volumeSection.style.display = 'none';
-        
-        const title = document.createElement('h3');
-        title.textContent = 'Volume';
-        
-        this.volumeControl = document.createElement('input');
-        this.volumeControl.type = 'range';
-        this.volumeControl.min = '0';
-        this.volumeControl.max = '100';
-        this.volumeControl.value = getConfig('defaultVolume');
-        this.volumeControl.className = 'slider spotify-volume-slider';
-        this.volumeControl.addEventListener('input', this.handleVolumeChange);
-        
-        const volumeLabel = document.createElement('span');
-        volumeLabel.className = 'volume-label';
-        volumeLabel.textContent = `${this.volumeControl.value}%`;
-        
-        volumeSection.appendChild(title);
-        volumeSection.appendChild(this.volumeControl);
-        volumeSection.appendChild(volumeLabel);
-        this.container.appendChild(volumeSection);
-    }
+    // Volume control removed - using main Background Music volume slider instead
 
     // Handle Spotify login
     async handleLogin() {
@@ -227,31 +230,223 @@ export class SpotifyUI {
         }
     }
 
-    // Handle volume change
-    async handleVolumeChange(event) {
-        const volume = event.target.value;
-        const volumeLabel = event.target.parentNode.querySelector('.volume-label');
-        if (volumeLabel) {
-            volumeLabel.textContent = `${volume}%`;
-        }
-        
-        // Set Spotify volume
-        await spotifyService.setVolume(volume);
-        
-        // Also update background music volume to match
-        const backgroundMusicVolumeSlider = document.getElementById('music-volume');
-        if (backgroundMusicVolumeSlider) {
-            backgroundMusicVolumeSlider.value = volume;
-            // Trigger the change event to update background music volume
-            backgroundMusicVolumeSlider.dispatchEvent(new Event('change'));
-        }
-    }
+    // Volume control removed - using main Background Music volume slider instead
 
     // Handle playlist selection
     async handlePlaylistChange(event) {
         const playlistUri = event.target.value;
         if (playlistUri) {
             await spotifyService.playPlaylist(playlistUri);
+        }
+    }
+
+    // Handle search
+    async handleSearch(event) {
+        const query = event.target.value.trim();
+        
+        if (query.length < 2) {
+            this.searchResults.style.display = 'none';
+            return;
+        }
+        
+        try {
+            const results = await spotifyService.search(query, ['track', 'artist', 'album'], 10);
+            this.displaySearchResults(results);
+        } catch (error) {
+            console.error('Search error:', error);
+            this.searchResults.innerHTML = '<div class="search-error">Search failed. Please try again.</div>';
+            this.searchResults.style.display = 'block';
+        }
+    }
+
+    // Display search results
+    displaySearchResults(results) {
+        if (!results || (!results.tracks?.items?.length && !results.artists?.items?.length && !results.albums?.items?.length)) {
+            this.searchResults.innerHTML = '<div class="no-results">No results found</div>';
+            this.searchResults.style.display = 'block';
+            return;
+        }
+        
+        let html = '';
+        
+        // Tracks
+        if (results.tracks?.items?.length) {
+            html += '<div class="search-section"><h4>Tracks</h4>';
+            results.tracks.items.forEach(track => {
+                html += `
+                    <div class="search-item">
+                        <img src="${track.album.images[0]?.url || ''}" alt="Album Art" class="search-item-art">
+                        <div class="search-item-info">
+                            <div class="search-item-name">${track.name}</div>
+                            <div class="search-item-artist">${track.artists.map(a => a.name).join(', ')}</div>
+                        </div>
+                        <div class="search-item-actions">
+                            <button class="search-action-btn play-btn" data-type="track" data-uri="${track.uri}" title="Play">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="search-action-btn add-btn" data-type="track" data-uri="${track.uri}" title="Add to Playlist">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+        
+        // Artists
+        if (results.artists?.items?.length) {
+            html += '<div class="search-section"><h4>Artists</h4>';
+            results.artists.items.forEach(artist => {
+                html += `
+                    <div class="search-item">
+                        <img src="${artist.images[0]?.url || ''}" alt="Artist" class="search-item-art">
+                        <div class="search-item-info">
+                            <div class="search-item-name">${artist.name}</div>
+                            <div class="search-item-artist">Artist</div>
+                        </div>
+                        <div class="search-item-actions">
+                            <button class="search-action-btn play-btn" data-type="artist" data-uri="${artist.uri}" title="Play Artist">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+        
+        // Albums
+        if (results.albums?.items?.length) {
+            html += '<div class="search-section"><h4>Albums</h4>';
+            results.albums.items.forEach(album => {
+                html += `
+                    <div class="search-item">
+                        <img src="${album.images[0]?.url || ''}" alt="Album Art" class="search-item-art">
+                        <div class="search-item-info">
+                            <div class="search-item-name">${album.name}</div>
+                            <div class="search-item-artist">${album.artists.map(a => a.name).join(', ')}</div>
+                        </div>
+                        <div class="search-item-actions">
+                            <button class="search-action-btn play-btn" data-type="album" data-uri="${album.uri}" title="Play Album">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+        
+        this.searchResults.innerHTML = html;
+        this.searchResults.style.display = 'block';
+        
+        // Add event listeners to search items
+        this.addSearchItemListeners();
+    }
+
+    // Add event listeners to search result items
+    addSearchItemListeners() {
+        const actionButtons = this.searchResults.querySelectorAll('.search-action-btn');
+        actionButtons.forEach(button => {
+            button.addEventListener('click', async (event) => {
+                event.stopPropagation(); // Prevent event bubbling
+                
+                const type = event.currentTarget.dataset.type;
+                const uri = event.currentTarget.dataset.uri;
+                const action = event.currentTarget.classList.contains('play-btn') ? 'play' : 'add';
+                
+                if (!type || !uri) return;
+                
+                try {
+                    if (action === 'play') {
+                        let success = false;
+                        switch (type) {
+                            case 'track':
+                                success = await spotifyService.playTrack(uri);
+                                break;
+                            case 'artist':
+                                success = await spotifyService.playArtist(uri);
+                                break;
+                            case 'album':
+                                success = await spotifyService.playAlbum(uri);
+                                break;
+                        }
+                        
+                        if (success) {
+                            // Hide search results after successful play
+                            this.searchResults.style.display = 'none';
+                            this.searchInput.value = '';
+                        } else {
+                            console.error('Failed to play', type, uri);
+                        }
+                    } else if (action === 'add' && type === 'track') {
+                        // Show playlist selector for adding track
+                        await this.showAddToPlaylistDialog(uri);
+                    }
+                } catch (error) {
+                    console.error('Error with', action, type, ':', error);
+                }
+            });
+        });
+    }
+
+    // Show dialog to select playlist for adding track
+    async showAddToPlaylistDialog(trackUri) {
+        try {
+            const playlists = await spotifyService.getUserPlaylists();
+            
+            if (playlists.length === 0) {
+                alert('No playlists found. Create a playlist first.');
+                return;
+            }
+
+            // Create playlist selection dialog
+            const dialog = document.createElement('div');
+            dialog.className = 'playlist-dialog';
+            dialog.innerHTML = `
+                <div class="playlist-dialog-content">
+                    <h3>Add to Playlist</h3>
+                    <select class="playlist-selector" id="playlist-selector">
+                        <option value="">Select a playlist...</option>
+                        ${playlists.map(playlist => 
+                            `<option value="${playlist.id}">${playlist.name}</option>`
+                        ).join('')}
+                    </select>
+                    <div class="playlist-dialog-actions">
+                        <button class="button-primary" id="add-to-playlist-btn">Add</button>
+                        <button class="button-secondary" id="cancel-add-btn">Cancel</button>
+                    </div>
+                </div>
+            `;
+
+            // Add to page
+            document.body.appendChild(dialog);
+
+            // Handle add button
+            document.getElementById('add-to-playlist-btn').addEventListener('click', async () => {
+                const playlistId = document.getElementById('playlist-selector').value;
+                if (playlistId) {
+                    const success = await spotifyService.addTrackToPlaylist(playlistId, trackUri);
+                    if (success) {
+                        alert('Track added to playlist successfully!');
+                        document.body.removeChild(dialog);
+                    } else {
+                        alert('Failed to add track to playlist.');
+                    }
+                } else {
+                    alert('Please select a playlist.');
+                }
+            });
+
+            // Handle cancel button
+            document.getElementById('cancel-add-btn').addEventListener('click', () => {
+                document.body.removeChild(dialog);
+            });
+
+        } catch (error) {
+            console.error('Error showing playlist dialog:', error);
+            alert('Error loading playlists.');
         }
     }
 
@@ -353,10 +548,10 @@ export class SpotifyUI {
         
         // Show/hide sections based on authentication
         const sections = [
-            { element: this.nowPlaying, show: isAuthenticated && isReady },
-            { element: this.controls, show: isAuthenticated && isReady },
-            { element: this.playlistSelector, show: isAuthenticated && isReady },
-            { element: this.volumeControl, show: isAuthenticated && isReady }
+            { element: this.nowPlaying, show: isAuthenticated },
+            { element: this.controls, show: isAuthenticated },
+            { element: this.playlistSelector, show: isAuthenticated },
+            { element: this.searchInput, show: isAuthenticated }
         ];
         
         sections.forEach(({ element, show }) => {
@@ -366,7 +561,7 @@ export class SpotifyUI {
         });
         
         // Load playlists if authenticated
-        if (isAuthenticated && isReady) {
+        if (isAuthenticated) {
             await this.loadPlaylists();
         }
     }

@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeRequestSoundModalButton = document.getElementById('closeRequestSoundModalButton');
     const spotifyToggleButton = document.getElementById('spotify-toggle-button');
     const musicSourceToggle = document.getElementById('music-source-toggle');
-    const musicSourceLabel = document.getElementById('music-source-label');
     const musicSourceContainer = document.getElementById('music-source-container');
 
     
@@ -243,7 +242,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (volumeSlider) {
           volumeSlider.addEventListener('change', function(event) {
               const volume = event.target.value;
+              
+              // Always set background music volume
               BackgroundMusic.setBackgroundVolume(volume);
+              
+              // If using Spotify, also set Spotify volume
+              if (useSpotify && spotifyService.isAuthenticated()) {
+                  spotifyService.setVolume(volume);
+              }
           });
       } else {
           console.error("Volume slider element with ID 'music-volume' not found.");
@@ -293,7 +299,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             // Force back to site music when Spotify disconnects
             useSpotify = false;
-            if (musicSourceLabel) musicSourceLabel.textContent = 'Site Music';
             if (musicSourceToggle) {
                 musicSourceToggle.innerHTML = '<i class="fab fa-spotify"></i> Switch to Spotify';
                 musicSourceToggle.classList.remove('button-primary-active');
@@ -323,7 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (useSpotify) {
             // Switch back to site music
             useSpotify = false;
-            if (musicSourceLabel) musicSourceLabel.textContent = 'Site Music';
             musicSourceToggle.innerHTML = '<i class="fab fa-spotify"></i> Switch to Spotify';
             musicSourceToggle.classList.remove('button-primary-active');
             
@@ -357,7 +361,6 @@ document.addEventListener('DOMContentLoaded', () => {
            
             // If already authenticated, switch to Spotify
             useSpotify = true;
-            if (musicSourceLabel) musicSourceLabel.textContent = 'Spotify';
             musicSourceToggle.innerHTML = '<i class="fas fa-music"></i> Switch to Site Music';
             musicSourceToggle.classList.add('button-primary-active');
             
@@ -374,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Show Spotify UI using the proper method
             spotifyUI.show();
             
-            // Sync background music volume with Spotify volume
+            // Sync Spotify volume with background music volume
             const backgroundMusicVolumeSlider = document.getElementById('music-volume');
             if (backgroundMusicVolumeSlider) {
                 const currentVolume = backgroundMusicVolumeSlider.value;
@@ -403,7 +406,6 @@ document.addEventListener('DOMContentLoaded', () => {
          const preference = localStorage.getItem('music_source_preference');
          if (preference === 'spotify' && spotifyService.isAuthenticated()) {
              useSpotify = true;
-            if (musicSourceLabel) musicSourceLabel.textContent = 'Spotify';
             musicSourceToggle.innerHTML = '<i class="fas fa-music"></i> Switch to Site Music';
             musicSourceToggle.classList.add('button-primary-active');
             
@@ -417,11 +419,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 backgroundMusicSection.style.display = 'none';
             }
             
-            // Show Spotify container
-            const spotifyContainer = document.getElementById('spotify-container');
-            if (spotifyContainer) {
-                spotifyContainer.style.display = 'block';
-            }
+            // Show Spotify container using the proper method
+            // Add a small delay to ensure Spotify service is fully ready
+            setTimeout(() => {
+                spotifyUI.show();
+            }, 100);
             
             // Sync background music volume with Spotify volume
             const backgroundMusicVolumeSlider = document.getElementById('music-volume');
@@ -452,13 +454,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // Update UI to show site music mode
-            if (musicSourceLabel) musicSourceLabel.textContent = 'Site Music';
             if (musicSourceToggle) {
                 musicSourceToggle.innerHTML = '<i class="fab fa-spotify"></i> Switch to Spotify';
                 musicSourceToggle.classList.remove('button-primary-active');
             }
         }
         
+        // Update UI visibility based on current state
+        updateMusicSourceUIVisibility();
     }
     
          // Check if returning from Spotify auth and auto-switch
@@ -542,21 +545,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
          // Listen for Spotify authentication events
      window.addEventListener('spotifyAuthenticated', async (event) => {
-         // Don't automatically switch to Spotify - just update UI visibility
-         // User can choose to switch manually using the toggle button
-         
-        // Update UI visibility first
+         // Update UI visibility first
         updateMusicSourceUIVisibility();
         
-        // Keep current music source preference (don't force Spotify)
-        // Only update UI elements if user was already using Spotify
-        if (useSpotify) {
-            if (musicSourceLabel) musicSourceLabel.textContent = 'Spotify';
-            if (musicSourceToggle) {
-                musicSourceToggle.innerHTML = '<i class="fas fa-music"></i> Switch to Site Music';
-                musicSourceToggle.classList.add('button-primary-active');
-            }
-        }
+        // Reload music source preference now that Spotify is authenticated
+        // This will restore the user's last choice if they had selected Spotify
+        loadMusicSourcePreference();
         
         // Only update UI if user was already using Spotify
         if (useSpotify) {
@@ -572,11 +566,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 backgroundMusicSection.style.display = 'none';
             }
             
-            // Show Spotify container
-            const spotifyContainer = document.getElementById('spotify-container');
-            if (spotifyContainer) {
-                spotifyContainer.style.display = 'block';
-            }
+            // Show Spotify container using the proper method
+            spotifyUI.show();
             
             // Sync background music volume with Spotify volume
             const backgroundMusicVolumeSlider = document.getElementById('music-volume');
@@ -630,6 +621,41 @@ document.addEventListener('DOMContentLoaded', () => {
          // Show user-friendly error message
          const errorMessage = event.detail?.error || 'Unknown error';
          alert(`Spotify Authentication Error: ${errorMessage}`);
+     });
+     
+     // Listen for Spotify disconnect events
+     window.addEventListener('spotifyDisconnected', () => {
+         console.log('Main.js: Spotify disconnected event received');
+         
+         // Force back to site music and save preference
+         useSpotify = false;
+         localStorage.setItem('music_source_preference', 'site');
+         
+         // Update UI to show site music
+         if (musicSourceToggle) {
+             musicSourceToggle.innerHTML = '<i class="fab fa-spotify"></i> Switch to Spotify';
+             musicSourceToggle.classList.remove('button-primary-active');
+         }
+         
+         // Show site music controls
+         const progressBar = document.getElementById('progressBar');
+         const nextButton = document.getElementById('nextButton');
+         if (progressBar) progressBar.style.display = 'block';
+         if (nextButton) nextButton.style.display = 'block';
+         
+         // Show background music manager
+         const backgroundMusicSection = document.getElementById('background-music');
+         if (backgroundMusicSection) {
+             backgroundMusicSection.style.display = 'block';
+         }
+         
+         // Hide Spotify container
+         if (spotifyUI.container) {
+             spotifyUI.container.style.display = 'none';
+         }
+         
+         // Update UI visibility
+         updateMusicSourceUIVisibility();
      });
      
      // Listen for music source toggle from Spotify UI

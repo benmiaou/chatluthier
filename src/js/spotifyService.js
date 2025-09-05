@@ -307,16 +307,34 @@ export class SpotifyService {
         }
     }
 
+    // Comprehensive search for tracks, artists, and albums
+    async search(query, types = ['track', 'artist', 'album'], limit = 10) {
+        if (!this.accessToken) return { tracks: { items: [] }, artists: { items: [] }, albums: { items: [] } };
+
+        try {
+            const typeString = types.join(',');
+            const response = await this.makeApiCall(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=${typeString}&limit=${limit}`);
+
+            if (!response.ok) throw new Error('Search request failed');
+            
+            const data = await response.json();
+            return {
+                tracks: data.tracks || { items: [] },
+                artists: data.artists || { items: [] },
+                albums: data.albums || { items: [] }
+            };
+        } catch (error) {
+            console.error('Error searching Spotify:', error);
+            return { tracks: { items: [] }, artists: { items: [] }, albums: { items: [] } };
+        }
+    }
+
     // Get user's playlists
     async getUserPlaylists() {
         if (!this.accessToken) return [];
 
         try {
-            const response = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
-                headers: {
-                    'Authorization': `Bearer ${this.accessToken}`
-                }
-            });
+            const response = await this.makeApiCall('https://api.spotify.com/v1/me/playlists?limit=50');
 
             if (!response.ok) throw new Error('Failed to fetch playlists');
             
@@ -333,10 +351,9 @@ export class SpotifyService {
         if (!this.accessToken || !this.deviceId) return false;
 
         try {
-            const response = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${this.deviceId}`, {
+            const response = await this.makeApiCall(`https://api.spotify.com/v1/me/player/play?device_id=${this.deviceId}`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${this.accessToken}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -347,6 +364,50 @@ export class SpotifyService {
             return response.ok;
         } catch (error) {
             console.error('Error playing track:', error);
+            return false;
+        }
+    }
+
+    // Play an artist's top tracks
+    async playArtist(artistUri) {
+        if (!this.accessToken || !this.deviceId) return false;
+
+        try {
+            const response = await this.makeApiCall(`https://api.spotify.com/v1/me/player/play?device_id=${this.deviceId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    context_uri: artistUri
+                })
+            });
+
+            return response.ok;
+        } catch (error) {
+            console.error('Error playing artist:', error);
+            return false;
+        }
+    }
+
+    // Play an album
+    async playAlbum(albumUri) {
+        if (!this.accessToken || !this.deviceId) return false;
+
+        try {
+            const response = await this.makeApiCall(`https://api.spotify.com/v1/me/player/play?device_id=${this.deviceId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    context_uri: albumUri
+                })
+            });
+
+            return response.ok;
+        } catch (error) {
+            console.error('Error playing album:', error);
             return false;
         }
     }
@@ -399,11 +460,8 @@ export class SpotifyService {
         if (!this.accessToken || !this.deviceId) return false;
 
         try {
-            const response = await fetch(`https://api.spotify.com/v1/me/player/pause?device_id=${this.deviceId}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${this.accessToken}`
-                }
+            const response = await this.makeApiCall(`https://api.spotify.com/v1/me/player/pause?device_id=${this.deviceId}`, {
+                method: 'PUT'
             });
 
             return response.ok;
@@ -541,6 +599,9 @@ export class SpotifyService {
         this.currentTrack = null;
         this.isPlaying = false;
         spotifyAuthManager.clearAuth();
+        
+        // Dispatch disconnect event
+        window.dispatchEvent(new CustomEvent('spotifyDisconnected'));
     }
     
     // Clear PKCE data (use with caution)
@@ -591,6 +652,108 @@ export class SpotifyService {
     // Check if player is ready
     isPlayerReady() {
         return !!this.deviceId;
+    }
+
+    // Make API call with automatic token refresh on 401
+    async makeApiCall(url, options = {}) {
+        const defaultOptions = {
+            headers: {
+                'Authorization': `Bearer ${this.accessToken}`,
+                ...options.headers
+            }
+        };
+        
+        const finalOptions = { ...options, ...defaultOptions };
+        
+        try {
+            const response = await fetch(url, finalOptions);
+            
+            // If we get a 401, try to refresh the token and retry
+            if (response.status === 401) {
+                console.log('SpotifyService: Got 401, attempting token refresh...');
+                const refreshSuccess = await spotifyAuthManager.refreshAccessToken();
+                
+                if (refreshSuccess) {
+                    // Update our access token
+                    this.accessToken = localStorage.getItem('spotify_access_token');
+                    
+                    // Retry the request with the new token
+                    finalOptions.headers['Authorization'] = `Bearer ${this.accessToken}`;
+                    return await fetch(url, finalOptions);
+                } else {
+                    console.error('SpotifyService: Token refresh failed, user needs to re-authenticate');
+                    // Dispatch disconnect event
+                    window.dispatchEvent(new CustomEvent('spotifyDisconnected'));
+                    return response; // Return the original 401 response
+                }
+            }
+            
+            return response;
+        } catch (error) {
+            console.error('SpotifyService: API call error:', error);
+            throw error;
+        }
+    }
+
+    // Add track to playlist
+    async addTrackToPlaylist(playlistId, trackUri) {
+        if (!this.accessToken) return false;
+
+        try {
+            const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    uris: [trackUri]
+                })
+            });
+
+            return response.ok;
+        } catch (error) {
+            console.error('Error adding track to playlist:', error);
+            return false;
+        }
+    }
+
+    // Create a new playlist
+    async createPlaylist(name, description = '', isPublic = false) {
+        if (!this.accessToken) return null;
+
+        try {
+            // First get user ID
+            const userResponse = await fetch('https://api.spotify.com/v1/me', {
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`
+                }
+            });
+
+            if (!userResponse.ok) throw new Error('Failed to get user info');
+            const user = await userResponse.json();
+
+            // Create playlist
+            const response = await fetch(`https://api.spotify.com/v1/users/${user.id}/playlists`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: name,
+                    description: description,
+                    public: isPublic
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to create playlist');
+            const playlist = await response.json();
+            return playlist;
+        } catch (error) {
+            console.error('Error creating playlist:', error);
+            return null;
+        }
     }
 }
 
