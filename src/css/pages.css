@@ -99,6 +99,24 @@ h2 {
     justify-content: center;
 }
 
+#background-music {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
+}
+
+#background-music .button-primary {
+    display: inline-block;
+    width: auto;
+}
+
+#background-music .button-primary-active {
+    display: inline-block !important;
+    width: auto;
+}
+
 /* Footer styling */
 footer {
     background-size: cover;

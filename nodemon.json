@@ -1,0 +1,9 @@
+{
+  "watch": ["srv"],
+  "ext": "js,json",
+  "ignore": ["node_modules", "dist", "uploads"],
+  "exec": "node srv/server.js",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

@@ -80,9 +80,6 @@ export class SpotifyUI {
         this.container.className = 'spotify-container';
         this.container.style.display = 'none'; // Hidden by default
 
-        // Create login section
-        this.createLoginSection();
-        
         // Create now playing section
         this.createNowPlayingSection();
         
@@ -102,35 +99,6 @@ export class SpotifyUI {
         }
         
         // Don't call updateUI here - wait for user to click toggle button
-    }
-
-    createLoginSection() {
-        const loginSection = document.createElement('div');
-        loginSection.className = 'spotify-login-section';
-        loginSection.style.display = 'none'; // Hide by default
-        
-        this.loginButton = document.createElement('button');
-        this.loginButton.className = 'button-primary spotify-login-btn';
-        this.loginButton.innerHTML = '<i class="fab fa-spotify"></i> Disconnect Spotify';
-        this.loginButton.addEventListener('click', this.handleLogin);
-        
-        const statusText = document.createElement('p');
-        statusText.className = 'spotify-status';
-        statusText.textContent = 'Connected to Spotify';
-        
-        // Add music source toggle button
-        const musicSourceToggle = document.createElement('button');
-        musicSourceToggle.className = 'button-primary spotify-music-toggle-btn';
-        musicSourceToggle.innerHTML = '<i class="fas fa-music"></i> Switch to Site Music';
-        musicSourceToggle.addEventListener('click', () => {
-            // Dispatch custom event to trigger music source toggle
-            window.dispatchEvent(new CustomEvent('toggleMusicSource'));
-        });
-        
-        loginSection.appendChild(this.loginButton);
-        loginSection.appendChild(statusText);
-        loginSection.appendChild(musicSourceToggle);
-        this.container.appendChild(loginSection);
     }
 
     createNowPlayingSection() {
@@ -155,8 +123,6 @@ export class SpotifyUI {
         controlsSection.className = 'spotify-controls';
         controlsSection.style.display = 'none';
         
-        const title = document.createElement('h3');
-        title.textContent = 'Spotify Controls';
         
         this.controls = document.createElement('div');
         this.controls.className = 'controls-content';
@@ -183,7 +149,6 @@ export class SpotifyUI {
         this.controls.appendChild(playPauseBtn);
         this.controls.appendChild(nextBtn);
         
-        controlsSection.appendChild(title);
         controlsSection.appendChild(this.controls);
         this.container.appendChild(controlsSection);
     }
@@ -217,7 +182,7 @@ export class SpotifyUI {
         volumeSection.style.display = 'none';
         
         const title = document.createElement('h3');
-        title.textContent = 'Spotify Volume';
+        title.textContent = 'Volume';
         
         this.volumeControl = document.createElement('input');
         this.volumeControl.type = 'range';

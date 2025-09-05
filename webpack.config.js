@@ -13,7 +13,7 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
         publicPath: '/', // Set to '/' for absolute paths
     },
-    mode: 'production', // Use 'development' for unminified output
+    mode: process.env.NODE_ENV === 'production' ? 'production' : 'development', // Dynamic mode based on environment
     module: {
         rules: [
             // JavaScript: Use Babel to transpile JS files
@@ -106,5 +106,15 @@ module.exports = {
         compress: true,
         port: 3000,
         open: true,
+        hot: true, // Enable hot module replacement
+        liveReload: true, // Enable live reload
+        watchFiles: ['src/**/*'], // Watch for changes in src directory
+        proxy: {
+            '/api': 'http://localhost:3001', // Proxy API calls to your server
+            '/socket.io': {
+                target: 'http://localhost:3001',
+                ws: true // Enable WebSocket proxying
+            }
+        }
     },
 };

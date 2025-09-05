@@ -117,3 +117,54 @@ button {
     text-decoration: none;
     cursor: pointer;
 }
+
+/* Music Mode Styles */
+.music-mode-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--main-background-color-secondary);
+    border: 2px solid var(--main-border);
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin: 20px 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.music-mode-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.music-mode-label {
+    font-family: var(--fontfamilly);
+    font-size: 16px;
+    color: var(--main-text);
+    font-weight: bold;
+}
+
+.music-mode-display {
+    font-family: var(--fontfamilly);
+    font-size: 18px;
+    color: var(--main-button-active-color);
+    font-weight: bold;
+    padding: 5px 12px;
+    background-color: var(--main-background-color);
+    border: 2px solid var(--main-button-active-color);
+    border-radius: 6px;
+    min-width: 120px;
+    text-align: center;
+}
+
+.music-mode-toggle {
+    min-width: 180px;
+    font-size: 14px;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+}
+
+.music-mode-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
