@@ -1,9 +1,18 @@
 // src/js/spotifyConfig.js
 
+// Dynamic redirect URI based on environment
+function getRedirectUri() {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://127.0.0.1:3000'; // Local development
+    } else {
+        return 'https://chatluthier.org'; // Production - use current domain
+    }
+}
+
 export const spotifyConfig = {
 
     clientId: 'e03effcac1d94e0ebe56813e98c815dc', // Replace with your actual Spotify Client ID
-    redirectUri: 'http://127.0.0.1:3000', // Fixed redirect URI for development
+    redirectUri: getRedirectUri(), // Dynamic redirect URI based on environment
     
     // Default playlists for different moods (optional)
     defaultPlaylists: {
@@ -82,4 +91,4 @@ export function loadConfig() {
 loadConfig();
 
 // Log the redirect URI being used for debugging
-console.log('Spotify redirect URI:', window.location.origin);
+console.log('Spotify redirect URI:', spotifyConfig.redirectUri);
