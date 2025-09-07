@@ -390,11 +390,6 @@ export class SpotifyUI {
     async showAddToPlaylistDialog(trackUri) {
         try {
             const playlists = await spotifyService.getUserPlaylists();
-            
-            if (playlists.length === 0) {
-                alert('No playlists found. Create a playlist first.');
-                return;
-            }
 
             // Create playlist selection dialog
             const dialog = document.createElement('div');
@@ -404,10 +399,19 @@ export class SpotifyUI {
                     <h3>Add to Playlist</h3>
                     <select class="playlist-selector" id="playlist-selector">
                         <option value="">Select a playlist...</option>
+                        <option value="CREATE_NEW">+ Create New Playlist</option>
                         ${playlists.map(playlist => 
                             `<option value="${playlist.id}">${playlist.name}</option>`
                         ).join('')}
                     </select>
+                    <div id="create-playlist-section" style="display: none; margin-top: 10px;">
+                        <input type="text" id="new-playlist-name" placeholder="Enter playlist name..." class="text-input" style="width: 100%; margin-bottom: 10px;">
+                        <input type="text" id="new-playlist-description" placeholder="Enter description (optional)..." class="text-input" style="width: 100%; margin-bottom: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px; margin-bottom: 10px;">
+                            <input type="checkbox" id="new-playlist-public">
+                            <span style="color: var(--main-text); font-size: 14px;">Make playlist public</span>
+                        </label>
+                    </div>
                     <div class="playlist-dialog-actions">
                         <button class="button-primary" id="add-to-playlist-btn">Add</button>
                         <button class="button-secondary" id="cancel-add-btn">Cancel</button>
@@ -418,11 +422,48 @@ export class SpotifyUI {
             // Add to page
             document.body.appendChild(dialog);
 
+            // Handle playlist selector change
+            document.getElementById('playlist-selector').addEventListener('change', (e) => {
+                const createSection = document.getElementById('create-playlist-section');
+                if (e.target.value === 'CREATE_NEW') {
+                    createSection.style.display = 'block';
+                } else {
+                    createSection.style.display = 'none';
+                }
+            });
+
             // Handle add button
             document.getElementById('add-to-playlist-btn').addEventListener('click', async () => {
-                const playlistId = document.getElementById('playlist-selector').value;
-                if (playlistId) {
-                    const success = await spotifyService.addTrackToPlaylist(playlistId, trackUri);
+                const playlistSelector = document.getElementById('playlist-selector');
+                const selectedValue = playlistSelector.value;
+                
+                if (selectedValue === 'CREATE_NEW') {
+                    // Create new playlist
+                    const name = document.getElementById('new-playlist-name').value.trim();
+                    const description = document.getElementById('new-playlist-description').value.trim();
+                    const isPublic = document.getElementById('new-playlist-public').checked;
+                    
+                    if (!name) {
+                        alert('Please enter a playlist name.');
+                        return;
+                    }
+                    
+                    const newPlaylist = await spotifyService.createPlaylist(name, description, isPublic);
+                    if (newPlaylist) {
+                        // Add track to the new playlist
+                        const success = await spotifyService.addTrackToPlaylist(newPlaylist.id, trackUri);
+                        if (success) {
+                            alert(`Playlist "${name}" created and track added successfully!`);
+                            document.body.removeChild(dialog);
+                        } else {
+                            alert('Playlist created but failed to add track.');
+                        }
+                    } else {
+                        alert('Failed to create playlist.');
+                    }
+                } else if (selectedValue) {
+                    // Add to existing playlist
+                    const success = await spotifyService.addTrackToPlaylist(selectedValue, trackUri);
                     if (success) {
                         alert('Track added to playlist successfully!');
                         document.body.removeChild(dialog);
@@ -430,7 +471,7 @@ export class SpotifyUI {
                         alert('Failed to add track to playlist.');
                     }
                 } else {
-                    alert('Please select a playlist.');
+                    alert('Please select a playlist or create a new one.');
                 }
             });
 
