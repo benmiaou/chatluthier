@@ -89,11 +89,8 @@ export class SpotifyUI {
         // Create controls section
         this.createControlsSection();
         
-        // Create search section
-        this.createSearchSection();
-        
-        // Create playlist selector
-        this.createPlaylistSelector();
+        // Create search and playlist section (combined)
+        this.createSearchAndPlaylistSection();
         
         // Volume control removed - using main Background Music volume slider instead
         
@@ -158,10 +155,15 @@ export class SpotifyUI {
         this.container.appendChild(controlsSection);
     }
 
-    createSearchSection() {
-        const searchSection = document.createElement('div');
-        searchSection.className = 'spotify-search';
-        searchSection.style.display = 'block';
+
+    createSearchAndPlaylistSection() {
+        // Create a container for search and playlist
+        const searchPlaylistSection = document.createElement('div');
+        searchPlaylistSection.className = 'spotify-search-playlist-container';
+        
+        // Create a row for the input and selector
+        const searchPlaylistRow = document.createElement('div');
+        searchPlaylistRow.className = 'spotify-search-playlist-row';
         
         // Search input
         this.searchInput = document.createElement('input');
@@ -170,37 +172,30 @@ export class SpotifyUI {
         this.searchInput.className = 'spotify-search-input';
         this.searchInput.addEventListener('input', this.handleSearch);
         
-        // Search results container
-        this.searchResults = document.createElement('div');
-        this.searchResults.className = 'spotify-search-results';
-        this.searchResults.style.display = 'none';
-        
-        searchSection.appendChild(this.searchInput);
-        searchSection.appendChild(this.searchResults);
-        this.container.appendChild(searchSection);
-    }
-
-    createPlaylistSelector() {
-        const playlistSection = document.createElement('div');
-        playlistSection.className = 'spotify-playlist-selector';
-        playlistSection.style.display = 'block';
-        
-        const title = document.createElement('h3');
-        title.textContent = 'Playlists';
-        
+        // Playlist selector
         this.playlistSelector = document.createElement('select');
-        this.playlistSelector.className = 'selector-primary spotify-playlist-select';
+        this.playlistSelector.className = 'selector-primary';
         this.playlistSelector.addEventListener('change', this.handlePlaylistChange);
         
         // Add default option
         const defaultOption = document.createElement('option');
         defaultOption.value = '';
-        defaultOption.textContent = 'Select a playlist...';
+        defaultOption.textContent = 'Select a playlist';
         this.playlistSelector.appendChild(defaultOption);
         
-        playlistSection.appendChild(title);
-        playlistSection.appendChild(this.playlistSelector);
-        this.container.appendChild(playlistSection);
+        // Search results container
+        this.searchResults = document.createElement('div');
+        this.searchResults.className = 'spotify-search-results';
+        this.searchResults.style.display = 'none';
+        
+        // Add elements to the row
+        searchPlaylistRow.appendChild(this.playlistSelector);
+        searchPlaylistRow.appendChild(this.searchInput);
+        
+        // Add row and results to the main container
+        searchPlaylistSection.appendChild(searchPlaylistRow);
+        searchPlaylistSection.appendChild(this.searchResults);
+        this.container.appendChild(searchPlaylistSection);
     }
 
     // Volume control removed - using main Background Music volume slider instead
@@ -577,7 +572,7 @@ export class SpotifyUI {
             this.playlistSelector.innerHTML = '';
             const defaultOption = document.createElement('option');
             defaultOption.value = '';
-            defaultOption.textContent = 'Select a playlist...';
+            defaultOption.textContent = 'Select a playlist';
             this.playlistSelector.appendChild(defaultOption);
             
             // Add playlist options
