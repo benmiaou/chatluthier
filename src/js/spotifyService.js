@@ -198,11 +198,42 @@ export class SpotifyService {
         return result;
     }
 
+    // Verify token validity and handle authentication errors
+    async verifyTokenAndHandleError(errorMessage) {
+        try {
+            // Test the token with a simple API call
+            const response = await fetch('https://api.spotify.com/v1/me', {
+                headers: {
+                    'Authorization': `Bearer ${this.accessToken}`
+                }
+            });
+            
+            if (response.ok) {
+                console.log('Spotify: Token is valid, ignoring authentication error');
+                // Token is valid, don't show error to user
+                return;
+            } else {
+                console.log('Spotify: Token is invalid, clearing and showing error');
+                this.accessToken = null;
+                localStorage.removeItem('spotify_access_token');
+                if (this.onError) this.onError(errorMessage);
+            }
+        } catch (error) {
+            console.log('Spotify: Error verifying token, clearing and showing error');
+            this.accessToken = null;
+            localStorage.removeItem('spotify_access_token');
+            if (this.onError) this.onError(errorMessage);
+        }
+    }
+
     // Initialize Spotify Web Playback SDK
     async initializePlayer() {
         if (!this.accessToken) return;
 
         try {
+            // Add a small delay to ensure authentication is fully processed
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
             // Load Spotify Web Playback SDK
             await this.loadSpotifySDK();
             
@@ -220,9 +251,18 @@ export class SpotifyService {
 
             this.player.addListener('authentication_error', ({ message }) => {
                 console.error('Spotify authentication error:', message);
-                this.accessToken = null;
-                localStorage.removeItem('spotify_access_token');
-                if (this.onError) this.onError(message);
+                
+                // Check if we actually have a valid token before clearing it
+                const storedToken = localStorage.getItem('spotify_access_token');
+                if (storedToken && this.accessToken) {
+                    console.log('Spotify: Authentication error but token exists, might be false positive');
+                    // Don't clear the token immediately, let's verify it first
+                    this.verifyTokenAndHandleError(message);
+                } else {
+                    this.accessToken = null;
+                    localStorage.removeItem('spotify_access_token');
+                    if (this.onError) this.onError(message);
+                }
             });
 
             this.player.addListener('account_error', ({ message }) => {
