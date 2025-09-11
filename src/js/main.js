@@ -32,6 +32,7 @@ window.AudioManager = audioManager;
 
 // Global state for music source - default to site music
 let useSpotify = false;
+let spotifyAuthCallbackProcessed = false; // Flag to prevent multiple auth callback processing
 
 // Add Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
@@ -466,20 +467,36 @@ document.addEventListener('DOMContentLoaded', () => {
     
          // Check if returning from Spotify auth and auto-switch
      async function checkSpotifyAuthReturn() {
+         // Prevent multiple processing of the same auth callback
+         if (spotifyAuthCallbackProcessed) {
+             console.log('Main.js: Auth callback already processed, skipping');
+             updateMusicSourceUIVisibility();
+             return;
+         }
+         
          // Check if we have search params (returning from auth)
          const urlParams = new URLSearchParams(window.location.search);
          if (urlParams.has('code') || urlParams.has('state')) {
              try {
+                 console.log('Main.js: Processing Spotify auth callback');
+                 spotifyAuthCallbackProcessed = true; // Mark as processed
+                 
                  // Handle the auth callback
                  const authResult = await spotifyService.handleAuthCallback();
                  if (authResult) {
+                     console.log('Main.js: Spotify auth successful');
                      // The spotifyAuthenticated event will handle UI updates
+                 } else {
+                     console.log('Main.js: Spotify auth failed');
                  }
              } catch (error) {
                  console.error('Main.js: Error handling Spotify auth callback:', error);
+                 spotifyAuthCallbackProcessed = false; // Reset on error to allow retry
              }
+         } else {
+             console.log('Main.js: No Spotify auth params found');
          }
-        
+         
         // Don't auto-switch to Spotify - let user choose explicitly
         // Just update the UI visibility based on connection status
         updateMusicSourceUIVisibility();

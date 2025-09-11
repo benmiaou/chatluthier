@@ -7,6 +7,7 @@ class SpotifyAuthManager {
         this.authState = 'disconnected'; // 'disconnected', 'connecting', 'connected', 'error'
         this.listeners = new Set();
         this.callbackProcessed = false; // Flag to prevent multiple callback processing
+        this.callbackInProgress = false; // Flag to prevent concurrent callback processing
     }
 
     // Initialize the auth manager
@@ -119,9 +120,22 @@ class SpotifyAuthManager {
             return this.authState === 'connected';
         }
         
-        this.setAuthState('connecting');
+        // If callback is already in progress, wait for it to complete
+        if (this.callbackInProgress) {
+            console.log('AuthManager: Callback already in progress, waiting...');
+            // Wait for the current callback to complete
+            while (this.callbackInProgress) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            return this.authState === 'connected';
+        }
+        
+        // Mark callback as in progress
+        this.callbackInProgress = true;
         
         try {
+            this.setAuthState('connecting');
+            
             // PKCE flow uses search params, not hash
             const searchParams = new URLSearchParams(window.location.search);
             console.log('AuthManager: Search params:', Object.fromEntries(searchParams));
@@ -181,6 +195,9 @@ class SpotifyAuthManager {
             console.error('AuthManager: Error handling callback:', error);
             this.setAuthState('error');
             return false;
+        } finally {
+            // Always clear the in-progress flag
+            this.callbackInProgress = false;
         }
     }
 
@@ -296,6 +313,7 @@ class SpotifyAuthManager {
     clearAuth() {
         this.setAuthState('disconnected');
         this.callbackProcessed = false; // Reset callback processed flag
+        this.callbackInProgress = false; // Reset callback in progress flag
         
         // Clean up PKCE-related data
         localStorage.removeItem('spotify_code_verifier');
@@ -305,6 +323,7 @@ class SpotifyAuthManager {
     // Reset callback processed flag (useful for testing or re-authentication)
     resetCallbackFlag() {
         this.callbackProcessed = false;
+        this.callbackInProgress = false;
         console.log('AuthManager: Callback processed flag reset');
     }
     
@@ -314,6 +333,7 @@ class SpotifyAuthManager {
             this.authState = 'disconnected';
             this.isAuthenticated = false;
             this.callbackProcessed = false;
+            this.callbackInProgress = false;
             
             // Clean up PKCE-related data for fresh start
             localStorage.removeItem('spotify_code_verifier');
