@@ -3,6 +3,7 @@ export interface Sound {
   name: string;
   filename: string;
   category: string;
+  imageFile?: string;
   credit?: string;
   creditUrl?: string;
   /** ambiance/soundboard: string[]; backgroundMusic: [category, scene][] stored as unknown[] */
