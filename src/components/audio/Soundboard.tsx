@@ -3,6 +3,7 @@ import { IconTrash, IconVolume } from '@tabler/icons-react';
 import { useEffect } from 'react';
 import { useSoundboard } from '../../hooks/useSoundboard';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
+import { showCreditToast } from '../../utils/showCreditToast';
 
 interface SoundboardProps {
   userId?: string | null;
@@ -30,6 +31,8 @@ export function Soundboard({ userId = null, isAdmin = false }: SoundboardProps) 
     if (sessionId) {
       send({ type: 'playSoundboardSound', id: sessionId, content: { filename } });
     }
+    const sound = sounds.find((s) => s.filename === filename);
+    if (sound?.credit) showCreditToast(sound.name, sound.credit);
   };
 
   // Listen for remote soundboard triggers

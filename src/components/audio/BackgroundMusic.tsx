@@ -145,9 +145,9 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: BackgroundMu
           )}
         </Group>
         {currentSound?.credit && (
-          <Text size="xs" c="dimmed" fs="italic" truncate>
-            {currentSound.credit}
-          </Text>
+          <Text size="xs" c="dimmed" fs="italic" truncate
+            dangerouslySetInnerHTML={{ __html: currentSound.credit }}
+          />
         )}
 
         {/* Progress bar */}

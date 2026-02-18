@@ -2,6 +2,7 @@ import { ActionIcon, Box, Text } from '@mantine/core';
 import { IconTrash, IconVolumeOff } from '@tabler/icons-react';
 import { useRef } from 'react';
 import type { AmbianceBar } from '../../hooks/useAmbianceSounds';
+import { showCreditToast } from '../../utils/showCreditToast';
 
 const IMAGE_BASE = '/assets/images/backgrounds/';
 const FALLBACK = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>';
@@ -17,6 +18,17 @@ export function SoundBar({ bar, onChange, isAdmin, onDelete }: SoundBarProps) {
   const imgSrc = bar.sound.imageFile ? `${IMAGE_BASE}${bar.sound.imageFile}` : FALLBACK;
   const isActive = bar.volume > 0;
   const dragging = useRef(false);
+  const wasActive = useRef(isActive);
+
+  const handleChange = (filename: string, vol: number) => {
+    const wasZero = !wasActive.current;
+    wasActive.current = vol > 0;
+    onChange(filename, vol);
+    // Show credit when first activating
+    if (wasZero && vol > 0 && bar.sound.credit) {
+      showCreditToast(bar.sound.name, bar.sound.credit);
+    }
+  };
 
   const volumeFromPointer = (e: React.PointerEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -26,12 +38,12 @@ export function SoundBar({ bar, onChange, isAdmin, onDelete }: SoundBarProps) {
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     dragging.current = true;
     e.currentTarget.setPointerCapture(e.pointerId);
-    onChange(bar.sound.filename, volumeFromPointer(e));
+    handleChange(bar.sound.filename, volumeFromPointer(e));
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!dragging.current) return;
-    onChange(bar.sound.filename, volumeFromPointer(e));
+    handleChange(bar.sound.filename, volumeFromPointer(e));
   };
 
   const handlePointerUp = () => { dragging.current = false; };
