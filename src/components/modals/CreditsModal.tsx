@@ -1,6 +1,5 @@
 import { Anchor, Modal, ScrollArea, Stack, Text, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
-import type { Sound } from '../../types/sound';
 
 interface CreditsModalProps {
   opened: boolean;
@@ -22,21 +21,25 @@ export function CreditsModal({ opened, onClose }: CreditsModalProps) {
     const fetchAll = async () => {
       try {
         const [bg, amb, sb] = await Promise.all([
-          fetch('/backgroundSounds').then((r) => r.json()),
+          fetch('/backgroundMusic').then((r) => r.json()),
           fetch('/ambianceSounds').then((r) => r.json()),
           fetch('/soundboard').then((r) => r.json()),
         ]);
-        const all: Sound[] = [...bg, ...amb, ...sb];
-        setCredits(
-          all
-            .filter((s) => s.credit)
-            .map((s) => ({
-              name: s.name,
-              credit: s.credit!,
-              creditUrl: s.creditUrl,
-              category: s.category,
-            })),
-        );
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const toEntry = (s: any, cat: string): CreditEntry | null => {
+          if (!s.credit) return null;
+          return {
+            name: s.name ?? s.display_name ?? s.filename,
+            credit: s.credit,
+            creditUrl: s.creditUrl,
+            category: cat,
+          };
+        };
+        setCredits([
+          ...(bg as any[]).map((s) => toEntry(s, 'Background Music')),
+          ...(amb as any[]).map((s) => toEntry(s, 'Ambiance Sounds')),
+          ...(sb as any[]).map((s) => toEntry(s, 'Soundboard')),
+        ].filter(Boolean) as CreditEntry[]);
       } catch {
         /* ignore */
       }

@@ -147,3 +147,4 @@ assets
 uploads
 backups
 requests
+.DS_Store

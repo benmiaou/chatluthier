@@ -4,6 +4,7 @@ import { useCallback, useEffect } from 'react';
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import type { BackgroundMusicCategory } from '../../types/sound';
+import { bgScenes } from '../../types/sound';
 
 interface BackgroundMusicProps {
   userId?: string | null;
@@ -84,7 +85,7 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: BackgroundMu
     if (sessionId) send({ type: 'backgroundMusicStop', id: sessionId });
   }, [stop, send, sessionId]);
 
-  const contexts = ['All', ...Array.from(new Set(sounds.flatMap((s) => s.contexts ?? [])))];
+  const contexts = ['All', ...Array.from(new Set(sounds.flatMap((s) => bgScenes(s))))];
 
   const handleSeek = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {

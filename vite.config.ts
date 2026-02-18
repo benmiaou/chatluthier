@@ -31,14 +31,23 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-      },
-      '/assets': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-      },
+      '/assets': { target: 'http://localhost:3000', changeOrigin: true },
+      '/backgroundMusic': { target: 'http://localhost:3000', changeOrigin: true },
+      '/ambianceSounds': { target: 'http://localhost:3000', changeOrigin: true },
+      '/soundboard': { target: 'http://localhost:3000', changeOrigin: true },
+      '/verify-login': { target: 'http://localhost:3000', changeOrigin: true },
+      '/logout': { target: 'http://localhost:3000', changeOrigin: true },
+      '/refresh-token': { target: 'http://localhost:3000', changeOrigin: true },
+      '/check-session': { target: 'http://localhost:3000', changeOrigin: true },
+      '/save-preset': { target: 'http://localhost:3000', changeOrigin: true },
+      '/load-presets': { target: 'http://localhost:3000', changeOrigin: true },
+      '/delete-sound': { target: 'http://localhost:3000', changeOrigin: true },
+      '/update-main-playlist': { target: 'http://localhost:3000', changeOrigin: true },
+      '/update-user-sound': { target: 'http://localhost:3000', changeOrigin: true },
+      '/add-sound': { target: 'http://localhost:3000', changeOrigin: true },
+      '/request-sound': { target: 'http://localhost:3000', changeOrigin: true },
+      '/get-requests': { target: 'http://localhost:3000', changeOrigin: true },
+      '/close-request': { target: 'http://localhost:3000', changeOrigin: true },
     },
   },
 });

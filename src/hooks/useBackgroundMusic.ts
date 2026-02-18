@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AudioPlayer, precacheAudio } from './useAudioPlayer';
 import type { Sound, BackgroundMusicCategory } from '../types/sound';
+import { bgMatchesCategory, bgScenes } from '../types/sound';
 
 const ASSET_PREFIX = '/assets/background/';
 
@@ -63,8 +64,8 @@ export function useBackgroundMusic(userId: string | null) {
     async (category: BackgroundMusicCategory) => {
       const filtered = sounds.filter(
         (s) =>
-          (category === 'all' || s.category === category) &&
-          (context === 'All' || s.contexts?.includes(context)),
+          bgMatchesCategory(s, category) &&
+          (context === 'All' || bgScenes(s).includes(context)),
       );
       if (!filtered.length) return;
       const pick = filtered[Math.floor(Math.random() * filtered.length)];
