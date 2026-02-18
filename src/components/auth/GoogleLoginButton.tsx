@@ -1,17 +1,35 @@
-import { Avatar, Group, Menu, Text } from '@mantine/core';
-import { IconLogout } from '@tabler/icons-react';
-import { useEffect, useRef } from 'react';
+import { Avatar, Group, Menu, Text, Button } from '@mantine/core';
+import { IconLogout, IconBrandGoogle } from '@tabler/icons-react';
+import { useEffect } from 'react';
 import { useAuthContext } from '../../contexts/AuthContext';
 
 export function GoogleLoginButton() {
-  const { isSignedIn, userName, userPicture, signOut, renderButton } = useAuthContext();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { isSignedIn, userName, userPicture, signOut } = useAuthContext();
 
   useEffect(() => {
-    if (!isSignedIn && containerRef.current) {
-      renderButton(containerRef.current);
+    // Initialize Google Identity Services
+    const initGoogle = () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const google = (window as any).google;
+      if (google?.accounts?.id) {
+        // Google is ready, but we don't render the button - we use our own
+      } else {
+        // Google not ready yet, try again shortly
+        const interval = setInterval(() => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const google = (window as any).google;
+          if (google?.accounts?.id) {
+            clearInterval(interval);
+          }
+        }, 100);
+        return () => clearInterval(interval);
+      }
+    };
+    
+    if (!isSignedIn) {
+      initGoogle();
     }
-  }, [isSignedIn, renderButton]);
+  }, [isSignedIn]);
 
   if (isSignedIn) {
     return (
@@ -37,5 +55,21 @@ export function GoogleLoginButton() {
     );
   }
 
-  return <div ref={containerRef} />;
+  return (
+    <Button
+      leftSection={<IconBrandGoogle size={16} />}
+      variant="default"
+      size="compact-sm"
+      style={{ height: '36px' }}
+      onClick={() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const google = (window as any).google;
+        if (google?.accounts?.id) {
+          google.accounts.id.prompt();
+        }
+      }}
+    >
+      Sign in
+    </Button>
+  );
 }

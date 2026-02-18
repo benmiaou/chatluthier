@@ -64,16 +64,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const init = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const google = (window as any).google;
-      if (!google?.accounts?.id) return;
-      google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleCredentialResponse,
-      });
+      if (!google?.accounts?.id) {
+        // Google library not loaded yet, wait for it
+        const interval = setInterval(() => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const google = (window as any).google;
+          if (google?.accounts?.id) {
+            clearInterval(interval);
+            google.accounts.id.initialize({
+              client_id: GOOGLE_CLIENT_ID,
+              callback: handleCredentialResponse,
+            });
+          }
+        }, 100);
+        return () => clearInterval(interval);
+      } else {
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleCredentialResponse,
+        });
+      }
     };
+    
+    // Check if Google is already available
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((window as any).google?.accounts?.id) {
       init();
     } else {
+      // Wait for window load event
       window.addEventListener('load', init);
       return () => window.removeEventListener('load', init);
     }
@@ -86,12 +104,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const renderButton = useCallback((container: HTMLElement) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).google?.accounts?.id?.renderButton(container, {
-      theme: 'filled_black',
-      size: 'medium',
-      shape: 'pill',
-    });
+    // We don't actually render the Google button anymore since we use our own
+    // But we still need this function for the useEffect cleanup
   }, []);
 
   return (
