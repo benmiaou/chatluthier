@@ -38,7 +38,7 @@ export function SoundBar({ bar, onChange, isAdmin, onDelete }: SoundBarProps) {
 
   return (
     <Box
-      style={{ position: 'relative', width: 52, height: 52, borderRadius: 6, overflow: 'hidden', cursor: 'ew-resize', userSelect: 'none', flexShrink: 0 }}
+      style={{ position: 'relative', width: '100%', aspectRatio: '1', borderRadius: 6, overflow: 'hidden', cursor: 'ew-resize', userSelect: 'none' }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
