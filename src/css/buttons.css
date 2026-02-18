@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'BagnardSans';
-    src: url('../fonts/BagnardSans.otf') format('opentype'); 
+    src: url('/fonts/BagnardSans.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
 }

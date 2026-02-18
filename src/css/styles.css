@@ -1,21 +1,5 @@
 /*src/css/styles.css*/
 @import './colors.css';
-
-/* Basic reset for styling */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-@font-face {
-    font-family: 'BagnardSans';
-    src: url('../fonts/BagnardSans.otf') format('opentype'); 
-    font-weight: normal;
-    font-style: normal;
-}
-
-
 @import './pages.css';
 @import './modal.css';
 @import './progressBar.css';
@@ -27,3 +11,17 @@
 @import './dropDownMenu.css';
 @import './editSounds.css';
 @import './ambianceControls.css';
+
+/* Basic reset for styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+@font-face {
+    font-family: 'BagnardSans';
+    src: url('/fonts/BagnardSans.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
