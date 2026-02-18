@@ -1,9 +1,10 @@
 import { ActionIcon, Button, Group, Paper, Select, SimpleGrid, Slider, Stack, Text } from '@mantine/core';
 import { IconTrash, IconVolume } from '@tabler/icons-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSoundboard } from '../../hooks/useSoundboard';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { showCreditToast } from '../../utils/showCreditToast';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 interface SoundboardProps {
   userId?: string | null;
@@ -13,6 +14,21 @@ interface SoundboardProps {
 export function Soundboard({ userId = null, isAdmin = false }: SoundboardProps) {
   const { send, addMessageHandler, sessionId } = useSocketContext();
   const { sounds, allSounds, volume, context, setContext, playSound, setVolume, loadSounds } = useSoundboard(userId);
+  const [orderedSounds, setOrderedSounds] = useState(sounds);
+
+  // Update ordered sounds when sounds change
+  useEffect(() => {
+    setOrderedSounds(sounds);
+  }, [sounds]);
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination || !userId) return;
+    
+    const items = Array.from(orderedSounds);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    setOrderedSounds(items);
+  };
 
   const contexts = ['All', ...Array.from(new Set(allSounds.flatMap((s) => s.contexts ?? [])))].filter(Boolean);
 
@@ -76,38 +92,53 @@ export function Soundboard({ userId = null, isAdmin = false }: SoundboardProps) 
           </Group>
         </Group>
 
-        {sounds.length === 0 && (
+        {orderedSounds.length === 0 && (
           <Text size="xs" c="dimmed">
             Loading sounds…
           </Text>
         )}
 
-        <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="xs">
-          {sounds.map((sound) => (
-            <Group key={sound.filename} gap={4} wrap="nowrap">
-              <Button
-                style={{ flex: 1 }}
-                size="xs"
-                variant="default"
-                onClick={() => handlePlay(sound.filename)}
-                styles={{ root: { whiteSpace: 'normal', height: 'auto', padding: '6px 8px' } }}
-              >
-                {sound.name}
-              </Button>
-              {isAdmin && (
-                <ActionIcon
-                  size="xs"
-                  variant="subtle"
-                  color="red"
-                  onClick={() => handleDelete(sound.filename)}
-                  title={`Delete ${sound.name}`}
-                >
-                  <IconTrash size={12} />
-                </ActionIcon>
-              )}
-            </Group>
-          ))}
-        </SimpleGrid>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="soundboard">
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="xs">
+                  {orderedSounds.map((sound, index) => (
+                    <Draggable key={sound.filename} draggableId={sound.filename} index={index} isDragDisabled={!userId}>
+                      {(provided) => (
+                        <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
+                          <Group gap={4} wrap="nowrap">
+                            <Button
+                              style={{ flex: 1, cursor: userId ? 'grab' : 'pointer' }}
+                              size="xs"
+                              variant="default"
+                              onClick={() => handlePlay(sound.filename)}
+                              styles={{ root: { whiteSpace: 'normal', height: 'auto', padding: '6px 8px' } }}
+                            >
+                              {sound.name}
+                            </Button>
+                            {isAdmin && (
+                              <ActionIcon
+                                size="xs"
+                                variant="subtle"
+                                color="red"
+                                onClick={() => handleDelete(sound.filename)}
+                                title={`Delete ${sound.name}`}
+                              >
+                                <IconTrash size={12} />
+                              </ActionIcon>
+                            )}
+                          </Group>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </SimpleGrid>
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </Stack>
     </Paper>
   );

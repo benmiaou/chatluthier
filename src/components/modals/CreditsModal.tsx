@@ -1,4 +1,4 @@
-import { Anchor, Modal, ScrollArea, Stack, Text, Title } from '@mantine/core';
+import { Modal, ScrollArea, Stack, Text, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
 interface CreditsModalProps {
@@ -64,13 +64,7 @@ export function CreditsModal({ opened, onClose }: CreditsModalProps) {
               {items.map((item) => (
                 <Text key={item.name} size="sm">
                   <strong>{item.name}</strong> —{' '}
-                  {item.creditUrl ? (
-                    <Anchor href={item.creditUrl} target="_blank" rel="noopener noreferrer">
-                      {item.credit}
-                    </Anchor>
-                  ) : (
-                    item.credit
-                  )}
+                  <span dangerouslySetInnerHTML={{ __html: item.credit }} />
                 </Text>
               ))}
             </Stack>

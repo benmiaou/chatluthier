@@ -19,6 +19,20 @@
     box-sizing: border-box;
 }
 
+/* Drag and drop styles */
+.drag-handle {
+    cursor: grab;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.dragging {
+    opacity: 0.8;
+    background-color: var(--mantine-color-gray-1);
+}
+
 @font-face {
     font-family: 'BagnardSans';
     src: url('/fonts/BagnardSans.otf') format('opentype');
