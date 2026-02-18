@@ -1,5 +1,5 @@
 import { ActionIcon, Box, Text } from '@mantine/core';
-import { IconTrash, IconVolume, IconVolumeOff } from '@tabler/icons-react';
+import { IconTrash, IconVolumeOff } from '@tabler/icons-react';
 import { useRef } from 'react';
 import type { AmbianceBar } from '../../hooks/useAmbianceSounds';
 
@@ -38,7 +38,7 @@ export function SoundBar({ bar, onChange, isAdmin, onDelete }: SoundBarProps) {
 
   return (
     <Box
-      style={{ position: 'relative', height: 48, borderRadius: 6, overflow: 'hidden', cursor: 'ew-resize', userSelect: 'none', flexShrink: 0 }}
+      style={{ position: 'relative', width: 52, height: 52, borderRadius: 6, overflow: 'hidden', cursor: 'ew-resize', userSelect: 'none', flexShrink: 0 }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -78,27 +78,35 @@ export function SoundBar({ bar, onChange, isAdmin, onDelete }: SoundBarProps) {
         }} />
       )}
 
-      {/* Icon + label */}
-      <Box style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', gap: 4, padding: '0 6px', pointerEvents: 'none' }}>
-        {isActive
-          ? <IconVolume size={12} color="rgba(255,255,255,0.85)" style={{ flexShrink: 0 }} />
-          : <IconVolumeOff size={12} color="rgba(255,255,255,0.45)" style={{ flexShrink: 0 }} />
-        }
-        <Text size="xs" c="white" fw={500} truncate style={{ lineHeight: 1 }}>
+      {/* Name label at bottom */}
+      <Box style={{
+        position: 'absolute', bottom: 0, left: 0, right: 0,
+        padding: '2px 3px',
+        background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
+        pointerEvents: 'none',
+      }}>
+        <Text size="xs" c="white" fw={500} truncate style={{ fontSize: 9, lineHeight: 1.2 }}>
           {bar.sound.name}
         </Text>
       </Box>
 
+      {/* Mute icon top-left */}
+      {!isActive && (
+        <Box style={{ position: 'absolute', top: 2, left: 2, pointerEvents: 'none' }}>
+          <IconVolumeOff size={10} color="rgba(255,255,255,0.5)" />
+        </Box>
+      )}
+
       {/* Admin delete */}
       {isAdmin && (
         <ActionIcon
-          size={16}
+          size={14}
           variant="filled"
           color="red"
-          style={{ position: 'absolute', top: 3, right: 3 }}
+          style={{ position: 'absolute', top: 2, right: 2 }}
           onClick={(e) => { e.stopPropagation(); onDelete?.(bar.sound.filename); }}
         >
-          <IconTrash size={10} />
+          <IconTrash size={9} />
         </ActionIcon>
       )}
     </Box>
