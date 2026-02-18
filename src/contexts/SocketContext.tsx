@@ -52,6 +52,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shouldReconnectRef = useRef(true);
+  // ID to subscribe to on next open (set by subscribe() when WS isn't ready yet)
+  const pendingIdRef = useRef<string | null>(null);
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
@@ -73,16 +75,18 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'ping' }));
       }, HEARTBEAT_MS);
 
-      // Auto-join from URL param or localStorage
+      // Priority: pending subscribe call > URL param > localStorage
       const urlParams = new URLSearchParams(window.location.search);
       const urlId = urlParams.get('sessionId');
-      if (urlId) {
-        ws.send(JSON.stringify({ type: 'subscribe', id: urlId }));
-        urlParams.delete('sessionId');
-        window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
-      } else {
-        const lastId = localStorage.getItem('lastJoinId');
-        if (lastId) ws.send(JSON.stringify({ type: 'subscribe', id: lastId }));
+      const idToJoin = pendingIdRef.current ?? urlId ?? localStorage.getItem('lastJoinId');
+
+      if (idToJoin) {
+        ws.send(JSON.stringify({ type: 'subscribe', id: idToJoin }));
+        pendingIdRef.current = null;
+        if (urlId) {
+          urlParams.delete('sessionId');
+          window.history.replaceState({}, '', window.location.pathname + (urlParams.toString() ? `?${urlParams}` : ''));
+        }
       }
     };
 
@@ -125,15 +129,18 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('lastJoinId', id);
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type: 'subscribe', id }));
+    } else {
+      // WS is connecting — queue it; onopen will send it
+      pendingIdRef.current = id;
     }
   }, []);
 
   const disconnect = useCallback(() => {
-    shouldReconnectRef.current = false;
+    // Clear session state but keep the WS alive for future subscriptions
     localStorage.removeItem('lastJoinId');
+    pendingIdRef.current = null;
     setSessionId(null);
-    setStatusMessage('Disconnected from session.');
-    wsRef.current?.close();
+    setStatusMessage('Left session.');
   }, []);
 
   const send = useCallback((msg: Record<string, unknown>) => {
