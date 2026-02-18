@@ -1,4 +1,4 @@
-import { Button, Group, Paper, Select, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
+import { Button, Group, Paper, Select, Stack, Text, TextInput } from '@mantine/core';
 import { IconDeviceFloppy, IconRefresh } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useAmbianceSounds } from '../../hooks/useAmbianceSounds';
@@ -102,11 +102,11 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
           </Text>
         )}
 
-        <SimpleGrid cols={{ base: 3, sm: 4, md: 5 }} spacing="xs">
+        <Stack gap={4}>
           {bars.map((bar) => (
             <SoundBar key={bar.sound.filename} bar={bar} onChange={handleChange} isAdmin={isAdmin} onDelete={handleDelete} />
           ))}
-        </SimpleGrid>
+        </Stack>
 
         {/* Preset controls — only shown when logged in */}
         {userId && (
