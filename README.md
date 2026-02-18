@@ -59,9 +59,18 @@ Any signed-in user can submit a request for a new sound. Admins review and close
 ### Setup
 ```bash
 npm install
-cp .env.example .env   # fill in your Spotify and Google client IDs
+cp .env.example .env          # fill in your Spotify and Google client IDs
+cp srv/Tokens.example srv/Tokens  # fill in your JWT secrets
 npm run build
-npm run dev            # starts Express + WebSocket server
+npm run dev                   # starts Express + WebSocket server
+```
+
+The `srv/Tokens` file holds JWT signing secrets (gitignored). Generate strong random strings for production:
+```json
+{
+  "ACCESS_TOKEN_SECRET": "a-long-random-string",
+  "REFRESH_TOKEN_SECRET": "another-long-random-string"
+}
 ```
 
 ### Development with hot reload
