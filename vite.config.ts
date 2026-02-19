@@ -48,6 +48,8 @@ export default defineConfig({
       '/request-sound': { target: 'http://localhost:3000', changeOrigin: true },
       '/get-requests': { target: 'http://localhost:3000', changeOrigin: true },
       '/close-request': { target: 'http://localhost:3000', changeOrigin: true },
+      '/get-sound-order': { target: 'http://localhost:3000', changeOrigin: true },
+      '/save-sound-order': { target: 'http://localhost:3000', changeOrigin: true },
     },
   },
 });

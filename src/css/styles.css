@@ -33,6 +33,12 @@
     background-color: var(--mantine-color-gray-1);
 }
 
+/* Style for dragged ambiance sound elements */
+.ambiance-draggable.dragging {
+    transform: scale(0.8) !important;
+    transition: transform 0.1s ease;
+}
+
 @font-face {
     font-family: 'BagnardSans';
     src: url('/fonts/BagnardSans.otf') format('opentype');

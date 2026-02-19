@@ -1,6 +1,7 @@
 import { Button, Group, Paper, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { IconDeviceFloppy, IconRefresh } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAmbianceSounds } from '../../hooks/useAmbianceSounds';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { SoundBar } from './SoundBar';
@@ -18,12 +19,83 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
 
   const contexts = ['All', ...Array.from(new Set(allBars.flatMap((b) => b.sound.contexts ?? [])))].filter(Boolean);
 
-  // Load presets when user logs in
+  const [soundOrder, setSoundOrder] = useState<string[]>([]);
+
+  // Apply sound order to bars when soundOrder or bars change
+  const orderedBars = useMemo(() => {
+    if (soundOrder.length === 0 || bars.length === 0) return bars;
+    
+    // Create a map for quick lookup
+    const orderMap = new Map(soundOrder.map((filename, index) => [filename, index]));
+    
+    return [...bars].sort((a, b) => {
+      const aIndex = orderMap.get(a.sound.filename) ?? Infinity;
+      const bIndex = orderMap.get(b.sound.filename) ?? Infinity;
+      return aIndex - bIndex;
+    });
+  }, [bars, soundOrder]);
+
+  // Load presets and sound order when user logs in
   useEffect(() => {
-    if (userId) loadPresets();
+    if (userId) {
+      loadPresets();
+      loadSoundOrder();
+    }
   }, [userId, loadPresets]);
 
+  const loadSoundOrder = async () => {
+    try {
+      const response = await fetch(`/get-sound-order?userId=${userId}&soundType=ambiance`);
+      if (!response.ok) {
+        throw new Error(`Server responded with status ${response.status}`);
+      }
+      
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Response is not JSON');
+      }
+      
+      const data = await response.json();
+      setSoundOrder(data.order || []);
+    } catch (error) {
+      console.error('Failed to load sound order:', error);
+      // Don't break the app - just keep empty order
+      setSoundOrder([]);
+    }
+  };
 
+  const saveSoundOrder = async (newOrder: string[]) => {
+    try {
+      const response = await fetch('/save-sound-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          soundType: 'ambiance',
+          order: newOrder
+        })
+      });
+      if (!response.ok) {
+        throw new Error(`Server responded with status ${response.status}`);
+      }
+      setSoundOrder(newOrder);
+    } catch (error) {
+      console.error('Failed to save sound order:', error);
+      // Fallback: still update local state even if server save fails
+      setSoundOrder(newOrder);
+    }
+  };
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination || !userId) return;
+    
+    const items = Array.from(bars);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    
+    const newOrder = items.map(item => item.sound.filename);
+    saveSoundOrder(newOrder);
+  };
 
   const handleChange = (filename: string, volume: number) => {
     setBarVolume(filename, volume);
@@ -123,11 +195,43 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
           </Text>
         )}
 
-        <SimpleGrid cols={{ base: 5, sm: 7, md: 9 }} spacing={4}>
-          {bars.map((bar) => (
-            <SoundBar key={bar.sound.filename} bar={bar} onChange={handleChange} />
-          ))}
-        </SimpleGrid>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="ambianceSounds" direction="horizontal">
+            {(provided) => (
+              <SimpleGrid
+                cols={{ base: 5, sm: 7, md: 9 }}
+                spacing={4}
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+              >
+                {orderedBars.map((bar, index) => (
+                  <Draggable key={`${bar.sound.filename}-${index}`} draggableId={bar.sound.filename} index={index} isDragDisabled={!userId}>
+                    {(provided) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className="ambiance-draggable"
+                        style={{
+                          ...provided.draggableProps.style,
+                          width: '100%'
+                        }}
+                      >
+                        <SoundBar 
+                          key={bar.sound.filename} 
+                          bar={bar} 
+                          onChange={handleChange}
+                          showDragHandle={!!userId}
+                          dragHandleProps={provided.dragHandleProps}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </SimpleGrid>
+            )}
+          </Droppable>
+        </DragDropContext>
 
 
       </Stack>

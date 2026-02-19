@@ -271,12 +271,59 @@ function loadPresets(req, res) {
     }
 }
 
+function getSoundOrder(req, res) {
+    const userId = req.query.userId;
+    const soundType = req.query.soundType;
+    
+    if (!userId || !soundType) {
+        return res.status(400).send('User ID and sound type are required');
+    }
+    
+    const userFilePath = path.join(__dirname, '..', 'user_data', userId, 'soundOrders.json');
+    if (fs.existsSync(userFilePath)) {
+        const soundOrders = JSON.parse(fs.readFileSync(userFilePath, 'utf8'));
+        res.json({ order: soundOrders[soundType] || [] });
+    } else {
+        res.json({ order: [] });
+    }
+}
+
+function saveSoundOrder(req, res) {
+    const { userId, soundType, order } = req.body;
+    
+    if (!userId || !soundType || !order) {
+        return res.status(400).send('User ID, sound type, and order are required');
+    }
+    
+    const userDir = path.join(__dirname, '..', 'user_data', userId);
+    
+    if (!fs.existsSync(userDir)) {
+        fs.mkdirSync(userDir, { recursive: true });
+    }
+    
+    const filePath = path.join(userDir, 'soundOrders.json');
+    let soundOrders = {};
+    
+    if (fs.existsSync(filePath)) {
+        const data = fs.readFileSync(filePath, 'utf8');
+        soundOrders = JSON.parse(data);
+    }
+    
+    soundOrders[soundType] = order;
+    
+    fs.writeFileSync(filePath, JSON.stringify(soundOrders, null, 2));
+    
+    res.send('Sound order saved successfully');
+}
+
 module.exports = {
     getData,
     updateMainPlaylist,
     updateUserSound,
     savePreset,
     loadPresets,
+    getSoundOrder,
+    saveSoundOrder,
     addSound,
     deleteSound,
 };

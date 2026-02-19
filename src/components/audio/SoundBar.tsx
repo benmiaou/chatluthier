@@ -1,5 +1,5 @@
 import { Box, Text } from '@mantine/core';
-import { IconVolumeOff } from '@tabler/icons-react';
+import { IconVolumeOff, IconGripVertical } from '@tabler/icons-react';
 import { useRef } from 'react';
 import type { AmbianceBar } from '../../hooks/useAmbianceSounds';
 import { showCreditToast } from '../../utils/showCreditToast';
@@ -10,9 +10,11 @@ const FALLBACK = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" wid
 interface SoundBarProps {
   bar: AmbianceBar;
   onChange: (filename: string, volume: number) => void;
+  showDragHandle?: boolean;
+  dragHandleProps?: any;
 }
 
-export function SoundBar({ bar, onChange }: SoundBarProps) {
+export function SoundBar({ bar, onChange, showDragHandle = false, dragHandleProps }: SoundBarProps) {
   const imgSrc = bar.sound.imageFile ? `${IMAGE_BASE}${bar.sound.imageFile}` : FALLBACK;
   const isActive = bar.volume > 0;
   const dragging = useRef(false);
@@ -100,6 +102,23 @@ export function SoundBar({ bar, onChange }: SoundBarProps) {
         </Text>
       </Box>
 
+
+      {/* Drag handle bottom-left (only when enabled) */}
+      {showDragHandle && (
+        <Box 
+          style={{ 
+            position: 'absolute', 
+            bottom: 4, 
+            left: 4, 
+            zIndex: 10,
+            cursor: 'grab'
+          }}
+          {...dragHandleProps}
+        >
+          <IconGripVertical size={16} color="rgba(255,255,255,0.8)" />
+        </Box>
+      )}
+      
       {/* Mute icon bottom-right */}
       {!isActive && (
         <Box style={{ position: 'absolute', bottom: 6, right: 6, pointerEvents: 'none' }}>
