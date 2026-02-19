@@ -5,43 +5,89 @@
     font-style: normal;
 }
 
-button {
+/* GLOBAL BUTTON STYLING - ALL BUTTONS USE MAIN BUTTON COLORS */
+button, .mantine-Button-root {
     font-family: var(--fontfamilly);
-    background-color: var(--main-background-color);
     border: none;
-    color: var(--main-text);
-    padding: 10px 20px;
-    font-size: 16px;
+    color: white;
+    padding: 8px 16px;
+    font-size: 14px;
     margin: 4px 2px;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 4px;
     text-align: center;
     text-decoration: none;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+    font-weight: 500;
+    background-color: var(--main-button-color); /* ALL buttons use main color */
 }
 
-.button-primary {
-    background-color: var(--main-button-color);
-    display: block;
-}
-
-.button-primary:hover {
+/* Hover state for ALL buttons */
+button:hover, .mantine-Button-root:hover {
     background-color: var(--main-button-hover-color);
 }
 
-.button-primary:disabled {
+/* Disabled state for ALL buttons */
+button:disabled, .mantine-Button-root:disabled {
     background-color: var(--main-button-disable-color);
     cursor: not-allowed;
+    opacity: 0.8;
 }
 
-.button-primary-active{
+/* Active/pressed state for ALL buttons */
+button:active, .mantine-Button-root:active {
     background-color: var(--main-button-active-color);
-    display: block;
 }
 
-.button-primary-active:hover{
-    background-color: var(--main-button-active-hover-color);
-    display: block;
+/* Soundboard buttons - special layout but SAME colors */
+.soundboard-button {
+    background-color: var(--main-button-color);
+    white-space: normal;
+    height: auto;
+    padding: 6px 8px;
+    text-align: left;
+    justify-content: flex-start;
+}
+
+.soundboard-button:hover {
+    background-color: var(--main-button-hover-color);
+}
+
+.soundboard-button:active {
+    background-color: var(--main-button-active-color);
+}
+
+/* Override any Mantine variant-specific colors to use main colors */
+.mantine-Button-root[data-variant="default"],
+.mantine-Button-root[data-variant="outline"],
+.mantine-Button-root[data-variant="filled"],
+.mantine-Button-root[data-variant="subtle"] {
+    background-color: var(--main-button-color) !important;
+    color: white !important;
+    border-color: var(--main-button-color) !important;
+}
+
+.mantine-Button-root[data-variant="default"]:hover,
+.mantine-Button-root[data-variant="outline"]:hover,
+.mantine-Button-root[data-variant="filled"]:hover,
+.mantine-Button-root[data-variant="subtle"]:hover {
+    background-color: var(--main-button-hover-color) !important;
+    border-color: var(--main-button-hover-color) !important;
+}
+
+/* Success button (green) */
+.mantine-Button-root[data-color="green"],
+button.button-success {
+    background-color: #2e7d32;
+    color: white;
+}
+
+.mantine-Button-root[data-color="green"]:hover,
+button.button-success:hover {
+    background-color: #1b5e20;
 }
 
 .update-button {
@@ -74,30 +120,66 @@ button {
     color: var(--main-text-placeholder);
 }
 
-/* Style the select element */
-.selector-primary {
-    font-family: var(--fontfamilly); /* Match your site's font */
+/* GLOBAL DROPDOWN/SELECT STYLING - ALL USE MAIN BUTTON COLORS */
+select, .mantine-Select-root, .mantine-Select-input, .selector-primary {
+    font-family: var(--fontfamilly);
     background-color: var(--main-button-color);
-    color:  var(--main-text); /* Text color */
-    border: none; /* Remove default border */
-    border-radius: 5px; /* Rounded corners */
-    padding: 10px 15px; /* Padding for the dropdown */
-    font-size: 16px; /* Font size */
-    cursor: pointer; /* Pointer cursor on hover */
-    transition: background-color 0.3s, box-shadow 0.3s; /* Add a hover effect */
+    color: var(--main-text);
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
 }
 
-/* Hover state */
-.selector-primary:hover {
+/* Hover state for ALL dropdowns */
+select:hover, .mantine-Select-root:hover, .mantine-Select-input:hover, .selector-primary:hover {
     background-color: var(--main-button-hover-color);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2); /* Add a shadow */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Style the dropdown options */
-.selector-primary option {
-    background-color: var(--main-background-color); /* Match the background color of the select */
-    color:  var(--main-text);
-    font-family:var(--fontfamilly); /* Font family */
+/* Focus state for ALL dropdowns */
+select:focus, .mantine-Select-root:focus, .mantine-Select-input:focus, .selector-primary:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(146, 58, 58, 0.3);
+}
+
+/* Dropdown options - dark background with light text */
+select option, .mantine-Select-dropdown, .selector-primary option {
+    background-color: var(--main-background-color);
+    color: var(--main-text);
+    font-family: var(--fontfamilly);
+}
+
+/* Mantine Select specific styling */
+.mantine-Select-root {
+    --select-bg: var(--main-button-color);
+    --select-hover:bg: var(--main-button-hover-color);
+}
+
+.mantine-Select-input {
+    border-color: var(--main-button-color);
+}
+
+.mantine-Select-dropdown {
+    background-color: var(--main-background-color);
+    border-color: var(--main-border);
+}
+
+.mantine-Select-item {
+    color: var(--main-text);
+    background-color: var(--main-background-color);
+}
+
+.mantine-Select-item:hover {
+    background-color: var(--main-background-color-secondary);
+}
+
+.mantine-Select-item[data-selected] {
+    background-color: var(--main-button-active-color);
+    color: white;
 }
 
 .close-button {

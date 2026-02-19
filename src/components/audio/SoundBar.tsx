@@ -1,5 +1,5 @@
-import { ActionIcon, Box, Text } from '@mantine/core';
-import { IconTrash, IconVolumeOff } from '@tabler/icons-react';
+import { Box, Text } from '@mantine/core';
+import { IconVolumeOff } from '@tabler/icons-react';
 import { useRef } from 'react';
 import type { AmbianceBar } from '../../hooks/useAmbianceSounds';
 import { showCreditToast } from '../../utils/showCreditToast';
@@ -10,11 +10,9 @@ const FALLBACK = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" wid
 interface SoundBarProps {
   bar: AmbianceBar;
   onChange: (filename: string, volume: number) => void;
-  isAdmin?: boolean;
-  onDelete?: (filename: string) => void;
 }
 
-export function SoundBar({ bar, onChange, isAdmin, onDelete }: SoundBarProps) {
+export function SoundBar({ bar, onChange }: SoundBarProps) {
   const imgSrc = bar.sound.imageFile ? `${IMAGE_BASE}${bar.sound.imageFile}` : FALLBACK;
   const isActive = bar.volume > 0;
   const dragging = useRef(false);
@@ -109,18 +107,7 @@ export function SoundBar({ bar, onChange, isAdmin, onDelete }: SoundBarProps) {
         </Box>
       )}
 
-      {/* Admin delete */}
-      {isAdmin && (
-        <ActionIcon
-          size={14}
-          variant="filled"
-          color="red"
-          style={{ position: 'absolute', top: 2, right: 2 }}
-          onClick={(e) => { e.stopPropagation(); onDelete?.(bar.sound.filename); }}
-        >
-          <IconTrash size={9} />
-        </ActionIcon>
-      )}
+
     </Box>
   );
 }

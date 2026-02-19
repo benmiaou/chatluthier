@@ -99,33 +99,62 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: BackgroundMu
   return (
     <Paper p="md" radius="md" withBorder>
       <Stack gap="sm">
-        <Text fw={600} size="sm" tt="uppercase" c="dimmed">
+        <Text fw={600} size="sm" tt="uppercase" c="dimmed" ta="center">
           Background Music
         </Text>
 
-        {/* Category buttons */}
-        <Group gap="xs">
-          {CATEGORIES.map(({ value, label }) => (
-            <Button
-              key={value}
-              size="xs"
-              variant={activeCategory === value ? 'filled' : 'default'}
-              onClick={() => handlePlayCategory(value)}
-            >
-              {label}
-            </Button>
-          ))}
+        {/* Category buttons with counts and aligned context dropdown */}
+        <Group gap="xs" align="center">
+          {CATEGORIES.map(({ value, label }) => {
+            // Filter sounds by current context first, then by category
+            const filteredSounds = sounds.filter((s) => 
+              context === 'All' || bgScenes(s).includes(context)
+            );
+            const count = filteredSounds.filter((s) => 
+              value === 'all' || bgScenes(s).includes(value)
+            ).length;
+            return (
+              <Button
+                key={value}
+                size="xs"
+                variant={activeCategory === value ? 'filled' : 'default'}
+                onClick={() => handlePlayCategory(value)}
+              >
+                Play {label} ({count})
+              </Button>
+            );
+          })}
+          {/* Context dropdown - exact same size as buttons, no background */}
+          <Select
+            size="xs"
+            value={context}
+            onChange={(v) => setContext(v ?? 'All')}
+            data={contexts}
+            w={80} // Match button width exactly
+            placeholder="Context"
+            styles={{
+              root: {
+                width: '100%' // Ensure container matches button size
+              },
+              label: { display: 'none' },
+              input: {
+                padding: '2px 6px', // Match button padding
+                fontSize: '11px', // Match button text size
+                height: '22px', // Exact button height
+                backgroundColor: 'transparent', // No background
+                border: 'none', // Remove border to match buttons
+                color: 'var(--main-text)' // Match text color
+              },
+              dropdown: { 
+                fontSize: '12px',
+                backgroundColor: 'var(--main-background-color)'
+              },
+              rightSection: {
+                paddingRight: '4px' // Adjust arrow positioning
+              }
+            }}
+          />
         </Group>
-
-        {/* Context selector */}
-        <Select
-          size="xs"
-          label="Context"
-          value={context}
-          onChange={(v) => setContext(v ?? 'All')}
-          data={contexts}
-          w={160}
-        />
 
         {/* Current track info */}
         <Group gap="xs" align="center">

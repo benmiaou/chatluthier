@@ -1,5 +1,5 @@
-import { ActionIcon, Button, Group, Paper, Select, SimpleGrid, Slider, Stack, Text } from '@mantine/core';
-import { IconTrash, IconVolume } from '@tabler/icons-react';
+import { Button, Group, Paper, Select, SimpleGrid, Slider, Stack, Text } from '@mantine/core';
+import { IconVolume } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useSoundboard } from '../../hooks/useSoundboard';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
@@ -32,15 +32,7 @@ export function Soundboard({ userId = null, isAdmin = false }: SoundboardProps) 
 
   const contexts = ['All', ...Array.from(new Set(allSounds.flatMap((s) => s.contexts ?? [])))].filter(Boolean);
 
-  const handleDelete = async (filename: string) => {
-    await fetch('/delete-sound', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename, soundType: 'soundboard' }),
-    });
-    loadSounds();
-  };
+
 
   const handlePlay = (filename: string) => {
     playSound(filename);
@@ -65,7 +57,7 @@ export function Soundboard({ userId = null, isAdmin = false }: SoundboardProps) 
     <Paper p="md" radius="md" withBorder>
       <Stack gap="sm">
         <Group justify="space-between" align="center">
-          <Text fw={600} size="sm" tt="uppercase" c="dimmed">
+          <Text fw={600} size="sm" tt="uppercase" c="dimmed" ta="center">
             Soundboard
           </Text>
           <Group gap={6} align="center">
@@ -109,25 +101,14 @@ export function Soundboard({ userId = null, isAdmin = false }: SoundboardProps) 
                         <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                           <Group gap={4} wrap="nowrap">
                             <Button
+                              className="soundboard-button"
                               style={{ flex: 1, cursor: userId ? 'grab' : 'pointer' }}
                               size="xs"
                               variant="default"
                               onClick={() => handlePlay(sound.filename)}
-                              styles={{ root: { whiteSpace: 'normal', height: 'auto', padding: '6px 8px' } }}
                             >
                               {sound.name}
                             </Button>
-                            {isAdmin && (
-                              <ActionIcon
-                                size="xs"
-                                variant="subtle"
-                                color="red"
-                                onClick={() => handleDelete(sound.filename)}
-                                title={`Delete ${sound.name}`}
-                              >
-                                <IconTrash size={12} />
-                              </ActionIcon>
-                            )}
                           </Group>
                         </div>
                       )}

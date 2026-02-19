@@ -22,15 +22,7 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
     if (userId) loadPresets();
   }, [userId, loadPresets]);
 
-  const handleDelete = async (filename: string) => {
-    await fetch('/delete-sound', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename, soundType: 'ambianceSounds' }),
-    });
-    loadSounds();
-  };
+
 
   const handleChange = (filename: string, volume: number) => {
     setBarVolume(filename, volume);
@@ -72,7 +64,7 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
     <Paper p="md" radius="md" withBorder>
       <Stack gap="sm">
         <Group justify="space-between">
-          <Text fw={600} size="sm" tt="uppercase" c="dimmed">
+          <Text fw={600} size="sm" tt="uppercase" c="dimmed" ta="center">
             Ambiance Sounds
           </Text>
           <Group gap="xs">
@@ -104,7 +96,7 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
 
         <SimpleGrid cols={{ base: 5, sm: 7, md: 9 }} spacing={4}>
           {bars.map((bar) => (
-            <SoundBar key={bar.sound.filename} bar={bar} onChange={handleChange} isAdmin={isAdmin} onDelete={handleDelete} />
+            <SoundBar key={bar.sound.filename} bar={bar} onChange={handleChange} />
           ))}
         </SimpleGrid>
 
