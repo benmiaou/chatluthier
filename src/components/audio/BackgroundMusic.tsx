@@ -4,8 +4,8 @@ import { IconPlayerSkipForward, IconPlayerStop, IconTrash, IconVolume } from '@t
 import { useCallback, useEffect } from 'react';
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
-import type { BackgroundMusicCategory } from '../../types/sound';
-import { bgScenes } from '../../types/sound';
+import type { BackgroundMusicCategory, Sound } from '../../types/sound';
+import { bgScenes, bgMatchesCategory } from '../../types/sound';
 
 interface BackgroundMusicProps {
   userId?: string | null;
@@ -88,6 +88,21 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: BackgroundMu
 
   const contexts = ['All', ...Array.from(new Set(sounds.flatMap((s) => bgScenes(s))))];
 
+  // Helper function to filter sounds by both context and category
+  const filterSoundsByContextAndCategory = (sound: Sound, contextFilter: string, categoryFilter: BackgroundMusicCategory) => {
+    // If context is 'All', only filter by category
+    if (contextFilter === 'All') {
+      return categoryFilter === 'all' || bgMatchesCategory(sound, categoryFilter);
+    }
+    
+    // If context is specific, filter by both scene and category
+    const soundScenes = bgScenes(sound);
+    const matchesScene = soundScenes.includes(contextFilter);
+    const matchesCategory = categoryFilter === 'all' || bgMatchesCategory(sound, categoryFilter);
+    
+    return matchesScene && matchesCategory;
+  };
+
   const handleSeek = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       const rect = e.currentTarget.getBoundingClientRect();
@@ -108,11 +123,8 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: BackgroundMu
         <Group gap="xs" align="center">
           {CATEGORIES.map(({ value, label }) => {
             // Filter sounds by current context first, then by category
-            const filteredSounds = sounds.filter((s) => 
-              context === 'All' || bgScenes(s).includes(context)
-            );
-            const count = filteredSounds.filter((s) => 
-              value === 'all' || bgScenes(s).includes(value)
+            const count = sounds.filter((s) => 
+              filterSoundsByContextAndCategory(s, context, value)
             ).length;
             return (
               <Button
