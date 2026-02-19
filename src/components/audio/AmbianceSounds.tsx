@@ -1,11 +1,13 @@
-import { Button, Group, Paper, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { Button, Group, Paper, Stack, Text, TextInput } from '@mantine/core';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IconDeviceFloppy, IconRefresh } from '@tabler/icons-react';
 import { useEffect, useState, useMemo } from 'react';
 import { useAmbianceSounds } from '../../hooks/useAmbianceSounds';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { SoundBar } from './SoundBar';
 import { CustomCombobox } from './CustomCombobox';
+import { DraggableSoundBar } from './DraggableSoundBar';
 
 interface AmbianceSoundsProps {
   userId?: string | null;
@@ -20,6 +22,14 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
   const contexts = ['All', ...Array.from(new Set(allBars.flatMap((b) => b.sound.contexts ?? [])))].filter(Boolean);
 
   const [soundOrder, setSoundOrder] = useState<string[]>([]);
+
+  // Add moveItem function for react-dnd
+  const moveItem = (fromIndex: number, toIndex: number) => {
+    const newOrder = [...soundOrder];
+    const [movedItem] = newOrder.splice(fromIndex, 1);
+    newOrder.splice(toIndex, 0, movedItem);
+    setSoundOrder(newOrder);
+  };
 
   // Apply sound order to bars when soundOrder or bars change
   const orderedBars = useMemo(() => {
@@ -89,12 +99,17 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination || !userId) return;
     
+    // Get current bars and create a working copy
     const items = Array.from(bars);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
     
+    // Update the sound order
     const newOrder = items.map(item => item.sound.filename);
     saveSoundOrder(newOrder);
+    
+    // Force re-render to ensure proper reflow
+    // This is handled automatically by the soundOrder state update
   };
 
   const handleChange = (filename: string, volume: number) => {
@@ -195,46 +210,34 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
           </Text>
         )}
 
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="ambianceSounds" direction="horizontal">
-            {(provided) => (
-              <SimpleGrid
-                cols={{ base: 5, sm: 7, md: 9 }}
-                spacing={4}
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-              >
-                {orderedBars.map((bar, index) => (
-                  <Draggable key={`${bar.sound.filename}-${index}`} draggableId={bar.sound.filename} index={index} isDragDisabled={!userId}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        style={{
-                          ...provided.draggableProps.style,
-                          width: '100%',
-                          // Apply scale transform only when dragging
-                          transform: snapshot.isDragging ? provided.draggableProps.style?.transform + ' scale(0.25)' : provided.draggableProps.style?.transform,
-                          transformOrigin: '0 0',  // Fix cursor positioning
-                          transition: 'transform 0.1s ease'
-                        }}
-                      >
-                        <SoundBar 
-                          key={bar.sound.filename} 
-                          bar={bar} 
-                          onChange={handleChange}
-                          showDragHandle={!!userId}
-                          dragHandleProps={provided.dragHandleProps}
-                        />
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </SimpleGrid>
-            )}
-          </Droppable>
-        </DragDropContext>
+        <DndProvider backend={HTML5Backend}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, 150px)',
+              gridTemplateRows: 'repeat(auto-fill, 150px)',
+              gap: 1,
+              minHeight: '500px',
+              position: 'relative',
+              width: '100%',
+              overflow: 'visible',
+              alignContent: 'start',
+              rowGap: 0,
+              columnGap: 1
+            }}
+          >
+            {orderedBars.map((bar, index) => (
+              <DraggableSoundBar
+                key={`${bar.sound.filename}-${index}`}
+                bar={bar}
+                index={index}
+                onChange={handleChange}
+                moveItem={moveItem}
+                showDragHandle={!!userId}
+              />
+            ))}
+          </div>
+        </DndProvider>
 
 
       </Stack>
