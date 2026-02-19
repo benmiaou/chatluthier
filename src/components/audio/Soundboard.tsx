@@ -56,10 +56,10 @@ export function Soundboard({ userId = null, isAdmin = false }: SoundboardProps) 
   return (
     <Paper p="md" radius="md" withBorder>
       <Stack gap="sm">
-        <Group justify="space-between" align="center">
-          <Text fw={600} size="sm" tt="uppercase" c="dimmed" ta="center">
-            Soundboard
-          </Text>
+        <Text fw={600} size="sm" tt="uppercase" c="dimmed" ta="center">
+          Soundboard
+        </Text>
+        <Group justify="flex-end" align="center">
           <Group gap={6} align="center">
             {contexts.length > 1 && (
               <Select

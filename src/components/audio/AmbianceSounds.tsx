@@ -63,10 +63,10 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
   return (
     <Paper p="md" radius="md" withBorder>
       <Stack gap="sm">
-        <Group justify="space-between">
-          <Text fw={600} size="sm" tt="uppercase" c="dimmed" ta="center">
-            Ambiance Sounds
-          </Text>
+        <Text fw={600} size="sm" tt="uppercase" c="dimmed" ta="center">
+          Ambiance Sounds
+        </Text>
+        <Group justify="flex-end">
           <Group gap="xs">
             {contexts.length > 1 && (
               <Select
