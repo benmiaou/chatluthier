@@ -48,7 +48,7 @@ export function SoundBar({ bar, onChange }: SoundBarProps) {
 
   return (
     <Box
-      style={{ position: 'relative', width: '100%', aspectRatio: '1', borderRadius: 6, overflow: 'hidden', cursor: 'ew-resize', userSelect: 'none' }}
+      style={{ position: 'relative', width: '100%', aspectRatio: '1.8', borderRadius: 6, overflow: 'hidden', cursor: 'ew-resize', userSelect: 'none', margin: '4px 0' }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -88,22 +88,22 @@ export function SoundBar({ bar, onChange }: SoundBarProps) {
         }} />
       )}
 
-      {/* Name label at bottom */}
+      {/* Name label at top */}
       <Box style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        padding: '2px 3px',
-        background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
+        position: 'absolute', top: 0, left: 0, right: 0,
+        padding: '6px 8px',
+        background: 'linear-gradient(rgba(0,0,0,0.6), transparent)',
         pointerEvents: 'none',
       }}>
-        <Text size="xs" c="white" fw={500} truncate style={{ fontSize: 9, lineHeight: 1.2 }}>
+        <Text size="sm" c="white" fw={600} truncate style={{ fontSize: 12, lineHeight: 1.3, textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}>
           {bar.sound.name}
         </Text>
       </Box>
 
-      {/* Mute icon top-left */}
+      {/* Mute icon bottom-right */}
       {!isActive && (
-        <Box style={{ position: 'absolute', top: 2, left: 2, pointerEvents: 'none' }}>
-          <IconVolumeOff size={10} color="rgba(255,255,255,0.5)" />
+        <Box style={{ position: 'absolute', bottom: 6, right: 6, pointerEvents: 'none' }}>
+          <IconVolumeOff size={14} color="rgba(255,255,255,0.7)" />
         </Box>
       )}
 

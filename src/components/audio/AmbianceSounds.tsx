@@ -67,7 +67,7 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
         <Text fw={600} size="sm" tt="uppercase" c="dimmed" ta="center">
           Ambiance Sounds
         </Text>
-        <Group justify="flex-end">
+        <Group justify="space-between">
           <Group gap="xs">
             {contexts.length > 1 && (
               <CustomCombobox
@@ -86,6 +86,35 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
               Reset
             </Button>
           </Group>
+          {userId && (
+            <Group gap="xs">
+              <TextInput
+                size="xs"
+                placeholder="Preset name"
+                value={presetName}
+                onChange={(e) => setPresetName(e.currentTarget.value)}
+                style={{ width: 150 }}
+                onKeyDown={(e) => e.key === 'Enter' && handleSavePreset()}
+              />
+              <Button
+                size="xs"
+                variant="default"
+                leftSection={<IconDeviceFloppy size={14} />}
+                onClick={handleSavePreset}
+                disabled={!presetName.trim()}
+              >
+                Save
+              </Button>
+              {presetNames.length > 0 && (
+                <CustomCombobox
+                  value=""
+                  onChange={handleApplyPreset}
+                  data={presetNames}
+                  placeholder="Load preset…"
+                />
+              )}
+            </Group>
+          )}
         </Group>
 
         {bars.length === 0 && (
@@ -100,40 +129,7 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
           ))}
         </SimpleGrid>
 
-        {/* Preset controls — only shown when logged in */}
-        {userId && (
-          <Stack gap="xs" pt="xs" style={{ borderTop: '1px solid var(--mantine-color-dark-4)' }}>
-            <Text size="xs" c="dimmed" tt="uppercase" fw={600}>Presets</Text>
-            <Group gap="xs">
-              <TextInput
-                size="xs"
-                placeholder="Preset name"
-                value={presetName}
-                onChange={(e) => setPresetName(e.currentTarget.value)}
-                style={{ flex: 1 }}
-                onKeyDown={(e) => e.key === 'Enter' && handleSavePreset()}
-              />
-              <Button
-                size="xs"
-                variant="default"
-                leftSection={<IconDeviceFloppy size={14} />}
-                onClick={handleSavePreset}
-                disabled={!presetName.trim()}
-              >
-                Save
-              </Button>
-            </Group>
-            {presetNames.length > 0 && (
-              <Select
-                size="xs"
-                placeholder="Load preset…"
-                data={presetNames}
-                onChange={handleApplyPreset}
-                clearable
-              />
-            )}
-          </Stack>
-        )}
+
       </Stack>
     </Paper>
   );
