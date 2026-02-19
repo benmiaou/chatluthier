@@ -206,14 +206,17 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
               >
                 {orderedBars.map((bar, index) => (
                   <Draggable key={`${bar.sound.filename}-${index}`} draggableId={bar.sound.filename} index={index} isDragDisabled={!userId}>
-                    {(provided) => (
+                    {(provided, snapshot) => (
                       <div
                         ref={provided.innerRef}
                         {...provided.draggableProps}
-                        className="ambiance-draggable"
                         style={{
                           ...provided.draggableProps.style,
-                          width: '100%'
+                          width: '100%',
+                          // Apply scale transform only when dragging
+                          transform: snapshot.isDragging ? provided.draggableProps.style?.transform + ' scale(0.25)' : provided.draggableProps.style?.transform,
+                          transformOrigin: '0 0',  // Fix cursor positioning
+                          transition: 'transform 0.1s ease'
                         }}
                       >
                         <SoundBar 
