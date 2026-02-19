@@ -1,4 +1,5 @@
-import { ActionIcon, Box, Button, Group, Paper, Slider, Stack, Text, Progress, Select } from '@mantine/core';
+import { ActionIcon, Box, Button, Group, Paper, Slider, Stack, Text, Progress } from '@mantine/core';
+import { CustomCombobox } from './CustomCombobox';
 import { IconPlayerSkipForward, IconPlayerStop, IconTrash, IconVolume } from '@tabler/icons-react';
 import { useCallback, useEffect } from 'react';
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
@@ -124,35 +125,12 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: BackgroundMu
               </Button>
             );
           })}
-          {/* Context dropdown - exact same size as buttons, no background */}
-          <Select
-            size="xs"
+          {/* Context dropdown - exact same size as buttons */}
+          <CustomCombobox
             value={context}
-            onChange={(v) => setContext(v ?? 'All')}
+            onChange={setContext}
             data={contexts}
-            w={80} // Match button width exactly
             placeholder="Context"
-            styles={{
-              root: {
-                width: '100%' // Ensure container matches button size
-              },
-              label: { display: 'none' },
-              input: {
-                padding: '2px 6px', // Match button padding
-                fontSize: '11px', // Match button text size
-                height: '22px', // Exact button height
-                backgroundColor: 'transparent', // No background
-                border: 'none', // Remove border to match buttons
-                color: 'var(--main-text)' // Match text color
-              },
-              dropdown: { 
-                fontSize: '12px',
-                backgroundColor: 'var(--main-background-color)'
-              },
-              rightSection: {
-                paddingRight: '4px' // Adjust arrow positioning
-              }
-            }}
           />
         </Group>
 

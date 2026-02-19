@@ -1,10 +1,11 @@
-import { Button, Group, Paper, Select, SimpleGrid, Slider, Stack, Text } from '@mantine/core';
+import { Button, Group, Paper, SimpleGrid, Slider, Stack, Text } from '@mantine/core';
 import { IconVolume } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useSoundboard } from '../../hooks/useSoundboard';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { showCreditToast } from '../../utils/showCreditToast';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { CustomCombobox } from './CustomCombobox';
 
 interface SoundboardProps {
   userId?: string | null;
@@ -62,12 +63,11 @@ export function Soundboard({ userId = null, isAdmin = false }: SoundboardProps) 
         <Group justify="flex-end" align="center">
           <Group gap={6} align="center">
             {contexts.length > 1 && (
-              <Select
-                size="xs"
-                w={130}
+              <CustomCombobox
                 value={context}
                 onChange={(v) => setContext(v ?? 'All')}
                 data={contexts}
+                placeholder="Context"
               />
             )}
             <IconVolume size={16} color="var(--mantine-color-dimmed)" />

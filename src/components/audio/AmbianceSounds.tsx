@@ -1,9 +1,10 @@
-import { Button, Group, Paper, Select, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
+import { Button, Group, Paper, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
 import { IconDeviceFloppy, IconRefresh } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useAmbianceSounds } from '../../hooks/useAmbianceSounds';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { SoundBar } from './SoundBar';
+import { CustomCombobox } from './CustomCombobox';
 
 interface AmbianceSoundsProps {
   userId?: string | null;
@@ -69,12 +70,11 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
         <Group justify="flex-end">
           <Group gap="xs">
             {contexts.length > 1 && (
-              <Select
-                size="xs"
-                w={130}
+              <CustomCombobox
                 value={context}
                 onChange={(v) => setContext(v ?? 'All')}
                 data={contexts}
+                placeholder="Context"
               />
             )}
             <Button
