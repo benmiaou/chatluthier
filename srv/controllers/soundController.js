@@ -289,31 +289,81 @@ function getSoundOrder(req, res) {
 }
 
 function saveSoundOrder(req, res) {
-    const { userId, soundType, order } = req.body;
+    console.log('saveSoundOrder called with body:', req.body);
     
-    if (!userId || !soundType || !order) {
-        return res.status(400).send('User ID, sound type, and order are required');
+    try {
+        // Validate input
+        if (!req.body || typeof req.body !== 'object') {
+            console.log('Invalid request body');
+            return res.status(400).send('Invalid request body');
+        }
+        
+        const { userId, soundType, order } = req.body;
+        
+        console.log('Parsed params:', { userId, soundType, order });
+        
+        // Validate required parameters
+        if (!userId || !soundType || !Array.isArray(order)) {
+            console.log('Missing or invalid required parameters');
+            return res.status(400).send('User ID, sound type (string), and order (array) are required');
+        }
+        
+        // Validate order array contents
+        if (order.some(item => typeof item !== 'string')) {
+            console.log('Invalid order array - contains non-string items');
+            return res.status(400).send('Order array must contain only strings');
+        }
+        
+        const userDir = path.join(__dirname, '..', 'user_data', userId);
+        
+        // Create user directory if it doesn't exist
+        if (!fs.existsSync(userDir)) {
+            console.log('Creating user directory:', userDir);
+            try {
+                fs.mkdirSync(userDir, { recursive: true });
+            } catch (mkdirError) {
+                console.error('Failed to create user directory:', mkdirError);
+                return res.status(500).send(`Failed to create user directory: ${mkdirError.message}`);
+            }
+        }
+        
+        const filePath = path.join(userDir, 'soundOrders.json');
+        let soundOrders = {};
+        
+        // Load existing sound orders if file exists
+        if (fs.existsSync(filePath)) {
+            try {
+                const data = fs.readFileSync(filePath, 'utf8');
+                if (data.trim()) {
+                    soundOrders = JSON.parse(data);
+                }
+            } catch (parseError) {
+                console.error('Failed to parse existing sound orders:', parseError);
+                // Continue with empty object if parsing fails
+            }
+        }
+        
+        console.log('Current sound orders:', soundOrders);
+        
+        // Create a safe copy to avoid reference issues
+        const updatedSoundOrders = { ...soundOrders };
+        updatedSoundOrders[soundType] = [...order]; // Create a copy of the array
+        
+        console.log('Updated sound orders:', updatedSoundOrders);
+        
+        // Save the updated sound orders
+        try {
+            fs.writeFileSync(filePath, JSON.stringify(updatedSoundOrders, null, 2));
+            console.log('Successfully saved to:', filePath);
+            res.send('Sound order saved successfully');
+        } catch (writeError) {
+            console.error('Failed to write sound orders file:', writeError);
+            res.status(500).send(`Failed to save sound order: ${writeError.message}`);
+        }
+    } catch (error) {
+        console.error('Error in saveSoundOrder:', error);
+        res.status(500).send(`Internal server error: ${error.message}`);
     }
-    
-    const userDir = path.join(__dirname, '..', 'user_data', userId);
-    
-    if (!fs.existsSync(userDir)) {
-        fs.mkdirSync(userDir, { recursive: true });
-    }
-    
-    const filePath = path.join(userDir, 'soundOrders.json');
-    let soundOrders = {};
-    
-    if (fs.existsSync(filePath)) {
-        const data = fs.readFileSync(filePath, 'utf8');
-        soundOrders = JSON.parse(data);
-    }
-    
-    soundOrders[soundType] = order;
-    
-    fs.writeFileSync(filePath, JSON.stringify(soundOrders, null, 2));
-    
-    res.send('Sound order saved successfully');
 }
 
 module.exports = {

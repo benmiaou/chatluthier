@@ -2,7 +2,7 @@ import { Button, Group, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IconDeviceFloppy, IconRefresh } from '@tabler/icons-react';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useAmbianceSounds } from '../../hooks/useAmbianceSounds';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { SoundBar } from './SoundBar';
@@ -21,14 +21,22 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
 
   const contexts = ['All', ...Array.from(new Set(allBars.flatMap((b) => b.sound.contexts ?? [])))].filter(Boolean);
 
-  const [soundOrder, setSoundOrder] = useState<string[]>([]);
+  // Initialize soundOrder with the current order of bars
+  const [soundOrder, setSoundOrder] = useState<string[]>(() => {
+    return bars.map(bar => bar.sound.filename);
+  });
+  
+  // Ref to track if we're currently processing a drag end
+  const isHandlingDragEnd = useRef(false);
 
   // Add moveItem function for react-dnd
   const moveItem = (fromIndex: number, toIndex: number) => {
-    const newOrder = [...soundOrder];
-    const [movedItem] = newOrder.splice(fromIndex, 1);
-    newOrder.splice(toIndex, 0, movedItem);
-    setSoundOrder(newOrder);
+    setSoundOrder(prevOrder => {
+      const newOrder = [...prevOrder];
+      const [movedItem] = newOrder.splice(fromIndex, 1);
+      newOrder.splice(toIndex, 0, movedItem);
+      return newOrder;
+    });
   };
 
   // Apply sound order to bars when soundOrder or bars change
@@ -38,6 +46,7 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
     // Create a map for quick lookup
     const orderMap = new Map(soundOrder.map((filename, index) => [filename, index]));
     
+    // Sort bars based on the soundOrder
     return [...bars].sort((a, b) => {
       const aIndex = orderMap.get(a.sound.filename) ?? Infinity;
       const bIndex = orderMap.get(b.sound.filename) ?? Infinity;
@@ -66,11 +75,19 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
       }
       
       const data = await response.json();
-      setSoundOrder(data.order || []);
+      const loadedOrder = data.order || [];
+      
+      // Filter the loaded order to only include filenames that exist in current bars
+      const validOrder = loadedOrder.filter(filename => 
+        bars.some(bar => bar.sound.filename === filename)
+      );
+      
+      // If we have a valid loaded order, use it. Otherwise use the current bars order.
+      setSoundOrder(validOrder.length > 0 ? validOrder : bars.map(bar => bar.sound.filename));
     } catch (error) {
       console.error('Failed to load sound order:', error);
-      // Don't break the app - just keep empty order
-      setSoundOrder([]);
+      // Fallback to current bars order if loading fails
+      setSoundOrder(bars.map(bar => bar.sound.filename));
     }
   };
 
@@ -85,9 +102,11 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
           order: newOrder
         })
       });
+      
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
       }
+      
       setSoundOrder(newOrder);
     } catch (error) {
       console.error('Failed to save sound order:', error);
@@ -96,20 +115,28 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
     }
   };
 
-  const handleDragEnd = (result: DropResult) => {
-    if (!result.destination || !userId) return;
+  const handleDragEnd = (fromIndex: number, toIndex: number) => {
+    console.log(`handleDragEnd CALLED with ${fromIndex} -> ${toIndex}`);
+    if (!userId) {
+      console.log('No user ID, skipping save');
+      return;
+    }
     
-    // Get current bars and create a working copy
-    const items = Array.from(bars);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
+    // Ensure the soundOrder state is updated with the final position
+    // This handles cases where the hover updates might not have been applied
+    setSoundOrder(prevOrder => {
+      const newOrder = [...prevOrder];
+      const [movedItem] = newOrder.splice(fromIndex, 1);
+      newOrder.splice(toIndex, 0, movedItem);
+      console.log('Updated soundOrder:', newOrder);
+      
+      // Save the final order to the server immediately after state update
+      saveSoundOrder(newOrder);
+      
+      return newOrder;
+    });
     
-    // Update the sound order
-    const newOrder = items.map(item => item.sound.filename);
-    saveSoundOrder(newOrder);
-    
-    // Force re-render to ensure proper reflow
-    // This is handled automatically by the soundOrder state update
+    // The visual order will update automatically via the orderedBars memo
   };
 
   const handleChange = (filename: string, volume: number) => {
@@ -233,6 +260,7 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
                 index={index}
                 onChange={handleChange}
                 moveItem={moveItem}
+                onDragEnd={handleDragEnd}
                 showDragHandle={!!userId}
               />
             ))}
