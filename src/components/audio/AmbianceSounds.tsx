@@ -137,7 +137,11 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
   const handleChange = (filename: string, volume: number) => {
     setBarVolume(filename, volume);
     if (sessionId) {
-      send({ type: 'ambianceStatusUpdate', id: sessionId, content: { ambianceStatus: getStatus() } });
+      // Send the updated status immediately with the new volume
+      // to avoid the one-step delay issue
+      const currentStatus = getStatus();
+      currentStatus[filename] = volume;
+      send({ type: 'ambianceStatusUpdate', id: sessionId, content: { ambianceStatus: currentStatus } });
     }
   };
 
