@@ -49,14 +49,13 @@ button:active, .mantine-Button-root:active {
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100% !important;
-    height: 36px;
-    padding: 6px 8px;
-    text-align: center;
-    justify-content: center;
-    font-size: 13px;
-    margin: 0 2px 4px 0 !important;
-    min-height: 36px;
-    flex: 1 1 auto;
+    height: 40px;
+    padding: 8px 12px;
+    text-align: left;
+    justify-content: flex-start;
+    font-size: 14px;
+    margin: 0 !important;
+    min-height: 40px;
 }
 
 /* Remove any extra spacing from drag-and-drop containers */
@@ -67,23 +66,32 @@ button:active, .mantine-Button-root:active {
     max-width: 100%;
 }
 
-/* Remove padding from SimpleGrid cells */
-.mantine-SimpleGrid-col > div,
-.mantine-SimpleGrid-root {
-    padding: 0 !important;
-    margin: 0 !important;
-}
 
-/* Target soundboard grid specifically */
-.soundboard-grid .mantine-SimpleGrid-col {
-    padding: 0 !important;
-}
 
 /* Ensure the draggable container takes full width */
 .soundboard-button-container {
     width: 100%;
     padding: 0;
     margin: 0;
+}
+
+/* Style for the drag handle */
+.soundboard-drag-handle {
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    padding: 2px 0;
+}
+
+.soundboard-drag-handle:active {
+    cursor: grabbing;
+}
+
+/* Style for the drag handle icon */
+.soundboard-drag-icon {
+    margin-right: 4px;
+    color: var(--mantine-color-dimmed);
+    cursor: grab;
 }
 
 .soundboard-button:hover {

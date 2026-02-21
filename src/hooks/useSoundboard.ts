@@ -56,3 +56,11 @@ export function useSoundboard(userId: string | null) {
     setVolume,
   };
 }
+
+export interface Sound {
+  filename: string;
+  name: string;
+  credit?: string;
+  contexts?: string[];
+  // ...other properties if they exist...
+}
