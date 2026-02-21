@@ -19,7 +19,7 @@ const CATEGORIES: { value: BackgroundMusicCategory; label: string }[] = [
   { value: 'all', label: 'All' },
 ];
 
-export function BackgroundMusic({ userId = null, isAdmin = false }: BackgroundMusicProps) {
+export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<BackgroundMusicProps>) {
   const { send, addMessageHandler, sessionId } = useSocketContext();
   const {
     currentSound,
@@ -115,9 +115,25 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: BackgroundMu
   return (
     <Paper p="md" radius="md" withBorder>
       <Stack gap="sm">
-        <Text fw={600} size="sm" tt="uppercase" c="dimmed" ta="center">
-          Background Music
-        </Text>
+        {/* Title with volume control */}
+        <Group justify="center" align="center">
+          <Text fw={600} size="sm" tt="uppercase" c="dimmed">
+            Background Music
+          </Text>
+          <Group gap={6} align="center" ml={8}>
+            <IconVolume size={16} color="var(--mantine-color-dimmed)" />
+            <Slider
+              size="xs"
+              w={80}
+              min={0}
+              max={1}
+              step={0.01}
+              value={volume}
+              onChange={setVolume}
+              label={(v) => `${Math.round(v * 100)}%`}
+            />
+          </Group>
+        </Group>
 
         {/* Category buttons with counts and aligned context dropdown */}
         <Group gap="xs" align="center">
@@ -198,20 +214,7 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: BackgroundMu
             Next
           </Button>
 
-          {/* Volume */}
-          <Group gap={6} ml="auto" align="center">
-            <IconVolume size={16} color="var(--mantine-color-dimmed)" />
-            <Slider
-              size="xs"
-              w={100}
-              min={0}
-              max={1}
-              step={0.01}
-              value={volume}
-              onChange={setVolume}
-              label={(v) => `${Math.round(v * 100)}%`}
-            />
-          </Group>
+
         </Group>
       </Stack>
     </Paper>

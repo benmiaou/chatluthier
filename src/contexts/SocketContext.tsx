@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -38,15 +39,14 @@ interface SocketContextValue {
 
 const SocketContext = createContext<SocketContextValue | null>(null);
 
-const WS_URL =
-  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'ws://localhost:3001'
-    : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws/`;
+const isLocalhost = globalThis.location.hostname === 'localhost' || globalThis.location.hostname === '127.0.0.1';
+const protocol = globalThis.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const WS_URL = isLocalhost ? 'ws://localhost:3001' : `${protocol}//${globalThis.location.host}/ws/`;
 
 const RECONNECT_MS = 5000;
 const HEARTBEAT_MS = 30_000;
 
-export function SocketProvider({ children }: { children: ReactNode }) {
+export function SocketProvider({ children }: Readonly<{ children: ReactNode }>) {
   const wsRef = useRef<WebSocket | null>(null);
   const handlersRef = useRef<Set<MessageHandler>>(new Set());
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -76,7 +76,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       }, HEARTBEAT_MS);
 
       // Priority: pending subscribe call > URL param > localStorage
-      const urlParams = new URLSearchParams(window.location.search);
+      const urlParams = new URLSearchParams(globalThis.location.search);
       const urlId = urlParams.get('sessionId');
       const idToJoin = pendingIdRef.current ?? urlId ?? localStorage.getItem('lastJoinId');
 
@@ -85,7 +85,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         pendingIdRef.current = null;
         if (urlId) {
           urlParams.delete('sessionId');
-          window.history.replaceState({}, '', window.location.pathname + (urlParams.toString() ? `?${urlParams}` : ''));
+          globalThis.history.replaceState({}, '', globalThis.location.pathname + (urlParams.toString() ? `?${urlParams}` : ''));
         }
       }
     };
@@ -154,10 +154,13 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     return () => handlersRef.current.delete(handler);
   }, []);
 
+  const contextValue = useMemo(
+    () => ({ connected, sessionId, statusMessage, subscribe, disconnect, send, addMessageHandler }),
+    [connected, sessionId, statusMessage, subscribe, disconnect, send, addMessageHandler]
+  );
+
   return (
-    <SocketContext.Provider
-      value={{ connected, sessionId, statusMessage, subscribe, disconnect, send, addMessageHandler }}
-    >
+    <SocketContext.Provider value={contextValue}>
       {children}
     </SocketContext.Provider>
   );

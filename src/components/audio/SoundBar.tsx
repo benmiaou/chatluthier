@@ -14,7 +14,7 @@ interface SoundBarProps {
   dragHandleProps?: any;
 }
 
-export function SoundBar({ bar, onChange, showDragHandle = false, dragHandleProps }: SoundBarProps) {
+export function SoundBar({ bar, onChange, showDragHandle = false, dragHandleProps }: Readonly<SoundBarProps>) {
   const imgSrc = bar.sound.imageFile ? `${IMAGE_BASE}${bar.sound.imageFile}` : FALLBACK;
   const isActive = bar.volume > 0;
   const dragging = useRef(false);

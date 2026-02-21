@@ -2,21 +2,19 @@ import { Button, Group, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IconDeviceFloppy, IconRefresh } from '@tabler/icons-react';
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAmbianceSounds } from '../../hooks/useAmbianceSounds';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
-import { SoundBar } from './SoundBar';
 import { CustomCombobox } from './CustomCombobox';
 import { DraggableSoundBar } from './DraggableSoundBar';
 
 interface AmbianceSoundsProps {
   userId?: string | null;
-  isAdmin?: boolean;
 }
 
-export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSoundsProps) {
+export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>) {
   const { send, addMessageHandler, sessionId } = useSocketContext();
-  const { bars, allBars, context, setContext, setBarVolume, reset, getStatus, applyStatus, loadSounds, presets, savePreset, applyPreset, loadPresets } = useAmbianceSounds(userId);
+  const { bars, allBars, context, setContext, setBarVolume, reset, getStatus, applyStatus, presets, savePreset, applyPreset, loadPresets } = useAmbianceSounds(userId);
   const [presetName, setPresetName] = useState('');
 
   const contexts = ['All', ...Array.from(new Set(allBars.flatMap((b) => b.sound.contexts ?? [])))].filter(Boolean);
@@ -25,9 +23,6 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
   const [soundOrder, setSoundOrder] = useState<string[]>(() => {
     return bars.map(bar => bar.sound.filename);
   });
-  
-  // Ref to track if we're currently processing a drag end
-  const isHandlingDragEnd = useRef(false);
 
   // Add moveItem function for react-dnd
   const moveItem = (fromIndex: number, toIndex: number) => {
@@ -70,7 +65,7 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
       }
       
       const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
+      if (!contentType?.includes('application/json')) {
         throw new Error('Response is not JSON');
       }
       
@@ -78,8 +73,8 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
       const loadedOrder = data.order || [];
       
       // Filter the loaded order to only include filenames that exist in current bars
-      const validOrder = loadedOrder.filter(filename => 
-        bars.some(bar => bar.sound.filename === filename)
+      const validOrder = loadedOrder.filter((filename: string) =>
+        bars.some((bar) => bar.sound.filename === filename)
       );
       
       // If we have a valid loaded order, use it. Otherwise use the current bars order.

@@ -1,11 +1,11 @@
-import { Combobox, Input, InputBase, useCombobox, Button } from '@mantine/core';
+import { Combobox, useCombobox, Button } from '@mantine/core';
 
 interface CustomComboboxProps {
-  value: string;
-  onChange: (value: string) => void;
-  data: string[];
-  placeholder?: string;
-  width?: number | string;
+  readonly value: string;
+  readonly onChange: (value: string) => void;
+  readonly data: string[];
+  readonly placeholder?: string;
+  readonly width?: number | string;
 }
 
 export function CustomCombobox({ value, onChange, data, placeholder = 'Select', width = 'auto' }: CustomComboboxProps) {

@@ -8,13 +8,12 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { CustomCombobox } from './CustomCombobox';
 
 interface SoundboardProps {
-  userId?: string | null;
-  isAdmin?: boolean;
+  readonly userId?: string | null;
 }
 
-export function Soundboard({ userId = null, isAdmin = false }: SoundboardProps) {
+export function Soundboard({ userId = null }: SoundboardProps) {
   const { send, addMessageHandler, sessionId } = useSocketContext();
-  const { sounds, allSounds, volume, context, setContext, playSound, setVolume, loadSounds } = useSoundboard(userId);
+  const { sounds, allSounds, volume, context, setContext, playSound, setVolume } = useSoundboard(userId);
   const [orderedSounds, setOrderedSounds] = useState(sounds);
 
   // Update ordered sounds when sounds change
@@ -24,7 +23,7 @@ export function Soundboard({ userId = null, isAdmin = false }: SoundboardProps) 
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination || !userId) return;
-    
+
     const items = Array.from(orderedSounds);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
@@ -32,8 +31,6 @@ export function Soundboard({ userId = null, isAdmin = false }: SoundboardProps) 
   };
 
   const contexts = ['All', ...Array.from(new Set(allSounds.flatMap((s) => s.contexts ?? [])))].filter(Boolean);
-
-
 
   const handlePlay = (filename: string) => {
     playSound(filename);
@@ -54,26 +51,57 @@ export function Soundboard({ userId = null, isAdmin = false }: SoundboardProps) 
     });
   }, [addMessageHandler, playSound]);
 
+  const renderSoundButton = (sound: any, index: number) => {
+    return (
+      <Draggable key={sound.filename} draggableId={sound.filename} index={index} isDragDisabled={!userId}>
+        {(provided) => (
+          <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className="soundboard-button-container">
+            <Button
+              className="soundboard-button"
+              style={{ width: '100%', cursor: userId ? 'grab' : 'pointer' }}
+              size="compact-xs"
+              variant="default"
+              onClick={() => handlePlay(sound.filename)}
+              title={sound.name}
+            >
+              {sound.name}
+            </Button>
+          </div>
+        )}
+      </Draggable>
+    );
+  };
+
+  const renderSoundboardGrid = () => {
+    return (
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="soundboard">
+          {(provided) => (
+            <div ref={provided.innerRef} {...provided.droppableProps} style={{ margin: 0, padding: 0 }}>
+              <SimpleGrid cols={{ base: 2, sm: 3, md: 5 }} spacing={4} style={{ margin: 0, padding: 0 }} className="soundboard-grid">
+                {orderedSounds.map((sound, index) => renderSoundButton(sound, index))}
+                {provided.placeholder}
+              </SimpleGrid>
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
+    );
+  };
+
   return (
-    <Paper p="md" radius="md" withBorder>
-      <Stack gap="sm">
-        <Text fw={600} size="sm" tt="uppercase" c="dimmed" ta="center">
-          Soundboard
-        </Text>
-        <Group justify="flex-end" align="center">
-          <Group gap={6} align="center">
-            {contexts.length > 1 && (
-              <CustomCombobox
-                value={context}
-                onChange={(v) => setContext(v ?? 'All')}
-                data={contexts}
-                placeholder="Context"
-              />
-            )}
+    <Paper p="xs" radius="md" withBorder>
+      <Stack gap="xs">
+        {/* Title with volume control */}
+        <Group justify="center" align="center">
+          <Text fw={600} size="sm" tt="uppercase" c="dimmed">
+            Soundboard
+          </Text>
+          <Group gap={6} align="center" ml={8}>
             <IconVolume size={16} color="var(--mantine-color-dimmed)" />
             <Slider
               size="xs"
-              w={100}
+              w={80}
               min={0}
               max={1}
               step={0.01}
@@ -84,42 +112,25 @@ export function Soundboard({ userId = null, isAdmin = false }: SoundboardProps) 
           </Group>
         </Group>
 
+        {/* Context dropdown */}
+        {contexts.length > 1 && (
+          <Group justify="flex-end" gap="xs">
+            <CustomCombobox
+              value={context}
+              onChange={(v) => setContext(v ?? 'All')}
+              data={contexts}
+              placeholder="Context"
+            />
+          </Group>
+        )}
+
         {orderedSounds.length === 0 && (
           <Text size="xs" c="dimmed">
             Loading sounds…
           </Text>
         )}
 
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="soundboard">
-            {(provided) => (
-              <div ref={provided.innerRef} {...provided.droppableProps}>
-                <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="xs">
-                  {orderedSounds.map((sound, index) => (
-                    <Draggable key={sound.filename} draggableId={sound.filename} index={index} isDragDisabled={!userId}>
-                      {(provided) => (
-                        <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-                          <Group gap={4} wrap="nowrap">
-                            <Button
-                              className="soundboard-button"
-                              style={{ flex: 1, cursor: userId ? 'grab' : 'pointer' }}
-                              size="xs"
-                              variant="default"
-                              onClick={() => handlePlay(sound.filename)}
-                            >
-                              {sound.name}
-                            </Button>
-                          </Group>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </SimpleGrid>
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+        {renderSoundboardGrid()}
       </Stack>
     </Paper>
   );
