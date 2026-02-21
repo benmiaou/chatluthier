@@ -50,7 +50,7 @@ export function SoundBar({ bar, onChange, showDragHandle = false, dragHandleProp
 
   return (
     <Box
-      style={{ position: 'relative', width: '100%', aspectRatio: '1.8', borderRadius: 6, overflow: 'hidden', cursor: 'ew-resize', userSelect: 'none', margin: '4px 0' }}
+      style={{ position: 'relative', width: '100%', aspectRatio: '1.8', borderRadius: 6, overflow: 'hidden', cursor: 'ew-resize', userSelect: 'none', margin: '0' }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}

@@ -177,7 +177,7 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
 
   return (
     <Paper p="md" radius="md" withBorder>
-      <Stack gap="sm">
+      <Stack gap="sm" style={{ margin: 0, padding: 0 }}>
         <Text fw={600} size="sm" tt="uppercase" c="dimmed" ta="center">
           Ambiance Sounds
         </Text>
@@ -241,16 +241,17 @@ export function AmbianceSounds({ userId = null, isAdmin = false }: AmbianceSound
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, 150px)',
-              gridTemplateRows: 'repeat(auto-fill, 150px)',
-              gap: 1,
-              minHeight: '500px',
+              gridTemplateColumns: 'repeat(auto-fill, 175px)',
+              gridTemplateRows: 'repeat(auto-fill, 95px)',
+              minHeight: '100px',
               position: 'relative',
               width: '100%',
               overflow: 'visible',
               alignContent: 'start',
-              rowGap: 0,
-              columnGap: 1
+              columnGap: '10px',  // Reduced horizontal spacing between images
+              rowGap: '10px',      // Consistent vertical spacing between rows
+              marginTop: '0',
+              paddingTop: '0'
             }}
           >
             {orderedBars.map((bar, index) => (

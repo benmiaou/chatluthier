@@ -65,9 +65,9 @@ export function DraggableSoundBar({
       ref={combinedRef}
       style={{
         opacity: isDragging ? 0.5 : 1,
-        width: '150px',
-        minWidth: '150px',
-        maxWidth: '150px',
+        width: '200px',
+        minWidth: '175px',
+        maxWidth: '175px',
         cursor: 'move',
         transform: isDragging ? 'scale(0.95)' : 'none',
         transition: 'transform 0.1s ease, opacity 0.1s ease',
