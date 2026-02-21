@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { useDrag, useDrop } from 'react-dnd';
+import { useDrag, useDrop} from 'react-dnd';
 import { SoundBar } from './SoundBar';
 import { IconGripVertical } from '@tabler/icons-react';
 
@@ -19,7 +19,7 @@ export function DraggableSoundBar({
   moveItem,
   onDragEnd,
   showDragHandle
-}: DraggableSoundBarProps) {
+}: Readonly<DraggableSoundBarProps>) {
   const ref = useRef<HTMLDivElement>(null);
 
   const [{ isDragging }, drag] = useDrag({
@@ -28,7 +28,7 @@ export function DraggableSoundBar({
     end: (item, monitor) => {
       if (monitor.didDrop()) {
         const dropResult = monitor.getDropResult();
-        if (dropResult) {
+        if (dropResult && typeof dropResult === 'object' && dropResult !== null && 'droppedOn' in dropResult && typeof dropResult.droppedOn === 'number') {
           onDragEnd(item.index, dropResult.droppedOn);
         }
       }
@@ -73,7 +73,7 @@ export function DraggableSoundBar({
     >
       {showDragHandle && (
         <div
-          ref={drag}
+          ref={drag as any}
           style={{
             position: 'absolute',
             top: 0,
