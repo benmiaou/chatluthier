@@ -59,7 +59,7 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
 
   const loadSoundOrder = async () => {
     try {
-      const response = await fetch(`/get-sound-order?userId=${userId}&soundType=ambiance`, {
+      const response = await fetch(`http://localhost:3000/get-sound-order?userId=${userId}&soundType=ambianceSounds`, {
         credentials: 'include'
       });
       if (!response.ok) {
@@ -90,21 +90,30 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
 
   const saveSoundOrder = async (newOrder: string[]) => {
     try {
+      if (!userId) {
+        console.log('No userId available, skipping server save');
+        setSoundOrder(newOrder);
+        return;
+      }
+      
       const response = await fetch('http://localhost:3000/save-sound-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           userId,
-          soundType: 'ambiance',
+          soundType: 'ambianceSounds',
           order: newOrder
         })
       });
       
       if (!response.ok) {
-        throw new Error(`Server responded with status ${response.status}`);
+        const errorText = await response.text();
+        console.error('Server error response:', errorText);
+        throw new Error(`Server responded with status ${response.status}: ${errorText}`);
       }
       
+      console.log('Sound order saved successfully');
       setSoundOrder(newOrder);
     } catch (error) {
       console.error('Failed to save sound order:', error);
@@ -115,8 +124,8 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
 
   const handleDragEnd = (fromIndex: number, toIndex: number) => {
     console.log(`handleDragEnd CALLED with ${fromIndex} -> ${toIndex}`);
-    if (!userId) {
-      console.log('No user ID, skipping save');
+    if (!userId || userId === 'null' || userId === 'undefined') {
+      console.log('No valid user ID, skipping save. userId:', userId);
       return;
     }
     

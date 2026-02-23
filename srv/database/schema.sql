@@ -1,122 +1,126 @@
 -- SQLite Database Schema for ChatLuthier
--- This schema is designed to replace the current JSON file-based storage
+-- Clean implementation: One entry per sound, contexts stored as JSON array
 
--- Users table - stores minimal user information (no email as requested)
+-- Users table
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     pseudo TEXT NOT NULL UNIQUE,
     password_hash TEXT,
+    secret_question TEXT,
+    secret_answer_hash TEXT,
     is_admin BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Sound categories table - defines the different sound types
+-- Sound categories
 CREATE TABLE IF NOT EXISTS sound_categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
     description TEXT
 );
 
--- Server sounds table - main repository of all sounds
-CREATE TABLE IF NOT EXISTS server_sounds (
+-- Ambiance sounds - one entry per sound, contexts as JSON array
+CREATE TABLE IF NOT EXISTS ambiance_sounds (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     filename TEXT NOT NULL,
     display_name TEXT NOT NULL,
-    category_id INTEGER NOT NULL,
     image_file TEXT,
     credit TEXT,
+    contexts TEXT, -- JSON array: ["animal", "nature"]
     is_enabled BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (category_id) REFERENCES sound_categories(id),
-    UNIQUE(filename, category_id)
+    UNIQUE(filename)
 );
 
--- Sound contexts table - for tagging sounds with contexts
-CREATE TABLE IF NOT EXISTS sound_contexts (
+-- Background music - one entry per sound, contexts as JSON array of tuples
+CREATE TABLE IF NOT EXISTS background_sounds (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sound_id INTEGER NOT NULL,
-    context TEXT NOT NULL,
-    context_index INTEGER DEFAULT 0,
-    FOREIGN KEY (sound_id) REFERENCES server_sounds(id) ON DELETE CASCADE,
-    UNIQUE(sound_id, context, context_index)
+    filename TEXT NOT NULL,
+    display_name TEXT NOT NULL,
+    image_file TEXT,
+    credit TEXT,
+    contexts TEXT, -- JSON array: [["dynamic", "city"], ["calm", "adventure"]]
+    is_enabled BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(filename)
 );
 
--- User sounds table - user-specific sound overrides
+-- Soundboard sounds - one entry per sound, contexts as JSON array
+CREATE TABLE IF NOT EXISTS soundboard (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT NOT NULL,
+    display_name TEXT NOT NULL,
+    credit TEXT,
+    contexts TEXT, -- JSON array: ["animal", "clock"]
+    is_enabled BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(filename)
+);
+
+-- User sounds - one entry per sound override
 CREATE TABLE IF NOT EXISTS user_sounds (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL,
+    sound_type TEXT NOT NULL, -- 'ambiance', 'background', or 'soundboard'
     sound_id INTEGER NOT NULL,
     is_enabled BOOLEAN,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (sound_id) REFERENCES server_sounds(id),
-    UNIQUE(user_id, sound_id)
+    UNIQUE(user_id, sound_type, sound_id)
 );
 
--- User sound contexts table - user-specific context overrides
+-- User sound contexts - one entry per user context override
 CREATE TABLE IF NOT EXISTS user_sound_contexts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_sound_id INTEGER NOT NULL,
-    context TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    sound_type TEXT NOT NULL,
+    sound_id INTEGER NOT NULL,
+    context TEXT NOT NULL, -- For background: "intensity:context"
     context_index INTEGER DEFAULT 0,
-    FOREIGN KEY (user_sound_id) REFERENCES user_sounds(id) ON DELETE CASCADE,
-    UNIQUE(user_sound_id, context, context_index)
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE(user_id, sound_type, sound_id, context, context_index)
 );
 
--- User presets table - stores named sound configurations
+-- User presets - one entry per preset
 CREATE TABLE IF NOT EXISTS user_presets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL,
     preset_name TEXT NOT NULL,
+    preset_data TEXT NOT NULL, -- JSON with all sound settings
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     UNIQUE(user_id, preset_name)
 );
 
--- User preset sounds table - individual sound settings within presets
-CREATE TABLE IF NOT EXISTS user_preset_sounds (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    preset_id INTEGER NOT NULL,
-    sound_id INTEGER NOT NULL,
-    volume_level REAL DEFAULT 0,
-    FOREIGN KEY (preset_id) REFERENCES user_presets(id) ON DELETE CASCADE,
-    FOREIGN KEY (sound_id) REFERENCES server_sounds(id),
-    UNIQUE(preset_id, sound_id)
-);
-
--- User sound orders table - stores custom sound ordering
+-- User sound orders - one entry per sound type
 CREATE TABLE IF NOT EXISTS user_sound_orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL,
-    category_id INTEGER NOT NULL,
+    sound_type TEXT NOT NULL,
     sound_order TEXT NOT NULL, -- JSON array of sound IDs
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (category_id) REFERENCES sound_categories(id),
-    UNIQUE(user_id, category_id)
+    UNIQUE(user_id, sound_type)
 );
 
--- Indexes for performance optimization
-CREATE INDEX IF NOT EXISTS idx_server_sounds_category ON server_sounds(category_id);
-CREATE INDEX IF NOT EXISTS idx_server_sounds_filename ON server_sounds(filename);
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_ambiance_sounds_filename ON ambiance_sounds(filename);
+CREATE INDEX IF NOT EXISTS idx_background_sounds_filename ON background_sounds(filename);
+CREATE INDEX IF NOT EXISTS idx_soundboard_filename ON soundboard(filename);
 CREATE INDEX IF NOT EXISTS idx_user_sounds_user ON user_sounds(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_sounds_sound ON user_sounds(sound_id);
-CREATE INDEX IF NOT EXISTS idx_sound_contexts_sound ON sound_contexts(sound_id);
+CREATE INDEX IF NOT EXISTS idx_user_sound_contexts_user ON user_sound_contexts(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_presets_user ON user_presets(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_preset_sounds_preset ON user_preset_sounds(preset_id);
 CREATE INDEX IF NOT EXISTS idx_user_sound_orders_user ON user_sound_orders(user_id);
 
--- Insert initial sound categories
+-- Initial sound categories
 INSERT OR IGNORE INTO sound_categories (id, name, description) VALUES 
     (1, 'ambianceSounds', 'Ambient sounds for background atmosphere'),
     (2, 'backgroundMusic', 'Background music tracks'),
     (3, 'soundboard', 'Sound effects for soundboard');
-
--- Note: Old tables (ambiance_sounds, background_music, soundboard_sounds, etc.) 
--- have been removed as part of the migration to the unified schema.
--- Use the cleanup_old_tables.js script if these legacy tables still exist.

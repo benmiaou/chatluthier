@@ -290,6 +290,7 @@ function getSoundOrder(req, res) {
 
 function saveSoundOrder(req, res) {
     console.log('saveSoundOrder called with body:', req.body);
+    console.log('Request headers:', req.headers);
     
     try {
         // Validate input
@@ -301,6 +302,9 @@ function saveSoundOrder(req, res) {
         const { userId, soundType, order } = req.body;
         
         console.log('Parsed params:', { userId, soundType, order });
+        console.log('userId type:', typeof userId, 'value:', userId);
+        console.log('soundType type:', typeof soundType, 'value:', soundType);
+        console.log('order type:', typeof order, 'isArray:', Array.isArray(order));
         
         // Validate required parameters
         if (!userId || !soundType || !Array.isArray(order)) {

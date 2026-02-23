@@ -110,6 +110,96 @@ async function getContextsForSoundWithUserOverrides(soundId, userSound) {
     return db.getSoundContexts(soundId);
 }
 
+async function saveSoundOrder(req, res) {
+    const { userId, soundType, order } = req.body;
+    
+    try {
+        // Validate input
+        if (!userId || !soundType || !Array.isArray(order)) {
+            return res.status(400).json({ error: 'User ID, sound type, and order array are required' });
+        }
+        
+        // Validate order array contents
+        if (order.some(item => typeof item !== 'string')) {
+            return res.status(400).json({ error: 'Order array must contain only strings (filenames)' });
+        }
+        
+        // Get category ID
+        const categoryId = config.soundCategories[soundType];
+        if (!categoryId) {
+            return res.status(400).json({ error: 'Invalid sound category.' });
+        }
+        
+        // Convert order array to JSON string
+        const soundOrderJSON = JSON.stringify(order);
+        
+        // Check if sound order already exists for this user and category
+        const existingOrder = await db.queryOne(
+            'SELECT id FROM user_sound_orders WHERE user_id = ? AND category_id = ?',
+            [userId, categoryId]
+        );
+        
+        const now = new Date().toISOString();
+        
+        if (existingOrder) {
+            // Update existing sound order
+            await db.execute(
+                'UPDATE user_sound_orders SET sound_order = ?, updated_at = ? WHERE id = ?',
+                [soundOrderJSON, now, existingOrder.id]
+            );
+        } else {
+            // Insert new sound order
+            await db.execute(
+                'INSERT INTO user_sound_orders (user_id, category_id, sound_order, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+                [userId, categoryId, soundOrderJSON, now, now]
+            );
+        }
+        
+        res.json({ success: true, message: 'Sound order saved successfully' });
+        
+    } catch (error) {
+        console.error('Error saving sound order:', error);
+        res.status(500).json({ error: 'Failed to save sound order' });
+    }
+}
+
+async function getSoundOrder(req, res) {
+    const userId = req.query.userId;
+    const soundType = req.query.soundType;
+    
+    try {
+        // Validate input
+        if (!userId || !soundType) {
+            return res.status(400).json({ error: 'User ID and sound type are required' });
+        }
+        
+        // Get category ID
+        const categoryId = config.soundCategories[soundType];
+        if (!categoryId) {
+            return res.status(400).json({ error: 'Invalid sound category.' });
+        }
+        
+        // Get sound order from database
+        const result = await db.queryOne(
+            'SELECT sound_order FROM user_sound_orders WHERE user_id = ? AND category_id = ?',
+            [userId, categoryId]
+        );
+        
+        if (result && result.sound_order) {
+            // Parse the JSON array and return it
+            const soundOrder = JSON.parse(result.sound_order);
+            res.json({ order: soundOrder });
+        } else {
+            // No sound order found, return empty array
+            res.json({ order: [] });
+        }
+        
+    } catch (error) {
+        console.error('Error getting sound order:', error);
+        res.status(500).json({ error: 'Failed to get sound order' });
+    }
+}
+
 async function deleteSound(req, res) {
     const { soundType, filename } = req.body;
     const accessToken = req.cookies.accessToken;

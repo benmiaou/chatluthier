@@ -57,7 +57,7 @@ export function Soundboard({ userId = null }: SoundboardProps) {
 
   const loadSoundOrder = async () => {
     try {
-      const response = await fetch(`/get-sound-order?userId=${userId}&soundType=soundboard`, {
+      const response = await fetch(`http://localhost:3000/get-sound-order?userId=${userId}&soundType=soundboard`, {
         credentials: 'include'
       });
       if (!response.ok) {
@@ -88,7 +88,13 @@ export function Soundboard({ userId = null }: SoundboardProps) {
 
   const saveSoundOrder = async (newOrder: string[]) => {
     try {
-      const response = await fetch('/save-sound-order', {
+      if (!userId) {
+        console.log('No userId available, skipping server save');
+        setSoundOrder(newOrder);
+        return;
+      }
+      
+      const response = await fetch('http://localhost:3000/save-sound-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -112,7 +118,8 @@ export function Soundboard({ userId = null }: SoundboardProps) {
   };
 
   const handleDragEnd = (fromIndex: number, toIndex: number) => {
-    if (!userId) {
+    if (!userId || userId === 'null' || userId === 'undefined') {
+      console.log('No valid user ID, skipping save. userId:', userId);
       return;
     }
     
