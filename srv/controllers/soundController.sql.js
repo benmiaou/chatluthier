@@ -43,7 +43,7 @@ async function getData(userId, filename) {
     }
 
     // Get user-specific overrides
-    return await getUserSoundsWithOverrides(userId, sounds);
+    return await getUserSoundsWithOverrides(userId, sounds, categoryId);
 }
 
 async function addContextsToSounds(sounds) {
@@ -71,7 +71,18 @@ async function addContextsToSounds(sounds) {
     });
 }
 
-async function getUserSoundsWithOverrides(userId, serverSounds) {
+async function getUserSoundsWithOverrides(userId, serverSounds, categoryId) {
+    // Map category ID to sound type string
+    let soundTypeStr;
+    switch (categoryId) {
+        case 1: soundTypeStr = 'ambiance'; break;
+        case 2: soundTypeStr = 'background'; break;
+        case 3: soundTypeStr = 'soundboard'; break;
+        default:
+            console.error('Invalid category ID:', categoryId);
+            return [];
+    }
+
     // Get all user sound overrides for these sounds
     const soundIds = serverSounds.map(s => s.id);
     const placeholders = soundIds.map(() => '?').join(',');
@@ -79,10 +90,10 @@ async function getUserSoundsWithOverrides(userId, serverSounds) {
     const sql = `
         SELECT us.sound_id, us.is_enabled, us.id as user_sound_id
         FROM user_sounds us
-        WHERE us.user_id = ? AND us.sound_id IN (${placeholders})
+        WHERE us.user_id = ? AND us.sound_type = ? AND us.sound_id IN (${placeholders})
     `;
 
-    const userSounds = await db.query(sql, [userId, ...soundIds]);
+    const userSounds = await db.query(sql, [userId, soundTypeStr, ...soundIds]);
 
     // Create a map for quick lookup
     const userSoundMap = {};
@@ -93,7 +104,7 @@ async function getUserSoundsWithOverrides(userId, serverSounds) {
     // Merge server sounds with user overrides
     return Promise.all(serverSounds.map(async (sound) => {
         const userSound = userSoundMap[sound.id];
-        const contexts = await getContextsForSoundWithUserOverrides(sound.id, userSound);
+        const contexts = await getContextsForSoundWithUserOverrides(userId, sound.id, soundTypeStr, userSound);
 
         return {
             filename: sound.filename,
@@ -106,17 +117,42 @@ async function getUserSoundsWithOverrides(userId, serverSounds) {
     }));
 }
 
-async function getContextsForSoundWithUserOverrides(soundId, userSound) {
+async function getContextsForSoundWithUserOverrides(userId, soundId, soundTypeStr, userSound) {
     if (userSound) {
-        // Get user-specific contexts
-        const userContexts = await db.getUserSoundContexts(userSound.id);
+        // Get user-specific contexts from the new schema
+        const sql = `
+            SELECT context 
+            FROM user_sound_contexts 
+            WHERE user_id = ? AND sound_type = ? AND sound_id = ?
+            ORDER BY context_index
+        `;
+        const userContexts = await db.query(sql, [userId, soundTypeStr, soundId]);
         if (userContexts.length > 0) {
-            return userContexts;
+            return userContexts.map(row => row.context);
         }
     }
 
-    // Fall back to server contexts
-    return db.getSoundContexts(soundId);
+    // Fall back to server contexts - parse from JSON
+    const tableName = soundTypeStr === 'ambiance' ? 'ambiance_sounds' : 
+                     soundTypeStr === 'background' ? 'background_sounds' : 'soundboard';
+    
+    const sql = `
+        SELECT contexts 
+        FROM ${tableName} 
+        WHERE id = ?
+    `;
+    const result = await db.queryOne(sql, [soundId]);
+    
+    if (result && result.contexts) {
+        try {
+            return JSON.parse(result.contexts);
+        } catch (e) {
+            console.error(`Error parsing contexts for sound ${soundId}:`, e.message);
+            return [];
+        }
+    }
+    
+    return [];
 }
 
 async function saveSoundOrder(req, res) {
@@ -230,21 +266,27 @@ async function deleteSound(req, res) {
             return res.status(400).json({ error: 'Invalid sound category.' });
         }
 
-        // Get the sound to delete
-        const sound = await db.getSoundByFilename(filename, categoryId);
-        if (!sound) {
-            return res.status(404).json({ error: 'Sound not found.' });
+        // Map category ID to the correct table name
+        let tableName;
+        switch (categoryId) {
+            case 1: tableName = 'ambiance_sounds'; break;
+            case 2: tableName = 'background_sounds'; break;
+            case 3: tableName = 'soundboard'; break;
+            default:
+                return res.status(400).json({ error: 'Invalid category ID.' });
         }
 
-        // Delete the sound and its contexts in a transaction
+        // Delete the sound directly from the appropriate table
         await db.beginTransaction();
 
         try {
-            // Delete sound contexts first (due to foreign key constraints)
-            await db.execute('DELETE FROM sound_contexts WHERE sound_id = ?', [sound.id]);
+            // Delete the sound from the specific table
+            const result = await db.execute(`DELETE FROM ${tableName} WHERE filename = ?`, [filename]);
 
-            // Delete the sound
-            await db.execute('DELETE FROM server_sounds WHERE id = ?', [sound.id]);
+            if (result.changes === 0) {
+                await db.rollback();
+                return res.status(404).json({ error: 'Sound not found.' });
+            }
 
             await db.commit();
 
@@ -321,25 +363,57 @@ async function addSound(req, res) {
             return res.status(400).json({ error: 'Invalid contexts format.' });
         }
 
+        // Map category ID to the correct table name
+        let tableName;
+        switch (categoryId) {
+            case 1: tableName = 'ambiance_sounds'; break;
+            case 2: tableName = 'background_sounds'; break;
+            case 3: tableName = 'soundboard'; break;
+            default:
+                return res.status(400).json({ error: 'Invalid category ID.' });
+        }
+
         // Insert the sound in a transaction
         await db.beginTransaction();
 
         try {
-            // Insert the sound
-            const result = await db.execute(
-                'INSERT INTO server_sounds (filename, display_name, category_id, image_file, credit, is_enabled) VALUES (?, ?, ?, ?, ?, ?)',
-                [sanitizedFileName, display_name, categoryId, sanitizedImageFileName || null, credit || '', true]
-            );
+            // Contexts are stored as JSON, preserve their structure
+            const contextsJSON = JSON.stringify(parsedContexts);
 
-            const soundId = result.lastID;
-
-            // Insert contexts
-            for (let i = 0; i < parsedContexts.length; i++) {
-                await db.execute(
-                    'INSERT INTO sound_contexts (sound_id, context, context_index) VALUES (?, ?, ?)',
-                    [soundId, parsedContexts[i], i]
-                );
+            // Build the appropriate query based on table structure
+            let query, params;
+            if (tableName === 'ambiance_sounds' || tableName === 'background_sounds') {
+                // Tables with image_file column
+                query = `
+                    INSERT INTO ${tableName} 
+                    (filename, display_name, image_file, credit, contexts, is_enabled) 
+                    VALUES (?, ?, ?, ?, ?, ?)
+                `;
+                params = [
+                    sanitizedFileName,
+                    display_name,
+                    sanitizedImageFileName || null,
+                    credit || '',
+                    contextsJSON,
+                    true
+                ];
+            } else {
+                // soundboard table without image_file column
+                query = `
+                    INSERT INTO ${tableName} 
+                    (filename, display_name, credit, contexts, is_enabled) 
+                    VALUES (?, ?, ?, ?, ?)
+                `;
+                params = [
+                    sanitizedFileName,
+                    display_name,
+                    credit || '',
+                    contextsJSON,
+                    true
+                ];
             }
+
+            await db.execute(query, params);
 
             await db.commit();
 
@@ -376,43 +450,63 @@ async function updateMainPlaylist(req, res) {
             return res.status(400).json({ error: 'Invalid sound category.' });
         }
 
+        // Map category ID to the correct table name
+        let tableName;
+        switch (categoryId) {
+            case 1: tableName = 'ambiance_sounds'; break;
+            case 2: tableName = 'background_sounds'; break;
+            case 3: tableName = 'soundboard'; break;
+            default:
+                return res.status(400).json({ error: 'Invalid category ID.' });
+        }
+
         // Update all sounds for this category in a transaction
         await db.beginTransaction();
 
         try {
             // First, delete all existing sounds in this category
-            const existingSounds = await db.query('SELECT id FROM server_sounds WHERE category_id = ?', [categoryId]);
-            
-            for (const sound of existingSounds) {
-                // Delete contexts first
-                await db.execute('DELETE FROM sound_contexts WHERE sound_id = ?', [sound.id]);
-            }
-            
-            await db.execute('DELETE FROM server_sounds WHERE category_id = ?', [categoryId]);
+            await db.execute(`DELETE FROM ${tableName}`);
 
             // Insert updated sounds
             for (const sound of sounds) {
-                // Handle the nested contexts structure
-                let contexts = sound.contexts || [];
-                if (Array.isArray(contexts) && contexts.length > 0 && Array.isArray(contexts[0])) {
-                    contexts = contexts.flat();
+                // Contexts are stored as JSON, preserve their structure
+                const contexts = sound.contexts || [];
+                const contextsJSON = JSON.stringify(contexts);
+
+                // Build the appropriate query based on table structure
+                let query, params;
+                if (tableName === 'ambiance_sounds' || tableName === 'background_sounds') {
+                    // Tables with image_file column
+                    query = `
+                        INSERT INTO ${tableName} 
+                        (filename, display_name, image_file, credit, contexts, is_enabled) 
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    `;
+                    params = [
+                        sound.filename,
+                        sound.display_name,
+                        sound.imageFile || null,
+                        sound.credit || '',
+                        contextsJSON,
+                        sound.isEnabled !== undefined ? sound.isEnabled : true
+                    ];
+                } else {
+                    // soundboard table without image_file column
+                    query = `
+                        INSERT INTO ${tableName} 
+                        (filename, display_name, credit, contexts, is_enabled) 
+                        VALUES (?, ?, ?, ?, ?)
+                    `;
+                    params = [
+                        sound.filename,
+                        sound.display_name,
+                        sound.credit || '',
+                        contextsJSON,
+                        sound.isEnabled !== undefined ? sound.isEnabled : true
+                    ];
                 }
 
-                // Insert the sound
-                const result = await db.execute(
-                    'INSERT INTO server_sounds (filename, display_name, category_id, image_file, credit, is_enabled) VALUES (?, ?, ?, ?, ?, ?)',
-                    [sound.filename, sound.display_name, categoryId, sound.imageFile || null, sound.credit || '', sound.isEnabled || true]
-                );
-
-                const soundId = result.lastID;
-
-                // Insert contexts
-                for (let i = 0; i < contexts.length; i++) {
-                    await db.execute(
-                        'INSERT INTO sound_contexts (sound_id, context, context_index) VALUES (?, ?, ?)',
-                        [soundId, contexts[i], i]
-                    );
-                }
+                await db.execute(query, params);
             }
 
             await db.commit();
@@ -460,6 +554,16 @@ async function updateUserSound(req, res) {
             return res.status(400).json({ error: 'Invalid contexts format.' });
         }
 
+        // Map category ID to sound type string
+        let soundTypeStr;
+        switch (categoryId) {
+            case 1: soundTypeStr = 'ambiance'; break;
+            case 2: soundTypeStr = 'background'; break;
+            case 3: soundTypeStr = 'soundboard'; break;
+            default:
+                return res.status(400).json({ error: 'Invalid category ID.' });
+        }
+
         // Check if user sound record exists
         const existingUserSound = await db.getUserSound(userId, sound.id);
 
@@ -473,13 +577,16 @@ async function updateUserSound(req, res) {
                     [isEnabled, existingUserSound.id]
                 );
 
-                // Delete existing contexts
-                await db.execute('DELETE FROM user_sound_contexts WHERE user_sound_id = ?', [existingUserSound.id]);
+                // Delete existing contexts for this user and sound
+                await db.execute(
+                    'DELETE FROM user_sound_contexts WHERE user_id = ? AND sound_type = ? AND sound_id = ?',
+                    [userId, soundTypeStr, sound.id]
+                );
             } else {
                 // Insert new record
                 const result = await db.execute(
-                    'INSERT INTO user_sounds (user_id, sound_id, is_enabled) VALUES (?, ?, ?)',
-                    [userId, sound.id, isEnabled]
+                    'INSERT INTO user_sounds (user_id, sound_type, sound_id, is_enabled) VALUES (?, ?, ?, ?)',
+                    [userId, soundTypeStr, sound.id, isEnabled]
                 );
                 existingUserSound.id = result.lastID;
             }
@@ -487,8 +594,8 @@ async function updateUserSound(req, res) {
             // Insert new contexts
             for (let i = 0; i < parsedContexts.length; i++) {
                 await db.execute(
-                    'INSERT INTO user_sound_contexts (user_sound_id, context, context_index) VALUES (?, ?, ?)',
-                    [existingUserSound.id, parsedContexts[i], i]
+                    'INSERT INTO user_sound_contexts (user_id, sound_type, sound_id, context, context_index) VALUES (?, ?, ?, ?, ?)',
+                    [userId, soundTypeStr, sound.id, parsedContexts[i], i]
                 );
             }
 
@@ -517,42 +624,27 @@ async function savePreset(req, res) {
         await db.beginTransaction();
 
         try {
+            // Convert preset data to JSON
+            const presetDataJSON = JSON.stringify(presetData);
+
             // Check if preset exists
             const existingPreset = await db.queryOne(
                 'SELECT id FROM user_presets WHERE user_id = ? AND preset_name = ?',
                 [userId, presetName]
             );
 
-            let presetId;
             if (existingPreset) {
                 // Update existing preset
                 await db.execute(
-                    'UPDATE user_presets SET updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-                    [existingPreset.id]
+                    'UPDATE user_presets SET preset_data = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+                    [presetDataJSON, existingPreset.id]
                 );
-                presetId = existingPreset.id;
-                
-                // Delete existing preset sounds
-                await db.execute('DELETE FROM user_preset_sounds WHERE preset_id = ?', [presetId]);
             } else {
                 // Insert new preset
-                const result = await db.execute(
-                    'INSERT INTO user_presets (user_id, preset_name) VALUES (?, ?)',
-                    [userId, presetName]
+                await db.execute(
+                    'INSERT INTO user_presets (user_id, preset_name, preset_data) VALUES (?, ?, ?)',
+                    [userId, presetName, presetDataJSON]
                 );
-                presetId = result.lastID;
-            }
-
-            // Insert preset sounds
-            for (const [filename, volumeLevel] of Object.entries(presetData)) {
-                // Get the sound by filename (assuming ambianceSounds category for presets)
-                const sound = await db.getSoundByFilename(filename, config.soundCategories.ambianceSounds);
-                if (sound) {
-                    await db.execute(
-                        'INSERT INTO user_preset_sounds (preset_id, sound_id, volume_level) VALUES (?, ?, ?)',
-                        [presetId, sound.id, volumeLevel]
-                    );
-                }
             }
 
             await db.commit();
@@ -578,28 +670,21 @@ async function loadPresets(req, res) {
     try {
         // Get all presets for the user
         const presets = await db.query(
-            'SELECT id, preset_name FROM user_presets WHERE user_id = ?',
+            'SELECT preset_name, preset_data FROM user_presets WHERE user_id = ?',
             [userId]
         );
 
         const result = {};
 
-        // Get sounds for each preset
+        // Parse preset data for each preset
         for (const preset of presets) {
-            const presetSounds = await db.query(
-                'SELECT s.filename, ps.volume_level ' +
-                'FROM user_preset_sounds ps ' +
-                'JOIN server_sounds s ON ps.sound_id = s.id ' +
-                'WHERE ps.preset_id = ?',
-                [preset.id]
-            );
-
-            const presetData = {};
-            presetSounds.forEach(ps => {
-                presetData[ps.filename] = ps.volume_level;
-            });
-
-            result[preset.preset_name] = presetData;
+            try {
+                const presetData = JSON.parse(preset.preset_data);
+                result[preset.preset_name] = presetData;
+            } catch (e) {
+                console.error(`Error parsing preset data for ${preset.preset_name}:`, e.message);
+                result[preset.preset_name] = {};
+            }
         }
 
         res.json({ presets: result });
@@ -623,10 +708,20 @@ async function getSoundOrder(req, res) {
             return res.status(400).json({ error: 'Invalid sound category.' });
         }
 
-        // Get sound order for this user and category
+        // Map category ID to sound type string
+        let soundTypeStr;
+        switch (categoryId) {
+            case 1: soundTypeStr = 'ambiance'; break;
+            case 2: soundTypeStr = 'background'; break;
+            case 3: soundTypeStr = 'soundboard'; break;
+            default:
+                return res.status(400).json({ error: 'Invalid category ID.' });
+        }
+        
+        // Get sound order from database
         const result = await db.queryOne(
-            'SELECT sound_order FROM user_sound_orders WHERE user_id = ? AND category_id = ?',
-            [userId, categoryId]
+            'SELECT sound_order FROM user_sound_orders WHERE user_id = ? AND sound_type = ?',
+            [userId, soundTypeStr]
         );
 
         if (result) {
@@ -686,15 +781,25 @@ async function saveSoundOrder(req, res) {
             }
         }
         
-        await db.beginTransaction();
-
+        // Don't use transactions for sound order saves to avoid nesting issues
+        // SQLite doesn't support nested transactions, and this is a simple operation
         try {
             const soundOrderJson = JSON.stringify(order);
             
+            // Map category ID to sound type string
+            let soundTypeStr;
+            switch (categoryId) {
+                case 1: soundTypeStr = 'ambiance'; break;
+                case 2: soundTypeStr = 'background'; break;
+                case 3: soundTypeStr = 'soundboard'; break;
+                default:
+                    return res.status(400).json({ error: 'Invalid category ID.' });
+            }
+            
             // Check if record exists
             const existing = await db.queryOne(
-                'SELECT id FROM user_sound_orders WHERE user_id = ? AND category_id = ?',
-                [userId, categoryId]
+                'SELECT id FROM user_sound_orders WHERE user_id = ? AND sound_type = ?',
+                [userId, soundTypeStr]
             );
 
             if (existing) {
@@ -706,16 +811,14 @@ async function saveSoundOrder(req, res) {
             } else {
                 // Insert new record
                 await db.execute(
-                    'INSERT INTO user_sound_orders (user_id, category_id, sound_order) VALUES (?, ?, ?)',
-                    [userId, categoryId, soundOrderJson]
+                    'INSERT INTO user_sound_orders (user_id, sound_type, sound_order) VALUES (?, ?, ?)',
+                    [userId, soundTypeStr, soundOrderJson]
                 );
             }
 
-            await db.commit();
             console.log('Successfully saved sound order');
             res.send('Sound order saved successfully');
         } catch (error) {
-            await db.rollback();
             console.error('Failed to save sound order:', error);
             res.status(500).send(`Failed to save sound order: ${error.message}`);
         }

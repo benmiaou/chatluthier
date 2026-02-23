@@ -190,26 +190,31 @@ class Database {
      * Get a sound by filename and category
      */
     async getSoundByFilename(filename, categoryId) {
+        // Map category ID to the correct table name
+        let tableName;
+        switch (categoryId) {
+            case 1: tableName = 'ambiance_sounds'; break;
+            case 2: tableName = 'background_sounds'; break;
+            case 3: tableName = 'soundboard'; break;
+            default:
+                console.error('Invalid category ID:', categoryId);
+                return null;
+        }
+        
         const sql = `
             SELECT * 
-            FROM server_sounds 
-            WHERE filename = ? AND category_id = ?
+            FROM ${tableName} 
+            WHERE filename = ?
         `;
-        return this.queryOne(sql, [filename, categoryId]);
+        return this.queryOne(sql, [filename]);
     }
 
     /**
-     * Get contexts for a sound
+     * Get contexts for a sound (not used in new schema - contexts are stored as JSON)
      */
     async getSoundContexts(soundId) {
-        const sql = `
-            SELECT context 
-            FROM sound_contexts 
-            WHERE sound_id = ?
-            ORDER BY context_index
-        `;
-        const rows = await this.query(sql, [soundId]);
-        return rows.map(row => row.context);
+        console.warn('getSoundContexts is deprecated - contexts are now stored as JSON in sound tables');
+        return [];
     }
 
     /**
@@ -225,17 +230,11 @@ class Database {
     }
 
     /**
-     * Get user-specific sound contexts
+     * Get user-specific sound contexts (not used in new schema - contexts are stored differently)
      */
     async getUserSoundContexts(userSoundId) {
-        const sql = `
-            SELECT context 
-            FROM user_sound_contexts 
-            WHERE user_sound_id = ?
-            ORDER BY context_index
-        `;
-        const rows = await this.query(sql, [userSoundId]);
-        return rows.map(row => row.context);
+        console.warn('getUserSoundContexts is deprecated - user contexts are now stored in user_sound_contexts table');
+        return [];
     }
 }
 
