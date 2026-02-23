@@ -17,15 +17,25 @@ async function getData(userId, filename) {
         return [];
     }
 
-    // Get all sounds for this category
+    // Map category ID to the correct table
+    let tableName;
+    switch (categoryId) {
+        case 1: tableName = 'ambiance_sounds'; break;
+        case 2: tableName = 'background_sounds'; break;
+        case 3: tableName = 'soundboard'; break;
+        default:
+            console.error('Invalid category ID:', categoryId);
+            return [];
+    }
+
+    // Get all sounds for this category from the correct table
     const sql = `
-        SELECT s.* 
-        FROM server_sounds s 
-        WHERE s.category_id = ? 
-        ORDER BY s.display_name
+        SELECT * 
+        FROM ${tableName} 
+        ORDER BY display_name
     `;
 
-    const sounds = await db.query(sql, [categoryId]);
+    const sounds = await db.query(sql);
 
     // If no userId, return server defaults
     if (!userId) {
@@ -37,19 +47,18 @@ async function getData(userId, filename) {
 }
 
 async function addContextsToSounds(sounds) {
-    // Add contexts to each sound
-    return Promise.all(sounds.map(async (sound) => {
-        const dbContexts = await db.getSoundContexts(sound.id);
+    // Contexts are now stored as JSON in the sound table, not in separate table
+    return sounds.map(sound => {
+        let contexts = [];
         
-        // Convert database contexts back to original format
-        const contexts = dbContexts.map(ctx => {
-            // ctx is a string from getSoundContexts
-            if (typeof ctx === 'string' && ctx.includes(':')) {
-                const [intensity, context] = ctx.split(':');
-                return [intensity, context];
+        try {
+            // Parse the JSON contexts from the database
+            if (sound.contexts) {
+                contexts = JSON.parse(sound.contexts);
             }
-            return ctx;
-        });
+        } catch (e) {
+            console.error(`Error parsing contexts for ${sound.filename}:`, e.message);
+        }
         
         return {
             filename: sound.filename,
@@ -59,7 +68,7 @@ async function addContextsToSounds(sounds) {
             credit: sound.credit,
             isEnabled: Boolean(sound.is_enabled) // Convert 1/0 to true/false
         };
-    }));
+    });
 }
 
 async function getUserSoundsWithOverrides(userId, serverSounds) {
