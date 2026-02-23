@@ -1,6 +1,6 @@
 import { Avatar, Group, Menu, Text, Button, Modal, TextInput, PasswordInput, Stack, Title } from '@mantine/core';
 import { IconLogout, IconLogin, IconUserPlus } from '@tabler/icons-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthContext } from '../../contexts/AuthContext';
 
 export function AuthButtons() {
@@ -27,6 +27,62 @@ export function AuthButtons() {
   const [resetNewPassword, setResetNewPassword] = useState('');
   const [resetConfirmPassword, setResetConfirmPassword] = useState('');
   
+  // Real-time validation states for registration
+  const [pseudoAvailable, setPseudoAvailable] = useState<boolean | null>(null);
+  const [pseudoChecking, setPseudoChecking] = useState(false);
+  const [passwordMatch, setPasswordMatch] = useState(false);
+  const [passwordStrongEnough, setPasswordStrongEnough] = useState(false);
+
+  // Real-time validation effects
+  useEffect(() => {
+    // Check if passwords match
+    setPasswordMatch(registerPassword === registerConfirmPassword && registerConfirmPassword !== '');
+  }, [registerPassword, registerConfirmPassword]);
+
+  useEffect(() => {
+    // Check if password is strong enough (at least 6 characters)
+    setPasswordStrongEnough(registerPassword.length >= 6);
+  }, [registerPassword]);
+
+  useEffect(() => {
+    // Check if pseudo is available (debounced to avoid too many requests)
+    if (registerPseudo.trim() === '') {
+      setPseudoAvailable(null);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setPseudoChecking(true);
+      try {
+        // Convert pseudo to lowercase for case-insensitive comparison
+        const pseudoToCheck = registerPseudo.trim();
+        
+        const response = await fetch('/check-pseudo-available', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pseudo: pseudoToCheck }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setPseudoAvailable(data.available);
+        } else {
+          // If the endpoint fails, assume pseudo is available for development
+          console.warn('Pseudo availability check failed, assuming available');
+          setPseudoAvailable(true);
+        }
+      } catch (err) {
+        console.error('Error checking pseudo availability:', err);
+        // If there's an error, assume pseudo is available for development
+        setPseudoAvailable(true);
+      } finally {
+        setPseudoChecking(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [registerPseudo]);
+
   const handleLogin = async () => {
     try {
       setError('');
@@ -35,7 +91,8 @@ export function AuthButtons() {
       setLoginPseudo('');
       setLoginPassword('');
     } catch (err) {
-      setError(err.message || 'Login failed');
+      // Show a simple, user-friendly error message for login failures
+      setError('Incorrect login or password');
     }
   };
   
@@ -43,21 +100,25 @@ export function AuthButtons() {
     try {
       setError('');
       
-      // Validate password confirmation
-      if (registerPassword !== registerConfirmPassword) {
+      // Check validation states
+      if (!passwordStrongEnough) {
+        setError('Password must be at least 6 characters');
+        return;
+      }
+      
+      if (!passwordMatch) {
         setError('Passwords do not match');
+        return;
+      }
+      
+      if (pseudoAvailable === false) {
+        setError('Pseudo is already taken');
         return;
       }
       
       // Validate secret question and answer
       if (!registerSecretQuestion || !registerSecretAnswer) {
         setError('Secret question and answer are required');
-        return;
-      }
-      
-      // Validate password length
-      if (registerPassword.length < 6) {
-        setError('Password must be at least 6 characters');
         return;
       }
       
@@ -98,6 +159,16 @@ export function AuthButtons() {
   const handleSecretQuestionModalOpen = () => {
     setError('');
     setSecretQuestionModalOpen(true);
+  };
+
+  const handleLoginModalOpen = () => {
+    setError('');
+    setLoginModalOpen(true);
+  };
+
+  const handleRegisterModalOpen = () => {
+    setError('');
+    setRegisterModalOpen(true);
   };
 
   const handlePasswordReset = async () => {
@@ -166,7 +237,7 @@ export function AuthButtons() {
         variant="default"
         size="compact-sm"
         style={{ height: '36px' }}
-        onClick={() => setLoginModalOpen(true)}
+        onClick={handleLoginModalOpen}
       >
         Login
       </Button>
@@ -176,7 +247,7 @@ export function AuthButtons() {
         variant="filled"
         size="compact-sm"
         style={{ height: '36px' }}
-        onClick={() => setRegisterModalOpen(true)}
+        onClick={handleRegisterModalOpen}
       >
         Sign Up
       </Button>
@@ -184,7 +255,7 @@ export function AuthButtons() {
       {/* Login Modal */}
       <Modal
         opened={loginModalOpen}
-        onClose={() => setLoginModalOpen(false)}
+        onClose={() => { setLoginModalOpen(false); setError(''); }}
         title="Login"
         centered
       >
@@ -218,7 +289,7 @@ export function AuthButtons() {
       {/* Register Modal */}
       <Modal
         opened={registerModalOpen}
-        onClose={() => setRegisterModalOpen(false)}
+        onClose={() => { setRegisterModalOpen(false); setError(''); }}
         title="Sign Up"
         centered
       >
@@ -229,20 +300,27 @@ export function AuthButtons() {
             value={registerPseudo}
             onChange={(e) => setRegisterPseudo(e.target.value)}
             required
+            error={pseudoAvailable === false ? 'Pseudo already taken' : ''}
+            rightSection={pseudoChecking ? <Text size="xs" c="gray">Checking...</Text> : 
+              pseudoAvailable === true ? <Text size="xs" c="green">✓ Available</Text> : null}
           />
+          
           <PasswordInput
             label="Password"
-            placeholder="Choose a password"
+            placeholder="Choose a password (min 6 characters)"
             value={registerPassword}
             onChange={(e) => setRegisterPassword(e.target.value)}
             required
+            error={registerPassword && !passwordStrongEnough ? 'Password must be at least 6 characters' : ''}
           />
+          
           <PasswordInput
             label="Confirm Password"
             placeholder="Confirm your password"
             value={registerConfirmPassword}
             onChange={(e) => setRegisterConfirmPassword(e.target.value)}
             required
+            error={registerConfirmPassword && !passwordMatch ? 'Passwords do not match' : ''}
           />
           <TextInput
             label="Secret Question"

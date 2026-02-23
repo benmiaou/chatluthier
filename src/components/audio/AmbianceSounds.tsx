@@ -59,7 +59,9 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
 
   const loadSoundOrder = async () => {
     try {
-      const response = await fetch(`/get-sound-order?userId=${userId}&soundType=ambiance`);
+      const response = await fetch(`/get-sound-order?userId=${userId}&soundType=ambiance`, {
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
       }
@@ -88,9 +90,10 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
 
   const saveSoundOrder = async (newOrder: string[]) => {
     try {
-      const response = await fetch('/save-sound-order', {
+      const response = await fetch('http://localhost:3000/save-sound-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           userId,
           soundType: 'ambiance',

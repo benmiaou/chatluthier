@@ -9,7 +9,8 @@ const {
     loginWithPseudo,
     changePassword,
     requestPasswordReset,
-    getSecretQuestion 
+    getSecretQuestion,
+    checkPseudoAvailable
 } = require('../controllers/authController');
 
 router.post('/verify-login', verifyLogin);
@@ -23,5 +24,6 @@ router.post('/login', loginWithPseudo);
 router.post('/change-password', changePassword);
 router.post('/request-password-reset', requestPasswordReset);
 router.post('/get-secret-question', getSecretQuestion);
+router.post('/check-pseudo-available', checkPseudoAvailable);
 
 module.exports = router;

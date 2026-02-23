@@ -58,6 +58,7 @@ export default defineConfig({
       '/login': { target: 'http://localhost:3000', changeOrigin: true },
       '/request-password-reset': { target: 'http://localhost:3000', changeOrigin: true },
       '/get-secret-question': { target: 'http://localhost:3000', changeOrigin: true },
+      '/check-pseudo-available': { target: 'http://localhost:3000', changeOrigin: true },
       '/change-password': { target: 'http://localhost:3000', changeOrigin: true },
     },
   },

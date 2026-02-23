@@ -57,7 +57,9 @@ export function Soundboard({ userId = null }: SoundboardProps) {
 
   const loadSoundOrder = async () => {
     try {
-      const response = await fetch(`/get-sound-order?userId=${userId}&soundType=soundboard`);
+      const response = await fetch(`/get-sound-order?userId=${userId}&soundType=soundboard`, {
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
       }
@@ -89,6 +91,7 @@ export function Soundboard({ userId = null }: SoundboardProps) {
       const response = await fetch('/save-sound-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           userId,
           soundType: 'soundboard',

@@ -101,8 +101,8 @@ async function registerWithPseudo(req, res) {
             return res.status(400).json({ error: 'Pseudo, password, secret question, and secret answer are required' });
         }
         
-        // Check if pseudo already exists
-        const existingUser = await db.queryOne('SELECT id FROM users WHERE pseudo = ?', [pseudo]);
+        // Check if pseudo already exists (case-insensitive)
+        const existingUser = await db.queryOne('SELECT id FROM users WHERE LOWER(pseudo) = LOWER(?)', [pseudo]);
         if (existingUser) {
             return res.status(409).json({ error: 'Pseudo already taken' });
         }
@@ -155,8 +155,8 @@ async function requestPasswordReset(req, res) {
             return res.status(400).json({ error: 'Pseudo, secret answer, and new password are required' });
         }
         
-        // Find user with secret question
-        const user = await db.queryOne('SELECT id, password_hash, secret_question, secret_answer_hash FROM users WHERE pseudo = ?', [pseudo]);
+        // Find user with secret question (case-insensitive)
+        const user = await db.queryOne('SELECT id, password_hash, secret_question, secret_answer_hash FROM users WHERE LOWER(pseudo) = LOWER(?)', [pseudo]);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -193,8 +193,8 @@ async function getSecretQuestion(req, res) {
             return res.status(400).json({ error: 'Pseudo is required' });
         }
         
-        // Find user
-        const user = await db.queryOne('SELECT secret_question FROM users WHERE pseudo = ?', [pseudo]);
+        // Find user (case-insensitive)
+        const user = await db.queryOne('SELECT secret_question FROM users WHERE LOWER(pseudo) = LOWER(?)', [pseudo]);
         if (!user || !user.secret_question) {
             return res.status(404).json({ error: 'User not found or no secret question set' });
         }
@@ -207,12 +207,32 @@ async function getSecretQuestion(req, res) {
     }
 }
 
+async function checkPseudoAvailable(req, res) {
+    try {
+        const { pseudo } = req.body;
+        
+        // Validate input
+        if (!pseudo || pseudo.trim() === '') {
+            return res.status(400).json({ error: 'Pseudo is required' });
+        }
+        
+        // Check if pseudo already exists (case-insensitive)
+        const existingUser = await db.queryOne('SELECT id FROM users WHERE LOWER(pseudo) = LOWER(?)', [pseudo]);
+        
+        return res.json({ available: !existingUser });
+        
+    } catch (error) {
+        console.error('Check pseudo availability error:', error);
+        return res.status(500).json({ error: 'Failed to check pseudo availability' });
+    }
+}
+
 async function loginWithPseudo(req, res) {
     try {
         const { pseudo, password } = req.body;
         
-        // Find user
-        const user = await db.queryOne('SELECT id, pseudo, password_hash, is_admin FROM users WHERE pseudo = ?', [pseudo]);
+        // Find user (case-insensitive)
+        const user = await db.queryOne('SELECT id, pseudo, password_hash, is_admin FROM users WHERE LOWER(pseudo) = LOWER(?)', [pseudo]);
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -281,4 +301,5 @@ module.exports = {
     changePassword,
     requestPasswordReset,
     getSecretQuestion,
+    checkPseudoAvailable,
 };
