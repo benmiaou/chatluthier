@@ -6,6 +6,11 @@ const CLIENT_ID = '793652859374-lvh19kj1d49a33cola5ui3tsj1hsg2li.apps.googleuser
 
 const client = new OAuth2Client(CLIENT_ID);
 
+// Database and filesystem imports for pseudo/password authentication
+const db = require('../database/db');
+const path = require('path');
+const fs = require('fs');
+
 async function verifyIdToken(token) {
     const ticket = await client.verifyIdToken({
         idToken: token,
@@ -84,10 +89,196 @@ function logout(req, res) {
     return res.json({ message: 'Logged out successfully' });
 }
 
+// Pseudo/Password Authentication
+const bcrypt = require('bcrypt');
+
+async function registerWithPseudo(req, res) {
+    try {
+        const { pseudo, password, secretQuestion, secretAnswer } = req.body;
+        
+        // Validate input
+        if (!pseudo || !password || !secretQuestion || !secretAnswer) {
+            return res.status(400).json({ error: 'Pseudo, password, secret question, and secret answer are required' });
+        }
+        
+        // Check if pseudo already exists
+        const existingUser = await db.queryOne('SELECT id FROM users WHERE pseudo = ?', [pseudo]);
+        if (existingUser) {
+            return res.status(409).json({ error: 'Pseudo already taken' });
+        }
+        
+        // Hash password
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(password, saltRounds);
+        const secretAnswerHash = await bcrypt.hash(secretAnswer, saltRounds);
+        
+        // Generate a user ID
+        const userId = `user_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        
+        // Insert user with secret question and answer
+        await db.execute(
+            'INSERT INTO users (id, pseudo, password_hash, secret_question, secret_answer_hash, is_admin) VALUES (?, ?, ?, ?, ?, ?)',
+            [userId, pseudo, passwordHash, secretQuestion, secretAnswerHash, false]
+        );
+        
+        // Create user directory
+        const userDir = path.join(__dirname, '..', 'user_data', userId);
+        if (!fs.existsSync(userDir)) {
+            fs.mkdirSync(userDir, { recursive: true });
+        }
+        
+        // Create initial preset file
+        fs.writeFileSync(
+            path.join(userDir, 'presets.json'),
+            JSON.stringify({}, null, 2)
+        );
+        
+        return res.status(201).json({
+            success: true,
+            userId,
+            pseudo,
+            message: 'Account created successfully'
+        });
+        
+    } catch (error) {
+        console.error('Registration error:', error);
+        return res.status(500).json({ error: 'Registration failed' });
+    }
+}
+
+async function requestPasswordReset(req, res) {
+    try {
+        const { pseudo, secretAnswer, newPassword } = req.body;
+        
+        // Validate input
+        if (!pseudo || !secretAnswer || !newPassword) {
+            return res.status(400).json({ error: 'Pseudo, secret answer, and new password are required' });
+        }
+        
+        // Find user with secret question
+        const user = await db.queryOne('SELECT id, password_hash, secret_question, secret_answer_hash FROM users WHERE pseudo = ?', [pseudo]);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        // Verify secret answer
+        const secretAnswerMatch = await bcrypt.compare(secretAnswer, user.secret_answer_hash);
+        if (!secretAnswerMatch) {
+            return res.status(401).json({ error: 'Invalid secret answer' });
+        }
+        
+        // Hash new password
+        const newPasswordHash = await bcrypt.hash(newPassword, 10);
+        
+        // Update password
+        await db.execute(
+            'UPDATE users SET password_hash = ? WHERE id = ?',
+            [newPasswordHash, user.id]
+        );
+        
+        return res.json({ success: true, message: 'Password reset successfully' });
+        
+    } catch (error) {
+        console.error('Password reset error:', error);
+        return res.status(500).json({ error: 'Password reset failed' });
+    }
+}
+
+async function getSecretQuestion(req, res) {
+    try {
+        const { pseudo } = req.body;
+        
+        // Validate input
+        if (!pseudo) {
+            return res.status(400).json({ error: 'Pseudo is required' });
+        }
+        
+        // Find user
+        const user = await db.queryOne('SELECT secret_question FROM users WHERE pseudo = ?', [pseudo]);
+        if (!user || !user.secret_question) {
+            return res.status(404).json({ error: 'User not found or no secret question set' });
+        }
+        
+        return res.json({ success: true, secretQuestion: user.secret_question });
+        
+    } catch (error) {
+        console.error('Get secret question error:', error);
+        return res.status(500).json({ error: 'Failed to retrieve secret question' });
+    }
+}
+
+async function loginWithPseudo(req, res) {
+    try {
+        const { pseudo, password } = req.body;
+        
+        // Find user
+        const user = await db.queryOne('SELECT id, pseudo, password_hash, is_admin FROM users WHERE pseudo = ?', [pseudo]);
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        
+        // Verify password
+        const passwordMatch = await bcrypt.compare(password, user.password_hash);
+        if (!passwordMatch) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        
+        // Generate JWT token
+        const accessToken = jwt.sign({ userId: user.id, pseudo: user.pseudo, isAdmin: user.is_admin }, accessTokenSecret, { expiresIn: '1h' });
+        const refreshToken = jwt.sign({ userId: user.id, pseudo: user.pseudo, isAdmin: user.is_admin }, refreshTokenSecret, { expiresIn: '7d' });
+        
+        res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
+        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
+        
+        return res.json({ userId: user.id, pseudo: user.pseudo, isAdmin: user.is_admin });
+        
+    } catch (error) {
+        console.error('Login error:', error);
+        return res.status(500).json({ error: 'Login failed' });
+    }
+}
+
+async function changePassword(req, res) {
+    try {
+        const { userId, currentPassword, newPassword } = req.body;
+        
+        // Verify current password
+        const user = await db.queryOne('SELECT password_hash FROM users WHERE id = ?', [userId]);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        const passwordMatch = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!passwordMatch) {
+            return res.status(401).json({ error: 'Current password incorrect' });
+        }
+        
+        // Hash new password
+        const newPasswordHash = await bcrypt.hash(newPassword, 10);
+        
+        // Update password
+        await db.execute(
+            'UPDATE users SET password_hash = ? WHERE id = ?',
+            [newPasswordHash, userId]
+        );
+        
+        return res.json({ success: true, message: 'Password changed successfully' });
+        
+    } catch (error) {
+        console.error('Change password error:', error);
+        return res.status(500).json({ error: 'Password change failed' });
+    }
+}
+
 module.exports = {
     verifyLogin,
     refreshToken,
     checkSession,
     logout,
     verifyjwt,
+    registerWithPseudo,
+    loginWithPseudo,
+    changePassword,
+    requestPasswordReset,
+    getSecretQuestion,
 };

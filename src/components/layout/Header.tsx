@@ -1,6 +1,6 @@
 import { Group, Text } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
-import { GoogleLoginButton } from '../auth/GoogleLoginButton';
+import { AuthButtons } from '../auth/AuthButtons';
 
 export function AppHeader() {
   const navigate = useNavigate();
@@ -19,8 +19,8 @@ export function AppHeader() {
         </Text>
       </Group>
 
-      {/* Auth button on the right */}
-      <GoogleLoginButton />
+      {/* Auth buttons on the right */}
+      <AuthButtons />
     </Group>
   );
 }

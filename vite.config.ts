@@ -32,6 +32,10 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/assets': { target: 'http://localhost:3000', changeOrigin: true },
+      '/api/sounds/backgroundMusic': { target: 'http://localhost:3000', changeOrigin: true },
+      '/api/sounds/ambianceSounds': { target: 'http://localhost:3000', changeOrigin: true },
+      '/api/sounds/soundboard': { target: 'http://localhost:3000', changeOrigin: true },
+      '/api/sounds': { target: 'http://localhost:3000', changeOrigin: true },
       '/backgroundMusic': { target: 'http://localhost:3000', changeOrigin: true },
       '/ambianceSounds': { target: 'http://localhost:3000', changeOrigin: true },
       '/soundboard': { target: 'http://localhost:3000', changeOrigin: true },
@@ -50,6 +54,11 @@ export default defineConfig({
       '/close-request': { target: 'http://localhost:3000', changeOrigin: true },
       '/get-sound-order': { target: 'http://localhost:3000', changeOrigin: true },
       '/save-sound-order': { target: 'http://localhost:3000', changeOrigin: true },
+      '/register': { target: 'http://localhost:3000', changeOrigin: true },
+      '/login': { target: 'http://localhost:3000', changeOrigin: true },
+      '/request-password-reset': { target: 'http://localhost:3000', changeOrigin: true },
+      '/get-secret-question': { target: 'http://localhost:3000', changeOrigin: true },
+      '/change-password': { target: 'http://localhost:3000', changeOrigin: true },
     },
   },
 });
