@@ -113,7 +113,6 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
         throw new Error(`Server responded with status ${response.status}: ${errorText}`);
       }
       
-      console.log('Sound order saved successfully');
       setSoundOrder(newOrder);
     } catch (error) {
       console.error('Failed to save sound order:', error);
@@ -123,7 +122,6 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
   };
 
   const handleDragEnd = (fromIndex: number, toIndex: number) => {
-    console.log(`handleDragEnd CALLED with ${fromIndex} -> ${toIndex}`);
     if (!userId || userId === 'null' || userId === 'undefined') {
       console.log('No valid user ID, skipping save. userId:', userId);
       return;
@@ -135,7 +133,6 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
       const newOrder = [...prevOrder];
       const [movedItem] = newOrder.splice(fromIndex, 1);
       newOrder.splice(toIndex, 0, movedItem);
-      console.log('Updated soundOrder:', newOrder);
       
       // Save the final order to the server immediately after state update
       saveSoundOrder(newOrder);
