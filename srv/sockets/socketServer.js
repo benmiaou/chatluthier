@@ -5,6 +5,7 @@ const wsServer = new WebSocket.Server({ port: 3001 });
 
 const subscribers = new Map(); // Map of sessionId -> Set of WebSocket connections
 const sessionParticipants = new Map(); // Map of sessionId -> Map of clientId -> {pseudo, isAnonymous}
+const participantToWs = new Map(); // Map of participantId -> WebSocket connection
 const MAX_MESSAGES_PER_SECOND = 10;
 const messageTimestamps = new Map();
 
@@ -55,6 +56,9 @@ wsServer.on('connection', function connection(ws) {
                     participantsMap.set(participantId, participantInfo);
                     
                     subscribers.get(connectedId).add(ws);
+                    
+                    // Track participant to WebSocket mapping
+                    participantToWs.set(participantId, ws);
                     
                     // Send current participant list to the new client
                     const participants = Array.from(participantsMap.values());
@@ -108,22 +112,22 @@ wsServer.on('connection', function connection(ws) {
                 
                 case 'requestStatus':
                     if (connectedId && data.content && data.content.type) {
-                        const { type: statusType } = data.content;
-                        const subs = subscribers.get(connectedId);
-                        if (subs) {
-                            // Broadcast the status request to all subscribers
-                            subs.forEach(subscriberWs => {
-                                if (subscriberWs !== ws && subscriberWs.readyState === WebSocket.OPEN) {
-                                    subscriberWs.send(JSON.stringify({
-                                        type: 'statusRequest',
-                                        id: connectedId,
-                                        content: {
-                                            statusType,
-                                            requesterId: participantId
-                                        }
-                                    }));
-                                }
-                            });
+                        const { type: statusType, targetParticipantId } = data.content;
+                        
+                        if (targetParticipantId) {
+                            // Find the specific participant's WebSocket connection
+                            const targetWs = participantToWs.get(targetParticipantId);
+                            
+                            if (targetWs && targetWs.readyState === WebSocket.OPEN && targetWs !== ws) {
+                                targetWs.send(JSON.stringify({
+                                    type: 'statusRequest',
+                                    id: connectedId,
+                                    content: {
+                                        statusType,
+                                        requesterId: participantId
+                                    }
+                                }));
+                            }
                         }
                     }
                     break;
@@ -153,6 +157,9 @@ wsServer.on('connection', function connection(ws) {
                 
                 case 'unsubscribe':
                     if (connectedId && participantId) {
+                        // Clean up participant to WebSocket mapping
+                        participantToWs.delete(participantId);
+                        
                         // Remove the participant from the session
                         const participants = sessionParticipants.get(connectedId);
                         if (participants && participants.has(participantId)) {
@@ -195,6 +202,9 @@ wsServer.on('connection', function connection(ws) {
             const subs = subscribers.get(connectedId);
             if (subs) {
                 subs.delete(ws);
+                
+                // Clean up participant to WebSocket mapping
+                participantToWs.delete(participantId);
                 
                 // Remove the specific participant
                 const participants = sessionParticipants.get(connectedId);

@@ -1,7 +1,8 @@
-import { ActionIcon, Box, Button, Group, Paper, Slider, Stack, Text, Progress } from '@mantine/core';
+import { ActionIcon, Box, Button, Group, Modal, Paper, Slider, Stack, Text, Progress } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { CustomCombobox } from './CustomCombobox';
 import { IconPlayerSkipForward, IconPlayerStop, IconTrash, IconVolume } from '@tabler/icons-react';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { showCreditToast } from '../../utils/showCreditToast';
@@ -30,6 +31,7 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
     progress,
     context,
     playCategory,
+    playSpecificSound,
     next,
     stop,
     setVolume,
@@ -39,7 +41,20 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
     loadSounds,
     playReceived,
     stopReceived,
-  } = useBackgroundMusic(userId);
+    getCurrentTime,
+    userInteracted,
+    setUserInteracted,
+  } = useBackgroundMusic(userId, () => {
+    // This callback is called when autoplay is blocked
+    if (!autoplayBlocked) {
+      setAutoplayBlocked(true);
+      open(); // Open the permission modal
+    }
+  });
+
+  // Autoplay permission modal state
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [modalOpened, { open, close }] = useDisclosure(false);
 
   const handleDelete = async (filename: string) => {
     await fetch('/delete-sound', {
@@ -54,41 +69,44 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
   // Broadcast music change to session peers
   const handlePlayCategory = useCallback(
     async (category: BackgroundMusicCategory) => {
+      // Mark that user has interacted with audio controls
+      if (!userInteracted) {
+        setUserInteracted(true);
+      }
       await playCategory(category);
     },
-    [playCategory],
+    [playCategory, userInteracted, setUserInteracted],
   );
 
   // When a track starts, broadcast to session
   useEffect(() => {
     if (currentSound && sessionId) {
+      const currentTime = getCurrentTime();
       send({
         type: 'backgroundMusicChange',
         id: sessionId,
         content: { 
           filename: currentSound.filename, 
           credit: currentSound.credit,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          currentTime: currentTime
         },
       });
     }
-  }, [currentSound, sessionId, send]);
+  }, [currentSound, sessionId, send, getCurrentTime]);
 
   // Listen for incoming socket messages
   useEffect(() => {
     return addMessageHandler((msg: WsMessage) => {
       if (msg.type === 'backgroundMusicChange' && msg.content) {
-        const { filename, credit, timestamp } = msg.content as { 
+        const { filename, credit, timestamp, currentTime } = msg.content as { 
           filename: string; 
           credit?: string;
-          timestamp?: number
+          timestamp?: number;
+          currentTime?: number
         };
         
-        // Calculate delay from when the message was sent
-        const now = Date.now();
-        const delay = timestamp ? now - timestamp : 0;
-        
-        playReceived({ filename, credit });
+        playReceived({ filename, credit, timestamp, currentTime });
         // Credit is already shown in the player UI, no need for toast
       } else if (msg.type === 'backgroundMusicStop') {
         stopReceived();
@@ -96,6 +114,7 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
         const { statusType } = msg.content as { statusType: string };
         if (statusType === 'backgroundMusic' && currentSound) {
           // Respond with current background music status
+          const currentTime = getCurrentTime();
           send({
             type: 'statusResponse',
             id: sessionId,
@@ -105,7 +124,8 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
                 filename: currentSound.filename,
                 credit: currentSound.credit,
                 isPlaying: isPlaying,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                currentTime: currentTime
               }
             }
           });
@@ -113,13 +133,15 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
       } else if (msg.type === 'statusResponse' && msg.content) {
         const { statusType, statusData } = msg.content as { 
           statusType: string; 
-          statusData: { filename: string; credit?: string; isPlaying: boolean; timestamp?: number }
+          statusData: { filename: string; credit?: string; isPlaying: boolean; timestamp?: number; currentTime?: number }
         };
         if (statusType === 'backgroundMusic' && statusData) {
           if (statusData.isPlaying) {
             playReceived({
               filename: statusData.filename,
-              credit: statusData.credit
+              credit: statusData.credit,
+              timestamp: statusData.timestamp,
+              currentTime: statusData.currentTime
             });
             // Credit is already shown in the player UI, no need for toast
           }
@@ -129,10 +151,45 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
   }, [addMessageHandler, playReceived, stopReceived, currentSound, isPlaying, sessionId, send]);
 
   // Broadcast stop
+  const handleVolumeChange = useCallback((v: number) => {
+    // Mark user interaction when changing volume
+    if (!userInteracted) {
+      setUserInteracted(true);
+    }
+    setVolume(v);
+  }, [setVolume, userInteracted, setUserInteracted]);
+
+  const handleNext = useCallback(() => {
+    // Mark user interaction when going to next track
+    if (!userInteracted) {
+      setUserInteracted(true);
+    }
+    next();
+  }, [next, userInteracted, setUserInteracted]);
+
+  const handlePlayCurrentSound = useCallback(() => {
+    // Mark user interaction and play the current sound
+    if (!userInteracted) {
+      setUserInteracted(true);
+    }
+    
+    // If there's a current sound that was blocked, play it specifically
+    if (currentSound) {
+      // Use the specific sound play method to play exactly this sound
+      playSpecificSound(currentSound).catch(e => {
+        // Silently handle playback errors
+      });
+    }
+  }, [currentSound, playSpecificSound, userInteracted, setUserInteracted]);
+
   const handleStop = useCallback(() => {
+    // Mark user interaction when stopping
+    if (!userInteracted) {
+      setUserInteracted(true);
+    }
     stop();
     if (sessionId) send({ type: 'backgroundMusicStop', id: sessionId });
-  }, [stop, send, sessionId]);
+  }, [stop, send, sessionId, userInteracted, setUserInteracted]);
 
   const contexts = ['All', ...Array.from(new Set(sounds.flatMap((s) => bgScenes(s))))];
 
@@ -153,16 +210,21 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
 
   const handleSeek = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
+      // Mark user interaction when seeking
+      if (!userInteracted) {
+        setUserInteracted(true);
+      }
       const rect = e.currentTarget.getBoundingClientRect();
       const pct = ((e.clientX - rect.left) / rect.width) * 100;
       seekTo(pct);
     },
-    [seekTo],
+    [seekTo, userInteracted, setUserInteracted],
   );
 
   return (
-    <Paper p="md" radius="md" withBorder>
-      <Stack gap="sm">
+    <>
+      <Paper p="md" radius="md" withBorder>
+        <Stack gap="sm">
         {/* Title with volume control */}
         <Group justify="center" align="center">
           <Text fw={600} size="sm" tt="uppercase" c="dimmed">
@@ -177,7 +239,7 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
               max={1}
               step={0.01}
               value={volume}
-              onChange={setVolume}
+              onChange={handleVolumeChange}
               label={(v) => `${Math.round(v * 100)}%`}
             />
           </Group>
@@ -256,7 +318,7 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
             size="xs"
             variant="subtle"
             leftSection={<IconPlayerSkipForward size={14} />}
-            onClick={next}
+            onClick={handleNext}
             disabled={!isPlaying}
           >
             Next
@@ -265,6 +327,44 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
 
         </Group>
       </Stack>
-    </Paper>
+      </Paper>
+    
+    {/* Autoplay Permission Modal */}
+    <Modal
+      opened={modalOpened}
+      onClose={close}
+      title="Playback Permission Required"
+      centered
+      withCloseButton={false}
+    >
+      <Stack gap="md">
+        <Text size="sm">
+          The browser blocked automatic playback. Please click "Allow Playback" to enable background music.
+        </Text>
+        <Group justify="flex-end" gap="sm">
+          <Button
+            variant="default"
+            onClick={() => {
+              close();
+              setAutoplayBlocked(false);
+            }}
+          >
+            Not Now
+          </Button>
+          <Button
+            variant="filled"
+            onClick={() => {
+              // Play the current sound using the proper method
+              handlePlayCurrentSound();
+              close();
+              setAutoplayBlocked(false);
+            }}
+          >
+            Allow Playback
+          </Button>
+        </Group>
+      </Stack>
+    </Modal>
+    </>
   );
 }

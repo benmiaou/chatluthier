@@ -29,3 +29,11 @@ export function bgScenes(sound: Sound): string[] {
 export type SoundCategory = 'background' | 'ambiance' | 'soundboard';
 
 export type BackgroundMusicCategory = 'calm' | 'dynamic' | 'intense' | 'all';
+
+// Runtime object for BackgroundMusicCategory values
+export const BackgroundMusicCategories = {
+  CALM: 'calm' as BackgroundMusicCategory,
+  DYNAMIC: 'dynamic' as BackgroundMusicCategory,
+  INTENSE: 'intense' as BackgroundMusicCategory,
+  ALL: 'all' as BackgroundMusicCategory
+};

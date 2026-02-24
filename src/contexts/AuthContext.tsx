@@ -67,7 +67,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
     
-    checkSession();
+    // Add a small delay to ensure page is fully loaded before checking session
+    const sessionTimeout = setTimeout(() => {
+      checkSession();
+    }, 1000); // 500ms delay
+    
+    return () => {
+      clearTimeout(sessionTimeout);
+    };
   }, []);
 
   // Set up token refresh mechanism

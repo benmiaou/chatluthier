@@ -145,29 +145,32 @@ export function SocketProvider({ children }: Readonly<{ children: ReactNode }>) 
               setParticipants(data.participants);
             }
             
-            // If there are existing participants, request current status
+            // If there are existing participants, request current status from the first participant only
             if (data.participants && data.participants.length > 0) {
-              // Request background music status
-              const ws = wsRef.current;
-              if (ws?.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({
-                  type: 'requestStatus',
-                  id: data.id,
-                  content: {
-                    type: 'backgroundMusic'
-                  }
-                }));
-              }
-              
-              // Request ambiance status
-              if (ws?.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({
-                  type: 'requestStatus',
-                  id: data.id,
-                  content: {
-                    type: 'ambiance'
-                  }
-                }));
+              const firstParticipantId = data.participants[0]?.id;
+              if (firstParticipantId) {
+                const ws = wsRef.current;
+                if (ws?.readyState === WebSocket.OPEN) {
+                  // Request background music status from first participant only
+                  ws.send(JSON.stringify({
+                    type: 'requestStatus',
+                    id: data.id,
+                    content: {
+                      type: 'backgroundMusic',
+                      targetParticipantId: firstParticipantId
+                    }
+                  }));
+                  
+                  // Request ambiance status from first participant only
+                  ws.send(JSON.stringify({
+                    type: 'requestStatus',
+                    id: data.id,
+                    content: {
+                      type: 'ambiance',
+                      targetParticipantId: firstParticipantId
+                    }
+                  }));
+                }
               }
             }
             break;
@@ -211,10 +214,15 @@ export function SocketProvider({ children }: Readonly<{ children: ReactNode }>) 
   }, []);
 
   useEffect(() => {
-    shouldReconnectRef.current = true;
-    connect();
+    // Add a small delay to ensure page is fully loaded before connecting
+    const connectionTimeout = setTimeout(() => {
+      shouldReconnectRef.current = true;
+      connect();
+    }, 1000); // 500ms delay
+    
     return () => {
       shouldReconnectRef.current = false;
+      clearTimeout(connectionTimeout);
       clearHeartbeat();
       if (reconnectRef.current) clearTimeout(reconnectRef.current);
       wsRef.current?.close();

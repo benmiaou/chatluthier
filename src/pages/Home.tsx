@@ -5,7 +5,6 @@ import { BackgroundMusic } from '../components/audio/BackgroundMusic';
 import { AmbianceSounds } from '../components/audio/AmbianceSounds';
 import { Soundboard } from '../components/audio/Soundboard';
 import { SessionManager } from '../components/session/SessionManager';
-import { CreditsModal } from '../components/modals/CreditsModal';
 import { RequestSoundModal } from '../components/modals/RequestSoundModal';
 import { AddSoundModal } from '../components/modals/AddSoundModal';
 import { EditSoundsModal } from '../components/modals/EditSoundsModal';
@@ -23,7 +22,6 @@ if (ENABLE_SPOTIFY) {
 
 export function Home() {
   const { userId, isAdmin } = useAuthContext();
-  const [creditsOpened, { open: openCredits, close: closeCredits }] = useDisclosure(false);
   const [requestOpened, { open: openRequest, close: closeRequest }] = useDisclosure(false);
   const [addOpened, { open: openAdd, close: closeAdd }] = useDisclosure(false);
   const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
@@ -38,14 +36,12 @@ export function Home() {
       <SessionManager />
 
       <Group justify="center" gap="sm" wrap="wrap">
-        <Button variant="outline" size="xs" onClick={openCredits}>Credits</Button>
         {userId && <Button variant="outline" size="xs" onClick={openRequest}>Request a Sound</Button>}
         {userId && <Button variant="outline" size="xs" onClick={openEdit}>Edit Sounds</Button>}
         {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={openAdd}>Add Sound</Button>}
         {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={openReview}>Review Requests</Button>}
       </Group>
 
-      <CreditsModal opened={creditsOpened} onClose={closeCredits} />
       <RequestSoundModal opened={requestOpened} onClose={closeRequest} userId={userId} />
       <EditSoundsModal
         opened={editOpened}
