@@ -1,23 +1,28 @@
-import { Container, Title, Text, Paper, Anchor, Button, Group } from '@mantine/core';
-import { useNavigate } from 'react-router-dom';
+import { Modal, ScrollArea, Title, Text, Anchor, Button, Group } from '@mantine/core';
 
-export function Privacy() {
-  const navigate = useNavigate();
-  
+export function PrivacyModal({ opened, onClose }: { opened: boolean; onClose: () => void }) {
   return (
-    <Container size="md" py="xl">
-      <Paper p="xl" radius="md">
-        <Group justify="space-between" mb="xl">
-          <Title order={1} ta="center" mb="sm" style={{ flex: 1 }}>
-            Privacy Policy
-          </Title>
-          <Button variant="subtle" onClick={() => navigate(-1)}>
-            ← Back
-          </Button>
-        </Group>
-        <Title order={1} ta="center" mb="sm">
-          Privacy Policy
-        </Title>
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title="Privacy Policy"
+      size="xl"
+      styles={{ 
+        root: { 
+          '--modal-width': '70%', 
+          '--modal-max-width': '700px' 
+        },
+        content: { 
+          width: 'var(--modal-width)', 
+          maxWidth: 'var(--modal-max-width)',
+          height: '90vh',
+          maxHeight: '90vh',
+          margin: 'auto'
+        }
+      }}
+    >
+      <ScrollArea style={{ height: 'calc(90vh - 120px)' }}>
+        <div style={{ padding: '0 1rem' }}>
         <Text ta="center" c="dimmed" fs="italic" mb="md">
           Last updated: 26/10/2024
         </Text>
@@ -49,7 +54,8 @@ export function Privacy() {
           If you have questions about this Privacy Policy, please contact us at{' '}
           <Anchor href="mailto:support@chatluthier.org">support@chatluthier.org</Anchor>.
         </Text>
-      </Paper>
-    </Container>
+        </div>
+      </ScrollArea>
+    </Modal>
   );
 }

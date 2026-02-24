@@ -1,20 +1,29 @@
-import { Container, Title, Text, Paper, List, Anchor, Button, Group } from '@mantine/core';
-import { useNavigate } from 'react-router-dom';
+import { Modal, ScrollArea, Title, Text, List, Anchor } from '@mantine/core';
 
-export function About() {
-  const navigate = useNavigate();
-  
+export function AboutModal({ opened, onClose }: { opened: boolean; onClose: () => void }) {
   return (
-    <Container size="md" py="xl">
-      <Paper p="xl" radius="md">
-        <Group justify="space-between" mb="xl">
-          <Title order={1} ta="center" mb="xl" style={{ flex: 1 }}>
-            About Le Chat Luthier
-          </Title>
-          <Button variant="subtle" onClick={() => navigate(-1)}>
-            ← Back
-          </Button>
-        </Group>
+    <Modal
+      opened={opened}
+      onClose={onClose}
+      title="About Le Chat Luthier"
+      size="xl"
+      styles={{ 
+        root: { 
+          '--modal-width': '70%', 
+          '--modal-max-width': '700px' 
+        },
+        content: { 
+          width: 'var(--modal-width)', 
+          maxWidth: 'var(--modal-max-width)',
+          height: '90vh',
+          maxHeight: '90vh',
+          margin: 'auto'
+        }
+      }}
+    >
+      <ScrollArea style={{ height: 'calc(90vh - 120px)' }}>
+        <div style={{ padding: '0 1rem' }}>
+
         <Text mb="md" style={{ textAlign: 'justify', lineHeight: 1.7 }}>
           Welcome to <strong>Le Chat Luthier</strong>, your immersive sound companion for enhancing
           role-playing games, storytelling sessions, or any experience that benefits from atmospheric
@@ -76,7 +85,8 @@ export function About() {
           Have questions or feedback? Reach out at{' '}
           <Anchor href="mailto:support@chatluthier.org">support@chatluthier.org</Anchor>.
         </Text>
-      </Paper>
-    </Container>
+        </div>
+      </ScrollArea>
+    </Modal>
   );
 }

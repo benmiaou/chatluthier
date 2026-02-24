@@ -10,8 +10,6 @@ export default function App() {
       <AppLayout>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/about" element={<About />} />
         </Routes>
       </AppLayout>
     </BrowserRouter>

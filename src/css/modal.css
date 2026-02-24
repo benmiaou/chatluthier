@@ -32,6 +32,17 @@
     background-color: var(--main-background-color);
 }
 
+/* Ensure Mantine modals aren't affected by general modal styles */
+.mantine-Modal-modal {
+    width: auto !important;
+    height: auto !important;
+}
+
+.mantine-Modal-content {
+    width: auto !important;
+    height: auto !important;
+}
+
 /* Modal Container */
 .add-sound-modal {
     display: flex;
