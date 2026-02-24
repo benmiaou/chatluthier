@@ -4,6 +4,7 @@ import { IconPlayerSkipForward, IconPlayerStop, IconTrash, IconVolume } from '@t
 import { useCallback, useEffect } from 'react';
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
+import { showCreditToast } from '../../utils/showCreditToast';
 import type { BackgroundMusicCategory, Sound } from '../../types/sound';
 import { bgScenes, bgMatchesCategory } from '../../types/sound';
 
@@ -64,7 +65,11 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
       send({
         type: 'backgroundMusicChange',
         id: sessionId,
-        content: { filename: currentSound.filename, credit: currentSound.credit },
+        content: { 
+          filename: currentSound.filename, 
+          credit: currentSound.credit,
+          timestamp: Date.now()
+        },
       });
     }
   }, [currentSound, sessionId, send]);
@@ -73,12 +78,55 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
   useEffect(() => {
     return addMessageHandler((msg: WsMessage) => {
       if (msg.type === 'backgroundMusicChange' && msg.content) {
-        playReceived(msg.content as { filename: string; credit?: string });
+        const { filename, credit, timestamp } = msg.content as { 
+          filename: string; 
+          credit?: string;
+          timestamp?: number
+        };
+        
+        // Calculate delay from when the message was sent
+        const now = Date.now();
+        const delay = timestamp ? now - timestamp : 0;
+        
+        playReceived({ filename, credit });
+        // Credit is already shown in the player UI, no need for toast
       } else if (msg.type === 'backgroundMusicStop') {
         stopReceived();
+      } else if (msg.type === 'statusRequest' && msg.content) {
+        const { statusType } = msg.content as { statusType: string };
+        if (statusType === 'backgroundMusic' && currentSound) {
+          // Respond with current background music status
+          send({
+            type: 'statusResponse',
+            id: sessionId,
+            content: {
+              statusType: 'backgroundMusic',
+              statusData: {
+                filename: currentSound.filename,
+                credit: currentSound.credit,
+                isPlaying: isPlaying,
+                timestamp: Date.now()
+              }
+            }
+          });
+        }
+      } else if (msg.type === 'statusResponse' && msg.content) {
+        const { statusType, statusData } = msg.content as { 
+          statusType: string; 
+          statusData: { filename: string; credit?: string; isPlaying: boolean; timestamp?: number }
+        };
+        if (statusType === 'backgroundMusic' && statusData) {
+          if (statusData.isPlaying) {
+            playReceived({
+              filename: statusData.filename,
+              credit: statusData.credit
+            });
+            // Credit is already shown in the player UI, no need for toast
+          }
+        }
       }
     });
-  }, [addMessageHandler, playReceived, stopReceived]);
+  }, [addMessageHandler, playReceived, stopReceived, currentSound, isPlaying, sessionId, send]);
 
   // Broadcast stop
   const handleStop = useCallback(() => {

@@ -143,18 +143,30 @@ export function Soundboard({ userId = null }: SoundboardProps) {
   const handlePlay = (filename: string) => {
     playSound(filename);
     if (sessionId) {
-      send({ type: 'playSoundboardSound', id: sessionId, content: { filename } });
+      const sound = sounds.find((s) => s.filename === filename);
+      send({ type: 'playSoundboardSound', id: sessionId, content: { 
+        filename, 
+        credit: sound?.credit,
+        name: sound?.name
+      } });
+      if (sound?.credit) showCreditToast(sound.name, sound.credit);
     }
-    const sound = sounds.find((s) => s.filename === filename);
-    if (sound?.credit) showCreditToast(sound.name, sound.credit);
-  };
+  }
 
   // Listen for remote soundboard triggers
   useEffect(() => {
     return addMessageHandler((msg: WsMessage) => {
       if (msg.type === 'playSoundboardSound' && msg.content) {
-        const { filename } = msg.content as { filename: string };
+        const { filename, credit, name } = msg.content as { 
+          filename: string; 
+          credit?: string;
+          name?: string
+        };
         playSound(filename);
+        // Show credit for received soundboard sounds
+        if (credit && name) {
+          showCreditToast(name, credit);
+        }
       }
     });
   }, [addMessageHandler, playSound]);

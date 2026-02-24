@@ -16,6 +16,12 @@ export type WsMessageType =
   | 'ambianceStatusUpdate'
   | 'message'
   | 'subscribed'
+  | 'participantJoined'
+  | 'participantLeft'
+  | 'requestStatus'
+  | 'statusRequest'
+  | 'statusResponse'
+  | 'unsubscribe'
   | 'error';
 
 export interface WsMessage {
@@ -23,6 +29,8 @@ export interface WsMessage {
   id?: string;
   content?: unknown;
   message?: string;
+  participants?: Array<{pseudo: string | null; isAnonymous: boolean; id: string}>;
+  participant?: {pseudo: string | null; isAnonymous: boolean; id: string};
 }
 
 type MessageHandler = (msg: WsMessage) => void;
@@ -31,6 +39,7 @@ interface SocketContextValue {
   connected: boolean;
   sessionId: string | null;
   statusMessage: string;
+  participants: Array<{pseudo: string | null; isAnonymous: boolean; id: string}>;
   subscribe: (id: string) => void;
   disconnect: () => void;
   send: (msg: Record<string, unknown>) => void;
@@ -42,6 +51,8 @@ const SocketContext = createContext<SocketContextValue | null>(null);
 const isLocalhost = globalThis.location.hostname === 'localhost' || globalThis.location.hostname === '127.0.0.1';
 const protocol = globalThis.location.protocol === 'https:' ? 'wss:' : 'ws:';
 const WS_URL = isLocalhost ? 'ws://localhost:3001' : `${protocol}//${globalThis.location.host}/ws/`;
+
+console.log('WebSocket URL:', WS_URL);
 
 const RECONNECT_MS = 5000;
 const HEARTBEAT_MS = 30_000;
@@ -57,7 +68,9 @@ export function SocketProvider({ children }: Readonly<{ children: ReactNode }>) 
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
-  const [statusMessage, setStatusMessage] = useState('');
+  const [statusMessage, setStatusMessage] = useState('Initializing session manager...');
+  const [participants, setParticipants] = useState<Array<{pseudo: string | null; isAnonymous: boolean; id: string}>>([]);
+  const [participantId, setParticipantId] = useState<string | null>(null);
 
   const clearHeartbeat = () => {
     if (heartbeatRef.current) clearInterval(heartbeatRef.current);
@@ -68,8 +81,20 @@ export function SocketProvider({ children }: Readonly<{ children: ReactNode }>) 
     const ws = new WebSocket(WS_URL);
     wsRef.current = ws;
 
+    // Set a timeout for connection
+    const connectionTimeout = setTimeout(() => {
+      if (ws.readyState !== WebSocket.OPEN) {
+        console.warn('WebSocket connection timeout');
+        setStatusMessage('Connection timeout. Retrying...');
+        ws.close();
+      }
+    }, 3000);
+
     ws.onopen = () => {
+      clearTimeout(connectionTimeout);
+      console.log('WebSocket connection opened');
       setConnected(true);
+      setStatusMessage('Connected to session server. Ready to join or create a session.');
       clearHeartbeat();
       heartbeatRef.current = setInterval(() => {
         if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'ping' }));
@@ -81,8 +106,21 @@ export function SocketProvider({ children }: Readonly<{ children: ReactNode }>) 
       const idToJoin = pendingIdRef.current ?? urlId ?? localStorage.getItem('lastJoinId');
 
       if (idToJoin) {
-        ws.send(JSON.stringify({ type: 'subscribe', id: idToJoin }));
+        // Get pseudo and participant ID
+        const userPseudo = localStorage.getItem('userPseudo') || null;
+        const participantId = localStorage.getItem('pendingParticipantId') || localStorage.getItem('wsParticipantId') || null;
+        
+        ws.send(JSON.stringify({ 
+          type: 'subscribe', 
+          id: idToJoin, 
+          pseudo: userPseudo,
+          participantId: participantId
+        }));
+        
+        // Clean up pending IDs
         pendingIdRef.current = null;
+        localStorage.removeItem('pendingParticipantId');
+        
         if (urlId) {
           urlParams.delete('sessionId');
           globalThis.history.replaceState({}, '', globalThis.location.pathname + (urlParams.toString() ? `?${urlParams}` : ''));
@@ -93,10 +131,62 @@ export function SocketProvider({ children }: Readonly<{ children: ReactNode }>) 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data as string) as WsMessage;
-        if (data.type === 'subscribed') {
-          setSessionId(data.id ?? null);
-          setStatusMessage(`Joined session: ${data.id ?? ''}`);
+        
+        switch (data.type) {
+          case 'subscribed':
+            setSessionId(data.id ?? null);
+            setStatusMessage(`Joined session: ${data.id ?? ''}`);
+            if (data.participantId) {
+              setParticipantId(data.participantId);
+              // Store participant ID in localStorage for reconnections
+              localStorage.setItem('wsParticipantId', data.participantId);
+            }
+            if (data.participants) {
+              setParticipants(data.participants);
+            }
+            
+            // If there are existing participants, request current status
+            if (data.participants && data.participants.length > 0) {
+              // Request background music status
+              const ws = wsRef.current;
+              if (ws?.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                  type: 'requestStatus',
+                  id: data.id,
+                  content: {
+                    type: 'backgroundMusic'
+                  }
+                }));
+              }
+              
+              // Request ambiance status
+              if (ws?.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                  type: 'requestStatus',
+                  id: data.id,
+                  content: {
+                    type: 'ambiance'
+                  }
+                }));
+              }
+            }
+            break;
+          case 'participantJoined':
+            if (data.participant) {
+              setParticipants(prev => [...prev, data.participant]);
+              setStatusMessage(`New participant joined: ${data.participant.pseudo || 'Anonymous'}`);
+            }
+            break;
+          case 'participantLeft':
+            if (data.participantId) {
+              setParticipants(prev => prev.filter(p => p.id !== data.participantId));
+              setStatusMessage('A participant left the session');
+            }
+            break;
+          default:
+            break;
         }
+        
         handlersRef.current.forEach((h) => h(data));
       } catch {
         /* ignore parse errors */
@@ -104,14 +194,20 @@ export function SocketProvider({ children }: Readonly<{ children: ReactNode }>) 
     };
 
     ws.onclose = () => {
+      console.log('WebSocket connection closed');
       setConnected(false);
+      setStatusMessage(sessionId ? 'Session active. Reconnecting to server...' : 'Disconnected. Reconnecting...');
       clearHeartbeat();
       if (shouldReconnectRef.current) {
         reconnectRef.current = setTimeout(connect, RECONNECT_MS);
       }
     };
 
-    ws.onerror = () => ws.close();
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      setStatusMessage('Connection error. Retrying...');
+      ws.close();
+    };
   }, []);
 
   useEffect(() => {
@@ -127,21 +223,50 @@ export function SocketProvider({ children }: Readonly<{ children: ReactNode }>) 
 
   const subscribe = useCallback((id: string) => {
     localStorage.setItem('lastJoinId', id);
+    
+    // Get stored participant ID for reconnection, or generate a new one
+    const storedParticipantId = localStorage.getItem('wsParticipantId');
+    const participantIdToUse = storedParticipantId || Math.random().toString(36).substring(2, 10);
+    
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: 'subscribe', id }));
+      const userPseudo = localStorage.getItem('userPseudo');
+      wsRef.current.send(JSON.stringify({ 
+        type: 'subscribe', 
+        id: id,
+        pseudo: userPseudo,
+        participantId: participantIdToUse
+      }));
     } else {
       // WS is connecting — queue it; onopen will send it
       pendingIdRef.current = id;
+      // Store the participant ID to use when connection opens
+      localStorage.setItem('pendingParticipantId', participantIdToUse);
     }
   }, []);
 
   const disconnect = useCallback(() => {
+    // Notify server about leaving the session
+    if (sessionId && wsRef.current?.readyState === WebSocket.OPEN) {
+      try {
+        wsRef.current.send(JSON.stringify({
+          type: 'unsubscribe',
+          id: sessionId,
+          participantId: participantId
+        }));
+      } catch (error) {
+        console.error('Error sending unsubscribe message:', error);
+      }
+    }
+    
     // Clear session state but keep the WS alive for future subscriptions
     localStorage.removeItem('lastJoinId');
+    localStorage.removeItem('wsParticipantId');
     pendingIdRef.current = null;
     setSessionId(null);
+    setParticipantId(null);
+    setParticipants([]);
     setStatusMessage('Left session.');
-  }, []);
+  }, [sessionId, participantId]);
 
   const send = useCallback((msg: Record<string, unknown>) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -155,8 +280,8 @@ export function SocketProvider({ children }: Readonly<{ children: ReactNode }>) 
   }, []);
 
   const contextValue = useMemo(
-    () => ({ connected, sessionId, statusMessage, subscribe, disconnect, send, addMessageHandler }),
-    [connected, sessionId, statusMessage, subscribe, disconnect, send, addMessageHandler]
+    () => ({ connected, sessionId, statusMessage, participants, subscribe, disconnect, send, addMessageHandler }),
+    [connected, sessionId, statusMessage, participants, subscribe, disconnect, send, addMessageHandler]
   );
 
   return (

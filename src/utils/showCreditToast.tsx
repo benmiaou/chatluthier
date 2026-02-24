@@ -17,5 +17,6 @@ export function showCreditToast(soundName: string, creditHtml: string) {
     autoClose: 10_000,
     withCloseButton: true,
     color: 'dark',
+    position: 'top-right',
   });
 }

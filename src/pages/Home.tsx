@@ -1,10 +1,9 @@
-import { Button, Collapse, Group, Stack } from '@mantine/core';
+import { Button, Group, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useCallback, useState } from 'react';
 import { BackgroundMusic } from '../components/audio/BackgroundMusic';
 import { AmbianceSounds } from '../components/audio/AmbianceSounds';
 import { Soundboard } from '../components/audio/Soundboard';
-import { SpotifyPlayer } from '../components/spotify/SpotifyPlayer';
 import { SessionManager } from '../components/session/SessionManager';
 import { CreditsModal } from '../components/modals/CreditsModal';
 import { RequestSoundModal } from '../components/modals/RequestSoundModal';
@@ -13,27 +12,29 @@ import { EditSoundsModal } from '../components/modals/EditSoundsModal';
 import { ReviewRequestsModal } from '../components/modals/ReviewRequestsModal';
 import { useAuthContext } from '../contexts/AuthContext';
 
+// Feature flag to toggle Spotify integration
+const ENABLE_SPOTIFY = false;
+
+// Conditional import for Spotify
+let SpotifyPlayer = null;
+if (ENABLE_SPOTIFY) {
+  SpotifyPlayer = require('../components/spotify/SpotifyPlayer').SpotifyPlayer;
+}
+
 export function Home() {
   const { userId, isAdmin } = useAuthContext();
-  const [spotifyConnected, setSpotifyConnected] = useState(false);
   const [creditsOpened, { open: openCredits, close: closeCredits }] = useDisclosure(false);
   const [requestOpened, { open: openRequest, close: closeRequest }] = useDisclosure(false);
   const [addOpened, { open: openAdd, close: closeAdd }] = useDisclosure(false);
   const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
   const [reviewOpened, { open: openReview, close: closeReview }] = useDisclosure(false);
 
-  const handleSpotifyAuthChange = useCallback((connected: boolean) => {
-    setSpotifyConnected(connected);
-  }, []);
-
   return (
     <Stack gap="xl" pb="xl">
-      <Collapse in={!spotifyConnected}>
-        <BackgroundMusic userId={userId} isAdmin={isAdmin} />
-      </Collapse>
+      <BackgroundMusic userId={userId} isAdmin={isAdmin} />
       <AmbianceSounds userId={userId} isAdmin={isAdmin} />
       <Soundboard userId={userId} isAdmin={isAdmin} />
-      <SpotifyPlayer onAuthChange={handleSpotifyAuthChange} />
+      {ENABLE_SPOTIFY && SpotifyPlayer && <SpotifyPlayer />}
       <SessionManager />
 
       <Group justify="center" gap="sm" wrap="wrap">

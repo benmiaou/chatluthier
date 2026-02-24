@@ -5,6 +5,7 @@ import { IconDeviceFloppy, IconRefresh } from '@tabler/icons-react';
 import { useEffect, useState, useMemo } from 'react';
 import { useAmbianceSounds } from '../../hooks/useAmbianceSounds';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
+import { showCreditToast } from '../../utils/showCreditToast';
 import { CustomCombobox } from './CustomCombobox';
 import { DraggableSoundBar } from './DraggableSoundBar';
 
@@ -177,9 +178,50 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
       if (msg.type === 'ambianceStatusUpdate' && msg.content) {
         const { ambianceStatus } = msg.content as { ambianceStatus: Record<string, number> };
         applyStatus(ambianceStatus);
+        
+        // Show credits for any sounds that have credits
+        Object.entries(ambianceStatus).forEach(([filename, volume]) => {
+          if (volume > 0) {
+            const sound = bars.find(s => s.sound.filename === filename);
+            if (sound?.sound?.credit) {
+              showCreditToast(sound.sound.name, sound.sound.credit);
+            }
+          }
+        });
+      } else if (msg.type === 'statusRequest' && msg.content) {
+        const { statusType } = msg.content as { statusType: string };
+        if (statusType === 'ambiance') {
+          // Respond with current ambiance status
+          send({
+            type: 'statusResponse',
+            id: sessionId,
+            content: {
+              statusType: 'ambiance',
+              statusData: getStatus()
+            }
+          });
+        }
+      } else if (msg.type === 'statusResponse' && msg.content) {
+        const { statusType, statusData } = msg.content as { 
+          statusType: string; 
+          statusData: Record<string, number>
+        };
+        if (statusType === 'ambiance' && statusData) {
+          applyStatus(statusData);
+          
+          // Show credits for any sounds that have credits
+          Object.entries(statusData).forEach(([filename, volume]) => {
+            if (volume > 0) {
+              const sound = bars.find(s => s.sound.filename === filename);
+              if (sound?.sound?.credit) {
+                showCreditToast(sound.sound.name, sound.sound.credit);
+              }
+            }
+          });
+        }
       }
     });
-  }, [addMessageHandler, applyStatus]);
+  }, [addMessageHandler, applyStatus, sessionId, send, getStatus, bars]);
 
   const presetNames = Object.keys(presets);
 

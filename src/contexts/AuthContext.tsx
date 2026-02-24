@@ -35,6 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).google?.accounts?.id?.disableAutoSelect();
+    // Clear pseudo from localStorage
+    localStorage.removeItem('userPseudo');
     setAuth({ isSignedIn: false, userId: null, userName: null, userPicture: null, isAdmin: false, token: null });
   }, []);
 
@@ -112,10 +114,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: string;
         isAdmin: boolean;
       };
+      // Store pseudo in localStorage for WebSocket session tracking
+      const userPseudo = payload.name ?? data.email;
+      localStorage.setItem('userPseudo', userPseudo);
+      
       setAuth({
         isSignedIn: true,
         userId: data.userId,
-        userName: payload.name ?? data.email,
+        userName: userPseudo,
         userPicture: payload.picture ?? null,
         isAdmin: data.isAdmin ?? false,
         token: null,
@@ -189,6 +195,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       try {
         const data = JSON.parse(responseText);
+        // Store pseudo in localStorage for WebSocket session tracking
+        localStorage.setItem('userPseudo', data.pseudo);
+        
         setAuth({
           isSignedIn: true,
           userId: data.userId,
@@ -247,6 +256,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       try {
         const data = JSON.parse(responseText);
+        // Store pseudo in localStorage for WebSocket session tracking
+        localStorage.setItem('userPseudo', data.pseudo);
+        
         setAuth({
           isSignedIn: true,
           userId: data.userId,

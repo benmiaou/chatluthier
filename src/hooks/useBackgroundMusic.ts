@@ -118,9 +118,24 @@ export function useBackgroundMusic(userId: string | null) {
       audio.volume = volume;
       await audio.play();
       setIsPlaying(true);
+      
+      // Find the sound object to update currentSound state
+      const soundToPlay = sounds.find(s => s.filename === musicData.filename);
+      if (soundToPlay) {
+        setCurrentSound({ ...soundToPlay, credit: musicData.credit });
+      } else {
+        // Fallback if sound not found in sounds list
+        setCurrentSound({
+          filename: musicData.filename,
+          credit: musicData.credit,
+          name: musicData.filename,
+          display_name: musicData.filename
+        } as Sound);
+      }
+      
       startProgressTracking();
     },
-    [volume],
+    [volume, sounds],
   );
 
   const stopReceived = useCallback(() => {
