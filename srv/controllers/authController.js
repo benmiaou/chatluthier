@@ -37,8 +37,22 @@ async function verifyLogin(req, res) {
         const accessToken = jwt.sign({ userId, email, isAdmin }, accessTokenSecret, { expiresIn: '1h' });
         const refreshToken = jwt.sign({ userId, email, isAdmin }, refreshTokenSecret, { expiresIn: '7d' });
 
-        res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
-        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
+        res.cookie('accessToken', accessToken, { 
+          httpOnly: true, 
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'none',
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+          path: '/',
+          domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost' 
+        });
+        res.cookie('refreshToken', refreshToken, { 
+          httpOnly: true, 
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'none',
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+          path: '/',
+          domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost' 
+        });
 
         return res.json({ userId, email, isAdmin });
     } catch (error) {
@@ -54,8 +68,24 @@ function refreshToken(req, res) {
     }
     try {
         const payload = jwt.verify(refreshToken, refreshTokenSecret);
-        const accessToken = jwt.sign({ userId: payload.userId, email: payload.email, isAdmin: payload.isAdmin }, accessTokenSecret, { expiresIn: '1h' });
-        res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
+        const accessToken = jwt.sign({ userId: payload.userId, email: payload.email, pseudo: payload.pseudo, isAdmin: payload.isAdmin }, accessTokenSecret, { expiresIn: '1h' });
+        const newRefreshToken = jwt.sign({ userId: payload.userId, email: payload.email, pseudo: payload.pseudo, isAdmin: payload.isAdmin }, refreshTokenSecret, { expiresIn: '7d' });
+        res.cookie('accessToken', accessToken, { 
+          httpOnly: true, 
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'none',
+          maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+          path: '/',
+          domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost' 
+        });
+        res.cookie('refreshToken', newRefreshToken, { 
+          httpOnly: true, 
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'none',
+          maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+          path: '/',
+          domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost' 
+        });
         return res.json({ accessToken });
     } catch (error) {
         console.error('Refresh token verification failed:', error);
@@ -64,18 +94,21 @@ function refreshToken(req, res) {
 }
 
 function checkSession(req, res) {
-    console.log(req)
     const accessToken = req.cookies.accessToken;
+    console.log('checkSession called, accessToken present:', !!accessToken);
     if (!accessToken) {
+        console.log('No access token found in cookies');
         return res.status(401).json({ isSignedIn: false });
     }
     try {
         const payload = jwt.verify(accessToken, accessTokenSecret);
+        console.log('Session verified for user:', payload.userId);
         return res.json({
             isSignedIn: true,
             userId: payload.userId,
             email: payload.email,
-            isAdmin: payload.isAdmin,
+            pseudo: payload.pseudo,
+            isAdmin: payload.isAdmin || false,
         });
     } catch (error) {
         console.error('Session verification failed:', error);
@@ -247,8 +280,24 @@ async function loginWithPseudo(req, res) {
         const accessToken = jwt.sign({ userId: user.id, pseudo: user.pseudo, isAdmin: user.is_admin }, accessTokenSecret, { expiresIn: '1h' });
         const refreshToken = jwt.sign({ userId: user.id, pseudo: user.pseudo, isAdmin: user.is_admin }, refreshTokenSecret, { expiresIn: '7d' });
         
-        res.cookie('accessToken', accessToken, { httpOnly: true, secure: true });
-        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
+        console.log('Setting cookies for user:', user.id);
+        console.log('Access token expires in: 24h');
+        console.log('Refresh token expires in: 24h');
+        
+        res.cookie('accessToken', accessToken, { 
+          httpOnly: true, 
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+          path: '/' 
+        });
+        res.cookie('refreshToken', refreshToken, { 
+          httpOnly: true, 
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+          path: '/' 
+        });
         
         return res.json({ userId: user.id, pseudo: user.pseudo, isAdmin: user.is_admin });
         

@@ -32,6 +32,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     token: null,
   });
 
+  const signOut = useCallback(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).google?.accounts?.id?.disableAutoSelect();
+    setAuth({ isSignedIn: false, userId: null, userName: null, userPicture: null, isAdmin: false, token: null });
+  }, []);
+
+  // Check for existing session on initial load
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const res = await fetch('/check-session', {
+          method: 'GET',
+          credentials: 'include',
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          if (data.isSignedIn) {
+            setAuth({
+              isSignedIn: true,
+              userId: data.userId,
+              userName: data.email || data.pseudo || null,
+              userPicture: null, // No picture for session restoration
+              isAdmin: data.isAdmin || false,
+              token: null,
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Session check failed:', err);
+      }
+    };
+    
+    checkSession();
+  }, []);
+
+  // Set up token refresh mechanism
+  useEffect(() => {
+    if (!auth.isSignedIn) return;
+    
+    // Refresh token every 55 minutes to maintain session (before 1-hour access token expires)
+    const refreshInterval = setInterval(async () => {
+      try {
+        const res = await fetch('/refresh-token', {
+          method: 'POST',
+          credentials: 'include',
+        });
+        
+        if (!res.ok) {
+          // If refresh fails, sign out the user
+          signOut();
+        }
+      } catch (err) {
+        console.error('Token refresh failed:', err);
+        signOut();
+      }
+    }, 55 * 60 * 1000); // 55 minutes
+    
+    return () => clearInterval(refreshInterval);
+  }, [auth.isSignedIn, signOut]);
+
   const handleCredentialResponse = useCallback(async (response: { credential: string }) => {
     try {
       // Decode Google JWT client-side to get name and picture
@@ -100,12 +161,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return () => window.removeEventListener('load', init);
     }
   }, [handleCredentialResponse]);
-
-  const signOut = useCallback(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).google?.accounts?.id?.disableAutoSelect();
-    setAuth({ isSignedIn: false, userId: null, userName: null, userPicture: null, isAdmin: false, token: null });
-  }, []);
 
   const renderButton = useCallback((container: HTMLElement) => {
     // We don't actually render the Google button anymore since we use our own
