@@ -258,6 +258,11 @@ export function AuthButtons() {
         onClose={() => { setLoginModalOpen(false); setError(''); }}
         title="Login"
         centered
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleLogin();
+          }
+        }}
       >
         <Stack>
           <TextInput
@@ -266,6 +271,11 @@ export function AuthButtons() {
             value={loginPseudo}
             onChange={(e) => setLoginPseudo(e.target.value)}
             required
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleLogin();
+              }
+            }}
           />
           <PasswordInput
             label="Password"
@@ -273,6 +283,11 @@ export function AuthButtons() {
             value={loginPassword}
             onChange={(e) => setLoginPassword(e.target.value)}
             required
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleLogin();
+              }
+            }}
           />
           {error && <Text color="red" size="sm">{error}</Text>}
           <Button onClick={handleLogin} fullWidth>
@@ -292,6 +307,11 @@ export function AuthButtons() {
         onClose={() => { setRegisterModalOpen(false); setError(''); }}
         title="Sign Up"
         centered
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleRegister();
+          }
+        }}
       >
         <Stack>
           <TextInput
@@ -303,6 +323,11 @@ export function AuthButtons() {
             error={pseudoAvailable === false ? 'Pseudo already taken' : ''}
             rightSection={pseudoChecking ? <Text size="xs" c="gray">Checking...</Text> : 
               pseudoAvailable === true ? <Text size="xs" c="green">✓ Available</Text> : null}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleRegister();
+              }
+            }}
           />
           
           <PasswordInput
@@ -312,6 +337,11 @@ export function AuthButtons() {
             onChange={(e) => setRegisterPassword(e.target.value)}
             required
             error={registerPassword && !passwordStrongEnough ? 'Password must be at least 6 characters' : ''}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleRegister();
+              }
+            }}
           />
           
           <PasswordInput
@@ -321,6 +351,11 @@ export function AuthButtons() {
             onChange={(e) => setRegisterConfirmPassword(e.target.value)}
             required
             error={registerConfirmPassword && !passwordMatch ? 'Passwords do not match' : ''}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleRegister();
+              }
+            }}
           />
           <TextInput
             label="Secret Question"
@@ -328,6 +363,11 @@ export function AuthButtons() {
             value={registerSecretQuestion}
             onChange={(e) => setRegisterSecretQuestion(e.target.value)}
             required
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleRegister();
+              }
+            }}
           />
           <TextInput
             label="Secret Answer"
@@ -335,6 +375,11 @@ export function AuthButtons() {
             value={registerSecretAnswer}
             onChange={(e) => setRegisterSecretAnswer(e.target.value)}
             required
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleRegister();
+              }
+            }}
           />
           {error && <Text color="red" size="sm">{error}</Text>}
           <Button onClick={handleRegister} fullWidth>
@@ -349,6 +394,11 @@ export function AuthButtons() {
         onClose={() => { setPasswordResetModalOpen(false); setError(''); }}
         title="Reset Password"
         centered
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handleGetSecretQuestion();
+          }
+        }}
       >
         <Stack>
           <TextInput
@@ -357,6 +407,11 @@ export function AuthButtons() {
             value={resetPseudo}
             onChange={(e) => setResetPseudo(e.target.value)}
             required
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleGetSecretQuestion();
+              }
+            }}
           />
           {error && <Text color="red" size="sm">{error}</Text>}
           <Button onClick={handleGetSecretQuestion} fullWidth>
@@ -371,6 +426,11 @@ export function AuthButtons() {
         onClose={() => { setSecretQuestionModalOpen(false); setError(''); }}
         title="Reset Password"
         centered
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            handlePasswordReset();
+          }
+        }}
       >
         <Stack>
           <Text size="sm" mb="sm">
@@ -382,6 +442,11 @@ export function AuthButtons() {
             value={resetSecretAnswer}
             onChange={(e) => setResetSecretAnswer(e.target.value)}
             required
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handlePasswordReset();
+              }
+            }}
           />
           <PasswordInput
             label="New Password"
@@ -389,6 +454,11 @@ export function AuthButtons() {
             value={resetNewPassword}
             onChange={(e) => setResetNewPassword(e.target.value)}
             required
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handlePasswordReset();
+              }
+            }}
           />
           <PasswordInput
             label="Confirm New Password"
@@ -396,6 +466,11 @@ export function AuthButtons() {
             value={resetConfirmPassword}
             onChange={(e) => setResetConfirmPassword(e.target.value)}
             required
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handlePasswordReset();
+              }
+            }}
           />
           {error && <Text color="red" size="sm">{error}</Text>}
           <Button onClick={handlePasswordReset} fullWidth>
