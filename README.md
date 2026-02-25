@@ -37,6 +37,13 @@ Admins get extra controls inline and in the toolbar:
 ### 💬 Sound Requests
 Any signed-in user can submit a request for a new sound. Admins review and close requests from the panel.
 
+### 📝 Development Logging
+Developers can enable file-based logging for both client and server during development:
+- **Console + File Logging**: `npm run dev:watch:logs`
+- **Console Only**: `npm run dev:watch` (default)
+- **Log Location**: `logs/` directory with daily rotating files
+- **Documentation**: See [LOGGING.md](LOGGING.md) for detailed usage
+
 ---
 
 ## Stack

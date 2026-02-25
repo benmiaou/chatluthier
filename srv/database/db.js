@@ -218,7 +218,40 @@ class Database {
     }
 
     /**
-     * Get user-specific sound overrides
+     * Get user-specific sound overrides (NEW: single JSON entry per user)
+     */
+    async getUserSoundOverrides(userId) {
+        // Try new table first
+        try {
+            const sql = `
+                SELECT sound_overrides 
+                FROM user_sounds_json 
+                WHERE user_id = ?
+            `;
+            const result = await this.queryOne(sql, [userId]);
+            if (result) {
+                return result.sound_overrides;
+            }
+        } catch (error) {
+            // New table doesn't exist yet, that's ok
+        }
+        
+        // Fallback to old format (for backward compatibility)
+        try {
+            const sql = `
+                SELECT sound_overrides 
+                FROM user_sounds 
+                WHERE user_id = ?
+            `;
+            const result = await this.queryOne(sql, [userId]);
+            return result ? result.sound_overrides : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    /**
+     * Get user-specific sound overrides (OLD: per-sound entries - kept for backward compatibility)
      */
     async getUserSound(userId, soundId) {
         const sql = `

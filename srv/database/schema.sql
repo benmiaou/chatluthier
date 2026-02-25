@@ -61,17 +61,14 @@ CREATE TABLE IF NOT EXISTS soundboard (
     UNIQUE(filename)
 );
 
--- User sounds - one entry per sound override
+-- User sounds - one entry per user with all sound overrides in JSON
 CREATE TABLE IF NOT EXISTS user_sounds (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id TEXT NOT NULL,
-    sound_type TEXT NOT NULL, -- 'ambiance', 'background', or 'soundboard'
-    sound_id INTEGER NOT NULL,
-    is_enabled BOOLEAN,
+    user_id TEXT NOT NULL UNIQUE, -- One entry per user
+    sound_overrides TEXT, -- JSON: { sound_id: { isEnabled, contexts, credit }, ... }
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    UNIQUE(user_id, sound_type, sound_id)
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 -- User sound contexts - one entry per user context override

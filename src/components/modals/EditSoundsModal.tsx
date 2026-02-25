@@ -1,7 +1,9 @@
 import { Button, Loader, Modal, Select, Stack, Switch, Text, MultiSelect, Group, Badge, TextInput } from '@mantine/core';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { notifications } from '@mantine/notifications';
+import { IconPlayerPlay, IconPlayerPause, IconPlayerStop } from '@tabler/icons-react';
 import type { Sound, SoundCategory } from '../../types/sound';
+import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 
 // Maps UI category to backend soundsType value
 const SOUNDS_TYPE: Record<SoundCategory, string> = {
@@ -68,6 +70,11 @@ export function EditSoundsModal({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingSoundId, setEditingSoundId] = useState<string | null>(null);
+  const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  
+  const { play, stop, pause } = useAudioPlayer();
+  const audioPlayerRef = useRef<{ play: (url: string) => Promise<void>, stop: () => void, pause: () => void } | null>(null);
 
   useEffect(() => {
     if (!opened) return;
@@ -89,12 +96,12 @@ export function EditSoundsModal({
       .then((data: any[]) => {
         // Map backend data format to frontend expected format
         const mappedSounds = data.map(sound => ({
-          id: sound.id || sound.filename,
+          id: String(sound.id || sound.filename),
           name: sound.display_name || sound.name || sound.filename,
           filename: sound.filename,
           imageFile: sound.imageFile || sound.image_file,
-          contexts: sound.contexts || [],
-          credit: sound.credit,
+          contexts: Array.isArray(sound.contexts) ? sound.contexts : [],
+          credit: sound.credit || '',
           isEnabled: sound.isEnabled !== undefined ? sound.isEnabled : true
         }));
         setSounds(mappedSounds);
@@ -111,10 +118,58 @@ export function EditSoundsModal({
     setEdits((prev) => ({ ...prev, [filename]: enabled }));
   };
 
+  const handlePlayPause = async (filename: string) => {
+    try {
+      // Fix audio path based on category
+      let soundUrl;
+      switch (selectedCategory) {
+        case 'background':
+          soundUrl = `/assets/background/${filename}`;
+          break;
+        case 'ambiance':
+          soundUrl = `/assets/ambiance/${filename}`;
+          break;
+        case 'soundboard':
+          soundUrl = `/assets/soundboard/${filename}`;
+          break;
+        default:
+          soundUrl = `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
+      }
+      
+      if (currentlyPlaying === filename && isPlaying) {
+        // Currently playing this sound, pause it
+        pause();
+        setIsPlaying(false);
+      } else {
+        // Play this sound
+        if (currentlyPlaying && currentlyPlaying !== filename) {
+          // Stop any currently playing sound first
+          stop();
+        }
+        
+        await play(soundUrl, 0.5); // Play at 50% volume
+        setCurrentlyPlaying(filename);
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      console.error('Error playing sound:', error);
+      notifications.show({ message: `Failed to play sound: ${error.message}`, color: 'red' });
+    }
+  };
+
+  const handleStop = (filename: string) => {
+    if (currentlyPlaying === filename) {
+      stop();
+      setCurrentlyPlaying(null);
+      setIsPlaying(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
       const soundsType = SOUNDS_TYPE[selectedCategory];
+      
       if (isAdmin) {
         // Admin: send full updated sounds array to /update-main-playlist
         const updated = sounds.map((s) => ({
@@ -123,30 +178,65 @@ export function EditSoundsModal({
           contexts: contextEdits[s.filename] ?? s.contexts ?? [],
           credit: creditEdits[s.filename] ?? s.credit ?? '',
         }));
-        await fetch('/update-main-playlist', {
+        
+        const response = await fetch('/update-main-playlist', {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ soundsType, sounds: updated }),
         });
+        
+        if (!response.ok) {
+          throw new Error('Failed to update main playlist');
+        }
       } else {
-        // User: call /update-user-sound for each changed sound
-        await Promise.all(
-          Object.entries(edits).map(([filename, isEnabled]) =>
-            fetch('/update-user-sound', {
-              method: 'POST',
-              credentials: 'include',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ userId, soundsType, filename, isEnabled }),
+        // User: collect all changes and send in a single request if possible
+        const changes = [];
+        
+        // Collect all changes
+        Object.entries(edits).forEach(([filename, isEnabled]) => {
+          changes.push({
+            filename,
+            isEnabled,
+            contexts: contextEdits[filename],
+          });
+        });
+        
+        // Add context-only changes
+        Object.entries(contextEdits).forEach(([filename, contexts]) => {
+          if (!edits[filename]) {
+            changes.push({
+              filename,
+              contexts,
+            });
+          }
+        });
+        
+        // Send all changes in a single batch request if there are changes
+        if (changes.length > 0) {
+          const response = await fetch('/update-user-sounds-batch', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              userId, 
+              soundsType, 
+              changes 
             }),
-          ),
-        );
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to update user sounds');
+          }
+        }
       }
+      
       notifications.show({ message: 'Saved!', color: 'teal' });
       onSave?.();
       onClose();
-    } catch {
-      notifications.show({ message: 'Failed to save', color: 'red' });
+    } catch (error) {
+      console.error('Save error:', error);
+      notifications.show({ message: `Failed to save: ${error.message}`, color: 'red' });
     } finally {
       setSaving(false);
     }
@@ -196,23 +286,21 @@ export function EditSoundsModal({
                       size="sm"
                       style={{ flex: 1 }}
                     />
-                    {isAdmin && (
-                      <Button
-                        size="xs"
-                        variant={isEditing ? 'filled' : 'outline'}
-                        onClick={() => setEditingSoundId(isEditing ? null : sound.id)}
-                      >
-                        {isEditing ? 'Done' : 'Edit'}
-                      </Button>
-                    )}
+                    <Button
+                      size="xs"
+                      variant={isEditing ? 'filled' : 'outline'}
+                      onClick={() => setEditingSoundId(isEditing ? null : String(sound.id))}
+                    >
+                      {isEditing ? 'Done' : 'Edit'}
+                    </Button>
                   </Group>
                   
-                  {isEditing && isAdmin && (
+                  {isEditing && (
                     <Stack gap="xs" mt="xs">
                       <MultiSelect
                         label="Contexts"
                         placeholder="Select contexts..."
-                        value={Array.isArray(currentContexts) ? currentContexts : []}
+                        value={currentContexts}
                         onChange={(values) => {
                           setContextEdits(prev => ({ ...prev, [sound.filename]: values }));
                         }}
@@ -231,20 +319,22 @@ export function EditSoundsModal({
                         }}
                       />
                       
-                      <TextInput
-                        label="Credit"
-                        placeholder="Artist/Source credit..."
-                        value={currentCredit}
-                        onChange={(e) => {
-                          setCreditEdits(prev => ({ ...prev, [sound.filename]: e.currentTarget.value }));
-                        }}
-                      />
+                      {isAdmin && (
+                        <TextInput
+                          label="Credit (Admin Only)"
+                          placeholder="Artist/Source credit..."
+                          value={currentCredit || ''}
+                          onChange={(e) => {
+                            setCreditEdits(prev => ({ ...prev, [sound.filename]: e.currentTarget.value }));
+                          }}
+                        />
+                      )}
                       
                       {currentContexts.length > 0 && (
                         <Group gap="xs">
                           <Text size="sm" fw={500}>Current contexts:</Text>
                           {currentContexts.map((ctx, index) => (
-                            <Badge key={index} variant="light">
+                            <Badge key={`${ctx}-${index}`} variant="light">
                               {ctx}
                             </Badge>
                           ))}
@@ -253,10 +343,31 @@ export function EditSoundsModal({
                     </Stack>
                   )}
                   
+                  <Group gap="xs" mt="xs">
+                    <Button
+                      size="xs"
+                      variant="subtle"
+                      leftSection={currentlyPlaying === sound.filename && isPlaying ? <IconPlayerPause size={14} /> : <IconPlayerPlay size={14} />}
+                      onClick={() => handlePlayPause(sound.filename)}
+                      disabled={!sound.filename}
+                    >
+                      {currentlyPlaying === sound.filename && isPlaying ? 'Pause' : 'Play'}
+                    </Button>
+                    <Button
+                      size="xs"
+                      variant="subtle"
+                      leftSection={<IconPlayerStop size={14} />}
+                      onClick={() => handleStop(sound.filename)}
+                      disabled={currentlyPlaying !== sound.filename}
+                    >
+                      Stop
+                    </Button>
+                  </Group>
+                  
                   <Text size="xs" c="dimmed">{sound.filename}</Text>
-                  {sound.credit && !isEditing && (
-                    <Text size="xs" c="dimmed" italic>
-                      Credit: {sound.credit}
+                  {sound.credit && (
+                    <Text size="xs" c="dimmed" italic={true}>
+                      <span dangerouslySetInnerHTML={{ __html: sound.credit }} />
                     </Text>
                   )}
                 </Stack>
