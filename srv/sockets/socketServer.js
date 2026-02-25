@@ -29,8 +29,6 @@ wsServer.on('connection', function connection(ws) {
 
             recentTimestamps.push(now);
             messageTimestamps.set(clientId, recentTimestamps);
-            console.log('Received:', data.type);
-
             switch (data.type) {
                 case 'subscribe':
                     connectedId = data.id;

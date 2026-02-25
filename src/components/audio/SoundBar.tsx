@@ -1,6 +1,6 @@
 import { Box, Text } from '@mantine/core';
 import { IconVolumeOff, IconGripVertical } from '@tabler/icons-react';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import type { AmbianceBar } from '../../hooks/useAmbianceSounds';
 import { showCreditToast } from '../../utils/showCreditToast';
 
@@ -19,6 +19,12 @@ export function SoundBar({ bar, onChange, showDragHandle = false, dragHandleProp
   const isActive = bar.volume > 0;
   const dragging = useRef(false);
   const wasActive = useRef(isActive);
+  const [localVolume, setLocalVolume] = useState(bar.volume);
+
+  // Sync localVolume with bar.volume when bar changes (for external updates)
+  useEffect(() => {
+    setLocalVolume(bar.volume);
+  }, [bar.volume]);
 
   const handleChange = (filename: string, vol: number) => {
     const wasZero = !wasActive.current;
@@ -30,6 +36,16 @@ export function SoundBar({ bar, onChange, showDragHandle = false, dragHandleProp
     }
   };
 
+  // Local audio update for real-time feedback during dragging
+  const updateLocalAudio = (vol: number) => {
+    bar.audio.volume = vol;
+    if (vol > 0 && bar.audio.paused) {
+      bar.audio.play().catch(() => {});
+    } else if (vol === 0) {
+      bar.audio.pause();
+    }
+  };
+
   const volumeFromPointer = (e: React.PointerEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     return Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -38,15 +54,30 @@ export function SoundBar({ bar, onChange, showDragHandle = false, dragHandleProp
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     dragging.current = true;
     e.currentTarget.setPointerCapture(e.pointerId);
-    handleChange(bar.sound.filename, volumeFromPointer(e));
+    const vol = volumeFromPointer(e);
+    setLocalVolume(vol);
+    updateLocalAudio(vol); // Update audio in real-time
+    // Don't send to server yet
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!dragging.current) return;
-    handleChange(bar.sound.filename, volumeFromPointer(e));
+    const vol = volumeFromPointer(e);
+    setLocalVolume(vol);
+    updateLocalAudio(vol); // Update audio in real-time
+    // Don't send to server yet
   };
 
-  const handlePointerUp = () => { dragging.current = false; };
+  const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragging.current) {
+      dragging.current = false;
+      const vol = volumeFromPointer(e);
+      setLocalVolume(vol);
+      updateLocalAudio(vol); // Final audio update
+      // Now send the final value to server
+      handleChange(bar.sound.filename, vol);
+    }
+  };
 
   return (
     <Box
@@ -72,7 +103,7 @@ export function SoundBar({ bar, onChange, showDragHandle = false, dragHandleProp
       <Box
         style={{
           position: 'absolute', top: 0, left: 0, bottom: 0,
-          width: `${bar.volume * 100}%`,
+          width: `${localVolume * 100}%`,
           background: 'rgba(146,58,58,0.55)',
           transition: 'width 0.05s linear',
           pointerEvents: 'none',
@@ -80,10 +111,10 @@ export function SoundBar({ bar, onChange, showDragHandle = false, dragHandleProp
       />
 
       {/* Volume line */}
-      {isActive && (
+      {localVolume > 0 && (
         <Box style={{
           position: 'absolute', top: 0, bottom: 0,
-          left: `${bar.volume * 100}%`,
+          left: `${localVolume * 100}%`,
           width: 2,
           background: 'rgba(220,100,100,0.9)',
           pointerEvents: 'none',
@@ -120,7 +151,7 @@ export function SoundBar({ bar, onChange, showDragHandle = false, dragHandleProp
       )}
       
       {/* Mute icon bottom-right */}
-      {!isActive && (
+      {localVolume === 0 && (
         <Box style={{ position: 'absolute', bottom: 6, right: 6, pointerEvents: 'none' }}>
           <IconVolumeOff size={14} color="rgba(255,255,255,0.7)" />
         </Box>
