@@ -1,64 +1,14 @@
 const jwt = require('jsonwebtoken');
-const { OAuth2Client } = require('google-auth-library');
 const { accessTokenSecret, refreshTokenSecret } = require('../config/secret')();
 const { isAdminUser } = require('../utils/tokenUtils');
-const CLIENT_ID = '793652859374-lvh19kj1d49a33cola5ui3tsj1hsg2li.apps.googleusercontent.com';
-
-const client = new OAuth2Client(CLIENT_ID);
 
 // Database and filesystem imports for pseudo/password authentication
 const db = require('../database/db');
 const path = require('path');
 const fs = require('fs');
 
-async function verifyIdToken(token) {
-    const ticket = await client.verifyIdToken({
-        idToken: token,
-        audience: CLIENT_ID,
-    });
-    return ticket.getPayload();
-}
-
 async function verifyjwt(accessToken) {
     return jwt.verify(accessToken, accessTokenSecret);
-}
-
-async function verifyLogin(req, res) {
-    const { idToken } = req.body;
-    if (!idToken) {
-        return res.status(400).json({ error: 'No ID token provided.' });
-    }
-    try {
-        const payload = await verifyIdToken(idToken);
-        const userId = payload.sub;
-        const email = payload.email;
-        const isAdmin = isAdminUser(email);
-
-        const accessToken = jwt.sign({ userId, email, isAdmin }, accessTokenSecret, { expiresIn: '1h' });
-        const refreshToken = jwt.sign({ userId, email, isAdmin }, refreshTokenSecret, { expiresIn: '7d' });
-
-        res.cookie('accessToken', accessToken, { 
-          httpOnly: true, 
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'none',
-          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
-          path: '/',
-          domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost' 
-        });
-        res.cookie('refreshToken', refreshToken, { 
-          httpOnly: true, 
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'none',
-          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
-          path: '/',
-          domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost' 
-        });
-
-        return res.json({ userId, email, isAdmin });
-    } catch (error) {
-        console.error('Token verification failed:', error);
-        return res.status(401).json({ error: 'Token verification failed.' });
-    }
 }
 
 function refreshToken(req, res) {
@@ -68,23 +18,26 @@ function refreshToken(req, res) {
     }
     try {
         const payload = jwt.verify(refreshToken, refreshTokenSecret);
-        const accessToken = jwt.sign({ userId: payload.userId, email: payload.email, pseudo: payload.pseudo, isAdmin: payload.isAdmin }, accessTokenSecret, { expiresIn: '1h' });
-        const newRefreshToken = jwt.sign({ userId: payload.userId, email: payload.email, pseudo: payload.pseudo, isAdmin: payload.isAdmin }, refreshTokenSecret, { expiresIn: '7d' });
+        // Use pseudo if available, otherwise fall back to email for backward compatibility
+        const userIdentifier = payload.pseudo || payload.email || payload.userId;
+        const isAdmin = payload.isAdmin || false;
+        
+        const accessToken = jwt.sign({ userId: payload.userId, pseudo: userIdentifier, isAdmin }, accessTokenSecret, { expiresIn: '1h' });
+        const newRefreshToken = jwt.sign({ userId: payload.userId, pseudo: userIdentifier, isAdmin }, refreshTokenSecret, { expiresIn: '7d' });
+        
         res.cookie('accessToken', accessToken, { 
           httpOnly: true, 
           secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'none',
+          sameSite: 'lax',
           maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-          path: '/',
-          domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost' 
+          path: '/'
         });
         res.cookie('refreshToken', newRefreshToken, { 
           httpOnly: true, 
           secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'lax' : 'none',
+          sameSite: 'lax',
           maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-          path: '/',
-          domain: process.env.NODE_ENV === 'production' ? undefined : 'localhost' 
+          path: '/'
         });
         return res.json({ accessToken });
     } catch (error) {
@@ -340,7 +293,6 @@ async function changePassword(req, res) {
 }
 
 module.exports = {
-    verifyLogin,
     refreshToken,
     checkSession,
     logout,

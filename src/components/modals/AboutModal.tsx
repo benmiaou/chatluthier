@@ -77,7 +77,7 @@ export function AboutModal({ opened, onClose }: { opened: boolean; onClose: () =
         <Title order={2} mb="sm">Get Started</Title>
         <Text mb="md" style={{ lineHeight: 1.7 }}>
           No registration is required to use the basic features. For advanced options like editing
-          sounds and saving custom playlists, please log in with your Google account.
+          sounds and saving custom playlists, please create an account with a username and password.
         </Text>
 
         <Title order={2} mb="sm">Contact Us</Title>

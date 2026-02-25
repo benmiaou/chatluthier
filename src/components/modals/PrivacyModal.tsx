@@ -35,13 +35,13 @@ export function PrivacyModal({ opened, onClose }: { opened: boolean; onClose: ()
 
         <Title order={2} mb="sm">Information We Collect</Title>
         <Text mb="md" style={{ textAlign: 'justify', lineHeight: 1.7 }}>
-          We collect your Google user ID when you log in using Google OAuth. We do not collect any
+          We collect your username and password when you create an account. We do not collect any
           other personal information.
         </Text>
 
         <Title order={2} mb="sm">How We Use Your Information</Title>
         <Text mb="md" style={{ textAlign: 'justify', lineHeight: 1.7 }}>
-          Your Google user ID is used solely to authenticate your access to our application.
+          Your username and password are used solely to authenticate your access to our application.
         </Text>
 
         <Title order={2} mb="sm">Data Security</Title>

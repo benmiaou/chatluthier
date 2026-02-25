@@ -119,6 +119,22 @@ CREATE INDEX IF NOT EXISTS idx_user_sound_contexts_user ON user_sound_contexts(u
 CREATE INDEX IF NOT EXISTS idx_user_presets_user ON user_presets(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_sound_orders_user ON user_sound_orders(user_id);
 
+-- Sound requests table
+CREATE TABLE IF NOT EXISTS sound_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    category TEXT NOT NULL,
+    file TEXT NOT NULL,
+    contexts TEXT NOT NULL,
+    sound_url TEXT,
+    requested_by TEXT,
+    status TEXT DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_sound_requests_created ON sound_requests(created_at);
+CREATE INDEX IF NOT EXISTS idx_sound_requests_status ON sound_requests(status);
+
 -- Initial sound categories
 INSERT OR IGNORE INTO sound_categories (id, name, description) VALUES 
     (1, 'ambianceSounds', 'Ambient sounds for background atmosphere'),

@@ -36,8 +36,6 @@ export function Home() {
       <SessionManager />
 
       <Group justify="center" gap="sm" wrap="wrap">
-        {userId && <Button variant="outline" size="xs" onClick={openRequest}>Request a Sound</Button>}
-        {userId && <Button variant="outline" size="xs" onClick={openEdit}>Edit Sounds</Button>}
         {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={openAdd}>Add Sound</Button>}
         {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={openReview}>Review Requests</Button>}
       </Group>
