@@ -5,8 +5,12 @@ const path = require('path');
 const authRoutes = require('./routes/authRoutes');
 const soundRoutes = require('./routes/soundRoutes');
 const requestRoutes = require('./routes/requestRoutes');
+const logger = require('./utils/logger');
 
 const app = express();
+
+// Add logging middleware
+app.use(logger.expressMiddleware());
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(cookieParser());
 app.use(cors({

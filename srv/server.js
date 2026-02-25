@@ -2,20 +2,24 @@ const app = require('./app');
 const http = require('http');
 const server = http.createServer(app);
 const db = require('./database/db');
+const logger = require('./utils/logger');
 
 const PORT = 3000;
+
+// Wrap database methods to log SQL queries
+const loggedDb = logger.wrapDatabaseMethods(db);
 
 // Initialize database before starting server
 async function startServer() {
     try {
-        console.log('Initializing database...');
+        logger.info('Initializing database...');
         
         // Set a timeout for database initialization
         const initPromise = Promise.race([
             (async () => {
-                await db.initialize();
-                await db.initializeSchema();
-                console.log('Database ready');
+                await loggedDb.initialize();
+                await loggedDb.initializeSchema();
+                logger.info('Database ready');
             })(),
             new Promise((_, reject) => 
                 setTimeout(() => reject(new Error('Database initialization timeout')), 10000)
@@ -25,25 +29,50 @@ async function startServer() {
         await initPromise;
         
         server.listen(PORT, '0.0.0.0', () => {
-            console.log(`Server started on port ${PORT}`);
+            logger.info(`Server started on port ${PORT}`);
             
             // Initialize WebSocket server after HTTP server is running
             const { wsServer } = require('./sockets/socketServer');
-            console.log(`WebSocket Server started on port ${wsServer.address().port}`);
+            logger.info(`WebSocket Server started on port ${wsServer.address().port}`);
         });
         
     } catch (error) {
-        console.error('Failed to initialize database:', error);
-        console.log('Attempting to start server without database initialization...');
+        logger.error('Failed to initialize database', { error: error.message });
+        logger.warn('Attempting to start server without database initialization...');
         // Try to start server anyway for development
         server.listen(PORT, '0.0.0.0', () => {
-            console.log(`Server started on port ${PORT} (database may not be available)`);
+            logger.info(`Server started on port ${PORT} (database may not be available)`);
             
             // Initialize WebSocket server after HTTP server is running
             const { wsServer } = require('./sockets/socketServer');
-            console.log(`WebSocket Server started on port ${wsServer.address().port}`);
+            logger.info(`WebSocket Server started on port ${wsServer.address().port}`);
         });
     }
 }
+
+// Handle process termination gracefully
+process.on('SIGINT', () => {
+    logger.info('Received SIGINT, shutting down gracefully...');
+    server.close(() => {
+        logger.info('Server closed');
+        process.exit(0);
+    });
+});
+
+process.on('SIGTERM', () => {
+    logger.info('Received SIGTERM, shutting down gracefully...');
+    server.close(() => {
+        logger.info('Server closed');
+        process.exit(0);
+    });
+});
+
+process.on('uncaughtException', (error) => {
+    logger.fatal('Uncaught Exception', { error: error.message, stack: error.stack }, 1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    logger.error('Unhandled Rejection', { reason: reason?.message || reason, promise });
+});
 
 startServer();

@@ -11,8 +11,8 @@ if (!fs.existsSync(logsDir)) {
     fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// Log file path
-const logFilePath = path.join(logsDir, `vite-${new Date().toISOString().slice(0, 10)}.log`);
+// Log file path - use combined log file
+const logFilePath = path.join(logsDir, `combined-${new Date().toISOString().slice(0, 10)}.log`);
 
 // Create write stream for logs
 const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
@@ -55,6 +55,14 @@ process.on('SIGINT', () => {
     console.log(sigintMessage);
     logStream.write(`[${new Date().toISOString()}] ${sigintMessage}`);
     viteProcess.kill('SIGINT');
+});
+
+// Handle SIGTERM (for when concurrently shuts down)
+process.on('SIGTERM', () => {
+    const sigtermMessage = `\n🔴 Received SIGTERM, shutting down Vite...\n`;
+    console.log(sigtermMessage);
+    logStream.write(`[${new Date().toISOString()}] ${sigtermMessage}`);
+    viteProcess.kill('SIGTERM');
 });
 
 // Handle uncaught exceptions

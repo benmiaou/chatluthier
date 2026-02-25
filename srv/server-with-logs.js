@@ -5,14 +5,14 @@ const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 
-// Create logs directory if it doesn't exist
-const logsDir = path.join(__dirname, 'logs');
+// Create logs directory if it doesn't exist (in root, not srv)
+const logsDir = path.join(__dirname, '..', 'logs');
 if (!fs.existsSync(logsDir)) {
     fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// Log file path
-const logFilePath = path.join(logsDir, `server-${new Date().toISOString().slice(0, 10)}.log`);
+// Log file path - use combined log file
+const logFilePath = path.join(logsDir, `combined-${new Date().toISOString().slice(0, 10)}.log`);
 
 // Create write stream for logs
 const logStream = fs.createWriteStream(logFilePath, { flags: 'a' });
@@ -30,14 +30,14 @@ const serverProcess = spawn('node', ['srv/server.js'], {
 serverProcess.stdout.on('data', (data) => {
     const message = data.toString();
     console.log(message.trim()); // Output to console
-    logStream.write(`[${new Date().toISOString()}] [INFO] ${message}`); // Write to file
+    logStream.write(`[${new Date().toISOString()}] [SERVER] ${message}`); // Write to file
 });
 
 // Pipe stderr to both console and log file
 serverProcess.stderr.on('data', (data) => {
     const message = data.toString();
     console.error(message.trim()); // Output to console
-    logStream.write(`[${new Date().toISOString()}] [ERROR] ${message}`); // Write to file
+    logStream.write(`[${new Date().toISOString()}] [SERVER-ERR] ${message}`); // Write to file
 });
 
 // Handle process exit
@@ -55,6 +55,14 @@ process.on('SIGINT', () => {
     console.log(sigintMessage);
     logStream.write(`[${new Date().toISOString()}] ${sigintMessage}`);
     serverProcess.kill('SIGINT');
+});
+
+// Handle SIGTERM (for when concurrently shuts down)
+process.on('SIGTERM', () => {
+    const sigtermMessage = `\n🔴 Received SIGTERM, shutting down server...\n`;
+    console.log(sigtermMessage);
+    logStream.write(`[${new Date().toISOString()}] ${sigtermMessage}`);
+    serverProcess.kill('SIGTERM');
 });
 
 // Handle uncaught exceptions

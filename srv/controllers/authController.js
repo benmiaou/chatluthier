@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { accessTokenSecret, refreshTokenSecret } = require('../config/secret')();
 const { isAdminUser } = require('../utils/tokenUtils');
+const logger = require('../utils/logger');
 
 // Database and filesystem imports for pseudo/password authentication
 const db = require('../database/db');
@@ -14,6 +15,7 @@ async function verifyjwt(accessToken) {
 function refreshToken(req, res) {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
+        logger.warn('Refresh token attempt with no token provided');
         return res.status(401).json({ error: 'No refresh token provided.' });
     }
     try {
@@ -21,6 +23,13 @@ function refreshToken(req, res) {
         // Use pseudo if available, otherwise fall back to email for backward compatibility
         const userIdentifier = payload.pseudo || payload.email || payload.userId;
         const isAdmin = payload.isAdmin || false;
+        
+        // Log successful token refresh
+        logger.access(payload.userId, 'TOKEN_REFRESH', {
+            userId: payload.userId,
+            pseudo: userIdentifier,
+            isAdmin: isAdmin
+        });
         
         const accessToken = jwt.sign({ userId: payload.userId, pseudo: userIdentifier, isAdmin }, accessTokenSecret, { expiresIn: '1h' });
         const newRefreshToken = jwt.sign({ userId: payload.userId, pseudo: userIdentifier, isAdmin }, refreshTokenSecret, { expiresIn: '7d' });
@@ -41,21 +50,25 @@ function refreshToken(req, res) {
         });
         return res.json({ accessToken });
     } catch (error) {
-        console.error('Refresh token verification failed:', error);
+        logger.error('Refresh token verification failed', { error: error.message });
         return res.status(401).json({ error: 'Refresh token verification failed.' });
     }
 }
 
 function checkSession(req, res) {
     const accessToken = req.cookies.accessToken;
-    console.log('checkSession called, accessToken present:', !!accessToken);
+    logger.info('checkSession called, accessToken present:', !!accessToken);
     if (!accessToken) {
-        console.log('No access token found in cookies');
+        logger.info('No access token found in cookies');
         return res.status(401).json({ isSignedIn: false });
     }
     try {
         const payload = jwt.verify(accessToken, accessTokenSecret);
-        console.log('Session verified for user:', payload.userId);
+        logger.access(payload.userId, 'SESSION_CHECK', {
+            userId: payload.userId,
+            pseudo: payload.pseudo,
+            isAdmin: payload.isAdmin || false
+        });
         return res.json({
             isSignedIn: true,
             userId: payload.userId,
@@ -64,12 +77,14 @@ function checkSession(req, res) {
             isAdmin: payload.isAdmin || false,
         });
     } catch (error) {
-        console.error('Session verification failed:', error);
+        logger.error('Session verification failed', { error: error.message });
         return res.status(401).json({ isSignedIn: false });
     }
 }
 
 function logout(req, res) {
+    const userId = req.user?.id || 'unknown';
+    logger.access(userId, 'LOGOUT');
     res.clearCookie('accessToken', { httpOnly: true, secure: true });
     res.clearCookie('refreshToken', { httpOnly: true, secure: true });
     return res.json({ message: 'Logged out successfully' });
