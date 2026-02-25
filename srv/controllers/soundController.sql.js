@@ -83,65 +83,50 @@ async function getUserSoundsWithOverrides(userId, serverSounds, categoryId) {
             return [];
     }
 
-    // Get all user sound overrides for these sounds
-    const soundIds = serverSounds.map(s => s.id);
-    const placeholders = soundIds.map(() => '?').join(',');
-
-    const sql = `
-        SELECT us.sound_id, us.is_enabled, us.id as user_sound_id
-        FROM user_sounds us
-        WHERE us.user_id = ? AND us.sound_type = ? AND us.sound_id IN (${placeholders})
-    `;
-
-    const userSounds = await db.query(sql, [userId, soundTypeStr, ...soundIds]);
-
-    // Create a map for quick lookup
-    const userSoundMap = {};
-    userSounds.forEach(us => {
-        userSoundMap[us.sound_id] = us;
-    });
+    // Get user sound overrides from the new JSON-based schema
+    const userSoundOverrides = await db.getUserSoundOverrides(userId);
+    const soundOverrides = userSoundOverrides ? JSON.parse(userSoundOverrides.sound_overrides || '{}') : {};
 
     // Merge server sounds with user overrides
     return Promise.all(serverSounds.map(async (sound) => {
-        const userSound = userSoundMap[sound.id];
-        const contexts = await getContextsForSoundWithUserOverrides(userId, sound.id, soundTypeStr, userSound);
+        const soundKey = `${soundTypeStr}_${sound.id}`;
+        const userSoundOverride = soundOverrides[soundKey] || {};
+        const contexts = await getContextsForSoundWithUserOverrides(userId, sound.id, soundTypeStr, userSoundOverride);
 
         return {
             filename: sound.filename,
             display_name: sound.display_name,
             imageFile: sound.image_file,
             contexts,
-            credit: sound.credit,
-            isEnabled: Boolean(userSound ? userSound.is_enabled : sound.is_enabled)
+            credit: userSoundOverride.credit || sound.credit,
+            isEnabled: userSoundOverride.isEnabled !== undefined ? Boolean(userSoundOverride.isEnabled) : Boolean(sound.is_enabled)
         };
     }));
 }
 
-async function getContextsForSoundWithUserOverrides(userId, soundId, soundTypeStr, userSound) {
-    if (userSound) {
-        // Get user-specific contexts from the new schema
-        const sql = `
-            SELECT context 
-            FROM user_sound_contexts 
-            WHERE user_id = ? AND sound_type = ? AND sound_id = ?
-            ORDER BY context_index
-        `;
-        const userContexts = await db.query(sql, [userId, soundTypeStr, soundId]);
-        if (userContexts.length > 0) {
-            return userContexts.map(row => row.context);
-        }
+async function getContextsForSoundWithUserOverrides(userId, soundId, soundTypeStr, userSoundOverride) {
+    // Check if user has custom contexts in user_sound_contexts table
+    const sql = `
+        SELECT context 
+        FROM user_sound_contexts 
+        WHERE user_id = ? AND sound_type = ? AND sound_id = ?
+        ORDER BY context_index
+    `;
+    const userContexts = await db.query(sql, [userId, soundTypeStr, soundId]);
+    if (userContexts.length > 0) {
+        return userContexts.map(row => row.context);
     }
 
     // Fall back to server contexts - parse from JSON
     const tableName = soundTypeStr === 'ambiance' ? 'ambiance_sounds' : 
                      soundTypeStr === 'background' ? 'background_sounds' : 'soundboard';
     
-    const sql = `
+    const sql2 = `
         SELECT contexts 
         FROM ${tableName} 
         WHERE id = ?
     `;
-    const result = await db.queryOne(sql, [soundId]);
+    const result = await db.queryOne(sql2, [soundId]);
     
     if (result && result.contexts) {
         try {
@@ -564,32 +549,44 @@ async function updateUserSound(req, res) {
                 return res.status(400).json({ error: 'Invalid category ID.' });
         }
 
-        // Check if user sound record exists
-        const existingUserSound = await db.getUserSound(userId, sound.id);
+        // Get existing user sound overrides or create new JSON structure
+        const existingUserSoundOverrides = await db.getUserSoundOverrides(userId);
+        const soundOverrides = existingUserSoundOverrides ? JSON.parse(existingUserSoundOverrides.sound_overrides || '{}') : {};
+
+        // Create sound key
+        const soundKey = `${soundTypeStr}_${sound.id}`;
 
         await db.beginTransaction();
 
         try {
-            if (existingUserSound) {
+            // Update or add sound override in JSON structure
+            soundOverrides[soundKey] = {
+                isEnabled: isEnabled,
+                credit: credit || ''
+            };
+
+            // Save updated JSON back to database
+            const soundOverridesJSON = JSON.stringify(soundOverrides);
+            
+            if (existingUserSoundOverrides) {
                 // Update existing record
                 await db.execute(
-                    'UPDATE user_sounds SET is_enabled = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-                    [isEnabled, existingUserSound.id]
-                );
-
-                // Delete existing contexts for this user and sound
-                await db.execute(
-                    'DELETE FROM user_sound_contexts WHERE user_id = ? AND sound_type = ? AND sound_id = ?',
-                    [userId, soundTypeStr, sound.id]
+                    'UPDATE user_sounds SET sound_overrides = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?',
+                    [soundOverridesJSON, userId]
                 );
             } else {
                 // Insert new record
-                const result = await db.execute(
-                    'INSERT INTO user_sounds (user_id, sound_type, sound_id, is_enabled) VALUES (?, ?, ?, ?)',
-                    [userId, soundTypeStr, sound.id, isEnabled]
+                await db.execute(
+                    'INSERT INTO user_sounds (user_id, sound_overrides) VALUES (?, ?)',
+                    [userId, soundOverridesJSON]
                 );
-                existingUserSound.id = result.lastID;
             }
+
+            // Delete existing contexts for this user and sound
+            await db.execute(
+                'DELETE FROM user_sound_contexts WHERE user_id = ? AND sound_type = ? AND sound_id = ?',
+                [userId, soundTypeStr, sound.id]
+            );
 
             // Insert new contexts
             for (let i = 0; i < parsedContexts.length; i++) {

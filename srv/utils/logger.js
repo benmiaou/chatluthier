@@ -149,14 +149,7 @@ class Logger {
             res.on('finish', () => {
                 const duration = Date.now() - start;
                 const userId = req.user?.id || 'anonymous';
-                
-                this.access(userId, 'HTTP_REQUEST', {
-                    method: req.method,
-                    path: req.path,
-                    status: res.statusCode,
-                    duration: `${duration}ms`,
-                    ip: req.ip || req.connection?.remoteAddress
-                });
+            
             });
             
             next();
