@@ -5,12 +5,16 @@ import { useAuthContext } from '../../contexts/AuthContext';
 import { useDisclosure } from '@mantine/hooks';
 import { RequestSoundModal } from '../modals/RequestSoundModal';
 import { EditSoundsModal } from '../modals/EditSoundsModal';
+import { AddSoundModal } from '../modals/AddSoundModal';
+import { ReviewRequestsModal } from '../modals/ReviewRequestsModal';
 
 export function AppHeader() {
   const navigate = useNavigate();
-  const { userId } = useAuthContext();
+  const { userId, isAdmin } = useAuthContext();
   const [requestOpened, { open: openRequest, close: closeRequest }] = useDisclosure(false);
   const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
+  const [addOpened, { open: openAdd, close: closeAdd }] = useDisclosure(false);
+  const [reviewOpened, { open: openReview, close: closeReview }] = useDisclosure(false);
 
   return (
     <>
@@ -31,6 +35,9 @@ export function AppHeader() {
         <Group gap="sm" visibleFrom="sm">
           {userId && <Button variant="outline" size="xs" onClick={openRequest}>Request Sound</Button>}
           {userId && <Button variant="outline" size="xs" onClick={openEdit}>Edit Sounds</Button>}
+          {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={() => openEdit('ambiance')}>Edit Server Sounds</Button>}
+          {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={openAdd}>Add Sound</Button>}
+          {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={openReview}>Review Requests</Button>}
         </Group>
 
         {/* Auth buttons on the right */}
@@ -39,7 +46,13 @@ export function AppHeader() {
       
       {/* Modals for header actions */}
       <RequestSoundModal opened={requestOpened} onClose={closeRequest} userId={userId} />
-      <EditSoundsModal opened={editOpened} onClose={closeEdit} userId={userId} />
+      <EditSoundsModal opened={editOpened} onClose={closeEdit} userId={userId} isAdmin={isAdmin} />
+      {isAdmin && (
+        <>
+          <AddSoundModal opened={addOpened} onClose={closeAdd} onAdded={() => {}} />
+          <ReviewRequestsModal opened={reviewOpened} onClose={closeReview} />
+        </>
+      )}
     </>
   );
 }
