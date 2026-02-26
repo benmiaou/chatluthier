@@ -835,4 +835,98 @@ module.exports = {
     saveSoundOrder,
     addSound,
     deleteSound,
+    updateUserSoundsBatch,
 };
+
+async function updateUserSoundsBatch(req, res) {
+    const { userId, soundsType, changes } = req.body;
+    
+    if (!userId || !soundsType || !Array.isArray(changes) || changes.length === 0) {
+        return res.status(400).json({ error: 'Invalid request data' });
+    }
+    
+    try {
+        // Get existing user sound overrides or create new JSON structure
+        const existingUserSoundOverrides = await db.getUserSoundOverrides(userId);
+        const soundOverrides = existingUserSoundOverrides ? JSON.parse(existingUserSoundOverrides.sound_overrides || '{}') : {};
+        
+        // Map category name to sound type string
+        let soundTypeStr;
+        switch (soundsType) {
+            case 'backgroundMusic':
+                soundTypeStr = 'background';
+                break;
+            case 'ambianceSounds':
+                soundTypeStr = 'ambiance';
+                break;
+            case 'soundboard':
+                soundTypeStr = 'soundboard';
+                break;
+            default:
+                return res.status(400).json({ error: 'Invalid sounds type' });
+        }
+        
+        await db.beginTransaction();
+        
+        // Process each change
+        for (const change of changes) {
+            const { filename, isEnabled, contexts = [], credit = '' } = change;
+            
+            // Get the sound ID from the database
+            const categoryId = config.soundCategories[soundsType];
+            if (!categoryId) {
+                return res.status(400).json({ error: 'Invalid sound category.' });
+            }
+            
+            const sound = await db.getSoundByFilename(filename, categoryId);
+            if (!sound) {
+                console.warn(`Sound not found: ${filename}, skipping`);
+                continue;
+            }
+            
+            const soundKey = `${soundTypeStr}_${sound.id}`;
+            
+            // Update sound override in JSON structure
+            soundOverrides[soundKey] = {
+                isEnabled: isEnabled !== undefined ? isEnabled : true,
+                credit: credit || ''
+            };
+            
+            // Update contexts in user_sound_contexts table
+            await db.execute(
+                'DELETE FROM user_sound_contexts WHERE user_id = ? AND sound_type = ? AND sound_id = ?',
+                [userId, soundTypeStr, sound.id]
+            );
+            
+            for (let i = 0; i < contexts.length; i++) {
+                await db.execute(
+                    'INSERT INTO user_sound_contexts (user_id, sound_type, sound_id, context, context_index) VALUES (?, ?, ?, ?, ?)',
+                    [userId, soundTypeStr, sound.id, contexts[i], i]
+                );
+            }
+        }
+        
+        // Save updated JSON back to database
+        const soundOverridesJSON = JSON.stringify(soundOverrides);
+        
+        if (existingUserSoundOverrides) {
+            await db.execute(
+                'UPDATE user_sounds SET sound_overrides = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?',
+                [soundOverridesJSON, userId]
+            );
+        } else {
+            await db.execute(
+                'INSERT INTO user_sounds (user_id, sound_overrides) VALUES (?, ?)',
+                [userId, soundOverridesJSON]
+            );
+        }
+        
+        await db.commit();
+        res.json({ success: true, message: 'Sounds updated successfully' });
+        
+    } catch (error) {
+        await db.rollback();
+        console.error('Error in updateUserSoundsBatch:', error);
+        res.status(500).json({ error: 'Failed to update sounds', details: error.message });
+    }
+}

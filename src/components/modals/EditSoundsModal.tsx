@@ -1,7 +1,7 @@
-import { Button, Loader, Modal, Select, Stack, Switch, Text, MultiSelect, Group, Badge, TextInput } from '@mantine/core';
-import { useEffect, useState, useRef } from 'react';
+import { Button, Loader, Modal, Select, Stack, Switch, Text, MultiSelect, Group, Badge, TextInput, ActionIcon } from '@mantine/core';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
-import { IconPlayerPlay, IconPlayerPause, IconPlayerStop } from '@tabler/icons-react';
+import { IconPlayerPlay, IconPlayerPause, IconPlayerStop, IconX } from '@tabler/icons-react';
 import type { Sound, SoundCategory } from '../../types/sound';
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 
@@ -66,15 +66,38 @@ export function EditSoundsModal({
   const [edits, setEdits] = useState<Record<string, boolean>>({});
   const [contextEdits, setContextEdits] = useState<Record<string, string[]>>({});
   const [creditEdits, setCreditEdits] = useState<Record<string, string>>({});
-  const [selectedCategory, setSelectedCategory] = useState<SoundCategory>(category);
+  const [selectedCategory, setSelectedCategory] = useState<SoundCategory>(category || 'ambiance');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingSoundId, setEditingSoundId] = useState<string | null>(null);
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   
-  const { play, stop, pause } = useAudioPlayer();
-  const audioPlayerRef = useRef<{ play: (url: string) => Promise<void>, stop: () => void, pause: () => void } | null>(null);
+  const { play, stop, player } = useAudioPlayer();
+
+  // Generate dynamic context options that include both predefined options and user-created contexts
+  const availableContexts = useMemo(() => {
+    if (!sounds.length || !selectedCategory) return CONTEXT_OPTIONS[selectedCategory] || [];
+
+    // Extract all unique contexts from all sounds in the current category
+    const userContexts = new Set<string>();
+    sounds.forEach(sound => {
+      if (sound.contexts && Array.isArray(sound.contexts)) {
+        sound.contexts.forEach(context => {
+          if (context && typeof context === 'string') {
+            userContexts.add(context);
+          }
+        });
+      }
+    });
+
+    // Merge predefined options with user contexts
+    const predefinedOptions = CONTEXT_OPTIONS[selectedCategory] || [];
+    const allContexts = [...new Set([...predefinedOptions, ...Array.from(userContexts)])];
+
+    // Sort alphabetically
+    return allContexts.sort((a, b) => a.localeCompare(b));
+  }, [sounds, selectedCategory]);
 
   useEffect(() => {
     if (!opened) return;
@@ -83,9 +106,20 @@ export function EditSoundsModal({
     setCreditEdits({});
     setEditingSoundId(null);
     setLoading(true);
+    
+    // Ensure we have a valid category
+    const safeCategory = selectedCategory || 'ambiance';
+    
+    // Ensure the category exists in our ENDPOINT mapping
+    if (!ENDPOINT[safeCategory]) {
+      console.error(`Invalid category: ${safeCategory}`);
+      setLoading(false);
+      return;
+    }
+    
     const url = userId
-      ? `${ENDPOINT[selectedCategory]}?userId=${userId}`
-      : ENDPOINT[selectedCategory];
+      ? `${ENDPOINT[safeCategory]}?userId=${userId}`
+      : ENDPOINT[safeCategory];
     fetch(url)
       .then((r) => {
         if (!r.ok) {
@@ -138,7 +172,7 @@ export function EditSoundsModal({
       
       if (currentlyPlaying === filename && isPlaying) {
         // Currently playing this sound, pause it
-        pause();
+        player.pause();
         setIsPlaying(false);
       } else {
         // Play this sound
@@ -297,49 +331,54 @@ export function EditSoundsModal({
                   
                   {isEditing && (
                     <Stack gap="xs" mt="xs">
+                      <Group gap="xs" align="flex-end">
+                        <TextInput
+                          placeholder="Add new context..."
+                          style={{ flex: 1 }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                              const newContext = e.currentTarget.value.trim();
+                              if (!currentContexts.includes(newContext)) {
+                                setContextEdits(prev => ({ 
+                                  ...prev, 
+                                  [sound.filename]: [...(prev[sound.filename] ?? sound.contexts ?? []), newContext]
+                                }));
+                                e.currentTarget.value = '';
+                              }
+                            }
+                          }}
+                        />
+                        <Button
+                          size="xs"
+                          onClick={() => {
+                            const input = document.querySelector('input[placeholder="Add new context..."]') as HTMLInputElement;
+                            if (input && input.value.trim() && !currentContexts.includes(input.value.trim())) {
+                              const newContext = input.value.trim();
+                              setContextEdits(prev => ({ 
+                                ...prev, 
+                                [sound.filename]: [...(prev[sound.filename] ?? sound.contexts ?? []), newContext]
+                              }));
+                              input.value = '';
+                            }
+                          }}
+                        >
+                          Add
+                        </Button>
+                      </Group>
+                      
                       <MultiSelect
-                        label="Contexts"
-                        placeholder="Select contexts..."
+                        label="Select existing contexts"
+                        placeholder="Search contexts..."
                         value={currentContexts}
                         onChange={(values) => {
                           setContextEdits(prev => ({ ...prev, [sound.filename]: values }));
                         }}
-                        data={CONTEXT_OPTIONS[selectedCategory]}
+                        data={availableContexts}
                         searchable
                         clearable
-                        creatable
-                        getCreateLabel={(query) => `+ Create ${query}`}
-                        onCreate={(query) => {
-                          const newOption = query;
-                          setContextEdits(prev => ({ 
-                            ...prev, 
-                            [sound.filename]: [...(prev[sound.filename] ?? []), newOption]
-                          }));
-                          return newOption;
-                        }}
+                        maxDropdownHeight={200}
+                        withinPortal={true}
                       />
-                      
-                      {isAdmin && (
-                        <TextInput
-                          label="Credit (Admin Only)"
-                          placeholder="Artist/Source credit..."
-                          value={currentCredit || ''}
-                          onChange={(e) => {
-                            setCreditEdits(prev => ({ ...prev, [sound.filename]: e.currentTarget.value }));
-                          }}
-                        />
-                      )}
-                      
-                      {currentContexts.length > 0 && (
-                        <Group gap="xs">
-                          <Text size="sm" fw={500}>Current contexts:</Text>
-                          {currentContexts.map((ctx, index) => (
-                            <Badge key={`${ctx}-${index}`} variant="light">
-                              {ctx}
-                            </Badge>
-                          ))}
-                        </Group>
-                      )}
                     </Stack>
                   )}
                   
@@ -364,9 +403,8 @@ export function EditSoundsModal({
                     </Button>
                   </Group>
                   
-                  <Text size="xs" c="dimmed">{sound.filename}</Text>
                   {sound.credit && (
-                    <Text size="xs" c="dimmed" italic={true}>
+                    <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
                       <span dangerouslySetInnerHTML={{ __html: sound.credit }} />
                     </Text>
                   )}

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getData, updateMainPlaylist, updateUserSound, savePreset, loadPresets, getSoundOrder, saveSoundOrder, addSound, deleteSound } = require('../controllers/soundController.sql');
+const { getData, updateMainPlaylist, updateUserSound, savePreset, loadPresets, getSoundOrder, saveSoundOrder, addSound, deleteSound, updateUserSoundsBatch } = require('../controllers/soundController.sql');
 const multer = require('multer');
 
 // Configure multer with a file size limit
@@ -50,6 +50,7 @@ router.post('/save-sound-order', saveSoundOrder);
 router.post('/delete-sound', deleteSound);
 router.post('/update-main-playlist', updateMainPlaylist);
 router.post('/update-user-sound', updateUserSound);
+router.post('/update-user-sounds-batch', updateUserSoundsBatch);
 router.post('/add-sound', upload.fields([{ name: 'file' }, { name: 'imageFile' }]), addSound); // Add the addSound route
 
 module.exports = router;

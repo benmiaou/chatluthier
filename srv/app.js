@@ -38,10 +38,6 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(authRoutes);
-app.use(soundRoutes);
-app.use(requestRoutes);
-
 // Spotify PKCE token exchange endpoint
 app.post('/api/spotify/token', async (req, res) => {
     try {
@@ -132,7 +128,10 @@ app.post('/api/spotify/refresh', async (req, res) => {
     }
 });
 
-
+// API routes must come before the catch-all route
+app.use(authRoutes);
+app.use(soundRoutes);
+app.use(requestRoutes);
 
 // SPA fallback — serve index.html for all non-API routes so React Router works
 app.get('*', (req, res) => {
