@@ -19,13 +19,13 @@ createRoot(document.getElementById('root')!).render(
     <ColorSchemeScript defaultColorScheme="dark" />
     <MantineProvider theme={theme} defaultColorScheme="dark">
       <ModalsProvider>
-        <Notifications 
+        <Notifications
           position="top-right"
           styles={{
             root: {
               top: 0, // Position below header
-              zIndex: 50  // High enough to show above content, low enough not to block
-            }
+              zIndex: 50, // High enough to show above content, low enough not to block
+            },
           }}
         />
         <AuthProvider>

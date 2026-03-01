@@ -46,7 +46,12 @@ export function AddSoundModal({ opened, onClose, onAdded }: AddSoundModalProps) 
   return (
     <Modal opened={opened} onClose={onClose} title="Add New Sound">
       <Stack gap="sm">
-        <TextInput label="Display Name" value={displayName} onChange={(e) => setDisplayName(e.currentTarget.value)} required />
+        <TextInput
+          label="Display Name"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.currentTarget.value)}
+          required
+        />
         <Select
           label="Category"
           value={category}
@@ -58,7 +63,11 @@ export function AddSoundModal({ opened, onClose, onAdded }: AddSoundModalProps) 
           ]}
           required
         />
-        <TextInput label="Credit" value={credit} onChange={(e) => setCredit(e.currentTarget.value)} />
+        <TextInput
+          label="Credit"
+          value={credit}
+          onChange={(e) => setCredit(e.currentTarget.value)}
+        />
         <FileInput label="Audio File" accept="audio/*" value={file} onChange={setFile} required />
         <Button onClick={handleSubmit} loading={loading}>
           Upload

@@ -15,19 +15,35 @@ interface AmbianceSoundsProps {
 
 export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>) {
   const { send, addMessageHandler, sessionId } = useSocketContext();
-  const { bars, allBars, context, setContext, setBarVolume, reset, getStatus, applyStatus, presets, savePreset, applyPreset, loadPresets } = useAmbianceSounds(userId);
+  const {
+    bars,
+    allBars,
+    context,
+    setContext,
+    setBarVolume,
+    reset,
+    getStatus,
+    applyStatus,
+    presets,
+    savePreset,
+    applyPreset,
+    loadPresets,
+  } = useAmbianceSounds(userId);
   const [presetName, setPresetName] = useState('');
 
-  const contexts = ['All', ...Array.from(new Set(allBars.flatMap((b) => b.sound.contexts ?? [])))].filter(Boolean);
+  const contexts = [
+    'All',
+    ...Array.from(new Set(allBars.flatMap((b) => b.sound.contexts ?? []))),
+  ].filter(Boolean);
 
   // Initialize soundOrder with the current order of bars
   const [soundOrder, setSoundOrder] = useState<string[]>(() => {
-    return bars.map(bar => bar.sound.filename);
+    return bars.map((bar) => bar.sound.filename);
   });
 
   // Add moveItem function for react-dnd
   const moveItem = (fromIndex: number, toIndex: number) => {
-    setSoundOrder(prevOrder => {
+    setSoundOrder((prevOrder) => {
       const newOrder = [...prevOrder];
       const [movedItem] = newOrder.splice(fromIndex, 1);
       newOrder.splice(toIndex, 0, movedItem);
@@ -38,10 +54,10 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
   // Apply sound order to bars when soundOrder or bars change
   const orderedBars = useMemo(() => {
     if (soundOrder.length === 0 || bars.length === 0) return bars;
-    
+
     // Create a map for quick lookup
     const orderMap = new Map(soundOrder.map((filename, index) => [filename, index]));
-    
+
     // Sort bars based on the soundOrder
     return [...bars].sort((a, b) => {
       const aIndex = orderMap.get(a.sound.filename) ?? Infinity;
@@ -60,32 +76,35 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
 
   const loadSoundOrder = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/get-sound-order?userId=${userId}&soundType=ambianceSounds`, {
-        credentials: 'include'
-      });
+      const response = await fetch(
+        `http://localhost:3000/get-sound-order?userId=${userId}&soundType=ambianceSounds`,
+        {
+          credentials: 'include',
+        }
+      );
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
       }
-      
+
       const contentType = response.headers.get('content-type');
       if (!contentType?.includes('application/json')) {
         throw new Error('Response is not JSON');
       }
-      
+
       const data = await response.json();
       const loadedOrder = data.order || [];
-      
+
       // Filter the loaded order to only include filenames that exist in current bars
       const validOrder = loadedOrder.filter((filename: string) =>
         bars.some((bar) => bar.sound.filename === filename)
       );
-      
+
       // If we have a valid loaded order, use it. Otherwise use the current bars order.
-      setSoundOrder(validOrder.length > 0 ? validOrder : bars.map(bar => bar.sound.filename));
+      setSoundOrder(validOrder.length > 0 ? validOrder : bars.map((bar) => bar.sound.filename));
     } catch (error) {
       console.error('Failed to load sound order:', error);
       // Fallback to current bars order if loading fails
-      setSoundOrder(bars.map(bar => bar.sound.filename));
+      setSoundOrder(bars.map((bar) => bar.sound.filename));
     }
   };
 
@@ -96,7 +115,7 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
         setSoundOrder(newOrder);
         return;
       }
-      
+
       const response = await fetch('http://localhost:3000/save-sound-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -104,16 +123,16 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
         body: JSON.stringify({
           userId,
           soundType: 'ambianceSounds',
-          order: newOrder
-        })
+          order: newOrder,
+        }),
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Server error response:', errorText);
         throw new Error(`Server responded with status ${response.status}: ${errorText}`);
       }
-      
+
       setSoundOrder(newOrder);
     } catch (error) {
       console.error('Failed to save sound order:', error);
@@ -127,20 +146,20 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
       console.log('No valid user ID, skipping save. userId:', userId);
       return;
     }
-    
+
     // Ensure the soundOrder state is updated with the final position
     // This handles cases where the hover updates might not have been applied
-    setSoundOrder(prevOrder => {
+    setSoundOrder((prevOrder) => {
       const newOrder = [...prevOrder];
       const [movedItem] = newOrder.splice(fromIndex, 1);
       newOrder.splice(toIndex, 0, movedItem);
-      
+
       // Save the final order to the server immediately after state update
       saveSoundOrder(newOrder);
-      
+
       return newOrder;
     });
-    
+
     // The visual order will update automatically via the orderedBars memo
   };
 
@@ -151,7 +170,11 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
       // to avoid the one-step delay issue
       const currentStatus = getStatus();
       currentStatus[filename] = volume;
-      send({ type: 'ambianceStatusUpdate', id: sessionId, content: { ambianceStatus: currentStatus } });
+      send({
+        type: 'ambianceStatusUpdate',
+        id: sessionId,
+        content: { ambianceStatus: currentStatus },
+      });
     }
   };
 
@@ -178,11 +201,11 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
       if (msg.type === 'ambianceStatusUpdate' && msg.content) {
         const { ambianceStatus } = msg.content as { ambianceStatus: Record<string, number> };
         applyStatus(ambianceStatus);
-        
+
         // Show credits for any sounds that have credits
         Object.entries(ambianceStatus).forEach(([filename, volume]) => {
           if (volume > 0) {
-            const sound = bars.find(s => s.sound.filename === filename);
+            const sound = bars.find((s) => s.sound.filename === filename);
             if (sound?.sound?.credit) {
               showCreditToast(sound.sound.name, sound.sound.credit);
             }
@@ -197,22 +220,22 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
             id: sessionId,
             content: {
               statusType: 'ambiance',
-              statusData: getStatus()
-            }
+              statusData: getStatus(),
+            },
           });
         }
       } else if (msg.type === 'statusResponse' && msg.content) {
-        const { statusType, statusData } = msg.content as { 
-          statusType: string; 
-          statusData: Record<string, number>
+        const { statusType, statusData } = msg.content as {
+          statusType: string;
+          statusData: Record<string, number>;
         };
         if (statusType === 'ambiance' && statusData) {
           applyStatus(statusData);
-          
+
           // Show credits for any sounds that have credits
           Object.entries(statusData).forEach(([filename, volume]) => {
             if (volume > 0) {
-              const sound = bars.find(s => s.sound.filename === filename);
+              const sound = bars.find((s) => s.sound.filename === filename);
               if (sound?.sound?.credit) {
                 showCreditToast(sound.sound.name, sound.sound.credit);
               }
@@ -298,10 +321,10 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
               width: '100%',
               overflow: 'visible',
               alignContent: 'start',
-              columnGap: '10px',  // Reduced horizontal spacing between images
-              rowGap: '10px',      // Consistent vertical spacing between rows
+              columnGap: '10px', // Reduced horizontal spacing between images
+              rowGap: '10px', // Consistent vertical spacing between rows
               marginTop: '0',
-              paddingTop: '0'
+              paddingTop: '0',
             }}
           >
             {orderedBars.map((bar, index) => (
@@ -317,8 +340,6 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
             ))}
           </div>
         </DndProvider>
-
-
       </Stack>
     </Paper>
   );

@@ -64,7 +64,7 @@ export function useAmbianceSounds(userId: string | null) {
           b.audio.pause();
         }
         return { ...b, volume };
-      }),
+      })
     );
   }, []);
 
@@ -74,7 +74,7 @@ export function useAmbianceSounds(userId: string | null) {
         b.audio.pause();
         b.audio.volume = 0;
         return { ...b, volume: 0 };
-      }),
+      })
     );
   }, []);
 
@@ -92,7 +92,7 @@ export function useAmbianceSounds(userId: string | null) {
         if (vol > 0 && b.audio.paused) b.audio.play().catch(() => {});
         else if (vol === 0) b.audio.pause();
         return { ...b, volume: vol };
-      }),
+      })
     );
   }, []);
 
@@ -125,7 +125,7 @@ export function useAmbianceSounds(userId: string | null) {
         body: JSON.stringify({ userId, presetName: name, presetData: status }),
       });
     },
-    [userId, getStatus],
+    [userId, getStatus]
   );
 
   const applyPreset = useCallback(
@@ -133,7 +133,7 @@ export function useAmbianceSounds(userId: string | null) {
       const preset = presets[name];
       if (preset) applyStatus(preset);
     },
-    [presets, applyStatus],
+    [presets, applyStatus]
   );
 
   // Cleanup audio on unmount
@@ -147,7 +147,8 @@ export function useAmbianceSounds(userId: string | null) {
   }, []);
 
   return {
-    bars: context === 'All' ? bars : bars.filter((b) => b.sound.contexts?.includes(context) ?? false),
+    bars:
+      context === 'All' ? bars : bars.filter((b) => b.sound.contexts?.includes(context) ?? false),
     allBars: bars,
     presets,
     context,

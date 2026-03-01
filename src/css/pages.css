@@ -1,146 +1,147 @@
 header {
-    background-size: cover;
-    padding: 20px;
-    text-align: center;
-    position: relative;
-    color: var(--main-text);
+  background-size: cover;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  color: var(--main-text);
 }
 
 .header-content {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: var(--main-background-color);
-    border-radius: 8px;
-    padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--main-background-color);
+  border-radius: 8px;
+  padding: 20px;
 }
 
 nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    background-color: var(--main-background-color);
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: var(--main-background-color);
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
 }
 
 nav a {
-    color:  var(--main-text);
-    text-decoration: none;
-    padding: 10px;
-    display: block;
+  color: var(--main-text);
+  text-decoration: none;
+  padding: 10px;
+  display: block;
 }
 
-body, html {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    font-family: var(--fontfamilly);
-    background-color: var(--main-background-color-secondary);
-    color: var(--main-text);
+body,
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--fontfamilly);
+  background-color: var(--main-background-color-secondary);
+  color: var(--main-text);
 }
 
 a {
-    color: var(--link-color);
-    text-decoration: none;
+  color: var(--link-color);
+  text-decoration: none;
 }
 
 a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
 
 h2 {
-    text-align: center;
-    margin-bottom: 20px;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .top-left-controls {
-    position: absolute;
-    left: 10px;
-    padding: 20px;
+  position: absolute;
+  left: 10px;
+  padding: 20px;
 }
 
 .logo {
-    width: 100px;
-    height: auto;
-    vertical-align: middle;
+  width: 100px;
+  height: auto;
+  vertical-align: middle;
 }
 
 .status {
-    margin-top: 10px;
-    font-size: 0.9em;
-    color: var(--main-text-info);
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: var(--main-text-info);
 }
 
 .center-content {
-    flex-grow: 1;
-    text-align: center;
+  flex-grow: 1;
+  text-align: center;
 }
 
 .icon {
-    position: absolute;
-    top: 25%;
-    right: 25%;
-    width: 50%;
-    height: 50%;
-    z-index: 3;
-    user-select: none;
-    pointer-events: none;
+  position: absolute;
+  top: 25%;
+  right: 25%;
+  width: 50%;
+  height: 50%;
+  z-index: 3;
+  user-select: none;
+  pointer-events: none;
 }
 
 .section {
-    padding: 20px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-    grid-auto-rows: minmax(50px, auto);
-    gap: 20px;
-    align-items: center;
-    justify-content: center;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  grid-auto-rows: minmax(50px, auto);
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
 }
 
 #background-music {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+  justify-content: center;
 }
 
 #background-music .button-primary {
-    display: inline-block;
-    width: auto;
+  display: inline-block;
+  width: auto;
 }
 
 #background-music .button-primary-active {
-    display: inline-block !important;
-    width: auto;
+  display: inline-block !important;
+  width: auto;
 }
 
 /* Footer styling */
 footer {
-    background-size: cover;
-    padding: 20px;
-    text-align: center;
-    position: relative;
-    color: var(--main-text);
+  background-size: cover;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  color: var(--main-text);
 }
 
 .footer-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--main-background-color);
-    border-radius: 8px;
-    padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--main-background-color);
+  border-radius: 8px;
+  padding: 20px;
 }
 
 .footer-content a {
-    margin: 0 15px;
-    color:  var(--main-text);
-    text-decoration: none;
+  margin: 0 15px;
+  color: var(--main-text);
+  text-decoration: none;
 }
 
 .footer-content a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }

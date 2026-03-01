@@ -9,7 +9,13 @@ interface CustomComboboxProps {
   readonly width?: number | string;
 }
 
-export function CustomCombobox({ value, onChange, data, placeholder = 'Select', width = 'auto' }: CustomComboboxProps) {
+export function CustomCombobox({
+  value,
+  onChange,
+  data,
+  placeholder = 'Select',
+  width = 'auto',
+}: CustomComboboxProps) {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
@@ -37,25 +43,35 @@ export function CustomCombobox({ value, onChange, data, placeholder = 'Select', 
           style={{
             width,
             justifyContent: 'space-between',
-            minWidth: '100px'
+            minWidth: '100px',
           }}
         >
           {value || placeholder}
         </Button>
       </Combobox.Target>
 
-      <Combobox.Dropdown style={{
-        backgroundColor: 'var(--main-background-color)',
-        border: '1px solid var(--main-border)',
-        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-        borderRadius: '4px',
-        overflow: 'hidden',
-        maxHeight: '300px',
-        overflowY: 'auto',
-        minWidth: '200px',
-        width: 'max-content'
-      }}>
-        <div style={{ padding: '8px', sticky: 'top', backgroundColor: 'var(--main-background-color)', zIndex: 1, width: '100%' }}>
+      <Combobox.Dropdown
+        style={{
+          backgroundColor: 'var(--main-background-color)',
+          border: '1px solid var(--main-border)',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
+          borderRadius: '4px',
+          overflow: 'hidden',
+          maxHeight: '300px',
+          overflowY: 'auto',
+          minWidth: '200px',
+          width: 'max-content',
+        }}
+      >
+        <div
+          style={{
+            padding: '8px',
+            sticky: 'top',
+            backgroundColor: 'var(--main-background-color)',
+            zIndex: 1,
+            width: '100%',
+          }}
+        >
           <TextInput
             placeholder="Search contexts..."
             value={searchValue}
@@ -74,7 +90,7 @@ export function CustomCombobox({ value, onChange, data, placeholder = 'Select', 
                   backgroundColor: 'var(--main-background-color)',
                   color: 'var(--main-text)',
                   padding: '8px 12px',
-                  fontSize: '14px'
+                  fontSize: '14px',
                 }}
               >
                 {item}

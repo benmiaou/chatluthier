@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { useDrag, useDrop} from 'react-dnd';
+import { useDrag, useDrop } from 'react-dnd';
 import { SoundBar } from './SoundBar';
 import { IconGripVertical } from '@tabler/icons-react';
 
@@ -18,7 +18,7 @@ export function DraggableSoundBar({
   onChange,
   moveItem,
   onDragEnd,
-  showDragHandle
+  showDragHandle,
 }: Readonly<DraggableSoundBarProps>) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -28,7 +28,13 @@ export function DraggableSoundBar({
     end: (item, monitor) => {
       if (monitor.didDrop()) {
         const dropResult = monitor.getDropResult();
-        if (dropResult && typeof dropResult === 'object' && dropResult !== null && 'droppedOn' in dropResult && typeof dropResult.droppedOn === 'number') {
+        if (
+          dropResult &&
+          typeof dropResult === 'object' &&
+          dropResult !== null &&
+          'droppedOn' in dropResult &&
+          typeof dropResult.droppedOn === 'number'
+        ) {
           onDragEnd(item.index, dropResult.droppedOn);
         }
       }
@@ -68,7 +74,7 @@ export function DraggableSoundBar({
         transform: isDragging ? 'scale(0.95)' : 'none',
         transition: 'transform 0.1s ease, opacity 0.1s ease',
         zIndex: isDragging ? 1000 : 'auto',
-        position: 'relative'
+        position: 'relative',
       }}
     >
       {showDragHandle && (
@@ -86,19 +92,14 @@ export function DraggableSoundBar({
             cursor: 'grab',
             zIndex: 10,
             background: 'rgba(0, 0, 0, 0.1)',
-            borderRadius: '4px 4px 0 0'
+            borderRadius: '4px 4px 0 0',
           }}
         >
           <IconGripVertical size={18} color="#666" />
         </div>
       )}
       <div style={{ pointerEvents: isDragging ? 'none' : 'auto' }}>
-        <SoundBar
-          key={bar.sound.filename}
-          bar={bar}
-          onChange={onChange}
-          showDragHandle={false}
-        />
+        <SoundBar key={bar.sound.filename} bar={bar} onChange={onChange} showDragHandle={false} />
       </div>
     </div>
   );

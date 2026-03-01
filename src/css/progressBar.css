@@ -1,13 +1,12 @@
-
 #progressBar {
-    flex-grow: 1;
-    height: 4px;
-    background-color: var(--main-progressbar);
-    margin-right: 10px;
+  flex-grow: 1;
+  height: 4px;
+  background-color: var(--main-progressbar);
+  margin-right: 10px;
 }
 
 #sound-progress {
-    height: 100%;
-    background-color: var(--main-border);
-    width: 0%;
+  height: 100%;
+  background-color: var(--main-border);
+  width: 0%;
 }

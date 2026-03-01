@@ -1,10 +1,23 @@
-import { Badge, Button, CopyButton, Group, Paper, Stack, Text, TextInput, Loader, Avatar, Tooltip } from '@mantine/core';
+import {
+  Badge,
+  Button,
+  CopyButton,
+  Group,
+  Paper,
+  Stack,
+  Text,
+  TextInput,
+  Loader,
+  Avatar,
+  Tooltip,
+} from '@mantine/core';
 import { useState } from 'react';
 import { useSocketContext } from '../../contexts/SocketContext';
 import { IconCopy, IconCheck, IconPlugConnectedX, IconUsers } from '@tabler/icons-react';
 
 export function SessionManager() {
-  const { connected, sessionId, subscribe, disconnect, statusMessage, participants } = useSocketContext();
+  const { connected, sessionId, subscribe, disconnect, statusMessage, participants } =
+    useSocketContext();
   const [joinInput, setJoinInput] = useState('');
 
   const handleJoin = () => {
@@ -22,9 +35,7 @@ export function SessionManager() {
     subscribe(id);
   };
 
-  const inviteLink = sessionId
-    ? `${window.location.origin}?sessionId=${sessionId}`
-    : '';
+  const inviteLink = sessionId ? `${window.location.origin}?sessionId=${sessionId}` : '';
 
   return (
     <Paper p="md" radius="md" withBorder>
@@ -44,7 +55,12 @@ export function SessionManager() {
         </Group>
 
         {statusMessage && (
-          <Text size="xs" c={statusMessage.toLowerCase().includes('error') ? 'red' : sessionId ? 'teal' : 'orange'}>
+          <Text
+            size="xs"
+            c={
+              statusMessage.toLowerCase().includes('error') ? 'red' : sessionId ? 'teal' : 'orange'
+            }
+          >
             {statusMessage}
           </Text>
         )}
@@ -57,9 +73,15 @@ export function SessionManager() {
             </Text>
             <Group gap="xs">
               {participants.map((participant) => (
-                <Tooltip key={participant.id} label={participant.isAnonymous ? 'Anonymous' : participant.pseudo || 'Unknown'} position="top">
+                <Tooltip
+                  key={participant.id}
+                  label={participant.isAnonymous ? 'Anonymous' : participant.pseudo || 'Unknown'}
+                  position="top"
+                >
                   <Avatar size="xs" radius="xl" color={participant.isAnonymous ? 'gray' : 'blue'}>
-                    {participant.isAnonymous ? '?' : participant.pseudo?.charAt(0).toUpperCase() || '?'}
+                    {participant.isAnonymous
+                      ? '?'
+                      : participant.pseudo?.charAt(0).toUpperCase() || '?'}
                   </Avatar>
                 </Tooltip>
               ))}

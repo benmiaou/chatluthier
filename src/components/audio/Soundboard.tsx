@@ -16,16 +16,17 @@ interface SoundboardProps {
 
 export function Soundboard({ userId = null }: SoundboardProps) {
   const { send, addMessageHandler, sessionId } = useSocketContext();
-  const { sounds, allSounds, volume, context, setContext, playSound, setVolume } = useSoundboard(userId);
-  
+  const { sounds, allSounds, volume, context, setContext, playSound, setVolume } =
+    useSoundboard(userId);
+
   // Initialize soundOrder with the current order of sounds
   const [soundOrder, setSoundOrder] = useState<string[]>(() => {
-    return sounds.map(sound => sound.filename);
+    return sounds.map((sound) => sound.filename);
   });
 
   // Add moveItem function for react-dnd
   const moveItem = (fromIndex: number, toIndex: number) => {
-    setSoundOrder(prevOrder => {
+    setSoundOrder((prevOrder) => {
       const newOrder = [...prevOrder];
       const [movedItem] = newOrder.splice(fromIndex, 1);
       newOrder.splice(toIndex, 0, movedItem);
@@ -36,10 +37,10 @@ export function Soundboard({ userId = null }: SoundboardProps) {
   // Apply sound order to sounds when soundOrder or sounds change
   const orderedSounds = useMemo(() => {
     if (soundOrder.length === 0 || sounds.length === 0) return sounds;
-    
+
     // Create a map for quick lookup
     const orderMap = new Map(soundOrder.map((filename, index) => [filename, index]));
-    
+
     // Sort sounds based on the soundOrder
     return [...sounds].sort((a, b) => {
       const aIndex = orderMap.get(a.filename) ?? Infinity;
@@ -57,9 +58,12 @@ export function Soundboard({ userId = null }: SoundboardProps) {
 
   const loadSoundOrder = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/get-sound-order?userId=${userId}&soundType=soundboard`, {
-        credentials: 'include'
-      });
+      const response = await fetch(
+        `http://localhost:3000/get-sound-order?userId=${userId}&soundType=soundboard`,
+        {
+          credentials: 'include',
+        }
+      );
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
       }
@@ -78,11 +82,11 @@ export function Soundboard({ userId = null }: SoundboardProps) {
       );
 
       // If we have a valid loaded order, use it. Otherwise use the current sounds order.
-      setSoundOrder(validOrder.length > 0 ? validOrder : sounds.map(sound => sound.filename));
+      setSoundOrder(validOrder.length > 0 ? validOrder : sounds.map((sound) => sound.filename));
     } catch (error) {
       console.error('Failed to load sound order:', error);
       // Fallback to current sounds order if loading fails
-      setSoundOrder(sounds.map(sound => sound.filename));
+      setSoundOrder(sounds.map((sound) => sound.filename));
     }
   };
 
@@ -93,7 +97,7 @@ export function Soundboard({ userId = null }: SoundboardProps) {
         setSoundOrder(newOrder);
         return;
       }
-      
+
       const response = await fetch('http://localhost:3000/save-sound-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,8 +105,8 @@ export function Soundboard({ userId = null }: SoundboardProps) {
         body: JSON.stringify({
           userId,
           soundType: 'soundboard',
-          order: newOrder
-        })
+          order: newOrder,
+        }),
       });
 
       if (!response.ok) {
@@ -122,27 +126,30 @@ export function Soundboard({ userId = null }: SoundboardProps) {
       console.log('No valid user ID, skipping save. userId:', userId);
       return;
     }
-    
+
     // Ensure the soundOrder state is updated with the final position
-    setSoundOrder(prevOrder => {
+    setSoundOrder((prevOrder) => {
       const newOrder = [...prevOrder];
       const [movedItem] = newOrder.splice(fromIndex, 1);
       newOrder.splice(toIndex, 0, movedItem);
-      
+
       // Save the final order to the server immediately after state update
       saveSoundOrder(newOrder);
-      
+
       return newOrder;
     });
-    
+
     // The visual order will update automatically via the orderedSounds memo
   };
 
-  const contexts = ['All', ...Array.from(new Set(allSounds.flatMap((s) => s.contexts ?? [])))].filter(Boolean);
+  const contexts = [
+    'All',
+    ...Array.from(new Set(allSounds.flatMap((s) => s.contexts ?? []))),
+  ].filter(Boolean);
 
   const handlePlay = (filename: string) => {
     playSound(filename);
-    
+
     // Always try to show credits, regardless of session
     const sound = sounds.find((s) => s.filename === filename);
     if (sound?.credit) {
@@ -150,38 +157,47 @@ export function Soundboard({ userId = null }: SoundboardProps) {
     } else {
       console.log('No credit found for sound:', sound?.name, 'Filename:', filename);
     }
-    
+
     // Session-specific logic
     if (sessionId) {
-      send({ type: 'playSoundboardSound', id: sessionId, content: { 
-        filename, 
-        credit: sound?.credit,
-        name: sound?.name
-      } });
+      send({
+        type: 'playSoundboardSound',
+        id: sessionId,
+        content: {
+          filename,
+          credit: sound?.credit,
+          name: sound?.name,
+        },
+      });
     }
-  }
+  };
 
   // Listen for remote soundboard triggers
   useEffect(() => {
     return addMessageHandler((msg: WsMessage) => {
       if (msg.type === 'playSoundboardSound' && msg.content) {
-        const { filename, credit, name } = msg.content as { 
-          filename: string; 
+        const { filename, credit, name } = msg.content as {
+          filename: string;
           credit?: string;
-          name?: string
+          name?: string;
         };
         playSound(filename);
         // Show credit for received soundboard sounds
         if (credit && name) {
           showCreditToast(name, credit);
         } else {
-          console.log('No credit in received message for:', filename, 'Credit:', credit, 'Name:', name);
+          console.log(
+            'No credit in received message for:',
+            filename,
+            'Credit:',
+            credit,
+            'Name:',
+            name
+          );
         }
       }
     });
   }, [addMessageHandler, playSound]);
-
-
 
   return (
     <Paper p="xs" radius="md" withBorder>
@@ -234,7 +250,7 @@ export function Soundboard({ userId = null }: SoundboardProps) {
               padding: 0,
               width: '100%',
               overflow: 'visible',
-              alignContent: 'start'
+              alignContent: 'start',
             }}
           >
             {orderedSounds.map((sound, index) => (
@@ -250,7 +266,6 @@ export function Soundboard({ userId = null }: SoundboardProps) {
             ))}
           </div>
         </DndProvider>
-
       </Stack>
     </Paper>
   );

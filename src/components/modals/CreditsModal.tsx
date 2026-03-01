@@ -1,4 +1,15 @@
-import { Modal, ScrollArea, Stack, Text, Title, Divider, Badge, Group, Tabs, rem } from '@mantine/core';
+import {
+  Modal,
+  ScrollArea,
+  Stack,
+  Text,
+  Title,
+  Divider,
+  Badge,
+  Group,
+  Tabs,
+  rem,
+} from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { IconMusic, IconCloud, IconSpeakerphone } from '@tabler/icons-react';
 
@@ -36,11 +47,13 @@ export function CreditsModal({ opened, onClose }: CreditsModalProps) {
             category: cat,
           };
         };
-        setCredits([
-          ...(bg as any[]).map((s) => toEntry(s, 'Background Music')),
-          ...(amb as any[]).map((s) => toEntry(s, 'Ambiance Sounds')),
-          ...(sb as any[]).map((s) => toEntry(s, 'Soundboard')),
-        ].filter(Boolean) as CreditEntry[]);
+        setCredits(
+          [
+            ...(bg as any[]).map((s) => toEntry(s, 'Background Music')),
+            ...(amb as any[]).map((s) => toEntry(s, 'Ambiance Sounds')),
+            ...(sb as any[]).map((s) => toEntry(s, 'Soundboard')),
+          ].filter(Boolean) as CreditEntry[]
+        );
       } catch {
         /* ignore */
       }
@@ -54,71 +67,96 @@ export function CreditsModal({ opened, onClose }: CreditsModalProps) {
   }, {});
 
   return (
-    <Modal 
-      opened={opened} 
-      onClose={onClose} 
+    <Modal
+      opened={opened}
+      onClose={onClose}
       title="Sound Credits"
       size="xl"
-      styles={{ 
-        root: { 
-          '--modal-width': '70%', 
-          '--modal-max-width': '800px' 
+      styles={{
+        root: {
+          '--modal-width': '70%',
+          '--modal-max-width': '800px',
         },
-        content: { 
-          width: 'var(--modal-width)', 
+        content: {
+          width: 'var(--modal-width)',
           maxWidth: 'var(--modal-max-width)',
           height: '90vh',
           maxHeight: '90vh',
-          margin: 'auto'
+          margin: 'auto',
         },
-        body: { 
-          padding: '0' 
-        }
+        body: {
+          padding: '0',
+        },
       }}
     >
-      <Tabs defaultValue="background" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Tabs
+        defaultValue="background"
+        style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+      >
         <Tabs.List grow>
-          <Tabs.Tab value="background" leftSection={<IconMusic size={rem(16)} />}>Background Music</Tabs.Tab>
-          <Tabs.Tab value="ambiance" leftSection={<IconCloud size={rem(16)} />}>Ambiance Sounds</Tabs.Tab>
-          <Tabs.Tab value="soundboard" leftSection={<IconSpeakerphone size={rem(16)} />}>Soundboard</Tabs.Tab>
+          <Tabs.Tab value="background" leftSection={<IconMusic size={rem(16)} />}>
+            Background Music
+          </Tabs.Tab>
+          <Tabs.Tab value="ambiance" leftSection={<IconCloud size={rem(16)} />}>
+            Ambiance Sounds
+          </Tabs.Tab>
+          <Tabs.Tab value="soundboard" leftSection={<IconSpeakerphone size={rem(16)} />}>
+            Soundboard
+          </Tabs.Tab>
         </Tabs.List>
-        
+
         <div style={{ flex: 1, overflow: 'auto', marginTop: '1rem', padding: '0 1rem' }}>
           <Tabs.Panel value="background">
             {byCategory['Background Music']?.length > 0 ? (
               <Stack gap="md">
                 {byCategory['Background Music'].map((item) => (
-                  <Stack key={item.name} gap="xs" style={{ 
-                    padding: '0.5rem', 
-                    borderRadius: 'var(--mantine-radius-sm)',
-                    backgroundColor: 'var(--main-background-color)',
-                    transition: 'background-color 0.2s ease'
-                  }}>
+                  <Stack
+                    key={item.name}
+                    gap="xs"
+                    style={{
+                      padding: '0.5rem',
+                      borderRadius: 'var(--mantine-radius-sm)',
+                      backgroundColor: 'var(--main-background-color)',
+                      transition: 'background-color 0.2s ease',
+                    }}
+                  >
                     <Group gap="sm" wrap="nowrap">
-                      <Text fw={600} style={{ 
-                        minWidth: '200px', 
-                        color: 'var(--main-text)' 
-                      }}>
+                      <Text
+                        fw={600}
+                        style={{
+                          minWidth: '200px',
+                          color: 'var(--main-text)',
+                        }}
+                      >
                         {item.name}:
                       </Text>
-                      <Text 
-                        size="sm" 
-                        style={{ 
-                          flex: 1, 
+                      <Text
+                        size="sm"
+                        style={{
+                          flex: 1,
                           lineHeight: 1.6,
-                          color: 'var(--main-text)'
+                          color: 'var(--main-text)',
                         }}
                         dangerouslySetInnerHTML={{ __html: item.credit }}
                       />
                     </Group>
                     {item.creditUrl && (
-                      <Text size="xs" style={{ 
-                        paddingLeft: '210px', 
-                        color: 'var(--main-text-placeholder)' 
-                      }}>
-                        Source: <a href={item.creditUrl} target="_blank" rel="noopener noreferrer" style={{ 
-                          color: 'var(--link-color)' 
-                        }}>
+                      <Text
+                        size="xs"
+                        style={{
+                          paddingLeft: '210px',
+                          color: 'var(--main-text-placeholder)',
+                        }}
+                      >
+                        Source:{' '}
+                        <a
+                          href={item.creditUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: 'var(--link-color)',
+                          }}
+                        >
                           {new URL(item.creditUrl).hostname}
                         </a>
                       </Text>
@@ -132,42 +170,58 @@ export function CreditsModal({ opened, onClose }: CreditsModalProps) {
               </Text>
             )}
           </Tabs.Panel>
-          
+
           <Tabs.Panel value="ambiance">
             {byCategory['Ambiance Sounds']?.length > 0 ? (
               <Stack gap="md">
                 {byCategory['Ambiance Sounds'].map((item) => (
-                  <Stack key={item.name} gap="xs" style={{ 
-                    padding: '0.5rem', 
-                    borderRadius: 'var(--mantine-radius-sm)',
-                    backgroundColor: 'var(--main-background-color)',
-                    transition: 'background-color 0.2s ease'
-                  }}>
+                  <Stack
+                    key={item.name}
+                    gap="xs"
+                    style={{
+                      padding: '0.5rem',
+                      borderRadius: 'var(--mantine-radius-sm)',
+                      backgroundColor: 'var(--main-background-color)',
+                      transition: 'background-color 0.2s ease',
+                    }}
+                  >
                     <Group gap="sm" wrap="nowrap">
-                      <Text fw={600} style={{ 
-                        minWidth: '200px', 
-                        color: 'var(--main-text)' 
-                      }}>
+                      <Text
+                        fw={600}
+                        style={{
+                          minWidth: '200px',
+                          color: 'var(--main-text)',
+                        }}
+                      >
                         {item.name}:
                       </Text>
-                      <Text 
-                        size="sm" 
-                        style={{ 
-                          flex: 1, 
+                      <Text
+                        size="sm"
+                        style={{
+                          flex: 1,
                           lineHeight: 1.6,
-                          color: 'var(--main-text)'
+                          color: 'var(--main-text)',
                         }}
                         dangerouslySetInnerHTML={{ __html: item.credit }}
                       />
                     </Group>
                     {item.creditUrl && (
-                      <Text size="xs" style={{ 
-                        paddingLeft: '210px', 
-                        color: 'var(--main-text-placeholder)' 
-                      }}>
-                        Source: <a href={item.creditUrl} target="_blank" rel="noopener noreferrer" style={{ 
-                          color: 'var(--link-color)' 
-                        }}>
+                      <Text
+                        size="xs"
+                        style={{
+                          paddingLeft: '210px',
+                          color: 'var(--main-text-placeholder)',
+                        }}
+                      >
+                        Source:{' '}
+                        <a
+                          href={item.creditUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: 'var(--link-color)',
+                          }}
+                        >
                           {new URL(item.creditUrl).hostname}
                         </a>
                       </Text>
@@ -181,42 +235,58 @@ export function CreditsModal({ opened, onClose }: CreditsModalProps) {
               </Text>
             )}
           </Tabs.Panel>
-          
+
           <Tabs.Panel value="soundboard">
             {byCategory['Soundboard']?.length > 0 ? (
               <Stack gap="md">
                 {byCategory['Soundboard'].map((item) => (
-                  <Stack key={item.name} gap="xs" style={{ 
-                    padding: '0.5rem', 
-                    borderRadius: 'var(--mantine-radius-sm)',
-                    backgroundColor: 'var(--main-background-color)',
-                    transition: 'background-color 0.2s ease'
-                  }}>
+                  <Stack
+                    key={item.name}
+                    gap="xs"
+                    style={{
+                      padding: '0.5rem',
+                      borderRadius: 'var(--mantine-radius-sm)',
+                      backgroundColor: 'var(--main-background-color)',
+                      transition: 'background-color 0.2s ease',
+                    }}
+                  >
                     <Group gap="sm" wrap="nowrap">
-                      <Text fw={600} style={{ 
-                        minWidth: '200px', 
-                        color: 'var(--main-text)' 
-                      }}>
+                      <Text
+                        fw={600}
+                        style={{
+                          minWidth: '200px',
+                          color: 'var(--main-text)',
+                        }}
+                      >
                         {item.name}:
                       </Text>
-                      <Text 
-                        size="sm" 
-                        style={{ 
-                          flex: 1, 
+                      <Text
+                        size="sm"
+                        style={{
+                          flex: 1,
                           lineHeight: 1.6,
-                          color: 'var(--main-text)'
+                          color: 'var(--main-text)',
                         }}
                         dangerouslySetInnerHTML={{ __html: item.credit }}
                       />
                     </Group>
                     {item.creditUrl && (
-                      <Text size="xs" style={{ 
-                        paddingLeft: '210px', 
-                        color: 'var(--main-text-placeholder)' 
-                      }}>
-                        Source: <a href={item.creditUrl} target="_blank" rel="noopener noreferrer" style={{ 
-                          color: 'var(--link-color)' 
-                        }}>
+                      <Text
+                        size="xs"
+                        style={{
+                          paddingLeft: '210px',
+                          color: 'var(--main-text-placeholder)',
+                        }}
+                      >
+                        Source:{' '}
+                        <a
+                          href={item.creditUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: 'var(--link-color)',
+                          }}
+                        >
                           {new URL(item.creditUrl).hostname}
                         </a>
                       </Text>

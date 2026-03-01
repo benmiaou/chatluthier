@@ -8,7 +8,7 @@ const { spawn } = require('child_process');
 // Create logs directory if it doesn't exist
 const logsDir = path.join(__dirname, '..', 'logs');
 if (!fs.existsSync(logsDir)) {
-    fs.mkdirSync(logsDir, { recursive: true });
+  fs.mkdirSync(logsDir, { recursive: true });
 }
 
 // Log file path - use combined log file
@@ -21,54 +21,58 @@ console.log(`📝 Vite logs will be saved to: ${logFilePath}`);
 console.log('🔄 Starting Vite dev server with logging...\n');
 
 // Spawn the vite process - use direct path to node_modules
-const viteProcess = spawn('node', [path.join(__dirname, '..', 'node_modules', 'vite', 'bin', 'vite.js')], {
+const viteProcess = spawn(
+  'node',
+  [path.join(__dirname, '..', 'node_modules', 'vite', 'bin', 'vite.js')],
+  {
     cwd: path.join(__dirname, '..'),
-    stdio: ['inherit', 'pipe', 'pipe'] // Capture stdout and stderr
-});
+    stdio: ['inherit', 'pipe', 'pipe'], // Capture stdout and stderr
+  }
+);
 
 // Pipe stdout to both console and log file
 viteProcess.stdout.on('data', (data) => {
-    const message = data.toString();
-    process.stdout.write(message); // Output to console
-    logStream.write(`[${new Date().toISOString()}] [VITE] ${message}`); // Write to file
+  const message = data.toString();
+  process.stdout.write(message); // Output to console
+  logStream.write(`[${new Date().toISOString()}] [VITE] ${message}`); // Write to file
 });
 
 // Pipe stderr to both console and log file
 viteProcess.stderr.on('data', (data) => {
-    const message = data.toString();
-    process.stderr.write(message); // Output to console
-    logStream.write(`[${new Date().toISOString()}] [VITE-ERR] ${message}`); // Write to file
+  const message = data.toString();
+  process.stderr.write(message); // Output to console
+  logStream.write(`[${new Date().toISOString()}] [VITE-ERR] ${message}`); // Write to file
 });
 
 // Handle process exit
 viteProcess.on('close', (code) => {
-    const exitMessage = `\n🛑 Vite process exited with code ${code}\n`;
-    console.log(exitMessage);
-    logStream.write(`[${new Date().toISOString()}] ${exitMessage}`);
-    logStream.end();
-    process.exit(code);
+  const exitMessage = `\n🛑 Vite process exited with code ${code}\n`;
+  console.log(exitMessage);
+  logStream.write(`[${new Date().toISOString()}] ${exitMessage}`);
+  logStream.end();
+  process.exit(code);
 });
 
 // Handle Ctrl+C
 process.on('SIGINT', () => {
-    const sigintMessage = `\n⏹️  Received SIGINT, shutting down Vite...\n`;
-    console.log(sigintMessage);
-    logStream.write(`[${new Date().toISOString()}] ${sigintMessage}`);
-    viteProcess.kill('SIGINT');
+  const sigintMessage = `\n⏹️  Received SIGINT, shutting down Vite...\n`;
+  console.log(sigintMessage);
+  logStream.write(`[${new Date().toISOString()}] ${sigintMessage}`);
+  viteProcess.kill('SIGINT');
 });
 
 // Handle SIGTERM (for when concurrently shuts down)
 process.on('SIGTERM', () => {
-    const sigtermMessage = `\n🔴 Received SIGTERM, shutting down Vite...\n`;
-    console.log(sigtermMessage);
-    logStream.write(`[${new Date().toISOString()}] ${sigtermMessage}`);
-    viteProcess.kill('SIGTERM');
+  const sigtermMessage = `\n🔴 Received SIGTERM, shutting down Vite...\n`;
+  console.log(sigtermMessage);
+  logStream.write(`[${new Date().toISOString()}] ${sigtermMessage}`);
+  viteProcess.kill('SIGTERM');
 });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-    const errorMessage = `❌ Uncaught Exception: ${error.message}\n${error.stack}\n`;
-    console.error(errorMessage);
-    logStream.write(`[${new Date().toISOString()}] [CRASH] ${errorMessage}`);
-    viteProcess.kill('SIGTERM');
+  const errorMessage = `❌ Uncaught Exception: ${error.message}\n${error.stack}\n`;
+  console.error(errorMessage);
+  logStream.write(`[${new Date().toISOString()}] [CRASH] ${errorMessage}`);
+  viteProcess.kill('SIGTERM');
 });

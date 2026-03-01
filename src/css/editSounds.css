@@ -1,37 +1,37 @@
 .edit-sound-modal {
-    display: flex;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--main-background-color);
-    z-index: 1000;
-    overflow-y: auto;
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--main-background-color);
+  z-index: 1000;
+  overflow-y: auto;
 }
 
 .edit-sound-modal .modal-header {
-    background-color: var(--main-background-color);
-    color: var(--main-text);
-    padding: 10px;
-    text-align: center;
+  background-color: var(--main-background-color);
+  color: var(--main-text);
+  padding: 10px;
+  text-align: center;
 }
 
 .edit-sound-modal .modal-body {
-    padding: 20px;
-    background-color: var(--main-background-color);
-    color: var(--main-text);
-    overflow-y: auto;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+  padding: 20px;
+  background-color: var(--main-background-color);
+  color: var(--main-text);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .sound-item {
-    flex: 1;
-    margin: 10px;
-    border: 1px solid  var(--main-text);
-    padding: 10px;
-    border-radius: 5px;
-    background-color: var(--main-background-color);
+  flex: 1;
+  margin: 10px;
+  border: 1px solid var(--main-text);
+  padding: 10px;
+  border-radius: 5px;
+  background-color: var(--main-background-color);
 }

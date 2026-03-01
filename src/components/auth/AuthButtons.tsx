@@ -1,15 +1,35 @@
-import { Avatar, Group, Menu, Text, Button, Modal, TextInput, PasswordInput, Stack, Title } from '@mantine/core';
+import {
+  Avatar,
+  Group,
+  Menu,
+  Text,
+  Button,
+  Modal,
+  TextInput,
+  PasswordInput,
+  Stack,
+  Title,
+} from '@mantine/core';
 import { IconLogout, IconLogin, IconUserPlus } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 import { useAuthContext } from '../../contexts/AuthContext';
 
 export function AuthButtons() {
-  const { isSignedIn, userName, userPicture, signOut, loginWithPseudo, registerWithPseudo, getSecretQuestion, requestPasswordReset } = useAuthContext();
-  
+  const {
+    isSignedIn,
+    userName,
+    userPicture,
+    signOut,
+    loginWithPseudo,
+    registerWithPseudo,
+    getSecretQuestion,
+    requestPasswordReset,
+  } = useAuthContext();
+
   // Modal states
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
-  
+
   // Form states
   const [loginPseudo, setLoginPseudo] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -26,7 +46,7 @@ export function AuthButtons() {
   const [resetSecretAnswer, setResetSecretAnswer] = useState('');
   const [resetNewPassword, setResetNewPassword] = useState('');
   const [resetConfirmPassword, setResetConfirmPassword] = useState('');
-  
+
   // Real-time validation states for registration
   const [pseudoAvailable, setPseudoAvailable] = useState<boolean | null>(null);
   const [pseudoChecking, setPseudoChecking] = useState(false);
@@ -36,7 +56,9 @@ export function AuthButtons() {
   // Real-time validation effects
   useEffect(() => {
     // Check if passwords match
-    setPasswordMatch(registerPassword === registerConfirmPassword && registerConfirmPassword !== '');
+    setPasswordMatch(
+      registerPassword === registerConfirmPassword && registerConfirmPassword !== ''
+    );
   }, [registerPassword, registerConfirmPassword]);
 
   useEffect(() => {
@@ -56,7 +78,7 @@ export function AuthButtons() {
       try {
         // Convert pseudo to lowercase for case-insensitive comparison
         const pseudoToCheck = registerPseudo.trim();
-        
+
         const response = await fetch('/check-pseudo-available', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -95,34 +117,39 @@ export function AuthButtons() {
       setError('Incorrect login or password');
     }
   };
-  
+
   const handleRegister = async () => {
     try {
       setError('');
-      
+
       // Check validation states
       if (!passwordStrongEnough) {
         setError('Password must be at least 6 characters');
         return;
       }
-      
+
       if (!passwordMatch) {
         setError('Passwords do not match');
         return;
       }
-      
+
       if (pseudoAvailable === false) {
         setError('Pseudo is already taken');
         return;
       }
-      
+
       // Validate secret question and answer
       if (!registerSecretQuestion || !registerSecretAnswer) {
         setError('Secret question and answer are required');
         return;
       }
-      
-      await registerWithPseudo(registerPseudo, registerPassword, registerSecretQuestion, registerSecretAnswer);
+
+      await registerWithPseudo(
+        registerPseudo,
+        registerPassword,
+        registerSecretQuestion,
+        registerSecretAnswer
+      );
       setRegisterModalOpen(false);
       setRegisterPseudo('');
       setRegisterPassword('');
@@ -174,25 +201,25 @@ export function AuthButtons() {
   const handlePasswordReset = async () => {
     try {
       setError('');
-      
+
       // Validate secret answer
       if (!resetSecretAnswer.trim()) {
         setError('Please enter your secret answer');
         return;
       }
-      
+
       // Validate password confirmation
       if (resetNewPassword !== resetConfirmPassword) {
         setError('Passwords do not match');
         return;
       }
-      
+
       // Validate password length
       if (resetNewPassword.length < 6) {
         setError('Password must be at least 6 characters');
         return;
       }
-      
+
       await requestPasswordReset(resetPseudo, resetSecretAnswer, resetNewPassword);
       setSecretQuestionModalOpen(false);
       setResetPseudo('');
@@ -214,7 +241,9 @@ export function AuthButtons() {
             {userPicture ? (
               <Avatar src={userPicture} size="sm" radius="xl" />
             ) : (
-              <Avatar size="sm" radius="xl">{userName?.[0]}</Avatar>
+              <Avatar size="sm" radius="xl">
+                {userName?.[0]}
+              </Avatar>
             )}
             <Text size="sm" visibleFrom="sm">
               {userName}
@@ -241,7 +270,7 @@ export function AuthButtons() {
       >
         Login
       </Button>
-      
+
       <Button
         leftSection={<IconUserPlus size={16} />}
         variant="filled"
@@ -255,7 +284,10 @@ export function AuthButtons() {
       {/* Login Modal */}
       <Modal
         opened={loginModalOpen}
-        onClose={() => { setLoginModalOpen(false); setError(''); }}
+        onClose={() => {
+          setLoginModalOpen(false);
+          setError('');
+        }}
         title="Login"
         centered
         onKeyDown={(e) => {
@@ -291,12 +323,23 @@ export function AuthButtons() {
               }
             }}
           />
-          {error && <Text color="red" size="sm">{error}</Text>}
+          {error && (
+            <Text color="red" size="sm">
+              {error}
+            </Text>
+          )}
           <Button onClick={handleLogin} fullWidth>
             Login
           </Button>
           <Text ta="center" size="sm" mt="sm">
-            <Text span onClick={() => { setLoginModalOpen(false); handlePasswordResetModalOpen(); }} style={{ cursor: 'pointer', color: 'var(--mantine-primary-color-6)' }}>
+            <Text
+              span
+              onClick={() => {
+                setLoginModalOpen(false);
+                handlePasswordResetModalOpen();
+              }}
+              style={{ cursor: 'pointer', color: 'var(--mantine-primary-color-6)' }}
+            >
               Forgot password?
             </Text>
           </Text>
@@ -306,7 +349,10 @@ export function AuthButtons() {
       {/* Register Modal */}
       <Modal
         opened={registerModalOpen}
-        onClose={() => { setRegisterModalOpen(false); setError(''); }}
+        onClose={() => {
+          setRegisterModalOpen(false);
+          setError('');
+        }}
         title="Sign Up"
         centered
         onKeyDown={(e) => {
@@ -325,29 +371,42 @@ export function AuthButtons() {
             onChange={(e) => setRegisterPseudo(e.target.value)}
             required
             error={pseudoAvailable === false ? 'Pseudo already taken' : ''}
-            rightSection={pseudoChecking ? <Text size="xs" c="gray">Checking...</Text> : 
-              pseudoAvailable === true ? <Text size="xs" c="green">✓ Available</Text> : null}
+            rightSection={
+              pseudoChecking ? (
+                <Text size="xs" c="gray">
+                  Checking...
+                </Text>
+              ) : pseudoAvailable === true ? (
+                <Text size="xs" c="green">
+                  ✓ Available
+                </Text>
+              ) : null
+            }
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 handleRegister();
               }
             }}
           />
-          
+
           <PasswordInput
             label="Password"
             placeholder="Choose a password (min 6 characters)"
             value={registerPassword}
             onChange={(e) => setRegisterPassword(e.target.value)}
             required
-            error={registerPassword && !passwordStrongEnough ? 'Password must be at least 6 characters' : ''}
+            error={
+              registerPassword && !passwordStrongEnough
+                ? 'Password must be at least 6 characters'
+                : ''
+            }
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 handleRegister();
               }
             }}
           />
-          
+
           <PasswordInput
             label="Confirm Password"
             placeholder="Confirm your password"
@@ -385,7 +444,11 @@ export function AuthButtons() {
               }
             }}
           />
-          {error && <Text color="red" size="sm">{error}</Text>}
+          {error && (
+            <Text color="red" size="sm">
+              {error}
+            </Text>
+          )}
           <Button onClick={handleRegister} fullWidth>
             Sign Up
           </Button>
@@ -395,7 +458,10 @@ export function AuthButtons() {
       {/* Password Reset Modal - Step 1: Get Pseudo */}
       <Modal
         opened={passwordResetModalOpen}
-        onClose={() => { setPasswordResetModalOpen(false); setError(''); }}
+        onClose={() => {
+          setPasswordResetModalOpen(false);
+          setError('');
+        }}
         title="Reset Password"
         centered
         onKeyDown={(e) => {
@@ -419,7 +485,11 @@ export function AuthButtons() {
               }
             }}
           />
-          {error && <Text color="red" size="sm">{error}</Text>}
+          {error && (
+            <Text color="red" size="sm">
+              {error}
+            </Text>
+          )}
           <Button onClick={handleGetSecretQuestion} fullWidth>
             Continue
           </Button>
@@ -429,7 +499,10 @@ export function AuthButtons() {
       {/* Password Reset Modal - Step 2: Show Secret Question and Reset */}
       <Modal
         opened={secretQuestionModalOpen}
-        onClose={() => { setSecretQuestionModalOpen(false); setError(''); }}
+        onClose={() => {
+          setSecretQuestionModalOpen(false);
+          setError('');
+        }}
         title="Reset Password"
         centered
         onKeyDown={(e) => {
@@ -480,7 +553,11 @@ export function AuthButtons() {
               }
             }}
           />
-          {error && <Text color="red" size="sm">{error}</Text>}
+          {error && (
+            <Text color="red" size="sm">
+              {error}
+            </Text>
+          )}
           <Button onClick={handlePasswordReset} fullWidth>
             Reset Password
           </Button>

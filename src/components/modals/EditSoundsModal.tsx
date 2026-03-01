@@ -1,8 +1,25 @@
-import { Button, Loader, Modal, Stack, Switch, Text, Group, Badge, TextInput, ActionIcon } from '@mantine/core';
+import {
+  Button,
+  Loader,
+  Modal,
+  Stack,
+  Switch,
+  Text,
+  Group,
+  Badge,
+  TextInput,
+  ActionIcon,
+} from '@mantine/core';
 import { CustomCombobox } from '../audio/CustomCombobox';
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
-import { IconPlayerPlay, IconPlayerPause, IconPlayerStop, IconX, IconSearch } from '@tabler/icons-react';
+import {
+  IconPlayerPlay,
+  IconPlayerPause,
+  IconPlayerStop,
+  IconX,
+  IconSearch,
+} from '@tabler/icons-react';
 import type { Sound, SoundCategory } from '../../types/sound';
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 
@@ -22,23 +39,74 @@ const ENDPOINT: Record<SoundCategory, string> = {
 // Context options for each category
 const CONTEXT_OPTIONS: Record<SoundCategory, string[]> = {
   background: [
-    'calm', 'dynamic', 'intense',
-    'city', 'forest', 'mountain', 'ocean', 'space',
-    'fantasy', 'medieval', 'modern', 'sci-fi',
-    'battle', 'exploration', 'mystery', 'peaceful'
+    'calm',
+    'dynamic',
+    'intense',
+    'city',
+    'forest',
+    'mountain',
+    'ocean',
+    'space',
+    'fantasy',
+    'medieval',
+    'modern',
+    'sci-fi',
+    'battle',
+    'exploration',
+    'mystery',
+    'peaceful',
   ],
   ambiance: [
-    'animal', 'nature', 'city', 'fantasy', 'medieval', 'modern',
-    'magic', 'weather', 'water', 'fire', 'battle', 'peaceful',
-    'horror', 'sci-fi', 'technology', 'vehicle', 'music', 'voice',
-    'indoor', 'outdoor', 'day', 'night', 'crowd', 'market'
+    'animal',
+    'nature',
+    'city',
+    'fantasy',
+    'medieval',
+    'modern',
+    'magic',
+    'weather',
+    'water',
+    'fire',
+    'battle',
+    'peaceful',
+    'horror',
+    'sci-fi',
+    'technology',
+    'vehicle',
+    'music',
+    'voice',
+    'indoor',
+    'outdoor',
+    'day',
+    'night',
+    'crowd',
+    'market',
   ],
   soundboard: [
-    'animal', 'nature', 'city', 'fantasy', 'medieval', 'modern',
-    'magic', 'weather', 'water', 'fire', 'battle', 'peaceful',
-    'horror', 'sci-fi', 'technology', 'vehicle', 'music', 'voice',
-    'weapon', 'spell', 'ui', 'notification', 'alert'
-  ]
+    'animal',
+    'nature',
+    'city',
+    'fantasy',
+    'medieval',
+    'modern',
+    'magic',
+    'weather',
+    'water',
+    'fire',
+    'battle',
+    'peaceful',
+    'horror',
+    'sci-fi',
+    'technology',
+    'vehicle',
+    'music',
+    'voice',
+    'weapon',
+    'spell',
+    'ui',
+    'notification',
+    'alert',
+  ],
 };
 
 interface EditSoundsModalProps {
@@ -70,15 +138,16 @@ export function EditSoundsModal({
   const [saving, setSaving] = useState(false);
   const [editingSoundId, setEditingSoundId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Filter sounds based on search term
-  const filteredSounds = sounds.filter(sound => 
-    sound.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    sound.filename.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSounds = sounds.filter(
+    (sound) =>
+      sound.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sound.filename.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  
+
   const { play, stop, player } = useAudioPlayer();
 
   // Generate dynamic context options that include both predefined options and user-created contexts
@@ -87,9 +156,9 @@ export function EditSoundsModal({
 
     // Extract all unique contexts from all sounds in the current category
     const userContexts = new Set<string>();
-    sounds.forEach(sound => {
+    sounds.forEach((sound) => {
       if (sound.contexts && Array.isArray(sound.contexts)) {
-        sound.contexts.forEach(context => {
+        sound.contexts.forEach((context) => {
           if (context && typeof context === 'string') {
             userContexts.add(context);
           }
@@ -112,20 +181,18 @@ export function EditSoundsModal({
     setCreditEdits({});
     setEditingSoundId(null);
     setLoading(true);
-    
+
     // Ensure we have a valid category
     const safeCategory = selectedCategory || 'ambiance';
-    
+
     // Ensure the category exists in our ENDPOINT mapping
     if (!ENDPOINT[safeCategory]) {
       console.error(`Invalid category: ${safeCategory}`);
       setLoading(false);
       return;
     }
-    
-    const url = userId
-      ? `${ENDPOINT[safeCategory]}?userId=${userId}`
-      : ENDPOINT[safeCategory];
+
+    const url = userId ? `${ENDPOINT[safeCategory]}?userId=${userId}` : ENDPOINT[safeCategory];
     fetch(url)
       .then((r) => {
         if (!r.ok) {
@@ -135,14 +202,14 @@ export function EditSoundsModal({
       })
       .then((data: any[]) => {
         // Map backend data format to frontend expected format
-        const mappedSounds = data.map(sound => ({
+        const mappedSounds = data.map((sound) => ({
           id: String(sound.id || sound.filename),
           name: sound.display_name || sound.name || sound.filename,
           filename: sound.filename,
           imageFile: sound.imageFile || sound.image_file,
           contexts: Array.isArray(sound.contexts) ? sound.contexts : [],
           credit: sound.credit || '',
-          isEnabled: sound.isEnabled !== undefined ? sound.isEnabled : true
+          isEnabled: sound.isEnabled !== undefined ? sound.isEnabled : true,
         }));
         setSounds(mappedSounds);
       })
@@ -175,7 +242,7 @@ export function EditSoundsModal({
         default:
           soundUrl = `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
       }
-      
+
       if (currentlyPlaying === filename && isPlaying) {
         // Currently playing this sound, pause it
         player.pause();
@@ -186,7 +253,7 @@ export function EditSoundsModal({
           // Stop any currently playing sound first
           stop();
         }
-        
+
         await play(soundUrl, 0.5); // Play at 50% volume
         setCurrentlyPlaying(filename);
         setIsPlaying(true);
@@ -209,10 +276,10 @@ export function EditSoundsModal({
     setSaving(true);
     try {
       const soundsType = SOUNDS_TYPE[selectedCategory];
-      
+
       // User: collect all changes and send in a single request if possible
       const changes = [];
-      
+
       // Collect all changes
       Object.entries(edits).forEach(([filename, isEnabled]) => {
         changes.push({
@@ -221,7 +288,7 @@ export function EditSoundsModal({
           contexts: contextEdits[filename],
         });
       });
-      
+
       // Add context-only changes
       Object.entries(contextEdits).forEach(([filename, contexts]) => {
         if (!edits[filename]) {
@@ -231,25 +298,25 @@ export function EditSoundsModal({
           });
         }
       });
-      
+
       // Send all changes in a single batch request if there are changes
       if (changes.length > 0) {
         const response = await fetch('/update-user-sounds-batch', {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            userId, 
-            soundsType, 
-            changes 
+          body: JSON.stringify({
+            userId,
+            soundsType,
+            changes,
           }),
         });
-        
+
         if (!response.ok) {
           throw new Error('Failed to update user sounds');
         }
       }
-      
+
       notifications.show({ message: 'Saved!', color: 'teal' });
       onSave?.();
       onClose();
@@ -268,17 +335,17 @@ export function EditSoundsModal({
       title="Edit My Sounds"
       size="xl"
       styles={{
-        root: { 
-          '--modal-width': '80%', 
-          '--modal-max-width': '900px' 
+        root: {
+          '--modal-width': '80%',
+          '--modal-max-width': '900px',
         },
-        content: { 
-          width: 'var(--modal-width)', 
+        content: {
+          width: 'var(--modal-width)',
           maxWidth: 'var(--modal-max-width)',
           height: '90vh',
           maxHeight: '90vh',
-          margin: 'auto'
-        }
+          margin: 'auto',
+        },
       }}
     >
       <Stack gap="sm">
@@ -302,26 +369,32 @@ export function EditSoundsModal({
         ) : filteredSounds.length === 0 ? (
           <Text c="dimmed">No sounds found matching your search.</Text>
         ) : (
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
-            gap: '1rem', 
-            maxHeight: '400px', 
-            overflowY: 'auto',
-            paddingRight: '0.5rem'
-          }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '1rem',
+              maxHeight: '400px',
+              overflowY: 'auto',
+              paddingRight: '0.5rem',
+            }}
+          >
             {filteredSounds.map((sound) => {
               const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
               const currentContexts = contextEdits[sound.filename] ?? sound.contexts ?? [];
               const currentCredit = creditEdits[sound.filename] ?? sound.credit ?? '';
               const isEditing = editingSoundId === sound.id;
-              
+
               return (
-                <Stack key={sound.filename} gap="sm" style={{ 
-                  border: '1px solid var(--mantine-color-dark-4)',
-                  padding: '0.5rem',
-                  borderRadius: 'var(--mantine-radius-sm)'
-                }}>
+                <Stack
+                  key={sound.filename}
+                  gap="sm"
+                  style={{
+                    border: '1px solid var(--mantine-color-dark-4)',
+                    padding: '0.5rem',
+                    borderRadius: 'var(--mantine-radius-sm)',
+                  }}
+                >
                   <Group justify="space-between" wrap="nowrap">
                     <Switch
                       label={sound.name}
@@ -338,7 +411,7 @@ export function EditSoundsModal({
                       {isEditing ? 'Done' : 'Edit'}
                     </Button>
                   </Group>
-                  
+
                   {isEditing && (
                     <Stack gap="xs" mt="xs">
                       <Group gap="xs" align="flex-end">
@@ -349,9 +422,12 @@ export function EditSoundsModal({
                             if (e.key === 'Enter' && e.currentTarget.value.trim()) {
                               const newContext = e.currentTarget.value.trim();
                               if (!currentContexts.includes(newContext)) {
-                                setContextEdits(prev => ({ 
-                                  ...prev, 
-                                  [sound.filename]: [...(prev[sound.filename] ?? sound.contexts ?? []), newContext]
+                                setContextEdits((prev) => ({
+                                  ...prev,
+                                  [sound.filename]: [
+                                    ...(prev[sound.filename] ?? sound.contexts ?? []),
+                                    newContext,
+                                  ],
                                 }));
                                 e.currentTarget.value = '';
                               }
@@ -361,12 +437,21 @@ export function EditSoundsModal({
                         <Button
                           size="xs"
                           onClick={() => {
-                            const input = document.querySelector('input[placeholder="Add new context..."]') as HTMLInputElement;
-                            if (input && input.value.trim() && !currentContexts.includes(input.value.trim())) {
+                            const input = document.querySelector(
+                              'input[placeholder="Add new context..."]'
+                            ) as HTMLInputElement;
+                            if (
+                              input &&
+                              input.value.trim() &&
+                              !currentContexts.includes(input.value.trim())
+                            ) {
                               const newContext = input.value.trim();
-                              setContextEdits(prev => ({ 
-                                ...prev, 
-                                [sound.filename]: [...(prev[sound.filename] ?? sound.contexts ?? []), newContext]
+                              setContextEdits((prev) => ({
+                                ...prev,
+                                [sound.filename]: [
+                                  ...(prev[sound.filename] ?? sound.contexts ?? []),
+                                  newContext,
+                                ],
                               }));
                               input.value = '';
                             }
@@ -375,15 +460,18 @@ export function EditSoundsModal({
                           Add
                         </Button>
                       </Group>
-                      
+
                       {/* CustomCombobox for choosing existing contexts (like main page) */}
                       <CustomCombobox
                         value=""
                         onChange={(value) => {
                           if (value && !currentContexts.includes(value)) {
-                            setContextEdits(prev => ({ 
-                              ...prev, 
-                              [sound.filename]: [...(prev[sound.filename] ?? sound.contexts ?? []), value]
+                            setContextEdits((prev) => ({
+                              ...prev,
+                              [sound.filename]: [
+                                ...(prev[sound.filename] ?? sound.contexts ?? []),
+                                value,
+                              ],
                             }));
                           }
                         }}
@@ -391,7 +479,7 @@ export function EditSoundsModal({
                         placeholder="Add existing context"
                         width={200}
                       />
-                      
+
                       {/* Display selected contexts as badges */}
                       {currentContexts.length > 0 && (
                         <Group gap="xs" mt="xs">
@@ -406,9 +494,10 @@ export function EditSoundsModal({
                                   size="xs"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setContextEdits(prev => ({ 
-                                      ...prev, 
-                                      [sound.filename]: prev[sound.filename]?.filter(c => c !== ctx) || []
+                                    setContextEdits((prev) => ({
+                                      ...prev,
+                                      [sound.filename]:
+                                        prev[sound.filename]?.filter((c) => c !== ctx) || [],
                                     }));
                                   }}
                                 >
@@ -423,12 +512,18 @@ export function EditSoundsModal({
                       )}
                     </Stack>
                   )}
-                  
+
                   <Group gap="xs" mt="xs">
                     <Button
                       size="xs"
                       variant="subtle"
-                      leftSection={currentlyPlaying === sound.filename && isPlaying ? <IconPlayerPause size={14} /> : <IconPlayerPlay size={14} />}
+                      leftSection={
+                        currentlyPlaying === sound.filename && isPlaying ? (
+                          <IconPlayerPause size={14} />
+                        ) : (
+                          <IconPlayerPlay size={14} />
+                        )
+                      }
                       onClick={() => handlePlayPause(sound.filename)}
                       disabled={!sound.filename}
                     >
@@ -444,7 +539,7 @@ export function EditSoundsModal({
                       Stop
                     </Button>
                   </Group>
-                  
+
                   {sound.credit && (
                     <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
                       <span dangerouslySetInnerHTML={{ __html: sound.credit }} />
@@ -456,10 +551,17 @@ export function EditSoundsModal({
           </div>
         )}
         <Group gap="sm" mt="sm">
-          <Button onClick={handleSave} loading={saving} disabled={Object.keys(edits).length === 0 && Object.keys(contextEdits).length === 0 && Object.keys(creditEdits).length === 0}>
+          <Button
+            onClick={handleSave}
+            loading={saving}
+            disabled={
+              Object.keys(edits).length === 0 &&
+              Object.keys(contextEdits).length === 0 &&
+              Object.keys(creditEdits).length === 0
+            }
+          >
             Save Changes
           </Button>
-
         </Group>
       </Stack>
     </Modal>

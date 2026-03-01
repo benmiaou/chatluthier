@@ -5,6 +5,7 @@ This document describes the SQLite database schema for the ChatLuthier applicati
 ## Table Structure
 
 ### 1. Users Table
+
 **Purpose**: Stores user account information with security questions
 
 ```sql
@@ -21,6 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
 ```
 
 **Fields**:
+
 - `id`: User ID (primary key)
 - `pseudo`: Username (unique)
 - `password_hash`: Hashed password
@@ -31,6 +33,7 @@ CREATE TABLE IF NOT EXISTS users (
 - `updated_at`: Last update timestamp
 
 ### 2. Sound Categories Table
+
 **Purpose**: Defines the different sound types/categories
 
 ```sql
@@ -42,19 +45,22 @@ CREATE TABLE IF NOT EXISTS sound_categories (
 ```
 
 **Fields**:
+
 - `id`: Category ID (primary key)
 - `name`: Category name (unique)
 - `description`: Category description
 
 **Initial Data**:
+
 ```sql
-INSERT OR IGNORE INTO sound_categories (id, name, description) VALUES 
+INSERT OR IGNORE INTO sound_categories (id, name, description) VALUES
     (1, 'ambianceSounds', 'Ambient sounds for background atmosphere'),
     (2, 'backgroundMusic', 'Background music tracks'),
     (3, 'soundboard', 'Sound effects for soundboard');
 ```
 
 ### 3. Ambiance Sounds Table
+
 **Purpose**: Stores ambient sound data
 
 ```sql
@@ -72,6 +78,7 @@ CREATE TABLE IF NOT EXISTS ambiance_sounds (
 ```
 
 **Fields**:
+
 - `id`: Sound ID (primary key)
 - `filename`: Audio file name
 - `display_name`: User-friendly sound name
@@ -82,6 +89,7 @@ CREATE TABLE IF NOT EXISTS ambiance_sounds (
 - `updated_at`: Last update timestamp
 
 ### 4. Background Sounds Table
+
 **Purpose**: Stores background music data
 
 ```sql
@@ -101,6 +109,7 @@ CREATE TABLE IF NOT EXISTS background_sounds (
 **Fields**: Same as ambiance_sounds
 
 ### 5. Soundboard Table
+
 **Purpose**: Stores soundboard sound effects
 
 ```sql
@@ -119,9 +128,11 @@ CREATE TABLE IF NOT EXISTS soundboard (
 **Fields**: Same as ambiance_sounds (without image_file)
 
 ### 6. Context Tables
+
 **Purpose**: Store contextual tags for each sound (one context per line)
 
 #### Ambiance Sound Contexts
+
 ```sql
 CREATE TABLE IF NOT EXISTS ambiance_sound_contexts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -134,6 +145,7 @@ CREATE TABLE IF NOT EXISTS ambiance_sound_contexts (
 ```
 
 #### Background Sound Contexts
+
 ```sql
 CREATE TABLE IF NOT EXISTS background_sound_contexts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -146,6 +158,7 @@ CREATE TABLE IF NOT EXISTS background_sound_contexts (
 ```
 
 #### Soundboard Contexts
+
 ```sql
 CREATE TABLE IF NOT EXISTS soundboard_contexts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -158,12 +171,14 @@ CREATE TABLE IF NOT EXISTS soundboard_contexts (
 ```
 
 **Fields** (all context tables):
+
 - `id`: Context ID (primary key)
 - `sound_id`: Reference to sound (foreign key)
 - `context`: Context tag/text
 - `context_index`: Position/index of context
 
 ### 7. User Sounds Table
+
 **Purpose**: Stores user-specific sound overrides (one entry per sound)
 
 ```sql
@@ -181,6 +196,7 @@ CREATE TABLE IF NOT EXISTS user_sounds (
 ```
 
 **Fields**:
+
 - `id`: User sound ID (primary key)
 - `user_id`: Reference to user (foreign key)
 - `sound_type`: Type of sound ('ambiance', 'background', 'soundboard')
@@ -190,6 +206,7 @@ CREATE TABLE IF NOT EXISTS user_sounds (
 - `updated_at`: Last update timestamp
 
 ### 8. User Sound Contexts Table
+
 **Purpose**: Stores user-specific context overrides (one context per line)
 
 ```sql
@@ -206,6 +223,7 @@ CREATE TABLE IF NOT EXISTS user_sound_contexts (
 ```
 
 **Fields**:
+
 - `id`: User context ID (primary key)
 - `user_id`: Reference to user (foreign key)
 - `sound_type`: Type of sound
@@ -214,6 +232,7 @@ CREATE TABLE IF NOT EXISTS user_sound_contexts (
 - `context_index`: Position/index of context
 
 ### 9. User Presets Table
+
 **Purpose**: Stores named sound configurations (one preset per line)
 
 ```sql
@@ -230,6 +249,7 @@ CREATE TABLE IF NOT EXISTS user_presets (
 ```
 
 **Fields**:
+
 - `id`: Preset ID (primary key)
 - `user_id`: Reference to user (foreign key)
 - `preset_name`: Name of preset
@@ -238,6 +258,7 @@ CREATE TABLE IF NOT EXISTS user_presets (
 - `updated_at`: Last update timestamp
 
 ### 10. User Sound Orders Table
+
 **Purpose**: Stores custom sound ordering (one order per line)
 
 ```sql
@@ -254,6 +275,7 @@ CREATE TABLE IF NOT EXISTS user_sound_orders (
 ```
 
 **Fields**:
+
 - `id`: Order ID (primary key)
 - `user_id`: Reference to user (foreign key)
 - `sound_type`: Type of sound
@@ -295,7 +317,7 @@ CREATE INDEX IF NOT EXISTS idx_user_sound_orders_user ON user_sound_orders(user_
 ## Data Statistics (After Migration)
 
 - **ambiance_sounds**: 31 sounds
-- **background_sounds**: 106 sounds  
+- **background_sounds**: 106 sounds
 - **soundboard**: 23 sounds
 - **Context tables**: Multiple entries per sound (one per context)
 - **User tables**: Ready for user data (initially empty)
@@ -303,6 +325,7 @@ CREATE INDEX IF NOT EXISTS idx_user_sound_orders_user ON user_sound_orders(user_
 ## Migration Process
 
 The `JSONtoSQL.js` script:
+
 1. Creates all tables according to this schema
 2. Migrates data from JSON files to the appropriate tables
 3. Handles nested context arrays in background music

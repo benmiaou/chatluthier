@@ -1,4 +1,15 @@
-import { ActionIcon, Box, Button, Group, Modal, Paper, Slider, Stack, Text, Progress } from '@mantine/core';
+import {
+  ActionIcon,
+  Box,
+  Button,
+  Group,
+  Modal,
+  Paper,
+  Slider,
+  Stack,
+  Text,
+  Progress,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { CustomCombobox } from './CustomCombobox';
 import { IconPlayerSkipForward, IconPlayerStop, IconTrash, IconVolume } from '@tabler/icons-react';
@@ -21,7 +32,10 @@ const CATEGORIES: { value: BackgroundMusicCategory; label: string }[] = [
   { value: 'all', label: 'All' },
 ];
 
-export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<BackgroundMusicProps>) {
+export function BackgroundMusic({
+  userId = null,
+  isAdmin = false,
+}: Readonly<BackgroundMusicProps>) {
   const { send, addMessageHandler, sessionId } = useSocketContext();
   const {
     currentSound,
@@ -75,7 +89,7 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
       }
       await playCategory(category);
     },
-    [playCategory, userInteracted, setUserInteracted],
+    [playCategory, userInteracted, setUserInteracted]
   );
 
   // When a track starts, broadcast to session
@@ -85,11 +99,11 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
       send({
         type: 'backgroundMusicChange',
         id: sessionId,
-        content: { 
-          filename: currentSound.filename, 
+        content: {
+          filename: currentSound.filename,
           credit: currentSound.credit,
           timestamp: Date.now(),
-          currentTime: currentTime
+          currentTime: currentTime,
         },
       });
     }
@@ -99,13 +113,13 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
   useEffect(() => {
     return addMessageHandler((msg: WsMessage) => {
       if (msg.type === 'backgroundMusicChange' && msg.content) {
-        const { filename, credit, timestamp, currentTime } = msg.content as { 
-          filename: string; 
+        const { filename, credit, timestamp, currentTime } = msg.content as {
+          filename: string;
           credit?: string;
           timestamp?: number;
-          currentTime?: number
+          currentTime?: number;
         };
-        
+
         playReceived({ filename, credit, timestamp, currentTime });
         // Credit is already shown in the player UI, no need for toast
       } else if (msg.type === 'backgroundMusicStop') {
@@ -125,15 +139,21 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
                 credit: currentSound.credit,
                 isPlaying: isPlaying,
                 timestamp: Date.now(),
-                currentTime: currentTime
-              }
-            }
+                currentTime: currentTime,
+              },
+            },
           });
         }
       } else if (msg.type === 'statusResponse' && msg.content) {
-        const { statusType, statusData } = msg.content as { 
-          statusType: string; 
-          statusData: { filename: string; credit?: string; isPlaying: boolean; timestamp?: number; currentTime?: number }
+        const { statusType, statusData } = msg.content as {
+          statusType: string;
+          statusData: {
+            filename: string;
+            credit?: string;
+            isPlaying: boolean;
+            timestamp?: number;
+            currentTime?: number;
+          };
         };
         if (statusType === 'backgroundMusic' && statusData) {
           if (statusData.isPlaying) {
@@ -141,7 +161,7 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
               filename: statusData.filename,
               credit: statusData.credit,
               timestamp: statusData.timestamp,
-              currentTime: statusData.currentTime
+              currentTime: statusData.currentTime,
             });
             // Credit is already shown in the player UI, no need for toast
           }
@@ -151,13 +171,16 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
   }, [addMessageHandler, playReceived, stopReceived, currentSound, isPlaying, sessionId, send]);
 
   // Broadcast stop
-  const handleVolumeChange = useCallback((v: number) => {
-    // Mark user interaction when changing volume
-    if (!userInteracted) {
-      setUserInteracted(true);
-    }
-    setVolume(v);
-  }, [setVolume, userInteracted, setUserInteracted]);
+  const handleVolumeChange = useCallback(
+    (v: number) => {
+      // Mark user interaction when changing volume
+      if (!userInteracted) {
+        setUserInteracted(true);
+      }
+      setVolume(v);
+    },
+    [setVolume, userInteracted, setUserInteracted]
+  );
 
   const handleNext = useCallback(() => {
     // Mark user interaction when going to next track
@@ -172,11 +195,11 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
     if (!userInteracted) {
       setUserInteracted(true);
     }
-    
+
     // If there's a current sound that was blocked, play it specifically
     if (currentSound) {
       // Use the specific sound play method to play exactly this sound
-      playSpecificSound(currentSound).catch(e => {
+      playSpecificSound(currentSound).catch((e) => {
         // Silently handle playback errors
       });
     }
@@ -194,17 +217,21 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
   const contexts = ['All', ...Array.from(new Set(sounds.flatMap((s) => bgScenes(s))))];
 
   // Helper function to filter sounds by both context and category
-  const filterSoundsByContextAndCategory = (sound: Sound, contextFilter: string, categoryFilter: BackgroundMusicCategory) => {
+  const filterSoundsByContextAndCategory = (
+    sound: Sound,
+    contextFilter: string,
+    categoryFilter: BackgroundMusicCategory
+  ) => {
     // If context is 'All', only filter by category
     if (contextFilter === 'All') {
       return categoryFilter === 'all' || bgMatchesCategory(sound, categoryFilter);
     }
-    
+
     // If context is specific, filter by both scene and category
     const soundScenes = bgScenes(sound);
     const matchesScene = soundScenes.includes(contextFilter);
     const matchesCategory = categoryFilter === 'all' || bgMatchesCategory(sound, categoryFilter);
-    
+
     return matchesScene && matchesCategory;
   };
 
@@ -218,142 +245,142 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
       const pct = ((e.clientX - rect.left) / rect.width) * 100;
       seekTo(pct);
     },
-    [seekTo, userInteracted, setUserInteracted],
+    [seekTo, userInteracted, setUserInteracted]
   );
 
   return (
     <>
       <Paper p="md" radius="md" withBorder>
         <Stack gap="sm">
-        {/* Title with volume control */}
-        <Group justify="center" align="center">
-          <Text fw={600} size="sm" tt="uppercase" c="dimmed">
-            Background Music
-          </Text>
-          <Group gap={6} align="center" ml={8}>
-            <IconVolume size={16} color="var(--mantine-color-dimmed)" />
-            <Slider
-              size="xs"
-              w={80}
-              min={0}
-              max={1}
-              step={0.01}
-              value={volume}
-              onChange={handleVolumeChange}
-              label={(v) => `${Math.round(v * 100)}%`}
+          {/* Title with volume control */}
+          <Group justify="center" align="center">
+            <Text fw={600} size="sm" tt="uppercase" c="dimmed">
+              Background Music
+            </Text>
+            <Group gap={6} align="center" ml={8}>
+              <IconVolume size={16} color="var(--mantine-color-dimmed)" />
+              <Slider
+                size="xs"
+                w={80}
+                min={0}
+                max={1}
+                step={0.01}
+                value={volume}
+                onChange={handleVolumeChange}
+                label={(v) => `${Math.round(v * 100)}%`}
+              />
+            </Group>
+          </Group>
+
+          {/* Category buttons with counts and aligned context dropdown */}
+          <Group gap="xs" align="center">
+            {CATEGORIES.map(({ value, label }) => {
+              // Filter sounds by current context first, then by category
+              const count = sounds.filter((s) =>
+                filterSoundsByContextAndCategory(s, context, value)
+              ).length;
+              return (
+                <Button
+                  key={value}
+                  size="xs"
+                  variant={activeCategory === value ? 'filled' : 'default'}
+                  onClick={() => handlePlayCategory(value)}
+                >
+                  Play {label} ({count})
+                </Button>
+              );
+            })}
+            {/* Context dropdown - exact same size as buttons */}
+            <CustomCombobox
+              value={context}
+              onChange={setContext}
+              data={contexts}
+              placeholder="Context"
             />
           </Group>
-        </Group>
 
-        {/* Category buttons with counts and aligned context dropdown */}
-        <Group gap="xs" align="center">
-          {CATEGORIES.map(({ value, label }) => {
-            // Filter sounds by current context first, then by category
-            const count = sounds.filter((s) => 
-              filterSoundsByContextAndCategory(s, context, value)
-            ).length;
-            return (
-              <Button
-                key={value}
-                size="xs"
-                variant={activeCategory === value ? 'filled' : 'default'}
-                onClick={() => handlePlayCategory(value)}
-              >
-                Play {label} ({count})
-              </Button>
-            );
-          })}
-          {/* Context dropdown - exact same size as buttons */}
-          <CustomCombobox
-            value={context}
-            onChange={setContext}
-            data={contexts}
-            placeholder="Context"
-          />
-        </Group>
+          {/* Current track info */}
+          <Group gap="xs" align="center">
+            <Text size="xs" c="dimmed" truncate style={{ flex: 1 }}>
+              {currentSound ? `♪ ${currentSound.name}` : 'No track playing'}
+            </Text>
+          </Group>
+          {currentSound?.credit && (
+            <Text
+              size="xs"
+              c="dimmed"
+              fs="italic"
+              truncate
+              dangerouslySetInnerHTML={{ __html: currentSound.credit }}
+            />
+          )}
 
-        {/* Current track info */}
-        <Group gap="xs" align="center">
-          <Text size="xs" c="dimmed" truncate style={{ flex: 1 }}>
-            {currentSound ? `♪ ${currentSound.name}` : 'No track playing'}
-          </Text>
-        </Group>
-        {currentSound?.credit && (
-          <Text size="xs" c="dimmed" fs="italic" truncate
-            dangerouslySetInnerHTML={{ __html: currentSound.credit }}
-          />
-        )}
+          {/* Progress bar */}
+          <Box style={{ cursor: 'pointer' }} onClick={handleSeek}>
+            <Progress value={progress} size="sm" radius="xs" color="maroon" />
+          </Box>
 
-        {/* Progress bar */}
-        <Box
-          style={{ cursor: 'pointer' }}
-          onClick={handleSeek}
-        >
-          <Progress value={progress} size="sm" radius="xs" color="maroon" />
-        </Box>
-
-        {/* Controls row */}
-        <Group gap="xs" align="center">
-          <Button
-            size="xs"
-            variant="subtle"
-            leftSection={<IconPlayerStop size={14} />}
-            onClick={handleStop}
-            disabled={!isPlaying}
-          >
-            Stop
-          </Button>
-          <Button
-            size="xs"
-            variant="subtle"
-            leftSection={<IconPlayerSkipForward size={14} />}
-            onClick={handleNext}
-            disabled={!isPlaying}
-          >
-            Next
-          </Button>
-
-
-        </Group>
-      </Stack>
+          {/* Controls row */}
+          <Group gap="xs" align="center">
+            <Button
+              size="xs"
+              variant="subtle"
+              leftSection={<IconPlayerStop size={14} />}
+              onClick={handleStop}
+              disabled={!isPlaying}
+            >
+              Stop
+            </Button>
+            <Button
+              size="xs"
+              variant="subtle"
+              leftSection={<IconPlayerSkipForward size={14} />}
+              onClick={handleNext}
+              disabled={!isPlaying}
+            >
+              Next
+            </Button>
+          </Group>
+        </Stack>
       </Paper>
-    
-    {/* Autoplay Permission Modal */}
-    <Modal
-      opened={modalOpened}
-      onClose={close}
-      title="Playback Permission Required"
-      centered
-      withCloseButton={false}
-    >
-      <Stack gap="md">
-        <Text size="sm">
-          The browser blocked automatic playback. Please click "Allow Playback" to enable background music.
-        </Text>
-        <Group justify="flex-end" gap="sm">
-          <Button
-            variant="default"
-            onClick={() => {
-              close();
-              setAutoplayBlocked(false);
-            }}
-          >
-            Not Now
-          </Button>
-          <Button
-            variant="filled"
-            onClick={() => {
-              // Play the current sound using the proper method
-              handlePlayCurrentSound();
-              close();
-              setAutoplayBlocked(false);
-            }}
-          >
-            Allow Playback
-          </Button>
-        </Group>
-      </Stack>
-    </Modal>
+
+      {/* Autoplay Permission Modal */}
+      <Modal
+        opened={modalOpened}
+        onClose={close}
+        title="Playback Permission Required"
+        centered
+        withCloseButton={false}
+      >
+        <Stack gap="md">
+          <Text size="sm">
+            The browser blocked automatic playback. Please click "Allow Playback" to enable
+            background music.
+          </Text>
+          <Group justify="flex-end" gap="sm">
+            <Button
+              variant="default"
+              onClick={() => {
+                close();
+                setAutoplayBlocked(false);
+              }}
+            >
+              Not Now
+            </Button>
+            <Button
+              variant="filled"
+              onClick={() => {
+                // Play the current sound using the proper method
+                handlePlayCurrentSound();
+                close();
+                setAutoplayBlocked(false);
+              }}
+            >
+              Allow Playback
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </>
   );
 }

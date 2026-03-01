@@ -82,7 +82,7 @@ export function useSpotify() {
       const accessToken = await ensureValidToken();
       if (accessToken) await spotifyPlay(accessToken, contextUri);
     },
-    [ensureValidToken],
+    [ensureValidToken]
   );
 
   const pause = useCallback(async () => {
@@ -100,7 +100,7 @@ export function useSpotify() {
       const accessToken = await ensureValidToken();
       if (accessToken) await spotifySetVolume(accessToken, volumePercent * 100);
     },
-    [ensureValidToken],
+    [ensureValidToken]
   );
 
   // ─── Polling for playback state ───────────────────────────────────────────

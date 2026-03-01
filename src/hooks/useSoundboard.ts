@@ -38,7 +38,7 @@ export function useSoundboard(userId: string | null) {
       audio.play().catch(() => {});
       return audio;
     },
-    [volume],
+    [volume]
   );
 
   const setVolume = useCallback((v: number) => {
@@ -46,7 +46,8 @@ export function useSoundboard(userId: string | null) {
   }, []);
 
   return {
-    sounds: context === 'All' ? sounds : sounds.filter((s) => s.contexts?.includes(context) ?? false),
+    sounds:
+      context === 'All' ? sounds : sounds.filter((s) => s.contexts?.includes(context) ?? false),
     allSounds: sounds,
     volume,
     context,

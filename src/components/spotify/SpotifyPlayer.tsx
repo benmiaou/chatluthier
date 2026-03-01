@@ -1,13 +1,10 @@
+import { Badge, Button, Group, Paper, Select, Stack, Text } from '@mantine/core';
 import {
-  Badge,
-  Button,
-  Group,
-  Paper,
-  Select,
-  Stack,
-  Text,
-} from '@mantine/core';
-import { IconBrandSpotify, IconPlayerPause, IconPlayerPlay, IconPlayerSkipForward } from '@tabler/icons-react';
+  IconBrandSpotify,
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconPlayerSkipForward,
+} from '@tabler/icons-react';
 import { useEffect } from 'react';
 import { useSpotify } from '../../hooks/useSpotify';
 
@@ -42,7 +39,11 @@ export function SpotifyPlayer({ onAuthChange }: SpotifyPlayerProps) {
               Spotify
             </Text>
           </Group>
-          {isAuthenticated && <Badge color="green" size="xs">Connected</Badge>}
+          {isAuthenticated && (
+            <Badge color="green" size="xs">
+              Connected
+            </Badge>
+          )}
         </Group>
 
         {!isAuthenticated ? (
@@ -105,12 +106,7 @@ export function SpotifyPlayer({ onAuthChange }: SpotifyPlayerProps) {
               />
             )}
 
-            <Button
-              size="xs"
-              variant="subtle"
-              color="red"
-              onClick={disconnect}
-            >
+            <Button size="xs" variant="subtle" color="red" onClick={disconnect}>
               Disconnect
             </Button>
           </Stack>

@@ -65,8 +65,7 @@ export function useBackgroundMusic(userId: string | null, onAutoplayBlocked?: ()
     async (category: BackgroundMusicCategory) => {
       const filtered = sounds.filter(
         (s) =>
-          bgMatchesCategory(s, category) &&
-          (context === 'All' || bgScenes(s).includes(context)),
+          bgMatchesCategory(s, category) && (context === 'All' || bgScenes(s).includes(context))
       );
       if (!filtered.length) return;
       const pick = filtered[Math.floor(Math.random() * filtered.length)];
@@ -81,31 +80,34 @@ export function useBackgroundMusic(userId: string | null, onAutoplayBlocked?: ()
       setIsPlaying(true);
       startProgressTracking();
     },
-    [sounds, volume, context],
+    [sounds, volume, context]
   );
 
-  const playSpecificSound = useCallback(async (sound: Sound) => {
-    setCurrentSound(sound);
-    
-    // Find which category this sound belongs to
-    const soundCategory = Object.values(BackgroundMusicCategories).find(category => 
-      bgMatchesCategory(sound, category)
-    ) as BackgroundMusicCategory | undefined;
-    
-    if (soundCategory) {
-      setActiveCategory(soundCategory);
-    }
+  const playSpecificSound = useCallback(
+    async (sound: Sound) => {
+      setCurrentSound(sound);
 
-    const audio = playerRef.current.getElement();
-    audio.src = `${ASSET_PREFIX}${sound.filename}`;
-    audio.volume = volume;
-    audio.onended = () => {
-      if (soundCategory) playCategory(soundCategory);
-    }; // auto-advance to next in category
-    await audio.play();
-    setIsPlaying(true);
-    startProgressTracking();
-  }, [sounds, volume, context, playCategory]);
+      // Find which category this sound belongs to
+      const soundCategory = Object.values(BackgroundMusicCategories).find((category) =>
+        bgMatchesCategory(sound, category)
+      ) as BackgroundMusicCategory | undefined;
+
+      if (soundCategory) {
+        setActiveCategory(soundCategory);
+      }
+
+      const audio = playerRef.current.getElement();
+      audio.src = `${ASSET_PREFIX}${sound.filename}`;
+      audio.volume = volume;
+      audio.onended = () => {
+        if (soundCategory) playCategory(soundCategory);
+      }; // auto-advance to next in category
+      await audio.play();
+      setIsPlaying(true);
+      startProgressTracking();
+    },
+    [sounds, volume, context, playCategory]
+  );
 
   const next = useCallback(() => {
     if (activeCategory) playCategory(activeCategory);
@@ -141,21 +143,26 @@ export function useBackgroundMusic(userId: string | null, onAutoplayBlocked?: ()
   // ─── Remote playback (received via socket) ────────────────────────────────
 
   const playReceived = useCallback(
-    async (musicData: { filename: string; credit?: string; timestamp?: number; currentTime?: number }) => {
+    async (musicData: {
+      filename: string;
+      credit?: string;
+      timestamp?: number;
+      currentTime?: number;
+    }) => {
       const audio = playerRef.current.getElement();
       audio.src = `${ASSET_PREFIX}${musicData.filename}`;
       audio.volume = volume;
-      
+
       // If timestamp and currentTime are provided, calculate the correct position
       if (musicData.timestamp && musicData.currentTime !== undefined) {
         const now = Date.now();
         const delay = now - musicData.timestamp;
-        const adjustedTime = musicData.currentTime + (delay / 1000); // Convert delay from ms to seconds
-        
+        const adjustedTime = musicData.currentTime + delay / 1000; // Convert delay from ms to seconds
+
         // Set the current time before playing
         audio.currentTime = adjustedTime;
       }
-      
+
       // Try to play, but handle autoplay restrictions
       try {
         if (userInteracted) {
@@ -183,9 +190,9 @@ export function useBackgroundMusic(userId: string | null, onAutoplayBlocked?: ()
           setIsPlaying(false);
         }
       }
-      
+
       // Find the sound object to update currentSound state
-      const soundToPlay = sounds.find(s => s.filename === musicData.filename);
+      const soundToPlay = sounds.find((s) => s.filename === musicData.filename);
       if (soundToPlay) {
         setCurrentSound({ ...soundToPlay, credit: musicData.credit });
       } else {
@@ -194,13 +201,13 @@ export function useBackgroundMusic(userId: string | null, onAutoplayBlocked?: ()
           filename: musicData.filename,
           credit: musicData.credit,
           name: musicData.filename,
-          display_name: musicData.filename
+          display_name: musicData.filename,
         } as Sound);
       }
-      
+
       startProgressTracking();
     },
-    [volume, sounds, userInteracted],
+    [volume, sounds, userInteracted]
   );
 
   const stopReceived = useCallback(() => {

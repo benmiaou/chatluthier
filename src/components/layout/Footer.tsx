@@ -25,7 +25,7 @@ export function AppFooter() {
           © {new Date().getFullYear()} Le Chat Luthier
         </Text>
       </Group>
-      
+
       <PrivacyModal opened={privacyOpened} onClose={closePrivacy} />
       <CreditsModal opened={creditsOpened} onClose={closeCredits} />
       <AboutModal opened={aboutOpened} onClose={closeAbout} />

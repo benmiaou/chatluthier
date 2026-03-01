@@ -38,8 +38,16 @@ export function Home() {
       <SessionManager />
 
       <Group justify="center" gap="sm" wrap="wrap">
-        {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={openServerEdit}>Edit Server Sounds</Button>}
-        {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={openReview}>Review Requests</Button>}
+        {isAdmin && (
+          <Button variant="outline" size="xs" color="orange" onClick={openServerEdit}>
+            Edit Server Sounds
+          </Button>
+        )}
+        {isAdmin && (
+          <Button variant="outline" size="xs" color="orange" onClick={openReview}>
+            Review Requests
+          </Button>
+        )}
       </Group>
 
       <RequestSoundModal opened={requestOpened} onClose={closeRequest} userId={userId} />
@@ -50,11 +58,7 @@ export function Home() {
         userId={userId}
         onSave={() => {}}
       />
-      <ServerEditSoundsModal
-        opened={serverEditOpened}
-        onClose={closeServerEdit}
-        userId={userId}
-      />
+      <ServerEditSoundsModal opened={serverEditOpened} onClose={closeServerEdit} userId={userId} />
 
       <ReviewRequestsModal opened={reviewOpened} onClose={closeReview} />
     </Stack>

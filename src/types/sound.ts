@@ -35,5 +35,5 @@ export const BackgroundMusicCategories = {
   CALM: 'calm' as BackgroundMusicCategory,
   DYNAMIC: 'dynamic' as BackgroundMusicCategory,
   INTENSE: 'intense' as BackgroundMusicCategory,
-  ALL: 'all' as BackgroundMusicCategory
+  ALL: 'all' as BackgroundMusicCategory,
 };

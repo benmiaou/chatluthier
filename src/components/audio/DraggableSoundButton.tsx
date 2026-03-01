@@ -18,7 +18,7 @@ export function DraggableSoundButton({
   onPlay,
   moveItem,
   onDragEnd,
-  showDragHandle
+  showDragHandle,
 }: Readonly<DraggableSoundButtonProps>) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -28,7 +28,13 @@ export function DraggableSoundButton({
     end: (item, monitor) => {
       if (monitor.didDrop()) {
         const dropResult = monitor.getDropResult();
-        if (dropResult && typeof dropResult === 'object' && dropResult !== null && 'droppedOn' in dropResult && typeof dropResult.droppedOn === 'number') {
+        if (
+          dropResult &&
+          typeof dropResult === 'object' &&
+          dropResult !== null &&
+          'droppedOn' in dropResult &&
+          typeof dropResult.droppedOn === 'number'
+        ) {
           onDragEnd(item.index, dropResult.droppedOn);
         }
       }
@@ -67,7 +73,7 @@ export function DraggableSoundButton({
         transition: 'transform 0.1s ease, opacity 0.1s ease',
         zIndex: isDragging ? 1000 : 'auto',
         position: 'relative',
-        height: '40px'  // Fixed height to match button
+        height: '40px', // Fixed height to match button
       }}
     >
       {showDragHandle && (
@@ -85,27 +91,29 @@ export function DraggableSoundButton({
             cursor: 'grab',
             zIndex: 10,
             background: 'rgba(0, 0, 0, 0.05)',
-            borderRadius: '4px 0 0 4px'
+            borderRadius: '4px 0 0 4px',
           }}
         >
           <IconGripVertical size={16} color="#666" />
         </div>
       )}
-      <div style={{ 
-        pointerEvents: isDragging ? 'none' : 'auto',
-        marginLeft: showDragHandle ? '24px' : '0',
-        width: showDragHandle ? 'calc(100% - 24px)' : '100%'
-      }}>
+      <div
+        style={{
+          pointerEvents: isDragging ? 'none' : 'auto',
+          marginLeft: showDragHandle ? '24px' : '0',
+          width: showDragHandle ? 'calc(100% - 24px)' : '100%',
+        }}
+      >
         <Button
           className="soundboard-button"
-          style={{ 
-            width: '100%', 
-            cursor: 'pointer', 
+          style={{
+            width: '100%',
+            cursor: 'pointer',
             height: '40px',
             padding: '8px 12px',
             textAlign: 'left',
             justifyContent: 'flex-start',
-            fontSize: '14px'
+            fontSize: '14px',
           }}
           size="compact-xs"
           variant="default"

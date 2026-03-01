@@ -1,8 +1,27 @@
-import { Button, Loader, Modal, Stack, Switch, Text, Group, Badge, TextInput, ActionIcon, FileInput, useCombobox } from '@mantine/core';
+import {
+  Button,
+  Loader,
+  Modal,
+  Stack,
+  Switch,
+  Text,
+  Group,
+  Badge,
+  TextInput,
+  ActionIcon,
+  FileInput,
+  useCombobox,
+} from '@mantine/core';
 import { CustomCombobox } from '../audio/CustomCombobox';
 import { useEffect, useState, useRef } from 'react';
 import { notifications } from '@mantine/notifications';
-import { IconPlayerPlay, IconPlayerPause, IconPlayerStop, IconX, IconSearch } from '@tabler/icons-react';
+import {
+  IconPlayerPlay,
+  IconPlayerPause,
+  IconPlayerStop,
+  IconX,
+  IconSearch,
+} from '@tabler/icons-react';
 import type { Sound, SoundCategory } from '../../types/sound';
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 
@@ -19,23 +38,74 @@ const BACKGROUND_INTENSITY_OPTIONS = ['calm', 'dynamic', 'intense'];
 // Context options for each category
 const CONTEXT_OPTIONS: Record<SoundCategory, string[]> = {
   background: [
-    'calm', 'dynamic', 'intense',
-    'city', 'forest', 'mountain', 'ocean', 'space',
-    'fantasy', 'medieval', 'modern', 'sci-fi',
-    'battle', 'exploration', 'mystery', 'peaceful'
+    'calm',
+    'dynamic',
+    'intense',
+    'city',
+    'forest',
+    'mountain',
+    'ocean',
+    'space',
+    'fantasy',
+    'medieval',
+    'modern',
+    'sci-fi',
+    'battle',
+    'exploration',
+    'mystery',
+    'peaceful',
   ],
   ambiance: [
-    'animal', 'nature', 'city', 'fantasy', 'medieval', 'modern',
-    'magic', 'weather', 'water', 'fire', 'battle', 'peaceful',
-    'horror', 'sci-fi', 'technology', 'vehicle', 'music', 'voice',
-    'indoor', 'outdoor', 'day', 'night', 'crowd', 'market'
+    'animal',
+    'nature',
+    'city',
+    'fantasy',
+    'medieval',
+    'modern',
+    'magic',
+    'weather',
+    'water',
+    'fire',
+    'battle',
+    'peaceful',
+    'horror',
+    'sci-fi',
+    'technology',
+    'vehicle',
+    'music',
+    'voice',
+    'indoor',
+    'outdoor',
+    'day',
+    'night',
+    'crowd',
+    'market',
   ],
   soundboard: [
-    'animal', 'nature', 'city', 'fantasy', 'medieval', 'modern',
-    'magic', 'weather', 'water', 'fire', 'battle', 'peaceful',
-    'horror', 'sci-fi', 'technology', 'vehicle', 'music', 'voice',
-    'weapon', 'spell', 'ui', 'notification', 'alert'
-  ]
+    'animal',
+    'nature',
+    'city',
+    'fantasy',
+    'medieval',
+    'modern',
+    'magic',
+    'weather',
+    'water',
+    'fire',
+    'battle',
+    'peaceful',
+    'horror',
+    'sci-fi',
+    'technology',
+    'vehicle',
+    'music',
+    'voice',
+    'weapon',
+    'spell',
+    'ui',
+    'notification',
+    'alert',
+  ],
 };
 
 interface ServerEditSoundsModalProps {
@@ -50,7 +120,13 @@ interface SoundEdit extends Sound {
   imageFileEdits?: File | string;
 }
 
-const ContextBadge = ({ ctx, selectedCategory }: { ctx: string; selectedCategory: SoundCategory }) => {
+const ContextBadge = ({
+  ctx,
+  selectedCategory,
+}: {
+  ctx: string;
+  selectedCategory: SoundCategory;
+}) => {
   if (selectedCategory === 'background') {
     const match = /^\(([^,]+),\s*([^)]+)\)$/.exec(String(ctx));
     if (match) {
@@ -68,11 +144,7 @@ const ContextBadge = ({ ctx, selectedCategory }: { ctx: string; selectedCategory
   );
 };
 
-export function ServerEditSoundsModal({
-  opened,
-  onClose,
-  onAddSound,
-}: ServerEditSoundsModalProps) {
+export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEditSoundsModalProps) {
   const [sounds, setSounds] = useState<SoundEdit[]>([]);
   const [edits, setEdits] = useState<Record<string, boolean>>({});
   const [contextEdits, setContextEdits] = useState<Record<string, string[]>>({});
@@ -88,21 +160,24 @@ export function ServerEditSoundsModal({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Filter sounds based on search term
-  const filteredSounds = sounds.filter(sound => 
-    sound.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    sound.filename.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredSounds = sounds.filter(
+    (sound) =>
+      sound.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      sound.filename.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const [editingSoundId, setEditingSoundId] = useState<string | null>(null);
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  
+
   const { play, stop, player } = useAudioPlayer();
 
   // For server editing, use only predefined contexts (no user-created contexts)
   // Ensure all contexts are strings to prevent MultiSelect errors
-  const availableContexts = (CONTEXT_OPTIONS[selectedCategory] || []).map(context => String(context));
+  const availableContexts = (CONTEXT_OPTIONS[selectedCategory] || []).map((context) =>
+    String(context)
+  );
 
   // Helper function to parse background context tuple
   const parseBackgroundContext = (context: string): { intensity: string; context: string } => {
@@ -126,74 +201,77 @@ export function ServerEditSoundsModal({
     setCreditEdits({});
     setEditingSoundId(null);
     setLoading(true);
-    
+
     // Ensure we have a valid category
     const safeCategory = selectedCategory || 'ambiance';
-    
+
     // Ensure the category exists in our ENDPOINT mapping
     if (!SOUNDS_TYPE[safeCategory]) {
       console.error(`Invalid category: ${safeCategory}`);
       setLoading(false);
       return;
     }
-    
-      const endpoint = `/${SOUNDS_TYPE[safeCategory]}`;
-      // For server editing, always fetch from main sounds table (no user-specific data)
-      fetch(endpoint)
-        .then((r) => {
-          if (!r.ok) {
-            throw new Error(`HTTP error! status: ${r.status}`);
-          }
-          return r.json();
-        })
-        .then((data) => processLoadedSounds(data, safeCategory))
-        .catch((error) => {
-          console.error('Failed to load sounds:', error);
-          notifications.show({ message: `Failed to load sounds: ${error.message}`, color: 'red' });
-        })
-        .finally(() => setLoading(false));
-    
-    
+
+    const endpoint = `/${SOUNDS_TYPE[safeCategory]}`;
+    // For server editing, always fetch from main sounds table (no user-specific data)
+    fetch(endpoint)
+      .then((r) => {
+        if (!r.ok) {
+          throw new Error(`HTTP error! status: ${r.status}`);
+        }
+        return r.json();
+      })
+      .then((data) => processLoadedSounds(data, safeCategory))
+      .catch((error) => {
+        console.error('Failed to load sounds:', error);
+        notifications.show({ message: `Failed to load sounds: ${error.message}`, color: 'red' });
+      })
+      .finally(() => setLoading(false));
+
     const processLoadedSounds = (data: any[], safeCategory: SoundCategory) => {
-        // Map backend data format to frontend expected format
-        const mappedSounds = data.map(sound => ({
-          id: String(sound.id || sound.filename),
-          name: sound.display_name || sound.name || sound.filename,
-          filename: sound.filename,
-          imageFile: sound.imageFile || sound.image_file,
-          // For server editing, show only main playlist contexts (no user custom contexts)
-          contexts: Array.isArray(sound.contexts) ? sound.contexts : [],
-          credit: sound.credit || '',
-          isEnabled: sound.isEnabled !== undefined ? sound.isEnabled : true
-        }));
-        
-        // Extract current images for ambiance sounds
-        const images: Record<string, string> = {};
-        const initialBackgroundIntensity: Record<string, string> = {};
-        const initialBackgroundContext: Record<string, string> = {};
-        
-        data.forEach(sound => {
-          if (sound.imageFile || sound.image_file) {
-            images[sound.filename] = sound.imageFile || sound.image_file;
+      // Map backend data format to frontend expected format
+      const mappedSounds = data.map((sound) => ({
+        id: String(sound.id || sound.filename),
+        name: sound.display_name || sound.name || sound.filename,
+        filename: sound.filename,
+        imageFile: sound.imageFile || sound.image_file,
+        // For server editing, show only main playlist contexts (no user custom contexts)
+        contexts: Array.isArray(sound.contexts) ? sound.contexts : [],
+        credit: sound.credit || '',
+        isEnabled: sound.isEnabled !== undefined ? sound.isEnabled : true,
+      }));
+
+      // Extract current images for ambiance sounds
+      const images: Record<string, string> = {};
+      const initialBackgroundIntensity: Record<string, string> = {};
+      const initialBackgroundContext: Record<string, string> = {};
+
+      data.forEach((sound) => {
+        if (sound.imageFile || sound.image_file) {
+          images[sound.filename] = sound.imageFile || sound.image_file;
+        }
+
+        // Parse background contexts for initial values
+        if (
+          selectedCategory === 'background' &&
+          Array.isArray(sound.contexts) &&
+          sound.contexts.length > 0
+        ) {
+          const firstContext = sound.contexts[0];
+          if (typeof firstContext === 'string') {
+            const parsed = parseBackgroundContext(firstContext);
+            initialBackgroundIntensity[sound.filename] = parsed.intensity;
+            initialBackgroundContext[sound.filename] = parsed.context;
           }
-          
-          // Parse background contexts for initial values
-          if (selectedCategory === 'background' && Array.isArray(sound.contexts) && sound.contexts.length > 0) {
-            const firstContext = sound.contexts[0];
-            if (typeof firstContext === 'string') {
-              const parsed = parseBackgroundContext(firstContext);
-              initialBackgroundIntensity[sound.filename] = parsed.intensity;
-              initialBackgroundContext[sound.filename] = parsed.context;
-            }
-          }
-        });
-        
-        setCurrentImages(images);
-        setBackgroundIntensity(initialBackgroundIntensity);
-        setBackgroundContext(initialBackgroundContext);
-        
-        setSounds(mappedSounds);
-      }
+        }
+      });
+
+      setCurrentImages(images);
+      setBackgroundIntensity(initialBackgroundIntensity);
+      setBackgroundContext(initialBackgroundContext);
+
+      setSounds(mappedSounds);
+    };
   }, [opened, selectedCategory]);
 
   const handleToggle = (filename: string, enabled: boolean) => {
@@ -218,7 +296,7 @@ export function ServerEditSoundsModal({
         default:
           soundUrl = `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
       }
-      
+
       if (currentlyPlaying === filename && isPlaying) {
         // Currently playing this sound, pause it
         player.pause();
@@ -229,7 +307,7 @@ export function ServerEditSoundsModal({
           // Stop any currently playing sound first
           stop();
         }
-        
+
         await play(soundUrl, 0.5); // Play at 50% volume
         setCurrentlyPlaying(filename);
         setIsPlaying(true);
@@ -252,19 +330,19 @@ export function ServerEditSoundsModal({
     setSaving(true);
     try {
       const soundsType = SOUNDS_TYPE[selectedCategory];
-      
+
       // Admin: send full updated sounds array to /update-main-playlist
       const updated = sounds.map((s) => {
         // Handle background music tuple format
         let finalContexts = contextEdits[s.filename] ?? s.contexts ?? [];
-        
+
         if (selectedCategory === 'background' && backgroundIntensity[s.filename]) {
           // Format as tuple: (intensity, context)
           const intensity = backgroundIntensity[s.filename] || BACKGROUND_INTENSITY_OPTIONS[0];
           const context = backgroundContext[s.filename] || '';
           finalContexts = [formatBackgroundContext(intensity, context)];
         }
-        
+
         return {
           ...s,
           display_name: s.display_name || s.name || s.filename, // Ensure display_name is always set
@@ -275,18 +353,18 @@ export function ServerEditSoundsModal({
           ...(imageFileEdits[s.filename] && { imageFile: imageFileEdits[s.filename] }),
         };
       });
-      
+
       const response = await fetch('/update-main-playlist', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ soundsType, sounds: updated }),
       });
-      
+
       if (!response?.ok) {
         throw new Error('Failed to update main playlist');
       }
-      
+
       notifications.show({ message: 'Server sounds updated successfully!', color: 'teal' });
       onClose();
     } catch (error) {
@@ -304,17 +382,17 @@ export function ServerEditSoundsModal({
       title="Edit Server Sounds (Admin)"
       size="xl"
       styles={{
-        root: { 
-          '--modal-width': '80%', 
-          '--modal-max-width': '900px' 
+        root: {
+          '--modal-width': '80%',
+          '--modal-max-width': '900px',
         },
-        content: { 
-          width: 'var(--modal-width)', 
+        content: {
+          width: 'var(--modal-width)',
           maxWidth: 'var(--modal-max-width)',
           height: '90vh',
           maxHeight: '90vh',
-          margin: 'auto'
-        }
+          margin: 'auto',
+        },
       }}
     >
       <Stack gap="sm">
@@ -341,27 +419,35 @@ export function ServerEditSoundsModal({
         ) : filteredSounds.length === 0 ? (
           <Text c="dimmed">No sounds found matching your search.</Text>
         ) : (
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
-            gap: '1rem', 
-            maxHeight: '400px', 
-            overflowY: 'auto',
-            paddingRight: '0.5rem'
-          }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gap: '1rem',
+              maxHeight: '400px',
+              overflowY: 'auto',
+              paddingRight: '0.5rem',
+            }}
+          >
             {filteredSounds.map((sound) => {
               const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
               // Ensure all contexts are strings to prevent MultiSelect errors
-              const currentContexts = (contextEdits[sound.filename] ?? sound.contexts ?? []).map(c => String(c));
+              const currentContexts = (contextEdits[sound.filename] ?? sound.contexts ?? []).map(
+                (c) => String(c)
+              );
               const currentCredit = creditEdits[sound.filename] ?? sound.credit ?? '';
               const isEditing = editingSoundId === sound.id;
-              
+
               return (
-                <Stack key={sound.filename} gap="sm" style={{ 
-                  border: '1px solid var(--mantine-color-dark-4)',
-                  padding: '0.5rem',
-                  borderRadius: 'var(--mantine-radius-sm)'
-                }}>
+                <Stack
+                  key={sound.filename}
+                  gap="sm"
+                  style={{
+                    border: '1px solid var(--mantine-color-dark-4)',
+                    padding: '0.5rem',
+                    borderRadius: 'var(--mantine-radius-sm)',
+                  }}
+                >
                   <Group justify="space-between" wrap="nowrap">
                     <Switch
                       label={sound.name}
@@ -378,49 +464,67 @@ export function ServerEditSoundsModal({
                       {isEditing ? 'Done' : 'Edit'}
                     </Button>
                   </Group>
-                  
+
                   {/* Always display current contexts */}
-                  {(currentContexts.length > 0 || (selectedCategory === 'background' && backgroundContext[sound.filename])) && (
+                  {(currentContexts.length > 0 ||
+                    (selectedCategory === 'background' && backgroundContext[sound.filename])) && (
                     <Group gap="xs" wrap="nowrap" align="center" mt="xs">
-                      <Text size="xs" c="dimmed">Contexts:</Text>
+                      <Text size="xs" c="dimmed">
+                        Contexts:
+                      </Text>
                       {currentContexts.map((ctx) => (
                         <ContextBadge key={ctx} ctx={ctx} selectedCategory={selectedCategory} />
                       ))}
                     </Group>
                   )}
-                  
+
                   {isEditing && (
                     <Stack gap="xs" mt="xs">
                       {/* Background Music: Simple ComboBox + context */}
                       {selectedCategory === 'background' ? (
                         <>
-                          <Text size="xs" c="dimmed" mb="xs">Background Music Settings</Text>
+                          <Text size="xs" c="dimmed" mb="xs">
+                            Background Music Settings
+                          </Text>
                           <Group gap="xs" align="flex-end" wrap="nowrap">
                             <Stack gap="xs" style={{ flex: 1 }}>
-                              <Text size="xs" c="dimmed">Intensity</Text>
+                              <Text size="xs" c="dimmed">
+                                Intensity
+                              </Text>
                               <CustomCombobox
-                                value={backgroundIntensity[sound.filename] || BACKGROUND_INTENSITY_OPTIONS[0]}
+                                value={
+                                  backgroundIntensity[sound.filename] ||
+                                  BACKGROUND_INTENSITY_OPTIONS[0]
+                                }
                                 onChange={(value) => {
-                                  setBackgroundIntensity(prev => ({ ...prev, [sound.filename]: value || '' }));
+                                  setBackgroundIntensity((prev) => ({
+                                    ...prev,
+                                    [sound.filename]: value || '',
+                                  }));
                                 }}
                                 data={BACKGROUND_INTENSITY_OPTIONS}
                                 placeholder="Select intensity"
                                 width={150}
                               />
-                          </Stack>
-                          
-                          <Stack gap="xs" style={{ flex: 2 }}>
-                            <Text size="xs" c="dimmed">Context</Text>
-                            <TextInput
-                              placeholder="additional context (optional)"
-                              value={backgroundContext[sound.filename] || ''}
-                              onChange={(e) => {
-                                setBackgroundContext(prev => ({ ...prev, [sound.filename]: e.currentTarget.value }));
-                              }}
-                              style={{ flex: 1 }}
-                            />
-                          </Stack>
-                        </Group>
+                            </Stack>
+
+                            <Stack gap="xs" style={{ flex: 2 }}>
+                              <Text size="xs" c="dimmed">
+                                Context
+                              </Text>
+                              <TextInput
+                                placeholder="additional context (optional)"
+                                value={backgroundContext[sound.filename] || ''}
+                                onChange={(e) => {
+                                  setBackgroundContext((prev) => ({
+                                    ...prev,
+                                    [sound.filename]: e.currentTarget.value,
+                                  }));
+                                }}
+                                style={{ flex: 1 }}
+                              />
+                            </Stack>
+                          </Group>
                         </>
                       ) : (
                         <>
@@ -433,9 +537,12 @@ export function ServerEditSoundsModal({
                                 if (e.key === 'Enter' && e.currentTarget.value.trim()) {
                                   const newContext = e.currentTarget.value.trim();
                                   if (!currentContexts.includes(newContext)) {
-                                    setContextEdits(prev => ({ 
-                                      ...prev, 
-                                      [sound.filename]: [...(prev[sound.filename] ?? sound.contexts ?? []), newContext]
+                                    setContextEdits((prev) => ({
+                                      ...prev,
+                                      [sound.filename]: [
+                                        ...(prev[sound.filename] ?? sound.contexts ?? []),
+                                        newContext,
+                                      ],
                                     }));
                                     e.currentTarget.value = '';
                                   }
@@ -445,12 +552,21 @@ export function ServerEditSoundsModal({
                             <Button
                               size="xs"
                               onClick={() => {
-                                const input = document.querySelector('input[placeholder="Add new context..."]') as HTMLInputElement;
-                                if (input && input.value.trim() && !currentContexts.includes(input.value.trim())) {
+                                const input = document.querySelector(
+                                  'input[placeholder="Add new context..."]'
+                                ) as HTMLInputElement;
+                                if (
+                                  input &&
+                                  input.value.trim() &&
+                                  !currentContexts.includes(input.value.trim())
+                                ) {
                                   const newContext = input.value.trim();
-                                  setContextEdits(prev => ({ 
-                                    ...prev, 
-                                    [sound.filename]: [...(prev[sound.filename] ?? sound.contexts ?? []), newContext]
+                                  setContextEdits((prev) => ({
+                                    ...prev,
+                                    [sound.filename]: [
+                                      ...(prev[sound.filename] ?? sound.contexts ?? []),
+                                      newContext,
+                                    ],
                                   }));
                                   input.value = '';
                                 }
@@ -459,15 +575,18 @@ export function ServerEditSoundsModal({
                               Add
                             </Button>
                           </Group>
-                          
+
                           {/* CustomCombobox for choosing existing contexts (like main page) */}
                           <CustomCombobox
                             value=""
                             onChange={(value) => {
                               if (value && !currentContexts.includes(value)) {
-                                setContextEdits(prev => ({ 
-                                  ...prev, 
-                                  [sound.filename]: [...(prev[sound.filename] ?? sound.contexts ?? []), value]
+                                setContextEdits((prev) => ({
+                                  ...prev,
+                                  [sound.filename]: [
+                                    ...(prev[sound.filename] ?? sound.contexts ?? []),
+                                    value,
+                                  ],
                                 }));
                               }
                             }}
@@ -475,15 +594,16 @@ export function ServerEditSoundsModal({
                             placeholder="Add existing context"
                             width={200}
                           />
-                          
+
                           {/* Display selected contexts as badges */}
                           {currentContexts.length > 0 && (
                             <Group gap="xs" mt="xs">
                               {currentContexts.map((ctx) => {
                                 const handleRemoveContext = () => {
-                                  setContextEdits(prev => ({ 
-                                    ...prev, 
-                                    [sound.filename]: prev[sound.filename]?.filter(c => c !== ctx) || []
+                                  setContextEdits((prev) => ({
+                                    ...prev,
+                                    [sound.filename]:
+                                      prev[sound.filename]?.filter((c) => c !== ctx) || [],
                                   }));
                                 };
                                 return (
@@ -512,17 +632,20 @@ export function ServerEditSoundsModal({
                           )}
                         </>
                       )}
-                      
+
                       {/* Credit Editing */}
                       <TextInput
                         label="Credit"
                         value={currentCredit}
                         onChange={(e) => {
-                          setCreditEdits(prev => ({ ...prev, [sound.filename]: e.currentTarget.value }));
+                          setCreditEdits((prev) => ({
+                            ...prev,
+                            [sound.filename]: e.currentTarget.value,
+                          }));
                         }}
                         placeholder="Enter credit information..."
                       />
-                      
+
                       {/* Image Upload (Ambiance sounds only) */}
                       {selectedCategory === 'ambiance' && (
                         <FileInput
@@ -530,24 +653,31 @@ export function ServerEditSoundsModal({
                           placeholder="Upload background image"
                           accept="image/*"
                           onChange={(file) => {
-                            setImageFileEdits(prev => ({ ...prev, [sound.filename]: file }));
+                            setImageFileEdits((prev) => ({ ...prev, [sound.filename]: file }));
                           }}
                         />
                       )}
-                      
+
                       {imageFileEdits[sound.filename] && (
                         <Text size="xs" c="green">
-                          Image selected: {(imageFileEdits[sound.filename] as File)?.name || 'Ready to upload'}
+                          Image selected:{' '}
+                          {(imageFileEdits[sound.filename] as File)?.name || 'Ready to upload'}
                         </Text>
                       )}
                     </Stack>
                   )}
-                  
+
                   <Group gap="xs" mt="xs">
                     <Button
                       size="xs"
                       variant="subtle"
-                      leftSection={currentlyPlaying === sound.filename && isPlaying ? <IconPlayerPause size={14} /> : <IconPlayerPlay size={14} />}
+                      leftSection={
+                        currentlyPlaying === sound.filename && isPlaying ? (
+                          <IconPlayerPause size={14} />
+                        ) : (
+                          <IconPlayerPlay size={14} />
+                        )
+                      }
                       onClick={() => handlePlayPause(sound.filename)}
                       disabled={!sound.filename}
                     >
@@ -563,7 +693,7 @@ export function ServerEditSoundsModal({
                       Stop
                     </Button>
                   </Group>
-                  
+
                   {/* Display current image for ambiance sounds */}
                   {selectedCategory === 'ambiance' && currentImages[sound.filename] && (
                     <Group gap="xs" mt="xs">
@@ -575,7 +705,7 @@ export function ServerEditSoundsModal({
                       />
                     </Group>
                   )}
-                  
+
                   {sound.credit && (
                     <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
                       <span dangerouslySetInnerHTML={{ __html: sound.credit }} />
@@ -587,7 +717,15 @@ export function ServerEditSoundsModal({
           </div>
         )}
         <Group gap="sm" mt="sm">
-          <Button onClick={handleSave} loading={saving} disabled={Object.keys(edits).length === 0 && Object.keys(contextEdits).length === 0 && Object.keys(creditEdits).length === 0}>
+          <Button
+            onClick={handleSave}
+            loading={saving}
+            disabled={
+              Object.keys(edits).length === 0 &&
+              Object.keys(contextEdits).length === 0 &&
+              Object.keys(creditEdits).length === 0
+            }
+          >
             Save Changes
           </Button>
           {onAddSound && (

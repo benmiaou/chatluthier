@@ -4,5 +4,4 @@ export const SETTINGS = {
   HEADER_HEIGHT: 90,
   // Additional padding for elements that need to avoid overlapping the header
   HEADER_PADDING: 10,
-  
 } as const;

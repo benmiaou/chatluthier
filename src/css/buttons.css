@@ -1,294 +1,307 @@
 @font-face {
-    font-family: 'BagnardSans';
-    src: url('/fonts/BagnardSans.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
+  font-family: 'BagnardSans';
+  src: url('/fonts/BagnardSans.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
 }
 
 /* GLOBAL BUTTON STYLING - ALL BUTTONS USE MAIN BUTTON COLORS */
-button, .mantine-Button-root {
-    font-family: var(--fontfamilly);
-    border: none;
-    color: white;
-    padding: 8px 16px;
-    font-size: 14px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border-radius: 4px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s ease;
-    font-weight: 500;
-    background-color: var(--main-button-color); /* ALL buttons use main color */
+button,
+.mantine-Button-root {
+  font-family: var(--fontfamilly);
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  font-size: 14px;
+  margin: 4px 2px;
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  font-weight: 500;
+  background-color: var(--main-button-color); /* ALL buttons use main color */
 }
 
 /* Hover state for ALL buttons */
-button:hover, .mantine-Button-root:hover {
-    background-color: var(--main-button-hover-color);
+button:hover,
+.mantine-Button-root:hover {
+  background-color: var(--main-button-hover-color);
 }
 
 /* Disabled state for ALL buttons */
-button:disabled, .mantine-Button-root:disabled {
-    background-color: var(--main-button-disable-color);
-    cursor: not-allowed;
-    opacity: 0.8;
+button:disabled,
+.mantine-Button-root:disabled {
+  background-color: var(--main-button-disable-color);
+  cursor: not-allowed;
+  opacity: 0.8;
 }
 
 /* Active/pressed state for ALL buttons */
-button:active, .mantine-Button-root:active {
-    background-color: var(--main-button-active-color);
+button:active,
+.mantine-Button-root:active {
+  background-color: var(--main-button-active-color);
 }
 
 /* Soundboard buttons - special layout but SAME colors */
 .soundboard-button {
-    background-color: var(--main-button-color);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100% !important;
-    height: 40px;
-    padding: 8px 12px;
-    text-align: left;
-    justify-content: flex-start;
-    font-size: 14px;
-    margin: 0 !important;
-    min-height: 40px;
+  background-color: var(--main-button-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100% !important;
+  height: 40px;
+  padding: 8px 12px;
+  text-align: left;
+  justify-content: flex-start;
+  font-size: 14px;
+  margin: 0 !important;
+  min-height: 40px;
 }
 
 /* Remove any extra spacing from drag-and-drop containers */
 .soundboard-button .mantine-Button-label {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
-
-
 
 /* Ensure the draggable container takes full width */
 .soundboard-button-container {
-    width: 100%;
-    padding: 0;
-    margin: 0;
+  width: 100%;
+  padding: 0;
+  margin: 0;
 }
 
 /* Style for the drag handle */
 .soundboard-drag-handle {
-    cursor: grab;
-    display: flex;
-    align-items: center;
-    padding: 2px 0;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  padding: 2px 0;
 }
 
 .soundboard-drag-handle:active {
-    cursor: grabbing;
+  cursor: grabbing;
 }
 
 /* Style for the drag handle icon */
 .soundboard-drag-icon {
-    margin-right: 4px;
-    color: var(--mantine-color-dimmed);
-    cursor: grab;
+  margin-right: 4px;
+  color: var(--mantine-color-dimmed);
+  cursor: grab;
 }
 
 .soundboard-button:hover {
-    background-color: var(--main-button-hover-color);
+  background-color: var(--main-button-hover-color);
 }
 
 .soundboard-button:active {
-    background-color: var(--main-button-active-color);
+  background-color: var(--main-button-active-color);
 }
 
 /* Override any Mantine variant-specific colors to use main colors */
-.mantine-Button-root[data-variant="default"],
-.mantine-Button-root[data-variant="outline"],
-.mantine-Button-root[data-variant="filled"],
-.mantine-Button-root[data-variant="subtle"] {
-    background-color: var(--main-button-color) !important;
-    color: white !important;
-    border-color: var(--main-button-color) !important;
+.mantine-Button-root[data-variant='default'],
+.mantine-Button-root[data-variant='outline'],
+.mantine-Button-root[data-variant='filled'],
+.mantine-Button-root[data-variant='subtle'] {
+  background-color: var(--main-button-color) !important;
+  color: white !important;
+  border-color: var(--main-button-color) !important;
 }
 
-.mantine-Button-root[data-variant="default"]:hover,
-.mantine-Button-root[data-variant="outline"]:hover,
-.mantine-Button-root[data-variant="filled"]:hover,
-.mantine-Button-root[data-variant="subtle"]:hover {
-    background-color: var(--main-button-hover-color) !important;
-    border-color: var(--main-button-hover-color) !important;
+.mantine-Button-root[data-variant='default']:hover,
+.mantine-Button-root[data-variant='outline']:hover,
+.mantine-Button-root[data-variant='filled']:hover,
+.mantine-Button-root[data-variant='subtle']:hover {
+  background-color: var(--main-button-hover-color) !important;
+  border-color: var(--main-button-hover-color) !important;
 }
 
 /* Success button (green) */
-.mantine-Button-root[data-color="green"],
+.mantine-Button-root[data-color='green'],
 button.button-success {
-    background-color: #2e7d32;
-    color: white;
+  background-color: #2e7d32;
+  color: white;
 }
 
-.mantine-Button-root[data-color="green"]:hover,
+.mantine-Button-root[data-color='green']:hover,
 button.button-success:hover {
-    background-color: #1b5e20;
+  background-color: #1b5e20;
 }
 
 .update-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background-color:  var(--main-button-active-color);
-    color: var(--main-text);
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--main-button-active-color);
+  color: var(--main-text);
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
 }
 
 .update-button:hover {
-    background-color: var(--main-button-active-color-hover);
+  background-color: var(--main-button-active-color-hover);
 }
 
-.text-input{
-    font-family: var(--fontfamilly);
-    padding: 10px;
-    width: 200px;
-    margin-right: 10px;
-    border-radius: 5px;
-    border: 1px solid var(--main-background-color);
-    background-color: var(--main-background-color-secondary);
-    color: var(--main-text);
+.text-input {
+  font-family: var(--fontfamilly);
+  padding: 10px;
+  width: 200px;
+  margin-right: 10px;
+  border-radius: 5px;
+  border: 1px solid var(--main-background-color);
+  background-color: var(--main-background-color-secondary);
+  color: var(--main-text);
 }
 
 .text-input::placeholder {
-    color: var(--main-text-placeholder);
+  color: var(--main-text-placeholder);
 }
 
 /* GLOBAL DROPDOWN/SELECT STYLING - ALL USE MAIN BUTTON COLORS */
-select, .mantine-Select-root, .mantine-Select-input, .selector-primary {
-    font-family: var(--fontfamilly);
-    background-color: var(--main-button-color);
-    color: var(--main-text);
-    border: none;
-    border-radius: 5px;
-    padding: 10px 15px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-weight: 500;
+select,
+.mantine-Select-root,
+.mantine-Select-input,
+.selector-primary {
+  font-family: var(--fontfamilly);
+  background-color: var(--main-button-color);
+  color: var(--main-text);
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
 }
 
 /* Hover state for ALL dropdowns */
-select:hover, .mantine-Select-root:hover, .mantine-Select-input:hover, .selector-primary:hover {
-    background-color: var(--main-button-hover-color);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+select:hover,
+.mantine-Select-root:hover,
+.mantine-Select-input:hover,
+.selector-primary:hover {
+  background-color: var(--main-button-hover-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Focus state for ALL dropdowns */
-select:focus, .mantine-Select-root:focus, .mantine-Select-input:focus, .selector-primary:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(146, 58, 58, 0.3);
+select:focus,
+.mantine-Select-root:focus,
+.mantine-Select-input:focus,
+.selector-primary:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(146, 58, 58, 0.3);
 }
 
 /* Dropdown options - dark background with light text */
-select option, .mantine-Select-dropdown, .selector-primary option {
-    background-color: var(--main-background-color);
-    color: var(--main-text);
-    font-family: var(--fontfamilly);
+select option,
+.mantine-Select-dropdown,
+.selector-primary option {
+  background-color: var(--main-background-color);
+  color: var(--main-text);
+  font-family: var(--fontfamilly);
 }
 
 /* Mantine Select specific styling */
 .mantine-Select-root {
-    --select-bg: var(--main-button-color);
-    --select-hover:bg: var(--main-button-hover-color);
+  --select-bg: var(--main-button-color);
+  --select-hover: bg: var(--main-button-hover-color);
 }
 
 .mantine-Select-input {
-    border-color: var(--main-button-color);
+  border-color: var(--main-button-color);
 }
 
 .mantine-Select-dropdown {
-    background-color: var(--main-background-color);
-    border-color: var(--main-border);
+  background-color: var(--main-background-color);
+  border-color: var(--main-border);
 }
 
 .mantine-Select-item {
-    color: var(--main-text);
-    background-color: var(--main-background-color);
+  color: var(--main-text);
+  background-color: var(--main-background-color);
 }
 
 .mantine-Select-item:hover {
-    background-color: var(--main-background-color-secondary);
+  background-color: var(--main-background-color-secondary);
 }
 
 .mantine-Select-item[data-selected] {
-    background-color: var(--main-button-active-color);
-    color: white;
+  background-color: var(--main-button-active-color);
+  color: white;
 }
 
 .close-button {
-    color:  var(--main-button-color);
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 1001;
+  color: var(--main-button-color);
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 1001;
 }
 
 .close-button:hover,
 .close-button:focus {
-    color:  var(--main-button-hover-color);
-    text-decoration: none;
-    cursor: pointer;
+  color: var(--main-button-hover-color);
+  text-decoration: none;
+  cursor: pointer;
 }
 
 /* Music Mode Styles */
 .music-mode-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: var(--main-background-color-secondary);
-    border: 2px solid var(--main-border);
-    border-radius: 10px;
-    padding: 15px 20px;
-    margin: 20px 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--main-background-color-secondary);
+  border: 2px solid var(--main-border);
+  border-radius: 10px;
+  padding: 15px 20px;
+  margin: 20px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .music-mode-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .music-mode-label {
-    font-family: var(--fontfamilly);
-    font-size: 16px;
-    color: var(--main-text);
-    font-weight: bold;
+  font-family: var(--fontfamilly);
+  font-size: 16px;
+  color: var(--main-text);
+  font-weight: bold;
 }
 
 .music-mode-display {
-    font-family: var(--fontfamilly);
-    font-size: 18px;
-    color: var(--main-button-active-color);
-    font-weight: bold;
-    padding: 5px 12px;
-    background-color: var(--main-background-color);
-    border: 2px solid var(--main-button-active-color);
-    border-radius: 6px;
-    min-width: 120px;
-    text-align: center;
+  font-family: var(--fontfamilly);
+  font-size: 18px;
+  color: var(--main-button-active-color);
+  font-weight: bold;
+  padding: 5px 12px;
+  background-color: var(--main-background-color);
+  border: 2px solid var(--main-button-active-color);
+  border-radius: 6px;
+  min-width: 120px;
+  text-align: center;
 }
 
 .music-mode-toggle {
-    min-width: 180px;
-    font-size: 14px;
-    padding: 12px 20px;
-    transition: all 0.3s ease;
+  min-width: 180px;
+  font-size: 14px;
+  padding: 12px 20px;
+  transition: all 0.3s ease;
 }
 
 .music-mode-toggle:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }

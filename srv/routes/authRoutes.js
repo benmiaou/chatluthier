@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { 
-    refreshToken, 
-    checkSession, 
-    logout,
-    registerWithPseudo,
-    loginWithPseudo,
-    changePassword,
-    requestPasswordReset,
-    getSecretQuestion,
-    checkPseudoAvailable
+const {
+  refreshToken,
+  checkSession,
+  logout,
+  registerWithPseudo,
+  loginWithPseudo,
+  changePassword,
+  requestPasswordReset,
+  getSecretQuestion,
+  checkPseudoAvailable,
 } = require('../controllers/authController');
 router.post('/refresh-token', refreshToken);
 router.get('/check-session', checkSession);

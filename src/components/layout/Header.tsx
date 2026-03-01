@@ -22,7 +22,13 @@ export function AppHeader() {
 
   return (
     <>
-      <Group h="100%" px="md" justify="space-between" wrap="nowrap" style={{ backgroundColor: 'var(--main-background-color)' }}>
+      <Group
+        h="100%"
+        px="md"
+        justify="space-between"
+        wrap="nowrap"
+        style={{ backgroundColor: 'var(--main-background-color)' }}
+      >
         {/* Logo + Title on the left */}
         <Group gap="sm" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
           <img
@@ -37,26 +43,42 @@ export function AppHeader() {
 
         {/* Center area for action buttons */}
         <Group gap="sm" visibleFrom="sm">
-          {userId && <Button variant="outline" size="xs" onClick={openRequest}>Request Sound</Button>}
-          {userId && <Button variant="outline" size="xs" onClick={openEdit}>Edit My Sounds</Button>}
-          {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={openServerEdit}>Edit Server Sounds</Button>}
-          {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={openReview}>Review Requests</Button>}
+          {userId && (
+            <Button variant="outline" size="xs" onClick={openRequest}>
+              Request Sound
+            </Button>
+          )}
+          {userId && (
+            <Button variant="outline" size="xs" onClick={openEdit}>
+              Edit My Sounds
+            </Button>
+          )}
+          {isAdmin && (
+            <Button variant="outline" size="xs" color="orange" onClick={openServerEdit}>
+              Edit Server Sounds
+            </Button>
+          )}
+          {isAdmin && (
+            <Button variant="outline" size="xs" color="orange" onClick={openReview}>
+              Review Requests
+            </Button>
+          )}
         </Group>
 
         {/* Auth buttons on the right */}
         <AuthButtons />
       </Group>
-      
+
       {/* Modals for header actions */}
       <RequestSoundModal opened={requestOpened} onClose={closeRequest} userId={userId} />
-      <EditSoundsModal 
-        opened={editOpened} 
-        onClose={closeEdit} 
+      <EditSoundsModal
+        opened={editOpened}
+        onClose={closeEdit}
         category="ambiance"
         userId={userId}
       />
-      <ServerEditSoundsModal 
-        opened={serverEditOpened} 
+      <ServerEditSoundsModal
+        opened={serverEditOpened}
         onClose={closeServerEdit}
         userId={userId}
         onAddSound={openAdd}

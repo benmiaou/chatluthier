@@ -14,30 +14,28 @@
 
 /* Basic reset for styling */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 /* Drag and drop styles */
 .drag-handle {
-    cursor: grab;
+  cursor: grab;
 }
 
 .drag-handle:active {
-    cursor: grabbing;
+  cursor: grabbing;
 }
 
 .dragging {
-    opacity: 0.8;
-    background-color: var(--mantine-color-gray-1);
+  opacity: 0.8;
+  background-color: var(--mantine-color-gray-1);
 }
 
-
-
 @font-face {
-    font-family: 'BagnardSans';
-    src: url('/fonts/BagnardSans.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
+  font-family: 'BagnardSans';
+  src: url('/fonts/BagnardSans.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
 }

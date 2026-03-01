@@ -15,7 +15,11 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
 }
 
 export async function apiUpload<T>(path: string, formData: FormData): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, { method: 'POST', body: formData, credentials: 'include' });
+  const res = await fetch(`${BASE}${path}`, {
+    method: 'POST',
+    body: formData,
+    credentials: 'include',
+  });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Upload ${path} failed (${res.status}): ${text}`);

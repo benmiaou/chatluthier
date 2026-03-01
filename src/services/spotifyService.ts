@@ -111,7 +111,7 @@ export function isTokenExpired(token: SpotifyToken): boolean {
 async function spotifyApi(
   path: string,
   accessToken: string,
-  options?: RequestInit,
+  options?: RequestInit
 ): Promise<Response> {
   return fetch(`https://api.spotify.com/v1${path}`, {
     ...options,

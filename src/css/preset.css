@@ -1,11 +1,11 @@
 /* Preset controls */
 #preset-controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 #input-button-container {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
