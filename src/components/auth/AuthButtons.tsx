@@ -263,6 +263,8 @@ export function AuthButtons() {
             handleLogin();
           }
         }}
+        closeOnClickOutside={false}
+        closeOnEscape={true}
       >
         <Stack>
           <TextInput
@@ -312,6 +314,8 @@ export function AuthButtons() {
             handleRegister();
           }
         }}
+        closeOnClickOutside={false}
+        closeOnEscape={true}
       >
         <Stack>
           <TextInput
@@ -399,6 +403,8 @@ export function AuthButtons() {
             handleGetSecretQuestion();
           }
         }}
+        closeOnClickOutside={false}
+        closeOnEscape={true}
       >
         <Stack>
           <TextInput
@@ -431,6 +437,8 @@ export function AuthButtons() {
             handlePasswordReset();
           }
         }}
+        closeOnClickOutside={false}
+        closeOnEscape={true}
       >
         <Stack>
           <Text size="sm" mb="sm">

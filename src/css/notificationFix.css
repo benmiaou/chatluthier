@@ -1,0 +1,10 @@
+/* Critical fix for notification blocking issue */
+.mantine-Notifications-root {
+    pointer-events: none !important;
+}
+
+/* Allow individual notifications to be clickable */
+.mantine-Notification-root {
+    pointer-events: auto !important;
+    z-index: 100 !important;
+}

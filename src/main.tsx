@@ -1,6 +1,7 @@
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import './css/styles.css';
+import './css/notificationFix.css';
 
 import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
@@ -14,11 +15,19 @@ import { SocketProvider } from './contexts/SocketContext';
 import { SETTINGS } from './constants/settings';
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  <>
     <ColorSchemeScript defaultColorScheme="dark" />
     <MantineProvider theme={theme} defaultColorScheme="dark">
       <ModalsProvider>
-        <Notifications position="top-right" styles={{ root: { top: SETTINGS.HEADER_HEIGHT + SETTINGS.HEADER_PADDING } }} />
+        <Notifications 
+          position="top-right"
+          styles={{
+            root: {
+              top: 0, // Position below header
+              zIndex: 50  // High enough to show above content, low enough not to block
+            }
+          }}
+        />
         <AuthProvider>
           <SocketProvider>
             <App />
@@ -26,5 +35,5 @@ createRoot(document.getElementById('root')!).render(
         </AuthProvider>
       </ModalsProvider>
     </MantineProvider>
-  </StrictMode>,
+  </>
 );

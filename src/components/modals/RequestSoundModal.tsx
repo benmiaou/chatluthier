@@ -1,4 +1,5 @@
-import { Button, Modal, Select, Stack, TextInput, Text, Anchor, List, MultiSelect, Group, Badge, ActionIcon } from '@mantine/core';
+import { Button, Modal, Stack, TextInput, Text, Anchor, List, MultiSelect, Group, Badge, ActionIcon } from '@mantine/core';
+import { CustomCombobox } from '../audio/CustomCombobox';
 import { useState } from 'react';
 import { notifications } from '@mantine/notifications';
 import { IconX } from '@tabler/icons-react';
@@ -15,6 +16,18 @@ export function RequestSoundModal({ opened, onClose, userId }: RequestSoundModal
   const [category, setCategory] = useState('soundboard');
   const [contexts, setContexts] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Mapping between display names and API values
+  const categoryMapping: Record<string, string> = {
+    'Background Music': 'backgroundMusic',
+    'Ambiance': 'ambianceSounds',
+    'Soundboard': 'soundboard'
+  };
+
+  // Get display name from API value
+  const getCategoryDisplayName = (apiValue: string) => {
+    return Object.entries(categoryMapping).find(([_, value]) => value === apiValue)?.[0] || 'Soundboard';
+  };
 
   const handleSubmit = async () => {
     if (!soundName) {
@@ -77,15 +90,13 @@ export function RequestSoundModal({ opened, onClose, userId }: RequestSoundModal
           required
         />
         
-        <Select
+        <CustomCombobox
           label="Category"
-          value={category}
-          onChange={(v) => setCategory(v ?? 'soundboard')}
-          data={[
-            { value: 'backgroundMusic', label: 'Background Music' },
-            { value: 'ambianceSounds', label: 'Ambiance' },
-            { value: 'soundboard', label: 'Soundboard' },
-          ]}
+          value={getCategoryDisplayName(category)}
+          onChange={(v) => setCategory(categoryMapping[v] || 'soundboard')}
+          data={['Background Music', 'Ambiance', 'Soundboard']}
+          placeholder="Select category"
+          width="100%"
         />
         
         <MultiSelect
