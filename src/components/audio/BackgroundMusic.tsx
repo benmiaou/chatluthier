@@ -277,17 +277,6 @@ export function BackgroundMusic({ userId = null, isAdmin = false }: Readonly<Bac
           <Text size="xs" c="dimmed" truncate style={{ flex: 1 }}>
             {currentSound ? `♪ ${currentSound.name}` : 'No track playing'}
           </Text>
-          {isAdmin && currentSound && (
-            <ActionIcon
-              size="xs"
-              variant="subtle"
-              color="red"
-              onClick={() => handleDelete(currentSound.filename)}
-              title={`Delete ${currentSound.name}`}
-            >
-              <IconTrash size={12} />
-            </ActionIcon>
-          )}
         </Group>
         {currentSound?.credit && (
           <Text size="xs" c="dimmed" fs="italic" truncate

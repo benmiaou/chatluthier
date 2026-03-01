@@ -67,7 +67,7 @@ async function getRequests(req, res) {
         const email = payload.email || payload.pseudo;
         console.log('User email/pseudo:', email);
         
-        const isAdmin = isAdminUser(email);
+        const isAdmin = isAdminUser(email, payload);
         console.log('Is admin:', isAdmin);
         
         if (!isAdmin) {
@@ -99,7 +99,7 @@ async function closeRequest(req, res) {
         const payload = await verifyjwt(accessToken);
         // Handle both email and pseudo-based authentication
         const email = payload.email || payload.pseudo;
-        const isAdmin = isAdminUser(email);
+        const isAdmin = isAdminUser(email, payload);
 
         if (!isAdmin) {
             return res.status(403).json({ error: 'Unauthorized' });

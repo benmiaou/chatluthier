@@ -3,16 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import { AuthButtons } from '../auth/AuthButtons';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { useDisclosure } from '@mantine/hooks';
+import { useState } from 'react';
 import { RequestSoundModal } from '../modals/RequestSoundModal';
 import { EditSoundsModal } from '../modals/EditSoundsModal';
+import { ServerEditSoundsModal } from '../modals/ServerEditSoundsModal';
 import { AddSoundModal } from '../modals/AddSoundModal';
 import { ReviewRequestsModal } from '../modals/ReviewRequestsModal';
+import { SETTINGS } from '../../constants/settings';
 
 export function AppHeader() {
   const navigate = useNavigate();
   const { userId, isAdmin } = useAuthContext();
   const [requestOpened, { open: openRequest, close: closeRequest }] = useDisclosure(false);
   const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
+  const [serverEditOpened, { open: openServerEdit, close: closeServerEdit }] = useDisclosure(false);
   const [addOpened, { open: openAdd, close: closeAdd }] = useDisclosure(false);
   const [reviewOpened, { open: openReview, close: closeReview }] = useDisclosure(false);
 
@@ -24,7 +28,7 @@ export function AppHeader() {
           <img
             src="/images/favicons/MainLogo.PNG"
             alt="Le Chat Luthier"
-            style={{ height: 42, width: 'auto' }}
+            style={{ height: SETTINGS.HEADER_HEIGHT * 0.9, width: 'auto' }}
           />
           <Text fw={700} size="xl" visibleFrom="sm" style={{ color: 'var(--main-text)' }}>
             Le Chat Luthier
@@ -34,9 +38,8 @@ export function AppHeader() {
         {/* Center area for action buttons */}
         <Group gap="sm" visibleFrom="sm">
           {userId && <Button variant="outline" size="xs" onClick={openRequest}>Request Sound</Button>}
-          {userId && <Button variant="outline" size="xs" onClick={openEdit}>Edit Sounds</Button>}
-          {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={() => openEdit('ambiance')}>Edit Server Sounds</Button>}
-          {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={openAdd}>Add Sound</Button>}
+          {userId && <Button variant="outline" size="xs" onClick={openEdit}>Edit My Sounds</Button>}
+          {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={openServerEdit}>Edit Server Sounds</Button>}
           {isAdmin && <Button variant="outline" size="xs" color="orange" onClick={openReview}>Review Requests</Button>}
         </Group>
 
@@ -46,7 +49,18 @@ export function AppHeader() {
       
       {/* Modals for header actions */}
       <RequestSoundModal opened={requestOpened} onClose={closeRequest} userId={userId} />
-      <EditSoundsModal opened={editOpened} onClose={closeEdit} userId={userId} isAdmin={isAdmin} />
+      <EditSoundsModal 
+        opened={editOpened} 
+        onClose={closeEdit} 
+        category="ambiance"
+        userId={userId}
+      />
+      <ServerEditSoundsModal 
+        opened={serverEditOpened} 
+        onClose={closeServerEdit}
+        userId={userId}
+        onAddSound={openAdd}
+      />
       {isAdmin && (
         <>
           <AddSoundModal opened={addOpened} onClose={closeAdd} onAdded={() => {}} />

@@ -1,7 +1,8 @@
-import { Button, Loader, Modal, Select, Stack, Switch, Text, MultiSelect, Group, Badge, TextInput, ActionIcon } from '@mantine/core';
+import { Button, Loader, Modal, Stack, Switch, Text, Group, Badge, TextInput, ActionIcon } from '@mantine/core';
+import { CustomCombobox } from '../audio/CustomCombobox';
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
-import { IconPlayerPlay, IconPlayerPause, IconPlayerStop, IconX } from '@tabler/icons-react';
+import { IconPlayerPlay, IconPlayerPause, IconPlayerStop, IconX, IconSearch } from '@tabler/icons-react';
 import type { Sound, SoundCategory } from '../../types/sound';
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 
@@ -44,7 +45,6 @@ interface EditSoundsModalProps {
   opened: boolean;
   onClose: () => void;
   category: SoundCategory;
-  isAdmin: boolean;
   userId: string | null;
   onSave?: () => void;
 }
@@ -58,7 +58,6 @@ export function EditSoundsModal({
   opened,
   onClose,
   category,
-  isAdmin,
   userId,
   onSave,
 }: EditSoundsModalProps) {
@@ -70,6 +69,13 @@ export function EditSoundsModal({
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editingSoundId, setEditingSoundId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Filter sounds based on search term
+  const filteredSounds = sounds.filter(sound => 
+    sound.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    sound.filename.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   
@@ -204,64 +210,43 @@ export function EditSoundsModal({
     try {
       const soundsType = SOUNDS_TYPE[selectedCategory];
       
-      if (isAdmin) {
-        // Admin: send full updated sounds array to /update-main-playlist
-        const updated = sounds.map((s) => ({
-          ...s,
-          isEnabled: edits[s.filename] ?? s.isEnabled ?? true,
-          contexts: contextEdits[s.filename] ?? s.contexts ?? [],
-          credit: creditEdits[s.filename] ?? s.credit ?? '',
-        }));
-        
-        const response = await fetch('/update-main-playlist', {
+      // User: collect all changes and send in a single request if possible
+      const changes = [];
+      
+      // Collect all changes
+      Object.entries(edits).forEach(([filename, isEnabled]) => {
+        changes.push({
+          filename,
+          isEnabled,
+          contexts: contextEdits[filename],
+        });
+      });
+      
+      // Add context-only changes
+      Object.entries(contextEdits).forEach(([filename, contexts]) => {
+        if (!edits[filename]) {
+          changes.push({
+            filename,
+            contexts,
+          });
+        }
+      });
+      
+      // Send all changes in a single batch request if there are changes
+      if (changes.length > 0) {
+        const response = await fetch('/update-user-sounds-batch', {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ soundsType, sounds: updated }),
+          body: JSON.stringify({ 
+            userId, 
+            soundsType, 
+            changes 
+          }),
         });
         
         if (!response.ok) {
-          throw new Error('Failed to update main playlist');
-        }
-      } else {
-        // User: collect all changes and send in a single request if possible
-        const changes = [];
-        
-        // Collect all changes
-        Object.entries(edits).forEach(([filename, isEnabled]) => {
-          changes.push({
-            filename,
-            isEnabled,
-            contexts: contextEdits[filename],
-          });
-        });
-        
-        // Add context-only changes
-        Object.entries(contextEdits).forEach(([filename, contexts]) => {
-          if (!edits[filename]) {
-            changes.push({
-              filename,
-              contexts,
-            });
-          }
-        });
-        
-        // Send all changes in a single batch request if there are changes
-        if (changes.length > 0) {
-          const response = await fetch('/update-user-sounds-batch', {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              userId, 
-              soundsType, 
-              changes 
-            }),
-          });
-          
-          if (!response.ok) {
-            throw new Error('Failed to update user sounds');
-          }
+          throw new Error('Failed to update user sounds');
         }
       }
       
@@ -280,27 +265,45 @@ export function EditSoundsModal({
     <Modal
       opened={opened}
       onClose={onClose}
-      title={`Edit Sounds${isAdmin ? ' (Admin)' : ''}`}
-      size="lg"
+      title="Edit My Sounds"
+      size="xl"
+      styles={{
+        root: { 
+          '--modal-width': '80%', 
+          '--modal-max-width': '900px' 
+        },
+        content: { 
+          width: 'var(--modal-width)', 
+          maxWidth: 'var(--modal-max-width)',
+          height: '90vh',
+          maxHeight: '90vh',
+          margin: 'auto'
+        }
+      }}
     >
       <Stack gap="sm">
-        <Select
-          label="Category"
+        <CustomCombobox
           value={selectedCategory}
           onChange={(v) => setSelectedCategory((v as SoundCategory) ?? 'ambiance')}
-          data={[
-            { value: 'background', label: 'Background Music' },
-            { value: 'ambiance', label: 'Ambiance Sounds' },
-            { value: 'soundboard', label: 'Soundboard' },
-          ]}
+          data={['background', 'ambiance', 'soundboard']}
+          placeholder="Select category"
+        />
+        <TextInput
+          placeholder="Search sounds..."
+          leftSection={<IconSearch size={16} />}
+          onChange={(e) => {
+            const searchTerm = e.currentTarget.value.toLowerCase();
+            setSearchTerm(searchTerm);
+          }}
+          style={{ marginBottom: '10px' }}
         />
         {loading ? (
           <Loader size="sm" />
-        ) : sounds.length === 0 ? (
-          <Text c="dimmed">No sounds found in this category.</Text>
+        ) : filteredSounds.length === 0 ? (
+          <Text c="dimmed">No sounds found matching your search.</Text>
         ) : (
           <Stack gap="xs" mah={400} style={{ overflowY: 'auto' }}>
-            {sounds.map((sound) => {
+            {filteredSounds.map((sound) => {
               const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
               const currentContexts = contextEdits[sound.filename] ?? sound.contexts ?? [];
               const currentCredit = creditEdits[sound.filename] ?? sound.credit ?? '';
@@ -366,19 +369,51 @@ export function EditSoundsModal({
                         </Button>
                       </Group>
                       
-                      <MultiSelect
-                        label="Select existing contexts"
-                        placeholder="Search contexts..."
-                        value={currentContexts}
-                        onChange={(values) => {
-                          setContextEdits(prev => ({ ...prev, [sound.filename]: values }));
+                      {/* CustomCombobox for choosing existing contexts (like main page) */}
+                      <CustomCombobox
+                        value=""
+                        onChange={(value) => {
+                          if (value && !currentContexts.includes(value)) {
+                            setContextEdits(prev => ({ 
+                              ...prev, 
+                              [sound.filename]: [...(prev[sound.filename] ?? sound.contexts ?? []), value]
+                            }));
+                          }
                         }}
                         data={availableContexts}
-                        searchable
-                        clearable
-                        maxDropdownHeight={200}
-                        withinPortal={true}
+                        placeholder="Add existing context"
+                        width={200}
                       />
+                      
+                      {/* Display selected contexts as badges */}
+                      {currentContexts.length > 0 && (
+                        <Group gap="xs" mt="xs">
+                          {currentContexts.map((ctx) => (
+                            <Badge
+                              key={ctx}
+                              variant="light"
+                              size="sm"
+                              c="blue"
+                              rightSection={
+                                <ActionIcon
+                                  size="xs"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setContextEdits(prev => ({ 
+                                      ...prev, 
+                                      [sound.filename]: prev[sound.filename]?.filter(c => c !== ctx) || []
+                                    }));
+                                  }}
+                                >
+                                  <IconX size={12} />
+                                </ActionIcon>
+                              }
+                            >
+                              {ctx}
+                            </Badge>
+                          ))}
+                        </Group>
+                      )}
                     </Stack>
                   )}
                   
@@ -413,9 +448,12 @@ export function EditSoundsModal({
             })}
           </Stack>
         )}
-        <Button mt="sm" onClick={handleSave} loading={saving} disabled={Object.keys(edits).length === 0 && Object.keys(contextEdits).length === 0 && Object.keys(creditEdits).length === 0}>
-          Save Changes
-        </Button>
+        <Group gap="sm" mt="sm">
+          <Button onClick={handleSave} loading={saving} disabled={Object.keys(edits).length === 0 && Object.keys(contextEdits).length === 0 && Object.keys(creditEdits).length === 0}>
+            Save Changes
+          </Button>
+
+        </Group>
       </Stack>
     </Modal>
   );

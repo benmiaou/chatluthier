@@ -26,10 +26,16 @@ export function ReviewRequestsModal({ opened, onClose }: ReviewRequestsModalProp
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const data = await fetch('/get-requests').then((r) => r.json());
-      setRequests(data ?? []);
-    } catch {
-      notifications.show({ message: 'Failed to load requests', color: 'red' });
+      const response = await fetch('/get-requests');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setRequests(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to load requests:', error);
+      notifications.show({ message: `Failed to load requests: ${error.message}`, color: 'red' });
+      setRequests([]);
     } finally {
       setLoading(false);
     }

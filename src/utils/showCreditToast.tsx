@@ -1,4 +1,5 @@
 import { notifications } from '@mantine/notifications';
+import { SETTINGS } from '../constants/settings';
 
 /**
  * Show a credit attribution toast with the HTML credit string from the JSON data.
@@ -18,5 +19,6 @@ export function showCreditToast(soundName: string, creditHtml: string) {
     withCloseButton: true,
     color: 'dark',
     position: 'top-right',
+    style: { top: SETTINGS.HEADER_HEIGHT + SETTINGS.HEADER_PADDING },
   });
 }
