@@ -341,7 +341,14 @@ export function ServerEditSoundsModal({
         ) : filteredSounds.length === 0 ? (
           <Text c="dimmed">No sounds found matching your search.</Text>
         ) : (
-          <Stack gap="xs" mah={400} style={{ overflowY: 'auto' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
+            gap: '1rem', 
+            maxHeight: '400px', 
+            overflowY: 'auto',
+            paddingRight: '0.5rem'
+          }}>
             {filteredSounds.map((sound) => {
               const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
               // Ensure all contexts are strings to prevent MultiSelect errors
@@ -577,7 +584,7 @@ export function ServerEditSoundsModal({
                 </Stack>
               );
             })}
-          </Stack>
+          </div>
         )}
         <Group gap="sm" mt="sm">
           <Button onClick={handleSave} loading={saving} disabled={Object.keys(edits).length === 0 && Object.keys(contextEdits).length === 0 && Object.keys(creditEdits).length === 0}>
