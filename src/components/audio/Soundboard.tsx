@@ -142,14 +142,22 @@ export function Soundboard({ userId = null }: SoundboardProps) {
 
   const handlePlay = (filename: string) => {
     playSound(filename);
+    
+    // Always try to show credits, regardless of session
+    const sound = sounds.find((s) => s.filename === filename);
+    if (sound?.credit) {
+      showCreditToast(sound.name, sound.credit);
+    } else {
+      console.log('No credit found for sound:', sound?.name, 'Filename:', filename);
+    }
+    
+    // Session-specific logic
     if (sessionId) {
-      const sound = sounds.find((s) => s.filename === filename);
       send({ type: 'playSoundboardSound', id: sessionId, content: { 
         filename, 
         credit: sound?.credit,
         name: sound?.name
       } });
-      if (sound?.credit) showCreditToast(sound.name, sound.credit);
     }
   }
 
@@ -166,6 +174,8 @@ export function Soundboard({ userId = null }: SoundboardProps) {
         // Show credit for received soundboard sounds
         if (credit && name) {
           showCreditToast(name, credit);
+        } else {
+          console.log('No credit in received message for:', filename, 'Credit:', credit, 'Name:', name);
         }
       }
     });

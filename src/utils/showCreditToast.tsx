@@ -10,8 +10,12 @@ export function showCreditToast(soundName: string, creditHtml: string) {
     id: `credit-${soundName}`,
     title: soundName,
     message: (
-      <span
-        style={{ fontSize: 11, lineHeight: 1.4 }}
+      <div
+        style={{ 
+          fontSize: 11, 
+          lineHeight: 1.4,
+          pointerEvents: 'auto'  // Allow clicks on links
+        }}
         dangerouslySetInnerHTML={{ __html: creditHtml }}
       />
     ),
@@ -19,6 +23,13 @@ export function showCreditToast(soundName: string, creditHtml: string) {
     withCloseButton: true,
     color: 'dark',
     position: 'top-right',
-    style: { top: SETTINGS.HEADER_HEIGHT + SETTINGS.HEADER_PADDING },
+    style: { 
+      top: SETTINGS.HEADER_HEIGHT + SETTINGS.HEADER_PADDING,
+      zIndex: 100  // Explicit z-index for credit toasts
+    },
+    classNames: {
+      root: 'credit-toast',
+      notification: 'credit-notification'
+    }
   });
 }
