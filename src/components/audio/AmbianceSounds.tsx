@@ -1,8 +1,9 @@
+import React from 'react';
 import { Button, Group, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IconDeviceFloppy, IconRefresh } from '@tabler/icons-react';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useAmbianceSounds } from '../../hooks/useAmbianceSounds';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { showCreditToast } from '../../utils/showCreditToast';
@@ -13,7 +14,7 @@ interface AmbianceSoundsProps {
   userId?: string | null;
 }
 
-export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>) {
+export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>): React.JSX.Element {
   const { send, addMessageHandler, sessionId } = useSocketContext();
   const {
     bars,
@@ -53,7 +54,7 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
 
   // Apply sound order to bars when soundOrder or bars change
   const orderedBars = useMemo(() => {
-    if (soundOrder.length === 0 || bars.length === 0) return bars;
+    if (soundOrder.length === 0 || bars.length === 0) {return bars;}
 
     // Create a map for quick lookup
     const orderMap = new Map(soundOrder.map((filename, index) => [filename, index]));
@@ -67,14 +68,7 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
   }, [bars, soundOrder]);
 
   // Load presets and sound order when user logs in
-  useEffect(() => {
-    if (userId) {
-      loadPresets();
-      loadSoundOrder();
-    }
-  }, [userId, loadPresets]);
-
-  const loadSoundOrder = async () => {
+  const loadSoundOrder = useCallback(async () => {
     try {
       const response = await fetch(
         `http://localhost:3000/get-sound-order?userId=${userId}&soundType=ambianceSounds`,
@@ -82,6 +76,7 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
           credentials: 'include',
         }
       );
+
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
       }
@@ -101,17 +96,22 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
 
       // If we have a valid loaded order, use it. Otherwise use the current bars order.
       setSoundOrder(validOrder.length > 0 ? validOrder : bars.map((bar) => bar.sound.filename));
-    } catch (error) {
-      console.error('Failed to load sound order:', error);
+    } catch (_error) {
       // Fallback to current bars order if loading fails
       setSoundOrder(bars.map((bar) => bar.sound.filename));
     }
-  };
+  }, [userId, bars]);
+
+  useEffect(() => {
+    if (userId) {
+      loadPresets();
+      loadSoundOrder();
+    }
+  }, [userId, loadPresets, loadSoundOrder]);
 
   const saveSoundOrder = async (newOrder: string[]) => {
     try {
       if (!userId) {
-        console.log('No userId available, skipping server save');
         setSoundOrder(newOrder);
         return;
       }
@@ -129,13 +129,11 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Server error response:', errorText);
         throw new Error(`Server responded with status ${response.status}: ${errorText}`);
       }
 
       setSoundOrder(newOrder);
-    } catch (error) {
-      console.error('Failed to save sound order:', error);
+    } catch (_error) {
       // Fallback: still update local state even if server save fails
       setSoundOrder(newOrder);
     }
@@ -143,7 +141,6 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
 
   const handleDragEnd = (fromIndex: number, toIndex: number) => {
     if (!userId || userId === 'null' || userId === 'undefined') {
-      console.log('No valid user ID, skipping save. userId:', userId);
       return;
     }
 
@@ -186,13 +183,13 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
   };
 
   const handleSavePreset = () => {
-    if (!presetName.trim()) return;
+    if (!presetName.trim()) {return;}
     savePreset(presetName.trim());
     setPresetName('');
   };
 
   const handleApplyPreset = (name: string | null) => {
-    if (name) applyPreset(name);
+    if (name) {applyPreset(name);}
   };
 
   // Listen for incoming ambiance updates from session peers
@@ -201,7 +198,7 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
       if (msg.type === 'ambianceStatusUpdate' && msg.content) {
         const { ambianceStatus } = msg.content as { ambianceStatus: Record<string, number> };
         applyStatus(ambianceStatus);
-
+        
         // Show credits for any sounds that have credits
         Object.entries(ambianceStatus).forEach(([filename, volume]) => {
           if (volume > 0) {
@@ -335,7 +332,7 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
                 onChange={handleChange}
                 moveItem={moveItem}
                 onDragEnd={handleDragEnd}
-                showDragHandle={!!userId}
+                showDragHandle={Boolean(userId)}
               />
             ))}
           </div>

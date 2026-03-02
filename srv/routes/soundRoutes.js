@@ -6,8 +6,8 @@ const {
   updateUserSound,
   savePreset,
   loadPresets,
-  getSoundOrder,
-  saveSoundOrder,
+  getSoundOrderV2,
+  saveSoundOrderV2,
   addSound,
   deleteSound,
   updateUserSoundsBatch,
@@ -55,8 +55,8 @@ router.get('/soundboard', async (req, res) => {
 
 router.post('/save-preset', savePreset);
 router.get('/load-presets', loadPresets);
-router.get('/get-sound-order', getSoundOrder);
-router.post('/save-sound-order', saveSoundOrder);
+router.get('/get-sound-order', getSoundOrderV2);
+router.post('/save-sound-order', saveSoundOrderV2);
 router.post('/delete-sound', deleteSound);
 router.post('/update-main-playlist', updateMainPlaylist);
 router.post('/update-user-sound', updateUserSound);

@@ -14,8 +14,9 @@ import {
 import { useState } from 'react';
 import { useSocketContext } from '../../contexts/SocketContext';
 import { IconCopy, IconCheck, IconPlugConnectedX, IconUsers } from '@tabler/icons-react';
+import React from 'react';
 
-export function SessionManager() {
+export function SessionManager(): React.JSX.Element {
   const { connected, sessionId, subscribe, disconnect, statusMessage, participants } =
     useSocketContext();
   const [joinInput, setJoinInput] = useState('');

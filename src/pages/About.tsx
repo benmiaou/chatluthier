@@ -1,7 +1,8 @@
+import React from 'react';
 import { Container, Title, Text, Paper, List, Anchor, Button, Group } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 
-export function About() {
+export function About(): React.ReactElement {
   const navigate = useNavigate();
 
   return (
@@ -12,7 +13,7 @@ export function About() {
             About Le Chat Luthier
           </Title>
           <Button variant="subtle" onClick={() => navigate(-1)}>
-            ← Back
+            &larr; Back
           </Button>
         </Group>
         <Text mb="md" style={{ textAlign: 'justify', lineHeight: 1.7 }}>
@@ -37,7 +38,7 @@ export function About() {
         <List mb="md" spacing="xs">
           <List.Item>
             <strong>Background Music:</strong> Choose from various themes like calm, dynamic, or
-            intense to match the scene's mood.
+            intense to match the scene&#39;s mood.
           </List.Item>
           <List.Item>
             <strong>Ambiance Sounds:</strong> Layer ambient noises to create immersive environments.
@@ -65,11 +66,11 @@ export function About() {
         </Text>
 
         <Title order={2} mb="sm">
-          Why "Le Chat Luthier"?
+          Why &quot;Le Chat Luthier&quot;?
         </Title>
         <Text mb="md" style={{ textAlign: 'justify', lineHeight: 1.7 }}>
-          The name translates to "The Luthier Cat" in French. A luthier is a craftsman who builds or
-          repairs string instruments. Our platform aims to be the artisan of audio experiences —
+          The name translates to &quot;The Luthier Cat&quot; in French. A luthier is a craftsman who builds or
+          repairs string instruments. Our platform aims to be the artisan of audio experiences &mdash;
           crafting the perfect soundscape for your adventures.
         </Text>
 

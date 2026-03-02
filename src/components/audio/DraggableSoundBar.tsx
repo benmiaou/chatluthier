@@ -1,10 +1,12 @@
+import React from 'react';
 import { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { SoundBar } from './SoundBar';
 import { IconGripVertical } from '@tabler/icons-react';
+import type { AmbianceBar } from '../../hooks/useAmbianceSounds';
 
 interface DraggableSoundBarProps {
-  bar: any;
+  bar: AmbianceBar;
   index: number;
   onChange: (filename: string, volume: number) => void;
   moveItem: (fromIndex: number, toIndex: number) => void;
@@ -19,7 +21,7 @@ export function DraggableSoundBar({
   moveItem,
   onDragEnd,
   showDragHandle,
-}: Readonly<DraggableSoundBarProps>) {
+}: Readonly<DraggableSoundBarProps>): React.JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
 
   const [{ isDragging }, drag] = useDrag({
@@ -40,7 +42,7 @@ export function DraggableSoundBar({
       }
     },
     collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
+      isDragging: Boolean(monitor.isDragging()),
     }),
   });
 
@@ -79,7 +81,7 @@ export function DraggableSoundBar({
     >
       {showDragHandle && (
         <div
-          ref={drag as any}
+          ref={drag as React.RefObject<HTMLDivElement>}
           style={{
             position: 'absolute',
             top: 0,

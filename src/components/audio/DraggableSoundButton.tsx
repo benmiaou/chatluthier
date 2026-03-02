@@ -1,10 +1,12 @@
+import React from 'react';
 import { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { Button } from '@mantine/core';
 import { IconGripVertical } from '@tabler/icons-react';
+import type { Sound } from '../../types/sound';
 
 interface DraggableSoundButtonProps {
-  sound: any;
+  sound: Sound;
   index: number;
   onPlay: (filename: string) => void;
   moveItem: (fromIndex: number, toIndex: number) => void;
@@ -19,7 +21,7 @@ export function DraggableSoundButton({
   moveItem,
   onDragEnd,
   showDragHandle,
-}: Readonly<DraggableSoundButtonProps>) {
+}: Readonly<DraggableSoundButtonProps>): React.JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
 
   const [{ isDragging }, drag] = useDrag({
@@ -40,7 +42,7 @@ export function DraggableSoundButton({
       }
     },
     collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
+      isDragging: Boolean(monitor.isDragging()),
     }),
   });
 
@@ -78,7 +80,7 @@ export function DraggableSoundButton({
     >
       {showDragHandle && (
         <div
-          ref={drag as any}
+          ref={drag as React.RefObject<HTMLDivElement>}
           style={{
             position: 'absolute',
             top: 0,

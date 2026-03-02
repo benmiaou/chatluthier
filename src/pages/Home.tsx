@@ -1,6 +1,6 @@
+import React from 'react';
 import { Button, Group, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { useState, useCallback } from 'react';
 import { BackgroundMusic } from '../components/audio/BackgroundMusic';
 import { AmbianceSounds } from '../components/audio/AmbianceSounds';
 import { Soundboard } from '../components/audio/Soundboard';
@@ -16,18 +16,19 @@ import { useAuthContext } from '../contexts/AuthContext';
 const ENABLE_SPOTIFY = false;
 
 // Conditional import for Spotify
-let SpotifyPlayer = null;
+let SpotifyPlayer: React.ComponentType<unknown> | null = null;
 if (ENABLE_SPOTIFY) {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   SpotifyPlayer = require('../components/spotify/SpotifyPlayer').SpotifyPlayer;
 }
 
-export function Home() {
+export function Home(): React.ReactElement {
   const { userId, isAdmin } = useAuthContext();
-  const [requestOpened, { open: openRequest, close: closeRequest }] = useDisclosure(false);
+  const [_requestOpened, { open: _openRequest, close: closeRequest }] = useDisclosure(false);
 
-  const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
-  const [serverEditOpened, { open: openServerEdit, close: closeServerEdit }] = useDisclosure(false);
-  const [reviewOpened, { open: openReview, close: closeReview }] = useDisclosure(false);
+  const [_editOpened, { open: _openEdit, close: closeEdit }] = useDisclosure(false);
+  const [_serverEditOpened, { open: _openServerEdit, close: closeServerEdit }] = useDisclosure(false);
+  const [_reviewOpened, { open: _openReview, close: closeReview }] = useDisclosure(false);
 
   return (
     <Stack gap="xl" pb="xl">
@@ -39,28 +40,28 @@ export function Home() {
 
       <Group justify="center" gap="sm" wrap="wrap">
         {isAdmin && (
-          <Button variant="outline" size="xs" color="orange" onClick={openServerEdit}>
+          <Button variant="outline" size="xs" color="orange" onClick={_openServerEdit}>
             Edit Server Sounds
           </Button>
         )}
         {isAdmin && (
-          <Button variant="outline" size="xs" color="orange" onClick={openReview}>
+          <Button variant="outline" size="xs" color="orange" onClick={_openReview}>
             Review Requests
           </Button>
         )}
       </Group>
 
-      <RequestSoundModal opened={requestOpened} onClose={closeRequest} userId={userId} />
+      <RequestSoundModal opened={_requestOpened} onClose={closeRequest} userId={userId} />
       <EditSoundsModal
-        opened={editOpened}
+        opened={_editOpened}
         onClose={closeEdit}
         category="ambiance"
         userId={userId}
         onSave={() => {}}
       />
-      <ServerEditSoundsModal opened={serverEditOpened} onClose={closeServerEdit} userId={userId} />
+      <ServerEditSoundsModal opened={_serverEditOpened} onClose={closeServerEdit} userId={userId} />
 
-      <ReviewRequestsModal opened={reviewOpened} onClose={closeReview} />
+      <ReviewRequestsModal opened={_reviewOpened} onClose={closeReview} />
     </Stack>
   );
 }

@@ -3,7 +3,18 @@ import type { Sound } from '../types/sound';
 
 const ASSET_PREFIX = '/assets/soundboard/';
 
-export function useSoundboard(userId: string | null) {
+export function useSoundboard(userId: string | null): {
+  sounds: Sound[];
+  volume: number;
+  setVolume: (volume: number) => void;
+  context: string;
+  setContext: (context: string) => void;
+  loadSounds: () => Promise<void>;
+  playSound: (sound: Sound) => void;
+  stopAll: () => void;
+  getStatus: () => Record<string, boolean>;
+  applyStatus: (status: Record<string, boolean>) => void;
+} {
   const [sounds, setSounds] = useState<Sound[]>([]);
   const [volume, setVolumeState] = useState(0.5);
   const [context, setContext] = useState('All');
@@ -22,13 +33,16 @@ export function useSoundboard(userId: string | null) {
         return { ...base, name: base.name ?? (base as any).display_name ?? base.filename };
       });
       setSounds(merged.filter((s) => s.isEnabled !== false));
-    } catch (err) {
-      console.error('Failed to load soundboard:', err);
+    } catch (_err) {
+      // Failed to load soundboard
     }
   }, [userId]);
 
   useEffect(() => {
-    loadSounds();
+    const load = async () => {
+      await loadSounds();
+    };
+    load();
   }, [loadSounds]);
 
   const playSound = useCallback(
@@ -56,12 +70,4 @@ export function useSoundboard(userId: string | null) {
     playSound,
     setVolume,
   };
-}
-
-export interface Sound {
-  filename: string;
-  name: string;
-  credit?: string;
-  contexts?: string[];
-  // ...other properties if they exist...
 }

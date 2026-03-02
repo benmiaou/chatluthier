@@ -9,7 +9,24 @@ export interface AmbianceBar {
   audio: HTMLAudioElement;
 }
 
-export function useAmbianceSounds(userId: string | null) {
+interface AmbianceSoundsHook {
+  bars: AmbianceBar[];
+  allBars: AmbianceBar[];
+  presets: Record<string, Record<string, number>>;
+  context: string;
+  setContext: (context: string) => void;
+  loadSounds: () => Promise<void>;
+  setBarVolume: (filename: string, volume: number) => void;
+  reset: () => void;
+  getStatus: () => Record<string, number>;
+  applyStatus: (status: Record<string, number>) => void;
+  loadPresets: () => Promise<void>;
+  savePreset: (name: string) => Promise<void>;
+  deletePreset: (name: string) => Promise<void>;
+  applyPreset: (name: string) => void;
+}
+
+export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
   const [bars, setBars] = useState<AmbianceBar[]>([]);
   const [presets, setPresets] = useState<Record<string, Record<string, number>>>({});
   const [context, setContext] = useState('All');
@@ -42,13 +59,16 @@ export function useAmbianceSounds(userId: string | null) {
 
       barsRef.current = newBars;
       setBars(newBars);
-    } catch (err) {
-      console.error('Failed to load ambiance sounds:', err);
+    } catch (_err) {
+      // Failed to load ambiance sounds
     }
   }, [userId]);
 
   useEffect(() => {
-    loadSounds();
+    const load = async () => {
+      await loadSounds();
+    };
+    load();
   }, [loadSounds]);
 
   // ─── Volume control ───────────────────────────────────────────────────────
@@ -56,7 +76,7 @@ export function useAmbianceSounds(userId: string | null) {
   const setBarVolume = useCallback((filename: string, volume: number) => {
     setBars((prev) =>
       prev.map((b) => {
-        if (b.sound.filename !== filename) return b;
+        if (b.sound.filename !== filename) {return b;}
         b.audio.volume = volume;
         if (volume > 0 && b.audio.paused) {
           b.audio.play().catch(() => {});
@@ -89,8 +109,8 @@ export function useAmbianceSounds(userId: string | null) {
       prev.map((b) => {
         const vol = status[b.sound.filename] ?? 0;
         b.audio.volume = vol;
-        if (vol > 0 && b.audio.paused) b.audio.play().catch(() => {});
-        else if (vol === 0) b.audio.pause();
+        if (vol > 0 && b.audio.paused) {b.audio.play().catch(() => {});}
+        else if (vol === 0) {b.audio.pause();}
         return { ...b, volume: vol };
       })
     );
@@ -104,7 +124,7 @@ export function useAmbianceSounds(userId: string | null) {
   // ─── Presets ──────────────────────────────────────────────────────────────
 
   const loadPresets = useCallback(async () => {
-    if (!userId) return;
+    if (!userId) {return;}
     try {
       const data = await fetch(`/load-presets?userId=${userId}`).then((r) => r.json());
       setPresets(data?.presets ?? {});
@@ -115,7 +135,7 @@ export function useAmbianceSounds(userId: string | null) {
 
   const savePreset = useCallback(
     async (name: string) => {
-      if (!userId) return;
+      if (!userId) {return;}
       const status = getStatus();
       setPresets((prev) => ({ ...prev, [name]: status }));
       await fetch('/save-preset', {
@@ -131,7 +151,7 @@ export function useAmbianceSounds(userId: string | null) {
   const applyPreset = useCallback(
     (name: string) => {
       const preset = presets[name];
-      if (preset) applyStatus(preset);
+      if (preset) {applyStatus(preset);}
     },
     [presets, applyStatus]
   );

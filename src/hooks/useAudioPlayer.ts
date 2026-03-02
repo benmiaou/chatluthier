@@ -1,6 +1,14 @@
 import { useCallback, useRef } from 'react';
+import type { RefObject } from 'react';
 
 const CACHE_NAME = 'audio-cache-v1';
+
+interface AudioPlayerHook {
+  player: RefObject<AudioPlayer>;
+  play: (url: string, volume?: number) => Promise<void>;
+  stop: () => void;
+  setVolume: (volume: number) => void;
+}
 
 export class AudioPlayer {
   private audio: HTMLAudioElement;
@@ -45,7 +53,7 @@ export class AudioPlayer {
   }
 }
 
-export function useAudioPlayer() {
+export function useAudioPlayer(): AudioPlayerHook {
   const playerRef = useRef<AudioPlayer>(new AudioPlayer());
 
   const play = useCallback(async (url: string, volume?: number) => {
@@ -60,12 +68,12 @@ export function useAudioPlayer() {
     playerRef.current.setVolume(volume);
   }, []);
 
-  return { player: playerRef.current, play, stop, setVolume };
+  return { player: playerRef, play, stop, setVolume };
 }
 
 /** Pre-cache a list of audio URLs using the Cache API */
 export async function precacheAudio(urls: string[]): Promise<void> {
-  if (!('caches' in window)) return;
+  if (!('caches' in window)) {return;}
   try {
     const cache = await caches.open(CACHE_NAME);
     await Promise.allSettled(urls.map((url) => cache.add(url)));

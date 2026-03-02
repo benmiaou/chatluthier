@@ -254,6 +254,10 @@ async function updateUserSound(req, res) {
             console.error('Error in updateUserSound:', error);
             res.status(500).send('Internal server error');
         }
+    } catch (error) {
+        console.error('Error in updateUserSound outer block:', error);
+        res.status(500).send('Internal server error');
+    }
 }
 
 // ADDING MISSING FUNCTIONS FOR COMPATIBILITY
@@ -345,6 +349,10 @@ async function updateMainPlaylist(req, res) {
             console.error('Error updating main playlist:', error);
             return res.status(500).json({ error: 'Failed to update main playlist.' });
         }
+    } catch (error) {
+        console.error('Error in updateMainPlaylist outer block:', error);
+        return res.status(500).json({ error: 'Failed to update main playlist.' });
+    }
 }
 
 async function savePreset(req, res) {

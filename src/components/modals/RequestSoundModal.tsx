@@ -15,14 +15,15 @@ import { CustomCombobox } from '../audio/CustomCombobox';
 import { useState } from 'react';
 import { notifications } from '@mantine/notifications';
 import { IconX } from '@tabler/icons-react';
+import React from 'react';
 
 interface RequestSoundModalProps {
   opened: boolean;
   onClose: () => void;
-  userId: string | null;
+  userId?: string | null;
 }
 
-export function RequestSoundModal({ opened, onClose, userId }: RequestSoundModalProps) {
+export function RequestSoundModal({ opened, onClose, _userId }: RequestSoundModalProps): React.JSX.Element {
   const [soundName, setSoundName] = useState('');
   const [soundUrl, setSoundUrl] = useState('');
   const [category, setCategory] = useState('soundboard');
@@ -37,7 +38,7 @@ export function RequestSoundModal({ opened, onClose, userId }: RequestSoundModal
   };
 
   // Get display name from API value
-  const getCategoryDisplayName = (apiValue: string) => {
+  const getCategoryDisplayName = (apiValue: string): string => {
     return (
       Object.entries(categoryMapping).find(([_, value]) => value === apiValue)?.[0] || 'Soundboard'
     );

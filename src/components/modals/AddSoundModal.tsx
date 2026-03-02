@@ -1,6 +1,7 @@
 import { Button, FileInput, Modal, Select, Stack, TextInput } from '@mantine/core';
 import { useState } from 'react';
 import { notifications } from '@mantine/notifications';
+import React from 'react';
 
 interface AddSoundModalProps {
   opened: boolean;
@@ -8,7 +9,7 @@ interface AddSoundModalProps {
   onAdded: () => void;
 }
 
-export function AddSoundModal({ opened, onClose, onAdded }: AddSoundModalProps) {
+export function AddSoundModal({ opened, onClose, onAdded }: AddSoundModalProps): React.JSX.Element {
   const [displayName, setDisplayName] = useState('');
   const [category, setCategory] = useState('soundboard');
   const [credit, setCredit] = useState('');

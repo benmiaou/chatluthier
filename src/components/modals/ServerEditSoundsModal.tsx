@@ -13,8 +13,9 @@ import {
   useCombobox,
 } from '@mantine/core';
 import { CustomCombobox } from '../audio/CustomCombobox';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { notifications } from '@mantine/notifications';
+import React from 'react';
 import {
   IconPlayerPlay,
   IconPlayerPause,
@@ -144,7 +145,7 @@ const ContextBadge = ({
   );
 };
 
-export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEditSoundsModalProps) {
+export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEditSoundsModalProps): React.JSX.Element {
   const [sounds, setSounds] = useState<SoundEdit[]>([]);
   const [edits, setEdits] = useState<Record<string, boolean>>({});
   const [contextEdits, setContextEdits] = useState<Record<string, string[]>>({});
@@ -195,7 +196,7 @@ export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEdi
   };
 
   useEffect(() => {
-    if (!opened) return;
+    if (!opened) {return;}
     setEdits({});
     setContextEdits({});
     setCreditEdits({});
@@ -207,7 +208,6 @@ export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEdi
 
     // Ensure the category exists in our ENDPOINT mapping
     if (!SOUNDS_TYPE[safeCategory]) {
-      console.error(`Invalid category: ${safeCategory}`);
       setLoading(false);
       return;
     }
@@ -222,15 +222,14 @@ export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEdi
         return r.json();
       })
       .then((data) => processLoadedSounds(data, safeCategory))
-      .catch((error) => {
-        console.error('Failed to load sounds:', error);
-        notifications.show({ message: `Failed to load sounds: ${error.message}`, color: 'red' });
+      .catch((error: unknown) => {
+        notifications.show({ message: `Failed to load sounds: ${error instanceof Error ? error.message : 'Unknown error'}`, color: 'red' });
       })
       .finally(() => setLoading(false));
 
-    const processLoadedSounds = (data: any[], safeCategory: SoundCategory) => {
+    const processLoadedSounds = (data: unknown[], _safeCategory: SoundCategory) => {
       // Map backend data format to frontend expected format
-      const mappedSounds = data.map((sound) => ({
+      const mappedSounds = data.map((sound: unknown) => ({
         id: String(sound.id || sound.filename),
         name: sound.display_name || sound.name || sound.filename,
         filename: sound.filename,
@@ -275,7 +274,6 @@ export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEdi
   }, [opened, selectedCategory]);
 
   const handleToggle = (filename: string, enabled: boolean) => {
-    console.log(`Toggling sound ${filename} to ${enabled}`);
     setEdits((prev) => ({ ...prev, [filename]: enabled }));
   };
 
@@ -284,17 +282,17 @@ export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEdi
       // Fix audio path based on category
       let soundUrl;
       switch (selectedCategory) {
-        case 'background':
-          soundUrl = `/assets/background/${filename}`;
-          break;
-        case 'ambiance':
-          soundUrl = `/assets/ambiance/${filename}`;
-          break;
-        case 'soundboard':
-          soundUrl = `/assets/soundboard/${filename}`;
-          break;
-        default:
-          soundUrl = `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
+      case 'background':
+        soundUrl = `/assets/background/${filename}`;
+        break;
+      case 'ambiance':
+        soundUrl = `/assets/ambiance/${filename}`;
+        break;
+      case 'soundboard':
+        soundUrl = `/assets/soundboard/${filename}`;
+        break;
+      default:
+        soundUrl = `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
       }
 
       if (currentlyPlaying === filename && isPlaying) {
@@ -312,9 +310,8 @@ export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEdi
         setCurrentlyPlaying(filename);
         setIsPlaying(true);
       }
-    } catch (error) {
-      console.error('Error playing sound:', error);
-      notifications.show({ message: `Failed to play sound: ${error.message}`, color: 'red' });
+    } catch (error: unknown) {
+      notifications.show({ message: `Failed to play sound: ${error instanceof Error ? error.message : 'Unknown error'}`, color: 'red' });
     }
   };
 
@@ -367,9 +364,8 @@ export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEdi
 
       notifications.show({ message: 'Server sounds updated successfully!', color: 'teal' });
       onClose();
-    } catch (error) {
-      console.error('Save error:', error);
-      notifications.show({ message: `Failed to save: ${error.message}`, color: 'red' });
+    } catch (error: unknown) {
+      notifications.show({ message: `Failed to save: ${error instanceof Error ? error.message : 'Unknown error'}`, color: 'red' });
     } finally {
       setSaving(false);
     }
@@ -409,8 +405,8 @@ export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEdi
           placeholder="Search sounds..."
           leftSection={<IconSearch size={16} />}
           onChange={(e) => {
-            const searchTerm = e.currentTarget.value.toLowerCase();
-            setSearchTerm(searchTerm);
+            const newSearchTerm = e.currentTarget.value.toLowerCase();
+            setSearchTerm(newSearchTerm);
           }}
           style={{ marginBottom: '10px' }}
         />
@@ -708,7 +704,7 @@ export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEdi
 
                   {sound.credit && (
                     <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
-                      <span dangerouslySetInnerHTML={{ __html: sound.credit }} />
+                      {sound.credit}
                     </Text>
                   )}
                 </Stack>

@@ -21,3 +21,9 @@ export interface SpotifyPlaybackState {
   item: SpotifyTrack | null;
   device: { name: string; volume_percent: number } | null;
 }
+
+export interface SpotifyPlaylist {
+  id: string;
+  name: string;
+  uri: string;
+}

@@ -1,10 +1,9 @@
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppLayout } from './components/layout/AppLayout';
 import { Home } from './pages/Home';
-import { Privacy } from './pages/Privacy';
-import { About } from './pages/About';
 
-export default function App() {
+function App(): React.JSX.Element {
   return (
     <BrowserRouter>
       <AppLayout>
@@ -15,3 +14,5 @@ export default function App() {
     </BrowserRouter>
   );
 }
+
+export default App;

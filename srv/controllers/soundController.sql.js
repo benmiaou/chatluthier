@@ -737,7 +737,7 @@ async function loadPresets(req, res) {
   }
 }
 
-async function getSoundOrder(req, res) {
+async function getSoundOrderV2(req, res) {
   const userId = req.query.userId;
   const soundType = req.query.soundType;
 
@@ -790,7 +790,7 @@ async function getSoundOrder(req, res) {
   }
 }
 
-async function saveSoundOrder(req, res) {
+async function saveSoundOrderV2(req, res) {
   console.log('saveSoundOrder called with body:', req.body);
 
   try {
@@ -889,8 +889,8 @@ module.exports = {
   updateUserSound,
   savePreset,
   loadPresets,
-  getSoundOrder,
-  saveSoundOrder,
+  getSoundOrderV2,
+  saveSoundOrderV2,
   addSound,
   deleteSound,
   updateUserSoundsBatch,

@@ -1,6 +1,7 @@
-import { Modal, ScrollArea, Title, Text, Anchor, Button, Group } from '@mantine/core';
+import { Modal, ScrollArea, Text, Anchor, Title } from '@mantine/core';
+import React from 'react';
 
-export function PrivacyModal({ opened, onClose }: { opened: boolean; onClose: () => void }) {
+export function PrivacyModal({ opened, onClose }: { opened: boolean; onClose: () => void }): React.JSX.Element {
   return (
     <Modal
       opened={opened}

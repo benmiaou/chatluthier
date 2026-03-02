@@ -1,6 +1,16 @@
 /** Base URL for API calls. Empty string works both in dev (via Vite proxy) and prod. */
 const BASE = '';
 
+interface RequestInit {
+  method?: string;
+  headers?: Record<string, string>;
+  body?: BodyInit | null;
+  credentials?: RequestCredentials;
+}
+
+type BodyInit = Blob | FormData | URLSearchParams | ReadableStream<Uint8Array> | string;
+type RequestCredentials = 'omit' | 'same-origin' | 'include';
+
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     credentials: 'include',

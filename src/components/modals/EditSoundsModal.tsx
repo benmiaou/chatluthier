@@ -11,8 +11,9 @@ import {
   ActionIcon,
 } from '@mantine/core';
 import { CustomCombobox } from '../audio/CustomCombobox';
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
+import React from 'react';
 import {
   IconPlayerPlay,
   IconPlayerPause,
@@ -128,7 +129,7 @@ export function EditSoundsModal({
   category,
   userId,
   onSave,
-}: EditSoundsModalProps) {
+}: EditSoundsModalProps): React.JSX.Element {
   const [sounds, setSounds] = useState<SoundEdit[]>([]);
   const [edits, setEdits] = useState<Record<string, boolean>>({});
   const [contextEdits, setContextEdits] = useState<Record<string, string[]>>({});
@@ -152,7 +153,7 @@ export function EditSoundsModal({
 
   // Generate dynamic context options that include both predefined options and user-created contexts
   const availableContexts = useMemo(() => {
-    if (!sounds.length || !selectedCategory) return CONTEXT_OPTIONS[selectedCategory] || [];
+    if (!sounds.length || !selectedCategory) {return CONTEXT_OPTIONS[selectedCategory] || [];}
 
     // Extract all unique contexts from all sounds in the current category
     const userContexts = new Set<string>();
@@ -175,7 +176,7 @@ export function EditSoundsModal({
   }, [sounds, selectedCategory]);
 
   useEffect(() => {
-    if (!opened) return;
+    if (!opened) {return;}
     setEdits({});
     setContextEdits({});
     setCreditEdits({});
@@ -187,7 +188,6 @@ export function EditSoundsModal({
 
     // Ensure the category exists in our ENDPOINT mapping
     if (!ENDPOINT[safeCategory]) {
-      console.error(`Invalid category: ${safeCategory}`);
       setLoading(false);
       return;
     }
@@ -200,9 +200,9 @@ export function EditSoundsModal({
         }
         return r.json();
       })
-      .then((data: any[]) => {
+      .then((data: unknown[]) => {
         // Map backend data format to frontend expected format
-        const mappedSounds = data.map((sound) => ({
+        const mappedSounds = data.map((sound: unknown) => ({
           id: String(sound.id || sound.filename),
           name: sound.display_name || sound.name || sound.filename,
           filename: sound.filename,
@@ -213,15 +213,13 @@ export function EditSoundsModal({
         }));
         setSounds(mappedSounds);
       })
-      .catch((error) => {
-        console.error('Failed to load sounds:', error);
-        notifications.show({ message: `Failed to load sounds: ${error.message}`, color: 'red' });
+      .catch((error: unknown) => {
+        notifications.show({ message: `Failed to load sounds: ${error instanceof Error ? error.message : 'Unknown error'}`, color: 'red' });
       })
       .finally(() => setLoading(false));
   }, [opened, selectedCategory, userId]);
 
   const handleToggle = (filename: string, enabled: boolean) => {
-    console.log(`Toggling sound ${filename} to ${enabled}`);
     setEdits((prev) => ({ ...prev, [filename]: enabled }));
   };
 
@@ -230,17 +228,17 @@ export function EditSoundsModal({
       // Fix audio path based on category
       let soundUrl;
       switch (selectedCategory) {
-        case 'background':
-          soundUrl = `/assets/background/${filename}`;
-          break;
-        case 'ambiance':
-          soundUrl = `/assets/ambiance/${filename}`;
-          break;
-        case 'soundboard':
-          soundUrl = `/assets/soundboard/${filename}`;
-          break;
-        default:
-          soundUrl = `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
+      case 'background':
+        soundUrl = `/assets/background/${filename}`;
+        break;
+      case 'ambiance':
+        soundUrl = `/assets/ambiance/${filename}`;
+        break;
+      case 'soundboard':
+        soundUrl = `/assets/soundboard/${filename}`;
+        break;
+      default:
+        soundUrl = `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
       }
 
       if (currentlyPlaying === filename && isPlaying) {
@@ -258,9 +256,8 @@ export function EditSoundsModal({
         setCurrentlyPlaying(filename);
         setIsPlaying(true);
       }
-    } catch (error) {
-      console.error('Error playing sound:', error);
-      notifications.show({ message: `Failed to play sound: ${error.message}`, color: 'red' });
+    } catch (error: unknown) {
+      notifications.show({ message: `Failed to play sound: ${error instanceof Error ? error.message : 'Unknown error'}`, color: 'red' });
     }
   };
 
@@ -320,9 +317,8 @@ export function EditSoundsModal({
       notifications.show({ message: 'Saved!', color: 'teal' });
       onSave?.();
       onClose();
-    } catch (error) {
-      console.error('Save error:', error);
-      notifications.show({ message: `Failed to save: ${error.message}`, color: 'red' });
+    } catch (error: unknown) {
+      notifications.show({ message: `Failed to save: ${error instanceof Error ? error.message : 'Unknown error'}`, color: 'red' });
     } finally {
       setSaving(false);
     }
@@ -359,8 +355,8 @@ export function EditSoundsModal({
           placeholder="Search sounds..."
           leftSection={<IconSearch size={16} />}
           onChange={(e) => {
-            const searchTerm = e.currentTarget.value.toLowerCase();
-            setSearchTerm(searchTerm);
+            const newSearchTerm = e.currentTarget.value.toLowerCase();
+            setSearchTerm(newSearchTerm);
           }}
           style={{ marginBottom: '10px' }}
         />
@@ -382,7 +378,6 @@ export function EditSoundsModal({
             {filteredSounds.map((sound) => {
               const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
               const currentContexts = contextEdits[sound.filename] ?? sound.contexts ?? [];
-              const currentCredit = creditEdits[sound.filename] ?? sound.credit ?? '';
               const isEditing = editingSoundId === sound.id;
 
               return (
@@ -542,7 +537,7 @@ export function EditSoundsModal({
 
                   {sound.credit && (
                     <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
-                      <span dangerouslySetInnerHTML={{ __html: sound.credit }} />
+                      {sound.credit}
                     </Text>
                   )}
                 </Stack>

@@ -13,13 +13,26 @@ import {
   spotifyPlay,
   spotifySetVolume,
 } from '../services/spotifyService';
-import type { SpotifyPlaybackState, SpotifyToken } from '../types/spotify';
+import type { SpotifyPlaylist, SpotifyPlaybackState, SpotifyToken } from '../types/spotify';
 
-export function useSpotify() {
+export function useSpotify(): {
+  isAuthenticated: boolean;
+  isConnecting: boolean;
+  token: SpotifyToken | null;
+  playbackState: SpotifyPlaybackState | null;
+  playlists: SpotifyPlaylist[];
+  connect: () => Promise<void>;
+  disconnect: () => void;
+  play: (uri: string) => Promise<void>;
+  pause: () => Promise<void>;
+  next: () => Promise<void>;
+  setVolume: (volume: number) => Promise<void>;
+  fetchPlaylists: () => Promise<void>;
+  } {
   const [token, setToken] = useState<SpotifyToken | null>(loadToken);
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     const t = loadToken();
-    return !!t && !isTokenExpired(t);
+    return Boolean(t) && !isTokenExpired(t);
   });
   const [playbackState, setPlaybackState] = useState<SpotifyPlaybackState | null>(null);
   const [playlists, setPlaylists] = useState<{ id: string; name: string; uri: string }[]>([]);
@@ -31,7 +44,9 @@ export function useSpotify() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
-    if (!code) return;
+    if (!code) {
+      return;
+    }
 
     params.delete('code');
     params.delete('state');
@@ -42,16 +57,16 @@ export function useSpotify() {
         setToken(t);
         setIsAuthenticated(true);
       })
-      .catch(console.error);
+      .catch(() => {});
   }, []);
 
   // ─── Refresh token when expired ───────────────────────────────────────────
 
   const ensureValidToken = useCallback(async (): Promise<string | null> => {
     let t = token;
-    if (!t) return null;
+    if (!t) {return null;}
     if (isTokenExpired(t)) {
-      if (!t.refresh_token) return null;
+      if (!t.refresh_token) {return null;}
       t = await refreshSpotifyToken(t.refresh_token);
       setToken(t);
     }
@@ -72,7 +87,7 @@ export function useSpotify() {
     setIsAuthenticated(false);
     setPlaybackState(null);
     setPlaylists([]);
-    if (pollRef.current) clearInterval(pollRef.current);
+    if (pollRef.current) {clearInterval(pollRef.current);}
   }, []);
 
   // ─── Playback controls ────────────────────────────────────────────────────
@@ -80,25 +95,25 @@ export function useSpotify() {
   const play = useCallback(
     async (contextUri?: string) => {
       const accessToken = await ensureValidToken();
-      if (accessToken) await spotifyPlay(accessToken, contextUri);
+      if (accessToken) {await spotifyPlay(accessToken, contextUri);}
     },
     [ensureValidToken]
   );
 
   const pause = useCallback(async () => {
     const accessToken = await ensureValidToken();
-    if (accessToken) await spotifyPause(accessToken);
+    if (accessToken) {await spotifyPause(accessToken);}
   }, [ensureValidToken]);
 
   const next = useCallback(async () => {
     const accessToken = await ensureValidToken();
-    if (accessToken) await spotifyNext(accessToken);
+    if (accessToken) {await spotifyNext(accessToken);}
   }, [ensureValidToken]);
 
   const setVolume = useCallback(
     async (volumePercent: number) => {
       const accessToken = await ensureValidToken();
-      if (accessToken) await spotifySetVolume(accessToken, volumePercent * 100);
+      if (accessToken) {await spotifySetVolume(accessToken, volumePercent * 100);}
     },
     [ensureValidToken]
   );
@@ -107,25 +122,32 @@ export function useSpotify() {
 
   const fetchPlaybackState = useCallback(async () => {
     const accessToken = await ensureValidToken();
-    if (!accessToken) return;
+    if (!accessToken) {return;}
     const state = await spotifyGetPlaybackState(accessToken);
     setPlaybackState(state);
   }, [ensureValidToken]);
 
   const fetchPlaylists = useCallback(async () => {
     const accessToken = await ensureValidToken();
-    if (!accessToken) return;
+    if (!accessToken) {return;}
     const items = await spotifyGetPlaylists(accessToken);
     setPlaylists(items.map((p: { id: string; name: string; uri: string }) => p));
   }, [ensureValidToken]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-    fetchPlaybackState();
-    fetchPlaylists();
+    if (!isAuthenticated) {
+      return;
+    }
+    const fetchInitial = async () => {
+      await fetchPlaybackState();
+      await fetchPlaylists();
+    };
+    fetchInitial();
     pollRef.current = setInterval(fetchPlaybackState, 5000);
     return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
+      if (pollRef.current) {
+        clearInterval(pollRef.current);
+      }
     };
   }, [isAuthenticated, fetchPlaybackState, fetchPlaylists]);
 

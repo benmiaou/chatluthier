@@ -1,6 +1,7 @@
 import { Button, Group, Loader, Modal, Stack, Text, Anchor } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { notifications } from '@mantine/notifications';
+import React from 'react';
 
 // Backend stores: { id, category, file, contexts, created_at, status, etc. }
 interface SoundRequest {
@@ -19,7 +20,7 @@ interface ReviewRequestsModalProps {
   onClose: () => void;
 }
 
-export function ReviewRequestsModal({ opened, onClose }: ReviewRequestsModalProps) {
+export function ReviewRequestsModal({ opened, onClose }: ReviewRequestsModalProps): React.JSX.Element {
   const [requests, setRequests] = useState<SoundRequest[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -32,8 +33,7 @@ export function ReviewRequestsModal({ opened, onClose }: ReviewRequestsModalProp
       }
       const data = await response.json();
       setRequests(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Failed to load requests:', error);
+    } catch (error: unknown) {
       notifications.show({ message: `Failed to load requests: ${error.message}`, color: 'red' });
       setRequests([]);
     } finally {
@@ -42,7 +42,7 @@ export function ReviewRequestsModal({ opened, onClose }: ReviewRequestsModalProp
   };
 
   useEffect(() => {
-    if (opened) fetchRequests();
+    if (opened) {fetchRequests();}
   }, [opened]);
 
   const closeRequest = async (requestId: number) => {

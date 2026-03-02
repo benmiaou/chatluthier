@@ -5,7 +5,7 @@ import { SETTINGS } from '../constants/settings';
  * Show a credit attribution toast with the HTML credit string from the JSON data.
  * Auto-closes after 10 s. Deduplicates by sound name.
  */
-export function showCreditToast(soundName: string, creditHtml: string) {
+export function showCreditToast(soundName: string, creditHtml: string): void {
   notifications.show({
     id: `credit-${soundName}`,
     title: soundName,
@@ -16,8 +16,9 @@ export function showCreditToast(soundName: string, creditHtml: string) {
           lineHeight: 1.4,
           pointerEvents: 'auto', // Allow clicks on links
         }}
-        dangerouslySetInnerHTML={{ __html: creditHtml }}
-      />
+      >
+        {creditHtml}
+      </div>
     ),
     autoClose: 10_000,
     withCloseButton: true,

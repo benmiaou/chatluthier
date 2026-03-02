@@ -1,7 +1,8 @@
+import React from 'react';
 import { Container, Title, Text, Paper, Anchor, Button, Group } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 
-export function Privacy() {
+export function Privacy(): React.ReactElement {
   const navigate = useNavigate();
 
   return (
@@ -12,7 +13,7 @@ export function Privacy() {
             Privacy Policy
           </Title>
           <Button variant="subtle" onClick={() => navigate(-1)}>
-            ← Back
+            &larr; Back
           </Button>
         </Group>
         <Title order={1} ta="center" mb="sm">

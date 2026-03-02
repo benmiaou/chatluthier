@@ -1,5 +1,5 @@
+import React from 'react';
 import {
-  ActionIcon,
   Box,
   Button,
   Group,
@@ -12,11 +12,11 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { CustomCombobox } from './CustomCombobox';
-import { IconPlayerSkipForward, IconPlayerStop, IconTrash, IconVolume } from '@tabler/icons-react';
+import { IconPlayerSkipForward, IconPlayerStop, IconVolume } from '@tabler/icons-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
-import { showCreditToast } from '../../utils/showCreditToast';
+
 import type { BackgroundMusicCategory, Sound } from '../../types/sound';
 import { bgScenes, bgMatchesCategory } from '../../types/sound';
 
@@ -34,9 +34,12 @@ const CATEGORIES: { value: BackgroundMusicCategory; label: string }[] = [
 
 export function BackgroundMusic({
   userId = null,
-  isAdmin = false,
-}: Readonly<BackgroundMusicProps>) {
+}: Readonly<BackgroundMusicProps>): React.JSX.Element {
   const { send, addMessageHandler, sessionId } = useSocketContext();
+  // Autoplay permission modal state
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [modalOpened, { open, close }] = useDisclosure(false);
+
   const {
     currentSound,
     activeCategory,
@@ -52,7 +55,6 @@ export function BackgroundMusic({
     seekTo,
     setContext,
     sounds,
-    loadSounds,
     playReceived,
     stopReceived,
     getCurrentTime,
@@ -66,19 +68,7 @@ export function BackgroundMusic({
     }
   });
 
-  // Autoplay permission modal state
-  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
-  const [modalOpened, { open, close }] = useDisclosure(false);
 
-  const handleDelete = async (filename: string) => {
-    await fetch('/delete-sound', {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename, soundType: 'backgroundMusic' }),
-    });
-    loadSounds();
-  };
 
   // Broadcast music change to session peers
   const handlePlayCategory = useCallback(
@@ -168,7 +158,7 @@ export function BackgroundMusic({
         }
       }
     });
-  }, [addMessageHandler, playReceived, stopReceived, currentSound, isPlaying, sessionId, send]);
+  }, [addMessageHandler, playReceived, stopReceived, currentSound, isPlaying, sessionId, send, getCurrentTime]);
 
   // Broadcast stop
   const handleVolumeChange = useCallback(
@@ -199,7 +189,7 @@ export function BackgroundMusic({
     // If there's a current sound that was blocked, play it specifically
     if (currentSound) {
       // Use the specific sound play method to play exactly this sound
-      playSpecificSound(currentSound).catch((e) => {
+      playSpecificSound(currentSound).catch((_e) => {
         // Silently handle playback errors
       });
     }
@@ -211,7 +201,7 @@ export function BackgroundMusic({
       setUserInteracted(true);
     }
     stop();
-    if (sessionId) send({ type: 'backgroundMusicStop', id: sessionId });
+    if (sessionId) {send({ type: 'backgroundMusicStop', id: sessionId });}
   }, [stop, send, sessionId, userInteracted, setUserInteracted]);
 
   const contexts = ['All', ...Array.from(new Set(sounds.flatMap((s) => bgScenes(s))))];
@@ -354,7 +344,7 @@ export function BackgroundMusic({
       >
         <Stack gap="md">
           <Text size="sm">
-            The browser blocked automatic playback. Please click "Allow Playback" to enable
+            The browser blocked automatic playback. Please click &quot;Allow Playback&quot; to enable
             background music.
           </Text>
           <Group justify="flex-end" gap="sm">
@@ -372,11 +362,9 @@ export function BackgroundMusic({
               onClick={() => {
                 // Play the current sound using the proper method
                 handlePlayCurrentSound();
-                close();
-                setAutoplayBlocked(false);
               }}
             >
-              Allow Playback
+              Allow Audio
             </Button>
           </Group>
         </Stack>

@@ -7,12 +7,13 @@ import {
 } from '@tabler/icons-react';
 import { useEffect } from 'react';
 import { useSpotify } from '../../hooks/useSpotify';
+import React from 'react';
 
 interface SpotifyPlayerProps {
   onAuthChange?: (connected: boolean) => void;
 }
 
-export function SpotifyPlayer({ onAuthChange }: SpotifyPlayerProps) {
+export function SpotifyPlayer({ onAuthChange }: SpotifyPlayerProps): React.JSX.Element {
   const {
     isAuthenticated,
     isConnecting,

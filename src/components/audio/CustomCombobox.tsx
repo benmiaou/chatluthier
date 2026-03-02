@@ -1,3 +1,4 @@
+import React from 'react';
 import { Combobox, useCombobox, Button, TextInput } from '@mantine/core';
 import { useState } from 'react';
 
@@ -15,7 +16,7 @@ export function CustomCombobox({
   data,
   placeholder = 'Select',
   width = 'auto',
-}: CustomComboboxProps) {
+}: CustomComboboxProps): React.JSX.Element {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });

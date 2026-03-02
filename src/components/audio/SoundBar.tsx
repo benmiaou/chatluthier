@@ -1,3 +1,4 @@
+import React from 'react';
 import { Box, Text } from '@mantine/core';
 import { IconVolumeOff, IconGripVertical } from '@tabler/icons-react';
 import { useRef, useState, useEffect } from 'react';
@@ -12,7 +13,7 @@ interface SoundBarProps {
   bar: AmbianceBar;
   onChange: (filename: string, volume: number) => void;
   showDragHandle?: boolean;
-  dragHandleProps?: any;
+  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
 export function SoundBar({
@@ -20,7 +21,7 @@ export function SoundBar({
   onChange,
   showDragHandle = false,
   dragHandleProps,
-}: Readonly<SoundBarProps>) {
+}: Readonly<SoundBarProps>): React.JSX.Element {
   const imgSrc = bar.sound.imageFile ? `${IMAGE_BASE}${bar.sound.imageFile}` : FALLBACK;
   const isActive = bar.volume > 0;
   const dragging = useRef(false);
@@ -44,11 +45,13 @@ export function SoundBar({
 
   // Local audio update for real-time feedback during dragging
   const updateLocalAudio = (vol: number) => {
-    bar.audio.volume = vol;
-    if (vol > 0 && bar.audio.paused) {
-      bar.audio.play().catch(() => {});
+    const audioElement = bar.audio;
+    // eslint-disable-next-line react-hooks/immutability
+    audioElement.volume = vol;
+    if (vol > 0 && audioElement.paused) {
+      audioElement.play().catch(() => {});
     } else if (vol === 0) {
-      bar.audio.pause();
+      audioElement.pause();
     }
   };
 
@@ -67,7 +70,7 @@ export function SoundBar({
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragging.current) return;
+    if (!dragging.current) {return;}
     const vol = volumeFromPointer(e);
     setLocalVolume(vol);
     updateLocalAudio(vol); // Update audio in real-time

@@ -1,20 +1,20 @@
-import { Button, Group, Paper, SimpleGrid, Slider, Stack, Text } from '@mantine/core';
+import { Group, Paper, Slider, Stack, Text } from '@mantine/core';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IconVolume } from '@tabler/icons-react';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
+import React from 'react';
 import { useSoundboard } from '../../hooks/useSoundboard';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { showCreditToast } from '../../utils/showCreditToast';
 import { CustomCombobox } from './CustomCombobox';
 import { DraggableSoundButton } from './DraggableSoundButton';
-import type { Sound } from '../../hooks/useSoundboard';
 
 interface SoundboardProps {
   readonly userId?: string | null;
 }
 
-export function Soundboard({ userId = null }: SoundboardProps) {
+export function Soundboard({ userId = null }: SoundboardProps): React.ReactElement {
   const { send, addMessageHandler, sessionId } = useSocketContext();
   const { sounds, allSounds, volume, context, setContext, playSound, setVolume } =
     useSoundboard(userId);
@@ -36,7 +36,7 @@ export function Soundboard({ userId = null }: SoundboardProps) {
 
   // Apply sound order to sounds when soundOrder or sounds change
   const orderedSounds = useMemo(() => {
-    if (soundOrder.length === 0 || sounds.length === 0) return sounds;
+    if (soundOrder.length === 0 || sounds.length === 0) {return sounds;}
 
     // Create a map for quick lookup
     const orderMap = new Map(soundOrder.map((filename, index) => [filename, index]));
@@ -50,13 +50,7 @@ export function Soundboard({ userId = null }: SoundboardProps) {
   }, [sounds, soundOrder]);
 
   // Load sound order when user logs in
-  useEffect(() => {
-    if (userId) {
-      loadSoundOrder();
-    }
-  }, [userId]);
-
-  const loadSoundOrder = async () => {
+  const loadSoundOrder = useCallback(async () => {
     try {
       const response = await fetch(
         `http://localhost:3000/get-sound-order?userId=${userId}&soundType=soundboard`,
@@ -83,17 +77,21 @@ export function Soundboard({ userId = null }: SoundboardProps) {
 
       // If we have a valid loaded order, use it. Otherwise use the current sounds order.
       setSoundOrder(validOrder.length > 0 ? validOrder : sounds.map((sound) => sound.filename));
-    } catch (error) {
-      console.error('Failed to load sound order:', error);
+    } catch (_error) {
       // Fallback to current sounds order if loading fails
       setSoundOrder(sounds.map((sound) => sound.filename));
     }
-  };
+  }, [userId, sounds]);
+
+  useEffect(() => {
+    if (userId) {
+      loadSoundOrder();
+    }
+  }, [userId, loadSoundOrder]);
 
   const saveSoundOrder = async (newOrder: string[]) => {
     try {
       if (!userId) {
-        console.log('No userId available, skipping server save');
         setSoundOrder(newOrder);
         return;
       }
@@ -114,8 +112,7 @@ export function Soundboard({ userId = null }: SoundboardProps) {
       }
 
       setSoundOrder(newOrder);
-    } catch (error) {
-      console.error('Failed to save sound order:', error);
+    } catch (_error) {
       // Fallback: still update local state even if server save fails
       setSoundOrder(newOrder);
     }
@@ -123,7 +120,6 @@ export function Soundboard({ userId = null }: SoundboardProps) {
 
   const handleDragEnd = (fromIndex: number, toIndex: number) => {
     if (!userId || userId === 'null' || userId === 'undefined') {
-      console.log('No valid user ID, skipping save. userId:', userId);
       return;
     }
 
@@ -154,8 +150,6 @@ export function Soundboard({ userId = null }: SoundboardProps) {
     const sound = sounds.find((s) => s.filename === filename);
     if (sound?.credit) {
       showCreditToast(sound.name, sound.credit);
-    } else {
-      console.log('No credit found for sound:', sound?.name, 'Filename:', filename);
     }
 
     // Session-specific logic
@@ -185,15 +179,6 @@ export function Soundboard({ userId = null }: SoundboardProps) {
         // Show credit for received soundboard sounds
         if (credit && name) {
           showCreditToast(name, credit);
-        } else {
-          console.log(
-            'No credit in received message for:',
-            filename,
-            'Credit:',
-            credit,
-            'Name:',
-            name
-          );
         }
       }
     });
@@ -236,7 +221,7 @@ export function Soundboard({ userId = null }: SoundboardProps) {
 
         {orderedSounds.length === 0 && (
           <Text size="xs" c="dimmed">
-            Loading sounds…
+            Loading sounds...
           </Text>
         )}
 
@@ -261,7 +246,7 @@ export function Soundboard({ userId = null }: SoundboardProps) {
                 onPlay={handlePlay}
                 moveItem={moveItem}
                 onDragEnd={handleDragEnd}
-                showDragHandle={!!userId}
+                showDragHandle={Boolean(userId)}
               />
             ))}
           </div>
