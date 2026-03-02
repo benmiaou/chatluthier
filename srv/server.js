@@ -31,10 +31,10 @@ async function startServer() {
     server.listen(PORT, '0.0.0.0', () => {
       logger.info(`Server started on port ${PORT}`);
 
-      // Initialize WebSocket server on the same HTTP server
+      // Initialize WebSocket server on port 3001 (HTTP port + 1)
       const { initializeWebSocketServer } = require('./sockets/socketServer');
-      const wsServer = initializeWebSocketServer(server);
-      logger.info(`WebSocket Server started on port ${PORT}`);
+      const wsServer = initializeWebSocketServer(server, PORT);
+      logger.info(`WebSocket Server started on port ${PORT + 1}`);
     });
   } catch (error) {
     logger.error('Failed to initialize database', { error: error.message });
@@ -43,10 +43,10 @@ async function startServer() {
     server.listen(PORT, '0.0.0.0', () => {
       logger.info(`Server started on port ${PORT} (database may not be available)`);
 
-      // Initialize WebSocket server on the same HTTP server
+      // Initialize WebSocket server on port 3001 (HTTP port + 1)
       const { initializeWebSocketServer } = require('./sockets/socketServer');
-      const wsServer = initializeWebSocketServer(server);
-      logger.info(`WebSocket Server started on port ${PORT}`);
+      const wsServer = initializeWebSocketServer(server, PORT);
+      logger.info(`WebSocket Server started on port ${PORT + 1}`);
     });
   }
 }

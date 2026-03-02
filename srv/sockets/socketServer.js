@@ -8,8 +8,12 @@ const participantToWs = new Map(); // Map of participantId -> WebSocket connecti
 const MAX_MESSAGES_PER_SECOND = 10;
 const messageTimestamps = new Map();
 
-function initializeWebSocketServer(httpServer) {
-  wsServer = new WebSocket.Server({ server: httpServer });
+function initializeWebSocketServer(httpServer, httpPort) {
+  const WS_PORT = httpPort;
+  
+  // Create a separate WebSocket server on port (HTTP port + 1)
+  wsServer = new WebSocket.Server({ port: WS_PORT });
+  console.log(`WebSocket server initialized on port ${WS_PORT}`);
 
   wsServer.on('connection', function connection(ws) {
     let connectedId = null;
