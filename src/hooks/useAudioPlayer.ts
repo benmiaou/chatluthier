@@ -73,7 +73,9 @@ export function useAudioPlayer(): AudioPlayerHook {
 
 /** Pre-cache a list of audio URLs using the Cache API */
 export async function precacheAudio(urls: string[]): Promise<void> {
-  if (!('caches' in window)) {return;}
+  if (!('caches' in window)) {
+    return;
+  }
   try {
     const cache = await caches.open(CACHE_NAME);
     await Promise.allSettled(urls.map((url) => cache.add(url)));

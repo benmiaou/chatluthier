@@ -27,7 +27,8 @@ export function Home(): React.ReactElement {
   const [_requestOpened, { open: _openRequest, close: closeRequest }] = useDisclosure(false);
 
   const [_editOpened, { open: _openEdit, close: closeEdit }] = useDisclosure(false);
-  const [_serverEditOpened, { open: _openServerEdit, close: closeServerEdit }] = useDisclosure(false);
+  const [_serverEditOpened, { open: _openServerEdit, close: closeServerEdit }] =
+    useDisclosure(false);
   const [_reviewOpened, { open: _openReview, close: closeReview }] = useDisclosure(false);
 
   return (

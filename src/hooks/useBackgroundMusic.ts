@@ -26,7 +26,10 @@ interface BackgroundMusicHook {
   getCurrentTime: () => number;
 }
 
-export function useBackgroundMusic(userId: string | null, onAutoplayBlocked?: () => void): BackgroundMusicHook {
+export function useBackgroundMusic(
+  userId: string | null,
+  onAutoplayBlocked?: () => void
+): BackgroundMusicHook {
   const playerRef = useRef<AudioPlayer>(new AudioPlayer());
   const [sounds, setSounds] = useState<Sound[]>([]);
   const [currentSound, setCurrentSound] = useState<Sound | null>(null);
@@ -70,15 +73,21 @@ export function useBackgroundMusic(userId: string | null, onAutoplayBlocked?: ()
   // ─── Progress bar ─────────────────────────────────────────────────────────
 
   const startProgressTracking = () => {
-    if (progressIntervalRef.current) {clearInterval(progressIntervalRef.current);}
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
     progressIntervalRef.current = setInterval(() => {
       const el = playerRef.current.getElement();
-      if (el.duration) {setProgress((el.currentTime / el.duration) * 100);}
+      if (el.duration) {
+        setProgress((el.currentTime / el.duration) * 100);
+      }
     }, 500);
   };
 
   const stopProgressTracking = () => {
-    if (progressIntervalRef.current) {clearInterval(progressIntervalRef.current);}
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
     progressIntervalRef.current = null;
     setProgress(0);
   };
@@ -121,7 +130,9 @@ export function useBackgroundMusic(userId: string | null, onAutoplayBlocked?: ()
         (s) =>
           bgMatchesCategory(s, category) && (context === 'All' || bgScenes(s).includes(context))
       );
-      if (!filtered.length) {return;}
+      if (!filtered.length) {
+        return;
+      }
       const pick = filtered[Math.floor(Math.random() * filtered.length)];
       setCurrentSound(pick);
       setActiveCategory(category);
@@ -134,7 +145,8 @@ export function useBackgroundMusic(userId: string | null, onAutoplayBlocked?: ()
         if (activeCategory === category) {
           // Manually implement next logic to avoid circular dependency
           const autoAdvanceFiltered = sounds.filter(
-            (s) => bgMatchesCategory(s, category) && (context === 'All' || bgScenes(s).includes(context))
+            (s) =>
+              bgMatchesCategory(s, category) && (context === 'All' || bgScenes(s).includes(context))
           );
           if (autoAdvanceFiltered.length > 0) {
             const currentIndex = autoAdvanceFiltered.findIndex((s) => s.filename === pick.filename);
@@ -152,7 +164,9 @@ export function useBackgroundMusic(userId: string | null, onAutoplayBlocked?: ()
   );
 
   const next = useCallback(() => {
-    if (activeCategory) {playCategory(activeCategory);}
+    if (activeCategory) {
+      playCategory(activeCategory);
+    }
   }, [activeCategory, playCategory]);
 
   const stop = useCallback(() => {
@@ -170,7 +184,9 @@ export function useBackgroundMusic(userId: string | null, onAutoplayBlocked?: ()
 
   const seekTo = useCallback((pct: number) => {
     const el = playerRef.current.getElement();
-    if (el.duration) {el.currentTime = (pct / 100) * el.duration;}
+    if (el.duration) {
+      el.currentTime = (pct / 100) * el.duration;
+    }
   }, []);
 
   const getCurrentTime = useCallback(() => {

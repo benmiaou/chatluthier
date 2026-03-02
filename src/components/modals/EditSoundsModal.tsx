@@ -153,7 +153,9 @@ export function EditSoundsModal({
 
   // Generate dynamic context options that include both predefined options and user-created contexts
   const availableContexts = useMemo(() => {
-    if (!sounds.length || !selectedCategory) {return CONTEXT_OPTIONS[selectedCategory] || [];}
+    if (!sounds.length || !selectedCategory) {
+      return CONTEXT_OPTIONS[selectedCategory] || [];
+    }
 
     // Extract all unique contexts from all sounds in the current category
     const userContexts = new Set<string>();
@@ -176,7 +178,9 @@ export function EditSoundsModal({
   }, [sounds, selectedCategory]);
 
   useEffect(() => {
-    if (!opened) {return;}
+    if (!opened) {
+      return;
+    }
     setEdits({});
     setContextEdits({});
     setCreditEdits({});
@@ -214,7 +218,10 @@ export function EditSoundsModal({
         setSounds(mappedSounds);
       })
       .catch((error: unknown) => {
-        notifications.show({ message: `Failed to load sounds: ${error instanceof Error ? error.message : 'Unknown error'}`, color: 'red' });
+        notifications.show({
+          message: `Failed to load sounds: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          color: 'red',
+        });
       })
       .finally(() => setLoading(false));
   }, [opened, selectedCategory, userId]);
@@ -228,17 +235,17 @@ export function EditSoundsModal({
       // Fix audio path based on category
       let soundUrl;
       switch (selectedCategory) {
-      case 'background':
-        soundUrl = `/assets/background/${filename}`;
-        break;
-      case 'ambiance':
-        soundUrl = `/assets/ambiance/${filename}`;
-        break;
-      case 'soundboard':
-        soundUrl = `/assets/soundboard/${filename}`;
-        break;
-      default:
-        soundUrl = `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
+        case 'background':
+          soundUrl = `/assets/background/${filename}`;
+          break;
+        case 'ambiance':
+          soundUrl = `/assets/ambiance/${filename}`;
+          break;
+        case 'soundboard':
+          soundUrl = `/assets/soundboard/${filename}`;
+          break;
+        default:
+          soundUrl = `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
       }
 
       if (currentlyPlaying === filename && isPlaying) {
@@ -257,7 +264,10 @@ export function EditSoundsModal({
         setIsPlaying(true);
       }
     } catch (error: unknown) {
-      notifications.show({ message: `Failed to play sound: ${error instanceof Error ? error.message : 'Unknown error'}`, color: 'red' });
+      notifications.show({
+        message: `Failed to play sound: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        color: 'red',
+      });
     }
   };
 
@@ -318,7 +328,10 @@ export function EditSoundsModal({
       onSave?.();
       onClose();
     } catch (error: unknown) {
-      notifications.show({ message: `Failed to save: ${error instanceof Error ? error.message : 'Unknown error'}`, color: 'red' });
+      notifications.show({
+        message: `Failed to save: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        color: 'red',
+      });
     } finally {
       setSaving(false);
     }

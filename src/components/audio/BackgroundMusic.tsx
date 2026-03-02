@@ -1,15 +1,5 @@
 import React from 'react';
-import {
-  Box,
-  Button,
-  Group,
-  Modal,
-  Paper,
-  Slider,
-  Stack,
-  Text,
-  Progress,
-} from '@mantine/core';
+import { Box, Button, Group, Modal, Paper, Slider, Stack, Text, Progress } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { CustomCombobox } from './CustomCombobox';
 import { IconPlayerSkipForward, IconPlayerStop, IconVolume } from '@tabler/icons-react';
@@ -67,8 +57,6 @@ export function BackgroundMusic({
       open(); // Open the permission modal
     }
   });
-
-
 
   // Broadcast music change to session peers
   const handlePlayCategory = useCallback(
@@ -158,7 +146,16 @@ export function BackgroundMusic({
         }
       }
     });
-  }, [addMessageHandler, playReceived, stopReceived, currentSound, isPlaying, sessionId, send, getCurrentTime]);
+  }, [
+    addMessageHandler,
+    playReceived,
+    stopReceived,
+    currentSound,
+    isPlaying,
+    sessionId,
+    send,
+    getCurrentTime,
+  ]);
 
   // Broadcast stop
   const handleVolumeChange = useCallback(
@@ -201,7 +198,9 @@ export function BackgroundMusic({
       setUserInteracted(true);
     }
     stop();
-    if (sessionId) {send({ type: 'backgroundMusicStop', id: sessionId });}
+    if (sessionId) {
+      send({ type: 'backgroundMusicStop', id: sessionId });
+    }
   }, [stop, send, sessionId, userInteracted, setUserInteracted]);
 
   const contexts = ['All', ...Array.from(new Set(sounds.flatMap((s) => bgScenes(s))))];
@@ -344,8 +343,8 @@ export function BackgroundMusic({
       >
         <Stack gap="md">
           <Text size="sm">
-            The browser blocked automatic playback. Please click &quot;Allow Playback&quot; to enable
-            background music.
+            The browser blocked automatic playback. Please click &quot;Allow Playback&quot; to
+            enable background music.
           </Text>
           <Group justify="flex-end" gap="sm">
             <Button

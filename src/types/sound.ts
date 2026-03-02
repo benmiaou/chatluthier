@@ -13,15 +13,21 @@ export interface Sound {
 
 /** Returns true if a background music sound matches the given category (contexts are tuples) */
 export function bgMatchesCategory(sound: Sound, category: BackgroundMusicCategory): boolean {
-  if (category === 'all') {return true;}
-  if (!sound.contexts?.length) {return false;}
+  if (category === 'all') {
+    return true;
+  }
+  if (!sound.contexts?.length) {
+    return false;
+  }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (sound.contexts as any[]).some(([cat]: [string, string]) => cat === category);
 }
 
 /** Returns scene labels from a background music sound's tuple contexts */
 export function bgScenes(sound: Sound): string[] {
-  if (!sound.contexts?.length) {return [];}
+  if (!sound.contexts?.length) {
+    return [];
+  }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (sound.contexts as any[]).map(([, scene]: [string, string]) => scene);
 }

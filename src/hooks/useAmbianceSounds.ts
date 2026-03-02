@@ -76,7 +76,9 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
   const setBarVolume = useCallback((filename: string, volume: number) => {
     setBars((prev) =>
       prev.map((b) => {
-        if (b.sound.filename !== filename) {return b;}
+        if (b.sound.filename !== filename) {
+          return b;
+        }
         b.audio.volume = volume;
         if (volume > 0 && b.audio.paused) {
           b.audio.play().catch(() => {});
@@ -109,8 +111,11 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
       prev.map((b) => {
         const vol = status[b.sound.filename] ?? 0;
         b.audio.volume = vol;
-        if (vol > 0 && b.audio.paused) {b.audio.play().catch(() => {});}
-        else if (vol === 0) {b.audio.pause();}
+        if (vol > 0 && b.audio.paused) {
+          b.audio.play().catch(() => {});
+        } else if (vol === 0) {
+          b.audio.pause();
+        }
         return { ...b, volume: vol };
       })
     );
@@ -124,7 +129,9 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
   // ─── Presets ──────────────────────────────────────────────────────────────
 
   const loadPresets = useCallback(async () => {
-    if (!userId) {return;}
+    if (!userId) {
+      return;
+    }
     try {
       const data = await fetch(`/load-presets?userId=${userId}`).then((r) => r.json());
       setPresets(data?.presets ?? {});
@@ -135,7 +142,9 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
 
   const savePreset = useCallback(
     async (name: string) => {
-      if (!userId) {return;}
+      if (!userId) {
+        return;
+      }
       const status = getStatus();
       setPresets((prev) => ({ ...prev, [name]: status }));
       await fetch('/save-preset', {
@@ -151,7 +160,9 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
   const applyPreset = useCallback(
     (name: string) => {
       const preset = presets[name];
-      if (preset) {applyStatus(preset);}
+      if (preset) {
+        applyStatus(preset);
+      }
     },
     [presets, applyStatus]
   );

@@ -14,7 +14,9 @@ interface AmbianceSoundsProps {
   userId?: string | null;
 }
 
-export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>): React.JSX.Element {
+export function AmbianceSounds({
+  userId = null,
+}: Readonly<AmbianceSoundsProps>): React.JSX.Element {
   const { send, addMessageHandler, sessionId } = useSocketContext();
   const {
     bars,
@@ -54,7 +56,9 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
 
   // Apply sound order to bars when soundOrder or bars change
   const orderedBars = useMemo(() => {
-    if (soundOrder.length === 0 || bars.length === 0) {return bars;}
+    if (soundOrder.length === 0 || bars.length === 0) {
+      return bars;
+    }
 
     // Create a map for quick lookup
     const orderMap = new Map(soundOrder.map((filename, index) => [filename, index]));
@@ -183,13 +187,17 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
   };
 
   const handleSavePreset = () => {
-    if (!presetName.trim()) {return;}
+    if (!presetName.trim()) {
+      return;
+    }
     savePreset(presetName.trim());
     setPresetName('');
   };
 
   const handleApplyPreset = (name: string | null) => {
-    if (name) {applyPreset(name);}
+    if (name) {
+      applyPreset(name);
+    }
   };
 
   // Listen for incoming ambiance updates from session peers
@@ -198,7 +206,7 @@ export function AmbianceSounds({ userId = null }: Readonly<AmbianceSoundsProps>)
       if (msg.type === 'ambianceStatusUpdate' && msg.content) {
         const { ambianceStatus } = msg.content as { ambianceStatus: Record<string, number> };
         applyStatus(ambianceStatus);
-        
+
         // Show credits for any sounds that have credits
         Object.entries(ambianceStatus).forEach(([filename, volume]) => {
           if (volume > 0) {

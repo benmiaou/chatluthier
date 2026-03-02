@@ -145,7 +145,11 @@ const ContextBadge = ({
   );
 };
 
-export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEditSoundsModalProps): React.JSX.Element {
+export function ServerEditSoundsModal({
+  opened,
+  onClose,
+  onAddSound,
+}: ServerEditSoundsModalProps): React.JSX.Element {
   const [sounds, setSounds] = useState<SoundEdit[]>([]);
   const [edits, setEdits] = useState<Record<string, boolean>>({});
   const [contextEdits, setContextEdits] = useState<Record<string, string[]>>({});
@@ -196,7 +200,9 @@ export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEdi
   };
 
   useEffect(() => {
-    if (!opened) {return;}
+    if (!opened) {
+      return;
+    }
     setEdits({});
     setContextEdits({});
     setCreditEdits({});
@@ -223,7 +229,10 @@ export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEdi
       })
       .then((data) => processLoadedSounds(data, safeCategory))
       .catch((error: unknown) => {
-        notifications.show({ message: `Failed to load sounds: ${error instanceof Error ? error.message : 'Unknown error'}`, color: 'red' });
+        notifications.show({
+          message: `Failed to load sounds: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          color: 'red',
+        });
       })
       .finally(() => setLoading(false));
 
@@ -282,17 +291,17 @@ export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEdi
       // Fix audio path based on category
       let soundUrl;
       switch (selectedCategory) {
-      case 'background':
-        soundUrl = `/assets/background/${filename}`;
-        break;
-      case 'ambiance':
-        soundUrl = `/assets/ambiance/${filename}`;
-        break;
-      case 'soundboard':
-        soundUrl = `/assets/soundboard/${filename}`;
-        break;
-      default:
-        soundUrl = `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
+        case 'background':
+          soundUrl = `/assets/background/${filename}`;
+          break;
+        case 'ambiance':
+          soundUrl = `/assets/ambiance/${filename}`;
+          break;
+        case 'soundboard':
+          soundUrl = `/assets/soundboard/${filename}`;
+          break;
+        default:
+          soundUrl = `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
       }
 
       if (currentlyPlaying === filename && isPlaying) {
@@ -311,7 +320,10 @@ export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEdi
         setIsPlaying(true);
       }
     } catch (error: unknown) {
-      notifications.show({ message: `Failed to play sound: ${error instanceof Error ? error.message : 'Unknown error'}`, color: 'red' });
+      notifications.show({
+        message: `Failed to play sound: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        color: 'red',
+      });
     }
   };
 
@@ -365,7 +377,10 @@ export function ServerEditSoundsModal({ opened, onClose, onAddSound }: ServerEdi
       notifications.show({ message: 'Server sounds updated successfully!', color: 'teal' });
       onClose();
     } catch (error: unknown) {
-      notifications.show({ message: `Failed to save: ${error instanceof Error ? error.message : 'Unknown error'}`, color: 'red' });
+      notifications.show({
+        message: `Failed to save: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        color: 'red',
+      });
     } finally {
       setSaving(false);
     }

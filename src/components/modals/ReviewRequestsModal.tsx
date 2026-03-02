@@ -20,7 +20,10 @@ interface ReviewRequestsModalProps {
   onClose: () => void;
 }
 
-export function ReviewRequestsModal({ opened, onClose }: ReviewRequestsModalProps): React.JSX.Element {
+export function ReviewRequestsModal({
+  opened,
+  onClose,
+}: ReviewRequestsModalProps): React.JSX.Element {
   const [requests, setRequests] = useState<SoundRequest[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -42,7 +45,9 @@ export function ReviewRequestsModal({ opened, onClose }: ReviewRequestsModalProp
   };
 
   useEffect(() => {
-    if (opened) {fetchRequests();}
+    if (opened) {
+      fetchRequests();
+    }
   }, [opened]);
 
   const closeRequest = async (requestId: number) => {

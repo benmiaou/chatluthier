@@ -59,7 +59,9 @@ export async function getSpotifyAuthUrl(): Promise<string> {
 
 export async function exchangeSpotifyCode(code: string): Promise<SpotifyToken> {
   const verifier = sessionStorage.getItem('spotify_code_verifier');
-  if (!verifier) {throw new Error('No code verifier found');}
+  if (!verifier) {
+    throw new Error('No code verifier found');
+  }
 
   const token = await apiFetch<SpotifyToken>('/api/spotify/token', {
     method: 'POST',
@@ -94,7 +96,9 @@ export function saveToken(token: SpotifyToken): void {
 
 export function loadToken(): SpotifyToken | null {
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) {return null;}
+  if (!raw) {
+    return null;
+  }
   return JSON.parse(raw) as SpotifyToken;
 }
 
@@ -154,13 +158,17 @@ export async function spotifySetVolume(accessToken: string, volumePercent: numbe
 
 export async function spotifyGetPlaybackState(accessToken: string): Promise<unknown> {
   const res = await spotifyApi('/me/player', accessToken);
-  if (!res.ok) {return null;}
+  if (!res.ok) {
+    return null;
+  }
   return res.json();
 }
 
 export async function spotifyGetPlaylists(accessToken: string): Promise<unknown[]> {
   const res = await spotifyApi('/me/playlists?limit=50', accessToken);
-  if (!res.ok) {return [];}
+  if (!res.ok) {
+    return [];
+  }
   const data = await res.json();
   return data.items ?? [];
 }

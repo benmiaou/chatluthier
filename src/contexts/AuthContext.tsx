@@ -19,7 +19,11 @@ interface AuthContextValue extends AuthState {
     secretQuestion: string,
     secretAnswer: string
   ) => Promise<void>;
-  requestPasswordReset: (pseudo: string, secretAnswer: string, newPassword: string) => Promise<{ success: boolean }>;
+  requestPasswordReset: (
+    pseudo: string,
+    secretAnswer: string,
+    newPassword: string
+  ) => Promise<{ success: boolean }>;
   getSecretQuestion: (pseudo: string) => Promise<{ secretQuestion: string }>;
 }
 
@@ -124,7 +128,8 @@ export function AuthProvider({ children }: { children: ReactNode }): React.React
 
     if (!res.ok) {
       // Simple error handling - just throw with response text or default message
-      const errorMessage = responseText && responseText !== 'Login failed' ? responseText : 'Login failed';
+      const errorMessage =
+        responseText && responseText !== 'Login failed' ? responseText : 'Login failed';
       throw new Error(errorMessage);
     }
 
@@ -222,9 +227,7 @@ export function AuthProvider({ children }: { children: ReactNode }): React.React
     }
 
     return await res.json();
-  },
-  []
-  );
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -245,6 +248,8 @@ export function AuthProvider({ children }: { children: ReactNode }): React.React
 
 export function useAuthContext(): AuthContextValue {
   const ctx = useContext(AuthContext);
-  if (!ctx) {throw new Error('useAuthContext must be used within AuthProvider');}
+  if (!ctx) {
+    throw new Error('useAuthContext must be used within AuthProvider');
+  }
   return ctx;
 }

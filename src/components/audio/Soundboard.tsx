@@ -36,7 +36,9 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
 
   // Apply sound order to sounds when soundOrder or sounds change
   const orderedSounds = useMemo(() => {
-    if (soundOrder.length === 0 || sounds.length === 0) {return sounds;}
+    if (soundOrder.length === 0 || sounds.length === 0) {
+      return sounds;
+    }
 
     // Create a map for quick lookup
     const orderMap = new Map(soundOrder.map((filename, index) => [filename, index]));

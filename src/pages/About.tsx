@@ -69,9 +69,9 @@ export function About(): React.ReactElement {
           Why &quot;Le Chat Luthier&quot;?
         </Title>
         <Text mb="md" style={{ textAlign: 'justify', lineHeight: 1.7 }}>
-          The name translates to &quot;The Luthier Cat&quot; in French. A luthier is a craftsman who builds or
-          repairs string instruments. Our platform aims to be the artisan of audio experiences &mdash;
-          crafting the perfect soundscape for your adventures.
+          The name translates to &quot;The Luthier Cat&quot; in French. A luthier is a craftsman who
+          builds or repairs string instruments. Our platform aims to be the artisan of audio
+          experiences &mdash; crafting the perfect soundscape for your adventures.
         </Text>
 
         <Title order={2} mb="sm">

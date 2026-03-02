@@ -70,7 +70,9 @@ export function SoundBar({
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragging.current) {return;}
+    if (!dragging.current) {
+      return;
+    }
     const vol = volumeFromPointer(e);
     setLocalVolume(vol);
     updateLocalAudio(vol); // Update audio in real-time

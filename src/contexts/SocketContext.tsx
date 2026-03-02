@@ -57,7 +57,9 @@ const WS_URL = isLocalhost ? 'ws://localhost:3000' : `${protocol}//${globalThis.
 const RECONNECT_MS = 5000;
 const HEARTBEAT_MS = 30_000;
 
-export function SocketProvider({ children }: Readonly<{ children: ReactNode }>): React.ReactElement {
+export function SocketProvider({
+  children,
+}: Readonly<{ children: ReactNode }>): React.ReactElement {
   const wsRef = useRef<WebSocket | null>(null);
   const handlersRef = useRef<Set<MessageHandler>>(new Set());
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -75,7 +77,9 @@ export function SocketProvider({ children }: Readonly<{ children: ReactNode }>):
   const [participantId, setParticipantId] = useState<string | null>(null);
 
   const clearHeartbeat = () => {
-    if (heartbeatRef.current) {clearInterval(heartbeatRef.current);}
+    if (heartbeatRef.current) {
+      clearInterval(heartbeatRef.current);
+    }
     heartbeatRef.current = null;
   };
 
@@ -98,7 +102,9 @@ export function SocketProvider({ children }: Readonly<{ children: ReactNode }>):
       setStatusMessage('Connected to session server. Ready to join or create a session.');
       clearHeartbeat();
       heartbeatRef.current = setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) {ws.send(JSON.stringify({ type: 'ping' }));}
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'ping' }));
+        }
       }, HEARTBEAT_MS);
 
       // Priority: pending subscribe call > URL param > localStorage
@@ -143,65 +149,65 @@ export function SocketProvider({ children }: Readonly<{ children: ReactNode }>):
         const data = JSON.parse(event.data as string) as WsMessage;
 
         switch (data.type) {
-        case 'subscribed':
-          setSessionId(data.id ?? null);
-          setStatusMessage(`Joined session: ${data.id ?? ''}`);
-          if (data.participantId) {
-            setParticipantId(data.participantId);
-            // Store participant ID in localStorage for reconnections
-            localStorage.setItem('wsParticipantId', data.participantId);
-          }
-          if (data.participants) {
-            setParticipants(data.participants);
-          }
+          case 'subscribed':
+            setSessionId(data.id ?? null);
+            setStatusMessage(`Joined session: ${data.id ?? ''}`);
+            if (data.participantId) {
+              setParticipantId(data.participantId);
+              // Store participant ID in localStorage for reconnections
+              localStorage.setItem('wsParticipantId', data.participantId);
+            }
+            if (data.participants) {
+              setParticipants(data.participants);
+            }
 
-          // If there are existing participants, request current status from the first participant only
-          if (data.participants && data.participants.length > 0) {
-            const firstParticipantId = data.participants[0]?.id;
-            if (firstParticipantId) {
-              const currentWs = wsRef.current;
-              if (currentWs?.readyState === WebSocket.OPEN) {
-                // Request background music status from first participant only
-                currentWs.send(
-                  JSON.stringify({
-                    type: 'requestStatus',
-                    id: data.id,
-                    content: {
-                      type: 'backgroundMusic',
-                      targetParticipantId: firstParticipantId,
-                    },
-                  })
-                );
+            // If there are existing participants, request current status from the first participant only
+            if (data.participants && data.participants.length > 0) {
+              const firstParticipantId = data.participants[0]?.id;
+              if (firstParticipantId) {
+                const currentWs = wsRef.current;
+                if (currentWs?.readyState === WebSocket.OPEN) {
+                  // Request background music status from first participant only
+                  currentWs.send(
+                    JSON.stringify({
+                      type: 'requestStatus',
+                      id: data.id,
+                      content: {
+                        type: 'backgroundMusic',
+                        targetParticipantId: firstParticipantId,
+                      },
+                    })
+                  );
 
-                // Request ambiance status from first participant only
-                ws.send(
-                  JSON.stringify({
-                    type: 'requestStatus',
-                    id: data.id,
-                    content: {
-                      type: 'ambiance',
-                      targetParticipantId: firstParticipantId,
-                    },
-                  })
-                );
+                  // Request ambiance status from first participant only
+                  ws.send(
+                    JSON.stringify({
+                      type: 'requestStatus',
+                      id: data.id,
+                      content: {
+                        type: 'ambiance',
+                        targetParticipantId: firstParticipantId,
+                      },
+                    })
+                  );
+                }
               }
             }
-          }
-          break;
-        case 'participantJoined':
-          if (data.participant) {
-            setParticipants((prev) => [...prev, data.participant]);
-            setStatusMessage(`New participant joined: ${data.participant.pseudo || 'Anonymous'}`);
-          }
-          break;
-        case 'participantLeft':
-          if (data.participantId) {
-            setParticipants((prev) => prev.filter((p) => p.id !== data.participantId));
-            setStatusMessage('A participant left the session');
-          }
-          break;
-        default:
-          break;
+            break;
+          case 'participantJoined':
+            if (data.participant) {
+              setParticipants((prev) => [...prev, data.participant]);
+              setStatusMessage(`New participant joined: ${data.participant.pseudo || 'Anonymous'}`);
+            }
+            break;
+          case 'participantLeft':
+            if (data.participantId) {
+              setParticipants((prev) => prev.filter((p) => p.id !== data.participantId));
+              setStatusMessage('A participant left the session');
+            }
+            break;
+          default:
+            break;
         }
 
         handlersRef.current.forEach((h) => h(data));
@@ -239,7 +245,9 @@ export function SocketProvider({ children }: Readonly<{ children: ReactNode }>):
       shouldReconnectRef.current = false;
       clearTimeout(connectionTimeout);
       clearHeartbeat();
-      if (reconnectRef.current) {clearTimeout(reconnectRef.current);}
+      if (reconnectRef.current) {
+        clearTimeout(reconnectRef.current);
+      }
       wsRef.current?.close();
     };
   }, [connect]);
@@ -334,6 +342,8 @@ export function SocketProvider({ children }: Readonly<{ children: ReactNode }>):
 
 export function useSocketContext(): SocketContextValue {
   const ctx = useContext(SocketContext);
-  if (!ctx) {throw new Error('useSocketContext must be used within SocketProvider');}
+  if (!ctx) {
+    throw new Error('useSocketContext must be used within SocketProvider');
+  }
   return ctx;
 }

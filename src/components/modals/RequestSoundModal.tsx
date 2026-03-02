@@ -23,7 +23,11 @@ interface RequestSoundModalProps {
   userId?: string | null;
 }
 
-export function RequestSoundModal({ opened, onClose, _userId }: RequestSoundModalProps): React.JSX.Element {
+export function RequestSoundModal({
+  opened,
+  onClose,
+  _userId,
+}: RequestSoundModalProps): React.JSX.Element {
   const [soundName, setSoundName] = useState('');
   const [soundUrl, setSoundUrl] = useState('');
   const [category, setCategory] = useState('soundboard');
