@@ -29,7 +29,7 @@ interface AuthContextValue extends AuthState {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }): React.ReactElement {
+export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): React.ReactElement {
   const [auth, setAuth] = useState<AuthState>({
     isSignedIn: false,
     userId: null,
@@ -65,8 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }): React.React
             });
           }
         }
-      } catch (_err: unknown) {
-        // Ignore session check errors
+      } catch (err: unknown) {
+        console.error('Session check failed:', err);
       }
     };
 
@@ -99,7 +99,8 @@ export function AuthProvider({ children }: { children: ReactNode }): React.React
             // If refresh fails, sign out the user
             signOut();
           }
-        } catch (_err: unknown) {
+        } catch (err: unknown) {
+          console.error('Token refresh failed:', err);
           signOut();
         }
       },
@@ -162,20 +163,13 @@ export function AuthProvider({ children }: { children: ReactNode }): React.React
         try {
           const errorData = JSON.parse(responseText);
           const errorMessage = errorData.error || 'Registration failed';
-          const errorToThrow = new Error(errorMessage);
-          throw errorToThrow;
-        } catch (_parseError) {
-          // JSON parse error
+          throw new Error(errorMessage);
+        } catch {
           // Try to extract error message from JSON string if parsing failed
-          try {
-            const jsonMatch = responseText.match(/"error":"([^"]+)"/);
-            const errorMessage = jsonMatch ? jsonMatch[1] : responseText || 'Registration failed';
-            const errorToThrow = new Error(errorMessage);
-            throw errorToThrow;
-          } catch (_e) {
-            const errorToThrow = new Error(responseText || 'Registration failed');
-            throw errorToThrow;
-          }
+          const errorRegex = /"error":"([^"]+)"/g;
+          const jsonMatch = errorRegex.exec(responseText);
+          const errorMessage = jsonMatch ? jsonMatch[1] : responseText || 'Registration failed';
+          throw new Error(errorMessage);
         }
       }
 

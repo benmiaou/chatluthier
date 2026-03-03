@@ -3,7 +3,7 @@ import { apiFetch } from './api';
 
 const CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID as string;
 const REDIRECT_URI =
-  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  globalThis.location.hostname === 'localhost' || globalThis.location.hostname === '127.0.0.1'
     ? (import.meta.env.VITE_SPOTIFY_REDIRECT_URI_LOCAL as string)
     : (import.meta.env.VITE_SPOTIFY_REDIRECT_URI_PROD as string);
 
@@ -22,19 +22,19 @@ const STORAGE_KEY = 'spotify_token';
 async function generateCodeVerifier(): Promise<string> {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
-  return btoa(String.fromCharCode(...array))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
+  return btoa(String.fromCodePoint(...array))
+    .split('+').join('-')
+    .split('/').join('_')
+    .split('=').join('');
 }
 
 async function generateCodeChallenge(verifier: string): Promise<string> {
   const data = new TextEncoder().encode(verifier);
   const digest = await crypto.subtle.digest('SHA-256', data);
-  return btoa(String.fromCharCode(...new Uint8Array(digest)))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
+  return btoa(String.fromCodePoint(...new Uint8Array(digest)))
+    .split('+').join('-')
+    .split('/').join('_')
+    .split('=').join('');
 }
 
 // ─── Auth URL ────────────────────────────────────────────────────────────────
