@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button, Group, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';

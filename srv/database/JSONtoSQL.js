@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const sqlite3 = require('sqlite3').verbose();
 
 /**
@@ -98,7 +98,6 @@ class JSONtoSQLMigrator {
         contexts = contexts.flat(); // Flatten nested arrays for non-background sounds
       }
 
-      const migrator = this;
       let soundQuery, params;
 
       if (soundType.hasImageFile) {
@@ -113,7 +112,7 @@ class JSONtoSQLMigrator {
           soundData.imageFile || null,
           soundData.credit || '',
           JSON.stringify(contexts),
-          soundData.isEnabled !== undefined ? soundData.isEnabled : true,
+          soundData.isEnabled ?? true,
         ];
       } else {
         soundQuery = `
@@ -126,11 +125,11 @@ class JSONtoSQLMigrator {
           soundData.display_name,
           soundData.credit || '',
           JSON.stringify(contexts),
-          soundData.isEnabled !== undefined ? soundData.isEnabled : true,
+          soundData.isEnabled ?? true,
         ];
       }
 
-      migrator.db.run(soundQuery, params, function (err) {
+      this.db.run(soundQuery, params, (err) => {
         if (err) {
           console.error(`Error inserting sound ${soundData.filename}:`, err.message);
           reject(err);

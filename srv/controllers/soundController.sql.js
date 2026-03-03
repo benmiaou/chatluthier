@@ -1,4 +1,5 @@
-const path = require('path');
+const path = require('node:path');
+const fs = require('node:fs');
 const db = require('../database/db');
 const config = require('../database/config');
 const { verifyjwt } = require('./authController');
@@ -120,9 +121,9 @@ async function getUserSoundsWithOverrides(userId, serverSounds, categoryId) {
         contexts,
         credit: userSoundOverride.credit || sound.credit,
         isEnabled:
-          userSoundOverride.isEnabled !== undefined
-            ? Boolean(userSoundOverride.isEnabled)
-            : Boolean(sound.is_enabled),
+          userSoundOverride.isEnabled === undefined
+            ? Boolean(sound.is_enabled)
+            : Boolean(userSoundOverride.isEnabled),
       };
     })
   );
@@ -147,12 +148,14 @@ async function getContextsForSoundWithUserOverrides(
   }
 
   // Fall back to server contexts - parse from JSON
-  const tableName =
-    soundTypeStr === 'ambiance'
-      ? 'ambiance_sounds'
-      : soundTypeStr === 'background'
-        ? 'background_sounds'
-        : 'soundboard';
+  let tableName;
+  if (soundTypeStr === 'ambiance') {
+    tableName = 'ambiance_sounds';
+  } else if (soundTypeStr === 'background') {
+    tableName = 'background_sounds';
+  } else {
+    tableName = 'soundboard';
+  }
 
   const sql2 = `
         SELECT contexts 
@@ -161,7 +164,7 @@ async function getContextsForSoundWithUserOverrides(
     `;
   const result = await db.queryOne(sql2, [soundId]);
 
-  if (result && result.contexts) {
+  if (result?.contexts) {
     try {
       return JSON.parse(result.contexts);
     } catch (e) {
@@ -247,7 +250,7 @@ async function getSoundOrder(req, res) {
       [userId, categoryId]
     );
 
-    if (result && result.sound_order) {
+    if (result?.sound_order) {
       // Parse the JSON array and return it
       const soundOrder = JSON.parse(result.sound_order);
       res.json({ order: soundOrder });
@@ -350,8 +353,8 @@ async function addSound(req, res) {
     const assetsDir = path.join(__dirname, '../..', 'assets');
     let soundFilePath, imageFilePath;
 
-    const sanitizedFileName = file.originalname.replace(/ /g, '_');
-    const sanitizedImageFileName = imageFile ? imageFile.originalname.replace(/ /g, '_') : null;
+    const sanitizedFileName = file.originalname.replaceAll(' ', '_');
+    const sanitizedImageFileName = imageFile ? imageFile.originalname.replaceAll(' ', '_') : null;
 
     switch (category) {
       case 'backgroundMusic':
@@ -371,9 +374,9 @@ async function addSound(req, res) {
     }
 
     // Move uploaded files
-    require('fs').renameSync(file.path, soundFilePath);
+    fs.renameSync(file.path, soundFilePath);
     if (imageFile) {
-      require('fs').renameSync(imageFile.path, imageFilePath);
+      fs.renameSync(imageFile.path, imageFilePath);
     }
 
     // Parse contexts as JSON
@@ -381,7 +384,8 @@ async function addSound(req, res) {
     try {
       parsedContexts = JSON.parse(contexts);
     } catch (e) {
-      return res.status(400).json({ error: 'Invalid contexts format.' });
+      console.error('Error parsing contexts:', e);
+      return res.status(400).json({ error: 'Invalid contexts format.', details: e.message });
     }
 
     // Map category ID to the correct table name
@@ -450,6 +454,61 @@ async function addSound(req, res) {
   }
 }
 
+function getCategoryIdAndTableName(soundsType) {
+  const categoryId = config.soundCategories[soundsType];
+  if (!categoryId) {
+    return { categoryId: null, tableName: null };
+  }
+
+  let tableName;
+  switch (categoryId) {
+    case 1:
+      tableName = 'ambiance_sounds';
+      break;
+    case 2:
+      tableName = 'background_sounds';
+      break;
+    case 3:
+      tableName = 'soundboard';
+      break;
+    default:
+      return { categoryId: null, tableName: null };
+  }
+
+  return { categoryId, tableName };
+}
+
+function buildInsertQuery(tableName, sound) {
+  const contexts = sound.contexts || [];
+  const contextsJSON = JSON.stringify(contexts);
+  const isEnabled = sound.isEnabled === undefined ? true : sound.isEnabled;
+
+  if (tableName === 'ambiance_sounds' || tableName === 'background_sounds') {
+    const query = `
+      INSERT INTO ${tableName} 
+      (filename, display_name, image_file, credit, contexts, is_enabled) 
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    const params = [
+      sound.filename,
+      sound.display_name,
+      sound.imageFile || null,
+      sound.credit || '',
+      contextsJSON,
+      isEnabled,
+    ];
+    return { query, params };
+  }
+
+  const query = `
+    INSERT INTO ${tableName} 
+    (filename, display_name, credit, contexts, is_enabled) 
+    VALUES (?, ?, ?, ?, ?)
+  `;
+  const params = [sound.filename, sound.display_name, sound.credit || '', contextsJSON, isEnabled];
+  return { query, params };
+}
+
 async function updateMainPlaylist(req, res) {
   const { soundsType, sounds } = req.body;
   const accessToken = req.cookies.accessToken;
@@ -465,25 +524,9 @@ async function updateMainPlaylist(req, res) {
       return res.status(403).json({ error: 'User is not authorized to edit the main playlist.' });
     }
 
-    const categoryId = config.soundCategories[soundsType];
-    if (!categoryId) {
+    const { categoryId, tableName } = getCategoryIdAndTableName(soundsType);
+    if (!categoryId || !tableName) {
       return res.status(400).json({ error: 'Invalid sound category.' });
-    }
-
-    // Map category ID to the correct table name
-    let tableName;
-    switch (categoryId) {
-      case 1:
-        tableName = 'ambiance_sounds';
-        break;
-      case 2:
-        tableName = 'background_sounds';
-        break;
-      case 3:
-        tableName = 'soundboard';
-        break;
-      default:
-        return res.status(400).json({ error: 'Invalid category ID.' });
     }
 
     // Update all sounds for this category in a transaction
@@ -495,43 +538,7 @@ async function updateMainPlaylist(req, res) {
 
       // Insert updated sounds
       for (const sound of sounds) {
-        // Contexts are stored as JSON, preserve their structure
-        const contexts = sound.contexts || [];
-        const contextsJSON = JSON.stringify(contexts);
-
-        // Build the appropriate query based on table structure
-        let query, params;
-        if (tableName === 'ambiance_sounds' || tableName === 'background_sounds') {
-          // Tables with image_file column
-          query = `
-                        INSERT INTO ${tableName} 
-                        (filename, display_name, image_file, credit, contexts, is_enabled) 
-                        VALUES (?, ?, ?, ?, ?, ?)
-                    `;
-          params = [
-            sound.filename,
-            sound.display_name,
-            sound.imageFile || null,
-            sound.credit || '',
-            contextsJSON,
-            sound.isEnabled !== undefined ? sound.isEnabled : true,
-          ];
-        } else {
-          // soundboard table without image_file column
-          query = `
-                        INSERT INTO ${tableName} 
-                        (filename, display_name, credit, contexts, is_enabled) 
-                        VALUES (?, ?, ?, ?, ?)
-                    `;
-          params = [
-            sound.filename,
-            sound.display_name,
-            sound.credit || '',
-            contextsJSON,
-            sound.isEnabled !== undefined ? sound.isEnabled : true,
-          ];
-        }
-
+        const { query, params } = buildInsertQuery(tableName, sound);
         await db.execute(query, params);
       }
 
@@ -576,6 +583,7 @@ async function updateUserSound(req, res) {
         parsedContexts = JSON.parse(contexts);
       }
     } catch (e) {
+      console.error('Error parsing contexts:', e.message);
       return res.status(400).json({ error: 'Invalid contexts format.' });
     }
 
@@ -948,7 +956,7 @@ async function updateUserSoundsBatch(req, res) {
 
       // Update sound override in JSON structure
       soundOverrides[soundKey] = {
-        isEnabled: isEnabled !== undefined ? isEnabled : true,
+        isEnabled: isEnabled ?? true,
         credit: credit || '',
       };
 

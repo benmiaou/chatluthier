@@ -149,3 +149,4 @@ backups
 requests
 .DS_Store
 srv/database/chatluthier.db
+LeChat/

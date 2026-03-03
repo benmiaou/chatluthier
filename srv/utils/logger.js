@@ -1,6 +1,6 @@
-const fs = require('fs');
-const path = require('path');
-const { format } = require('util');
+const fs = require('node:fs');
+const path = require('node:path');
+const { format } = require('node:util');
 
 /**
  * Logger Utility for ChatLuthier
@@ -144,11 +144,8 @@ class Logger {
    */
   expressMiddleware() {
     return (req, res, next) => {
-      const start = Date.now();
-
       res.on('finish', () => {
-        const duration = Date.now() - start;
-        const userId = req.user?.id || 'anonymous';
+        // Request finished
       });
 
       next();

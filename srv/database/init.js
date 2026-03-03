@@ -28,7 +28,7 @@ async function initializeDatabase() {
 
 // Run initialization if this script is executed directly
 if (require.main === module) {
-  initializeDatabase();
+  await initializeDatabase();
 }
 
 module.exports = { initializeDatabase };

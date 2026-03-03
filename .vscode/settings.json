@@ -1,0 +1,6 @@
+{
+    "sonarlint.connectedMode.project": {
+        "connectionId": "https-sonar-chatluthier-org-",
+        "projectKey": "Chatluthier"
+    }
+}

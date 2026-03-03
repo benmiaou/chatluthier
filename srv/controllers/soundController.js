@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const { verifyjwt } = require('./authController');
 const { isAdminUser } = require('../utils/tokenUtils');
 
@@ -110,8 +110,8 @@ async function addSound(req, res) {
     const assetsDir = path.join(__dirname, '../..', 'assets');
     let soundFilePath, imageFilePath;
 
-    const sanitizedFileName = file.originalname.replace(/ /g, '_');
-    const sanitizedImageFileName = imageFile ? imageFile.originalname.replace(/ /g, '_') : null;
+    const sanitizedFileName = file.originalname.replaceAll(' ', '_');
+    const sanitizedImageFileName = imageFile ? imageFile.originalname.replaceAll(' ', '_') : null;
 
     switch (category) {
       case 'backgroundMusic':
@@ -146,6 +146,7 @@ async function addSound(req, res) {
     try {
       parsedContexts = JSON.parse(contexts);
     } catch (e) {
+      console.error('Error parsing contexts:', e);
       return res.status(400).json({ error: 'Invalid contexts format.' });
     }
 
@@ -218,15 +219,15 @@ async function updateUserSound(req, res) {
   }
 
   const soundIndex = existingSounds.findIndex((sound) => sound.filename === filename);
-  if (soundIndex !== -1) {
-    existingSounds[soundIndex].contexts = contexts;
-    existingSounds[soundIndex].isEnabled = isEnabled;
-  } else {
+  if (soundIndex === -1) {
     existingSounds.push({
       filename: filename,
       isEnabled: isEnabled,
       contexts: contexts,
     });
+  } else {
+    existingSounds[soundIndex].contexts = contexts;
+    existingSounds[soundIndex].isEnabled = isEnabled;
   }
 
   fs.writeFileSync(filePath, JSON.stringify(existingSounds, null, 2));

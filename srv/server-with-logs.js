@@ -1,9 +1,9 @@
 // Server with logging to file
 // This wraps the original server and adds file logging
 
-const fs = require('fs');
-const path = require('path');
-const { spawn } = require('child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const { spawn } = require('node:child_process');
 
 // Create logs directory if it doesn't exist (in root, not srv)
 const logsDir = path.join(__dirname, '..', 'logs');

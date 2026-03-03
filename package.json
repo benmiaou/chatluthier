@@ -71,6 +71,7 @@
   ],
   "author": "Benjamin Thibault",
   "license": "ISC",
+  "type": "commonjs",
   "overrides": {
     "tar": "^7.5.9",
     "node-gyp": "^10.3.1"

@@ -5,8 +5,8 @@ const logger = require('../utils/logger');
 
 // Database and filesystem imports for pseudo/password authentication
 const db = require('../database/db');
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs');
 
 async function verifyjwt(accessToken) {
   return jwt.verify(accessToken, accessTokenSecret);
@@ -208,7 +208,7 @@ async function getSecretQuestion(req, res) {
       'SELECT secret_question FROM users WHERE LOWER(pseudo) = LOWER(?)',
       [pseudo]
     );
-    if (!user || !user.secret_question) {
+    if (!user?.secret_question) {
       return res.status(404).json({ error: 'User not found or no secret question set' });
     }
 

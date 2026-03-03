@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const path = require('node:path');
 const config = require('./config');
 
 /**
@@ -10,10 +10,8 @@ const config = require('./config');
  */
 
 class Database {
-  constructor() {
-    this.db = null;
-    this.config = config.sqlite;
-  }
+  db = null;
+  config = config.sqlite;
 
   /**
    * Initialize the database connection
@@ -149,6 +147,7 @@ class Database {
       );
       return result.length > 0;
     } catch (error) {
+      console.error('Error checking if database is initialized:', error.message);
       return false;
     }
   }
@@ -166,8 +165,9 @@ class Database {
 
     console.log('Initializing database schema...');
 
+    const fs = require('node:fs');
     const schemaPath = path.join(__dirname, 'schema.sql');
-    const schema = require('fs').readFileSync(schemaPath, 'utf8');
+    const schema = fs.readFileSync(schemaPath, 'utf8');
 
     // Use exec instead of execute for multiple statements
     await new Promise((resolve, reject) => {
@@ -226,8 +226,8 @@ class Database {
    * Get user-specific sound overrides (NEW: single JSON entry per user)
    */
   async getUserSoundOverrides(userId) {
-    // Try new table first
     try {
+      // Try new table first
       const sql = `
                 SELECT sound_overrides 
                 FROM user_sounds_json 
@@ -237,20 +237,17 @@ class Database {
       if (result) {
         return result.sound_overrides;
       }
-    } catch (error) {
-      // New table doesn't exist yet, that's ok
-    }
 
-    // Fallback to old format (for backward compatibility)
-    try {
-      const sql = `
+      // Fallback to old format (for backward compatibility)
+      const legacySql = `
                 SELECT sound_overrides 
                 FROM user_sounds 
                 WHERE user_id = ?
             `;
-      const result = await this.queryOne(sql, [userId]);
-      return result ? result.sound_overrides : null;
+      const legacyResult = await this.queryOne(legacySql, [userId]);
+      return legacyResult ? legacyResult.sound_overrides : null;
     } catch (error) {
+      console.error('Error retrieving user sound overrides:', error.message);
       return null;
     }
   }
