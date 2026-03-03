@@ -4,10 +4,10 @@ import { CustomCombobox } from './CustomCombobox';
 import { IconPlayerSkipForward, IconPlayerStop, IconVolume } from '@tabler/icons-react';
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
+import React, { useState, useCallback, useEffect } from 'react';
 
 import type { BackgroundMusicCategory, Sound } from '../../types/sound';
 import { bgScenes, bgMatchesCategory } from '../../types/sound';
-import { useState } from 'react';
 
 interface BackgroundMusicProps {
   userId?: string | null;
@@ -44,7 +44,6 @@ export function BackgroundMusic({
     seekTo,
     setContext,
     sounds,
-    playReceived,
     stopReceived,
     getCurrentTime,
     userInteracted,
@@ -382,7 +381,5 @@ export function BackgroundMusic({
     </>
   );
 }
-function useState(arg0: boolean): [any, any] {
-  throw new Error('Function not implemented.');
-}
+
 

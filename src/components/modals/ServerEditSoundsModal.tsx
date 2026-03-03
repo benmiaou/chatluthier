@@ -440,13 +440,7 @@ export function ServerEditSoundsModal({
     if (e.key === 'Enter' && e.currentTarget.value?.trim()) {
       const newContext = e.currentTarget.value.trim();
       if (!currentContexts.includes(newContext)) {
-        setContextEdits((prev) => ({
-          ...prev,
-          [soundFilename]: [
-            ...(prev[soundFilename] ?? []),
-            newContext,
-          ],
-        }));
+        addNewContext(soundFilename, newContext);
         e.currentTarget.value = '';
       }
     }
@@ -461,27 +455,25 @@ export function ServerEditSoundsModal({
       !currentContexts.includes(input.value.trim())
     ) {
       const newContext = input.value.trim();
-      setContextEdits((prev) => ({
-        ...prev,
-        [soundFilename]: [
-          ...(prev[soundFilename] ?? []),
-          newContext,
-        ],
-      }));
+      addNewContext(soundFilename, newContext);
       input.value = '';
     }
   };
 
   const handleExistingContextChange = (value: string, soundFilename: string, currentContexts: string[]) => {
     if (value?.trim() && !currentContexts.includes(value)) {
-      setContextEdits((prev) => ({
-        ...prev,
-        [soundFilename]: [
-          ...(prev[soundFilename] ?? []),
-          value,
-        ],
-      }));
+      addNewContext(soundFilename, value);
     }
+  };
+
+  const addNewContext = (soundFilename: string, newContext: string) => {
+    setContextEdits((prev) => ({
+      ...prev,
+      [soundFilename]: [
+        ...(prev[soundFilename] ?? []),
+        newContext,
+      ],
+    }));
   };
 
   const renderContextBadges = (soundFilename: string, currentContexts: string[]) => {
@@ -663,21 +655,86 @@ export function ServerEditSoundsModal({
           </Button>
         </Group>
 
-        {/* Always display current contexts */}
-        {(currentContexts.length > 0 ||
-          (selectedCategory === 'background' && backgroundContext[sound.filename])) && (
-          <Group gap="xs" wrap="nowrap" align="center" mt="xs">
-            <Text size="xs" c="dimmed">
-              Contexts:
-            </Text>
-            {currentContexts.map((ctx) => (
-              <ContextBadge key={ctx} ctx={ctx} selectedCategory={selectedCategory} />
-            ))}
-          </Group>
-        )}
-
+        {renderSoundContexts(sound, currentContexts)}
         {isEditing && renderSoundEditSection(sound, currentContexts, currentCredit)}
+        {renderSoundControls(sound)}
+        {renderSoundImage(sound)}
+        {renderSoundCreditText(sound)}
       </Stack>
+    );
+  };
+
+  const renderSoundContexts = (sound: SoundEdit, currentContexts: string[]) => {
+    if (currentContexts.length === 0 && !(selectedCategory === 'background' && backgroundContext[sound.filename])) {
+      return null;
+    }
+    return (
+      <Group gap="xs" wrap="nowrap" align="center" mt="xs">
+        <Text size="xs" c="dimmed">
+          Contexts:
+        </Text>
+        {currentContexts.map((ctx) => (
+          <ContextBadge key={ctx} ctx={ctx} selectedCategory={selectedCategory} />
+        ))}
+      </Group>
+    );
+  };
+
+  const renderSoundControls = (sound: SoundEdit) => {
+    return (
+      <Group gap="xs" mt="xs">
+        <Button
+          size="xs"
+          variant="subtle"
+          leftSection={
+            currentlyPlaying === sound.filename && isPlaying ? (
+              <IconPlayerPause size={14} />
+            ) : (
+              <IconPlayerPlay size={14} />
+            )
+          }
+          onClick={() => handlePlayPause(sound.filename)}
+          disabled={!sound.filename}
+        >
+          {currentlyPlaying === sound.filename && isPlaying ? 'Pause' : 'Play'}
+        </Button>
+        <Button
+          size="xs"
+          variant="subtle"
+          leftSection={<IconPlayerStop size={14} />}
+          onClick={() => handleStop(sound.filename)}
+          disabled={currentlyPlaying !== sound.filename}
+        >
+          Stop
+        </Button>
+      </Group>
+    );
+  };
+
+  const renderSoundImage = (sound: SoundEdit) => {
+    if (selectedCategory !== 'ambiance' || !currentImages[sound.filename]) {
+      return null;
+    }
+    return (
+      <Group gap="xs" mt="xs">
+        <Text size="xs">Current Image:</Text>
+        <img
+          src={`/assets/images/backgrounds/${currentImages[sound.filename]}`}
+          alt="Background"
+          style={{ maxWidth: '100px', maxHeight: '60px', objectFit: 'cover' }}
+        />
+      </Group>
+    );
+  };
+
+  const renderSoundCreditText = (sound: SoundEdit) => {
+    if (!sound.credit?.trim()) {
+      return null;
+    }
+    return (
+      <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+        {sound.credit}
+      </Text>
     );
   };
 
@@ -748,281 +805,7 @@ export function ServerEditSoundsModal({
             paddingRight: '0.5rem',
           }}
         >
-          {filteredSounds.map((sound) => {
-            const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
-            // Ensure all contexts are strings to prevent MultiSelect errors
-            const currentContexts = (contextEdits[sound.filename] ?? sound.contexts ?? []).map(String);
-            const currentCredit = creditEdits[sound.filename] ?? sound.credit ?? '';
-            const isEditing = editingSoundId === sound.id;
-
-            return (
-              <Stack
-                key={sound.filename}
-                gap="sm"
-                style={{
-                  border: '1px solid var(--mantine-color-dark-4)',
-                  padding: '0.5rem',
-                  borderRadius: 'var(--mantine-radius-sm)',
-                }}
-              >
-                <Group justify="space-between" wrap="nowrap">
-                  <Switch
-                    label={sound.name}
-                    checked={enabled}
-                    onChange={(e) => handleToggle(sound.filename, e.currentTarget.checked)}
-                    size="sm"
-                    style={{ flex: 1 }}
-                  />
-                  <Button
-                    size="xs"
-                    variant={isEditing ? 'filled' : 'outline'}
-                    onClick={() => setEditingSoundId(isEditing ? null : String(sound.id))}
-                  >
-                    {isEditing ? 'Done' : 'Edit'}
-                  </Button>
-                </Group>
-
-                {/* Always display current contexts */}
-                {(currentContexts.length > 0 ||
-                    (selectedCategory === 'background' && backgroundContext[sound.filename])) && (
-                  <Group gap="xs" wrap="nowrap" align="center" mt="xs">
-                    <Text size="xs" c="dimmed">
-                        Contexts:
-                    </Text>
-                    {currentContexts.map((ctx) => (
-                      <ContextBadge key={ctx} ctx={ctx} selectedCategory={selectedCategory} />
-                    ))}
-                  </Group>
-                )}
-
-                {isEditing && (
-                  <Stack gap="xs" mt="xs">
-                    {/* Background Music: Simple ComboBox + context */}
-                    {selectedCategory === 'background' ? (
-                      <>
-                        <Text size="xs" c="dimmed" mb="xs">
-                            Background Music Settings
-                        </Text>
-                        <Group gap="xs" align="flex-end" wrap="nowrap">
-                          <Stack gap="xs" style={{ flex: 1 }}>
-                            <Text size="xs" c="dimmed">
-                                Intensity
-                            </Text>
-                            <CustomCombobox
-                              value={
-                                backgroundIntensity[sound.filename] ||
-                                  BACKGROUND_INTENSITY_OPTIONS[0]
-                              }
-                              onChange={(value) => {
-                                setBackgroundIntensity((prev) => ({
-                                  ...prev,
-                                  [sound.filename]: value || '',
-                                }));
-                              }}
-                              data={BACKGROUND_INTENSITY_OPTIONS}
-                              placeholder="Select intensity"
-                              width={150}
-                            />
-                          </Stack>
-
-                          <Stack gap="xs" style={{ flex: 2 }}>
-                            <Text size="xs" c="dimmed">
-                                Context
-                            </Text>
-                            <TextInput
-                              placeholder="additional context (optional)"
-                              value={backgroundContext[sound.filename] || ''}
-                              onChange={(e) => {
-                                setBackgroundContext((prev) => ({
-                                  ...prev,
-                                  [sound.filename]: e.currentTarget.value,
-                                }));
-                              }}
-                              style={{ flex: 1 }}
-                            />
-                          </Stack>
-                        </Group>
-                      </>
-                    ) : (
-                      <>
-                        {/* Context Editing (for ambiance and soundboard) - Simplified with Combobox */}
-                        <Group gap="xs" align="flex-end">
-                          <TextInput
-                            placeholder="Add new context..."
-                            style={{ flex: 1 }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && e.currentTarget.value?.trim()) {
-                                const newContext = e.currentTarget.value.trim();
-                                if (!currentContexts.includes(newContext)) {
-                                  setContextEdits((prev) => ({
-                                    ...prev,
-                                    [sound.filename]: [
-                                      ...(prev[sound.filename] ?? sound.contexts ?? []),
-                                      newContext,
-                                    ],
-                                  }));
-                                  e.currentTarget.value = '';
-                                }
-                              }
-                            }}
-                          />
-                          <Button
-                            size="xs"
-                            onClick={() => {
-                              const input = document.querySelector(
-                                'input[placeholder="Add new context..."]'
-                              ) as HTMLInputElement;
-                              if (
-                                input?.value?.trim() &&
-                                  !currentContexts.includes(input.value.trim())
-                              ) {
-                                const newContext = input.value.trim();
-                                setContextEdits((prev) => ({
-                                  ...prev,
-                                  [sound.filename]: [
-                                    ...(prev[sound.filename] ?? sound.contexts ?? []),
-                                    newContext,
-                                  ],
-                                }));
-                                input.value = '';
-                              }
-                            }}
-                          >
-                              Add
-                          </Button>
-                        </Group>
-
-                        {/* CustomCombobox for choosing existing contexts (like main page) */}
-                        <CustomCombobox
-                          value=""
-                          onChange={(value) => {
-                            if (value?.trim() && !currentContexts.includes(value)) {
-                              setContextEdits((prev) => ({
-                                ...prev,
-                                [sound.filename]: [
-                                  ...(prev[sound.filename] ?? sound.contexts ?? []),
-                                  value,
-                                ],
-                              }));
-                            }
-                          }}
-                          data={availableContexts}
-                          placeholder="Add existing context"
-                          width={200}
-                        />
-
-                        {/* Display selected contexts as badges */}
-                        {currentContexts.length > 0 && (
-                          <Group gap="xs" mt="xs">
-                            {currentContexts.map((ctx) => (
-                              <Badge
-                                key={ctx}
-                                variant="light"
-                                size="sm"
-                                c="blue"
-                                rightSection={
-                                  <ActionIcon
-                                    size="xs"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleRemoveContext(sound.filename, ctx);
-                                    }}
-                                  >
-                                    <IconX size={12} />
-                                  </ActionIcon>
-                                }
-                              >
-                                {ctx}
-                              </Badge>
-                            ))}
-                          </Group>
-                        )}
-                      </>
-                    )}
-
-                    {/* Credit Editing */}
-                    <TextInput
-                      label="Credit"
-                      value={currentCredit}
-                      onChange={(e) => {
-                        setCreditEdits((prev) => ({
-                          ...prev,
-                          [sound.filename]: e.currentTarget.value,
-                        }));
-                      }}
-                      placeholder="Enter credit information..."
-                    />
-
-                    {/* Image Upload (Ambiance sounds only) */}
-                    {selectedCategory === 'ambiance' && (
-                      <FileInput
-                        label="Background Image"
-                        placeholder="Upload background image"
-                        accept="image/*"
-                        onChange={(file) => {
-                          if (file) {
-                            setImageFileEdits((prev) => ({ ...prev, [sound.filename]: file }));
-                          }
-                        }}
-                      />
-                    )}
-
-                    {imageFileEdits[sound.filename] && (
-                      <Text size="xs" c="green">
-                          Image selected:{' '}
-                        {(imageFileEdits[sound.filename] as File)?.name || 'Ready to upload'}
-                      </Text>
-                    )}
-                  </Stack>
-                )}
-
-                <Group gap="xs" mt="xs">
-                  <Button
-                    size="xs"
-                    variant="subtle"
-                    leftSection={
-                      currentlyPlaying === sound.filename && isPlaying ? (
-                        <IconPlayerPause size={14} />
-                      ) : (
-                        <IconPlayerPlay size={14} />
-                      )
-                    }
-                    onClick={() => handlePlayPause(sound.filename)}
-                    disabled={!sound.filename}
-                  >
-                    {currentlyPlaying === sound.filename && isPlaying ? 'Pause' : 'Play'}
-                  </Button>
-                  <Button
-                    size="xs"
-                    variant="subtle"
-                    leftSection={<IconPlayerStop size={14} />}
-                    onClick={() => handleStop(sound.filename)}
-                    disabled={currentlyPlaying !== sound.filename}
-                  >
-                      Stop
-                  </Button>
-                </Group>
-
-                {/* Display current image for ambiance sounds */}
-                {selectedCategory === 'ambiance' && currentImages[sound.filename] && (
-                  <Group gap="xs" mt="xs">
-                    <Text size="xs">Current Image:</Text>
-                    <img
-                      src={`/assets/images/backgrounds/${currentImages[sound.filename]}`}
-                      alt="Background"
-                      style={{ maxWidth: '100px', maxHeight: '60px', objectFit: 'cover' }}
-                    />
-                  </Group>
-                )}
-
-                {sound.credit?.trim() && (
-                  <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
-                    {sound.credit}
-                  </Text>
-                )}
-              </Stack>
-            );
-          })}
+          {filteredSounds.map(renderSoundItem)}
         </div>
         <Group gap="sm" mt="sm">
           <Button

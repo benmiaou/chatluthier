@@ -422,13 +422,7 @@ export function EditSoundsModal({
     if (e.key === 'Enter' && e.currentTarget.value?.trim()) {
       const newContext = e.currentTarget.value.trim();
       if (!currentContexts.includes(newContext)) {
-        setContextEdits((prev) => ({
-          ...prev,
-          [soundFilename]: [
-            ...(prev[soundFilename] ?? []),
-            newContext,
-          ],
-        }));
+        addNewContext(soundFilename, newContext);
         e.currentTarget.value = '';
       }
     }
@@ -443,13 +437,7 @@ export function EditSoundsModal({
       !currentContexts.includes(input.value.trim())
     ) {
       const newContext = input.value.trim();
-      setContextEdits((prev) => ({
-        ...prev,
-        [soundFilename]: [
-          ...(prev[soundFilename] ?? []),
-          newContext,
-        ],
-      }));
+      addNewContext(soundFilename, newContext);
       input.value = '';
     }
   };
@@ -460,14 +448,18 @@ export function EditSoundsModal({
     currentContexts: string[]
   ) => {
     if (value?.trim() && !currentContexts.includes(value)) {
-      setContextEdits((prev) => ({
-        ...prev,
-        [soundFilename]: [
-          ...(prev[soundFilename] ?? []),
-          value,
-        ],
-      }));
+      addNewContext(soundFilename, value);
     }
+  };
+
+  const addNewContext = (soundFilename: string, newContext: string) => {
+    setContextEdits((prev) => ({
+      ...prev,
+      [soundFilename]: [
+        ...(prev[soundFilename] ?? []),
+        newContext,
+      ],
+    }));
   };
 
   const renderContextBadges = (soundFilename: string, currentContexts: string[]) => {
@@ -563,7 +555,51 @@ export function EditSoundsModal({
         </Group>
 
         {isEditing && renderSoundEditSection(sound, currentContexts)}
+        {renderSoundControls(sound)}
+        {renderSoundCredit(sound)}
       </Stack>
+    );
+  };
+
+  const renderSoundControls = (sound: SoundEdit) => {
+    return (
+      <Group gap="xs" mt="xs">
+        <Button
+          size="xs"
+          variant="subtle"
+          leftSection={
+            currentlyPlaying === sound.filename && isPlaying ? (
+              <IconPlayerPause size={14} />
+            ) : (
+              <IconPlayerPlay size={14} />
+            )
+          }
+          onClick={() => handlePlayPause(sound.filename)}
+          disabled={!sound.filename}
+        >
+          {currentlyPlaying === sound.filename && isPlaying ? 'Pause' : 'Play'}
+        </Button>
+        <Button
+          size="xs"
+          variant="subtle"
+          leftSection={<IconPlayerStop size={14} />}
+          onClick={() => handleStop(sound.filename)}
+          disabled={currentlyPlaying !== sound.filename}
+        >
+          Stop
+        </Button>
+      </Group>
+    );
+  };
+
+  const renderSoundCredit = (sound: SoundEdit) => {
+    if (!sound.credit?.trim()) {
+      return null;
+    }
+    return (
+      <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+        {sound.credit}
+      </Text>
     );
   };
 
@@ -614,169 +650,7 @@ export function EditSoundsModal({
             paddingRight: '0.5rem',
           }}
         >
-          {filteredSounds.map((sound) => {
-            const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
-            const currentContexts = contextEdits[sound.filename] ?? sound.contexts ?? [];
-            const isEditing = editingSoundId === sound.id;
-
-            return (
-              <Stack
-                key={sound.filename}
-                gap="sm"
-                style={{
-                  border: '1px solid var(--mantine-color-dark-4)',
-                  padding: '0.5rem',
-                  borderRadius: 'var(--mantine-radius-sm)',
-                }}
-              >
-                <Group justify="space-between" wrap="nowrap">
-                  <Switch
-                    label={sound.name}
-                    checked={enabled}
-                    onChange={(e) => handleToggle(sound.filename, e.currentTarget.checked)}
-                    size="sm"
-                    style={{ flex: 1 }}
-                  />
-                  <Button
-                    size="xs"
-                    variant={isEditing ? 'filled' : 'outline'}
-                    onClick={() => setEditingSoundId(isEditing ? null : String(sound.id))}
-                  >
-                    {isEditing ? 'Done' : 'Edit'}
-                  </Button>
-                </Group>
-
-                {isEditing && (
-                  <Stack gap="xs" mt="xs">
-                    <Group gap="xs" align="flex-end">
-                      <TextInput
-                        placeholder="Add new context..."
-                        style={{ flex: 1 }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && e.currentTarget.value?.trim()) {
-                            const newContext = e.currentTarget.value.trim();
-                            if (!currentContexts.includes(newContext)) {
-                              setContextEdits((prev) => ({
-                                ...prev,
-                                [sound.filename]: [
-                                  ...(prev[sound.filename] ?? sound.contexts ?? []),
-                                  newContext,
-                                ],
-                              }));
-                              e.currentTarget.value = '';
-                            }
-                          }
-                        }}
-                      />
-                      <Button
-                        size="xs"
-                        onClick={() => {
-                          const input = document.querySelector(
-                            'input[placeholder="Add new context..."]'
-                          ) as HTMLInputElement;
-                          if (
-                            input?.value?.trim() &&
-                            !currentContexts.includes(input.value.trim())
-                          ) {
-                            const newContext = input.value.trim();
-                            setContextEdits((prev) => ({
-                              ...prev,
-                              [sound.filename]: [
-                                ...(prev[sound.filename] ?? sound.contexts ?? []),
-                                newContext,
-                              ],
-                            }));
-                            input.value = '';
-                          }
-                        }}
-                      >
-                          Add
-                      </Button>
-                    </Group>
-
-                    {/* CustomCombobox for choosing existing contexts (like main page) */}
-                    <CustomCombobox
-                      value=""
-                      onChange={(value) => {
-                        if (value?.trim() && !currentContexts.includes(value)) {
-                          setContextEdits((prev) => ({
-                            ...prev,
-                            [sound.filename]: [
-                              ...(prev[sound.filename] ?? sound.contexts ?? []),
-                              value,
-                            ],
-                          }));
-                        }
-                      }}
-                      data={availableContexts}
-                      placeholder="Add existing context"
-                      width={200}
-                    />
-
-                    {/* Display selected contexts as badges */}
-                    {currentContexts.length > 0 && (
-                      <Group gap="xs" mt="xs">
-                        {currentContexts.map((ctx) => (
-                          <Badge
-                            key={ctx}
-                            variant="light"
-                            size="sm"
-                            c="blue"
-                            rightSection={
-                              <ActionIcon
-                                size="xs"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveContext(sound.filename, ctx);
-                                }}
-                              >
-                                <IconX size={12} />
-                              </ActionIcon>
-                            }
-                          >
-                            {ctx}
-                          </Badge>
-                        ))}
-                      </Group>
-                    )}
-                  </Stack>
-                )}
-
-                <Group gap="xs" mt="xs">
-                  <Button
-                    size="xs"
-                    variant="subtle"
-                    leftSection={
-                      currentlyPlaying === sound.filename && isPlaying ? (
-                        <IconPlayerPause size={14} />
-                      ) : (
-                        <IconPlayerPlay size={14} />
-                      )
-                    }
-                    onClick={() => handlePlayPause(sound.filename)}
-                    disabled={!sound.filename}
-                  >
-                    {currentlyPlaying === sound.filename && isPlaying ? 'Pause' : 'Play'}
-                  </Button>
-                  <Button
-                    size="xs"
-                    variant="subtle"
-                    leftSection={<IconPlayerStop size={14} />}
-                    onClick={() => handleStop(sound.filename)}
-                    disabled={currentlyPlaying !== sound.filename}
-                  >
-                      Stop
-                  </Button>
-                </Group>
-
-                {sound.credit?.trim() && (
-                  <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
-                    {sound.credit}
-                  </Text>
-                )}
-              </Stack>
-            );
-          })}
+          {filteredSounds.map(renderSoundItem)}
         </div>
         <Group gap="sm" mt="sm">
           <Button

@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Combobox, useCombobox, Button, TextInput } from '@mantine/core';
-import { useState } from 'react';
 
 interface CustomComboboxProps {
   readonly value: string;

@@ -1,5 +1,4 @@
-import React from 'react';
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { SoundBar } from './SoundBar';
 import { IconGripVertical } from '@tabler/icons-react';

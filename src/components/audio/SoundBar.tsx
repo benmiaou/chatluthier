@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Box, Text } from '@mantine/core';
 import { IconVolumeOff, IconGripVertical } from '@tabler/icons-react';
-import { useRef, useState, useEffect } from 'react';
 import type { AmbianceBar } from '../../hooks/useAmbianceSounds';
 import { showCreditToast } from '../../utils/showCreditToast';
 

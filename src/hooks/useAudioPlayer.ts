@@ -73,7 +73,7 @@ export function useAudioPlayer(): AudioPlayerHook {
 
 /** Pre-cache a list of audio URLs using the Cache API */
 export async function precacheAudio(urls: string[]): Promise<void> {
-  if (!('caches' in window)) {
+  if (!('caches' in globalThis)) {
     return;
   }
   try {
