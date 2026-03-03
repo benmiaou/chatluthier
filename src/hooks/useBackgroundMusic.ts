@@ -200,6 +200,60 @@ export function useBackgroundMusic(
 
   // ─── Remote playback (received via socket) ────────────────────────────────
 
+  const calculateAdjustedTime = useCallback((timestamp: number, currentTime: number): number => {
+    const now = Date.now();
+    const delay = now - timestamp;
+    return currentTime + delay / 1000; // Convert delay from ms to seconds
+  }, []);
+
+  const handlePlayAttempt = useCallback(async (audio: HTMLAudioElement): Promise<boolean> => {
+    const handleAutoplayBlocked = () => {
+      setIsPlaying(false);
+      if (onAutoplayBlocked) {
+        onAutoplayBlocked();
+      }
+    };
+
+    const handleOtherErrors = () => {
+      setIsPlaying(false);
+    };
+
+    try {
+      if (userInteracted) {
+        await audio.play();
+        setIsPlaying(true);
+        return true;
+      }
+      
+      handleAutoplayBlocked();
+      return false;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'NotAllowedError') {
+        handleAutoplayBlocked();
+      } else {
+        handleOtherErrors();
+      }
+      return false;
+    }
+  }, [userInteracted, onAutoplayBlocked]);
+
+  const updateCurrentSound = useCallback((musicData: {
+    filename: string;
+    credit?: string;
+  }) => {
+    const soundToPlay = sounds.find((s) => s.filename === musicData.filename);
+    if (soundToPlay) {
+      setCurrentSound({ ...soundToPlay, credit: musicData.credit });
+    } else {
+      setCurrentSound({
+        filename: musicData.filename,
+        credit: musicData.credit,
+        name: musicData.filename,
+        display_name: musicData.filename,
+      } as Sound);
+    }
+  }, [sounds]);
+
   const playReceived = useCallback(
     async (musicData: {
       filename: string;
@@ -211,61 +265,20 @@ export function useBackgroundMusic(
       audio.src = `${ASSET_PREFIX}${musicData.filename}`;
       audio.volume = volume;
 
-      // If timestamp and currentTime are provided, calculate the correct position
+      // Set adjusted time if timestamp and currentTime are provided
       if (musicData.timestamp && musicData.currentTime !== undefined) {
-        const now = Date.now();
-        const delay = now - musicData.timestamp;
-        const adjustedTime = musicData.currentTime + delay / 1000; // Convert delay from ms to seconds
-
-        // Set the current time before playing
-        audio.currentTime = adjustedTime;
+        audio.currentTime = calculateAdjustedTime(musicData.timestamp, musicData.currentTime);
       }
 
-      // Try to play, but handle autoplay restrictions
-      try {
-        if (userInteracted) {
-          await audio.play();
-          setIsPlaying(true);
-        } else {
-          // If no user interaction yet, set up the audio but don't play
-          // This will be played when user interacts with any audio control
-          setIsPlaying(false);
-          // Notify the component that autoplay was blocked
-          if (onAutoplayBlocked) {
-            onAutoplayBlocked();
-          }
-        }
-      } catch (error) {
-        if (error instanceof Error && error.name === 'NotAllowedError') {
-          // Autoplay blocked by browser, waiting for user interaction
-          setIsPlaying(false);
-          // Notify the component that autoplay was blocked
-          if (onAutoplayBlocked) {
-            onAutoplayBlocked();
-          }
-        } else {
-          // Error playing received music
-          setIsPlaying(false);
-        }
-      }
+      // Attempt to play the audio
+      await handlePlayAttempt(audio);
 
-      // Find the sound object to update currentSound state
-      const soundToPlay = sounds.find((s) => s.filename === musicData.filename);
-      if (soundToPlay) {
-        setCurrentSound({ ...soundToPlay, credit: musicData.credit });
-      } else {
-        // Fallback if sound not found in sounds list
-        setCurrentSound({
-          filename: musicData.filename,
-          credit: musicData.credit,
-          name: musicData.filename,
-          display_name: musicData.filename,
-        } as Sound);
-      }
+      // Update current sound state
+      updateCurrentSound(musicData);
 
       startProgressTracking();
     },
-    [volume, sounds, userInteracted, onAutoplayBlocked]
+    [volume, sounds, userInteracted, onAutoplayBlocked, calculateAdjustedTime, handlePlayAttempt, updateCurrentSound]
   );
 
   const stopReceived = useCallback(() => {

@@ -611,11 +611,14 @@ export function ServerEditSoundsModal({
                             <Group gap="xs" mt="xs">
                               {currentContexts.map((ctx) => {
                                 const handleRemoveContext = () => {
-                                  setContextEdits((prev) => ({
-                                    ...prev,
-                                    [sound.filename]:
-                                      prev[sound.filename]?.filter((c) => c !== ctx) || [],
-                                  }));
+                                  setContextEdits((prev) => {
+                                    const currentSoundContexts = prev[sound.filename] || [];
+                                    const updatedContexts = currentSoundContexts.filter((c) => c !== ctx);
+                                    return {
+                                      ...prev,
+                                      [sound.filename]: updatedContexts,
+                                    };
+                                  });
                                 };
                                 return (
                                   <Badge

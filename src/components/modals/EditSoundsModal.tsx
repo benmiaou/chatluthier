@@ -491,31 +491,39 @@ export function EditSoundsModal({
                       {/* Display selected contexts as badges */}
                       {currentContexts.length > 0 && (
                         <Group gap="xs" mt="xs">
-                          {currentContexts.map((ctx) => (
-                            <Badge
-                              key={ctx}
-                              variant="light"
-                              size="sm"
-                              c="blue"
-                              rightSection={
-                                <ActionIcon
-                                  size="xs"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setContextEdits((prev) => ({
-                                      ...prev,
-                                      [sound.filename]:
-                                        prev[sound.filename]?.filter((c) => c !== ctx) || [],
-                                    }));
-                                  }}
-                                >
-                                  <IconX size={12} />
-                                </ActionIcon>
-                              }
-                            >
-                              {ctx}
-                            </Badge>
-                          ))}
+                          {currentContexts.map((ctx) => {
+                            const handleRemoveContext = () => {
+                              setContextEdits((prev) => {
+                                const currentSoundContexts = prev[sound.filename] || [];
+                                const updatedContexts = currentSoundContexts.filter((c) => c !== ctx);
+                                return {
+                                  ...prev,
+                                  [sound.filename]: updatedContexts,
+                                };
+                              });
+                            };
+                            return (
+                              <Badge
+                                key={ctx}
+                                variant="light"
+                                size="sm"
+                                c="blue"
+                                rightSection={
+                                  <ActionIcon
+                                    size="xs"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleRemoveContext();
+                                    }}
+                                  >
+                                    <IconX size={12} />
+                                  </ActionIcon>
+                                }
+                              >
+                                {ctx}
+                              </Badge>
+                            );
+                          })}
                         </Group>
                       )}
                     </Stack>

@@ -73,21 +73,26 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
 
   // ─── Volume control ───────────────────────────────────────────────────────
 
+  const updateBarAudio = useCallback((bar: AmbianceBar, volume: number) => {
+    bar.audio.volume = volume;
+    if (volume > 0 && bar.audio.paused) {
+      bar.audio.play().catch(() => {});
+    } else if (volume === 0) {
+      bar.audio.pause();
+    }
+  }, []);
+
   const setBarVolume = useCallback((filename: string, volume: number) => {
-    setBars((prev) =>
-      prev.map((b) => {
-        if (b.sound.filename !== filename) {
+    setBars((prev) => {
+      const shouldUpdateBar = (bar: AmbianceBar) => bar.sound.filename === filename;
+      return prev.map((b) => {
+        if (!shouldUpdateBar(b)) {
           return b;
         }
-        b.audio.volume = volume;
-        if (volume > 0 && b.audio.paused) {
-          b.audio.play().catch(() => {});
-        } else if (volume === 0) {
-          b.audio.pause();
-        }
+        updateBarAudio(b, volume);
         return { ...b, volume };
-      })
-    );
+      });
+    });
   }, []);
 
   const reset = useCallback(() => {
@@ -107,18 +112,14 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
   }, []);
 
   const applyStatus = useCallback((status: Record<string, number>) => {
-    setBars((prev) =>
-      prev.map((b) => {
-        const vol = status[b.sound.filename] ?? 0;
-        b.audio.volume = vol;
-        if (vol > 0 && b.audio.paused) {
-          b.audio.play().catch(() => {});
-        } else if (vol === 0) {
-          b.audio.pause();
-        }
+    setBars((prev) => {
+      const getVolumeForBar = (bar: AmbianceBar) => status[bar.sound.filename] ?? 0;
+      return prev.map((b) => {
+        const vol = getVolumeForBar(b);
+        updateBarAudio(b, vol);
         return { ...b, volume: vol };
-      })
-    );
+      });
+    });
   }, []);
 
   // Keep barsRef in sync

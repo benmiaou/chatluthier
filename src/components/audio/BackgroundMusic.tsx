@@ -90,62 +90,72 @@ export function BackgroundMusic({
   // Listen for incoming socket messages
   useEffect(() => {
     return addMessageHandler((msg: WsMessage) => {
-      if (msg.type === 'backgroundMusicChange' && msg.content) {
-        const { filename, credit, timestamp, currentTime } = msg.content as {
-          filename: string;
-          credit?: string;
-          timestamp?: number;
-          currentTime?: number;
-        };
+      if (!msg.content) return;
 
-        playReceived({ filename, credit, timestamp, currentTime });
-        // Credit is already shown in the player UI, no need for toast
-      } else if (msg.type === 'backgroundMusicStop') {
-        stopReceived();
-      } else if (msg.type === 'statusRequest' && msg.content) {
-        const { statusType } = msg.content as { statusType: string };
-        if (statusType === 'backgroundMusic' && currentSound) {
-          // Respond with current background music status
-          const currentTime = getCurrentTime();
-          send({
-            type: 'statusResponse',
-            id: sessionId,
-            content: {
-              statusType: 'backgroundMusic',
-              statusData: {
-                filename: currentSound.filename,
-                credit: currentSound.credit,
-                isPlaying: isPlaying,
-                timestamp: Date.now(),
-                currentTime: currentTime,
-              },
-            },
-          });
-        }
-      } else if (msg.type === 'statusResponse' && msg.content) {
-        const { statusType, statusData } = msg.content as {
-          statusType: string;
-          statusData: {
+      const messageHandlers: Record<string, (content: unknown) => void> = {
+        backgroundMusicChange: (content) => {
+          const { filename, credit, timestamp, currentTime } = content as {
             filename: string;
             credit?: string;
-            isPlaying: boolean;
             timestamp?: number;
             currentTime?: number;
           };
-        };
-        if (statusType === 'backgroundMusic' && statusData) {
-          if (statusData.isPlaying) {
-            playReceived({
-              filename: statusData.filename,
-              credit: statusData.credit,
-              timestamp: statusData.timestamp,
-              currentTime: statusData.currentTime,
+          playReceived({ filename, credit, timestamp, currentTime });
+        },
+        backgroundMusicStop: () => {
+          stopReceived();
+        },
+        statusRequest: (content) => {
+          const { statusType } = content as { statusType: string };
+          if (statusType === 'backgroundMusic' && currentSound) {
+            const currentTime = getCurrentTime();
+            send({
+              type: 'statusResponse',
+              id: sessionId,
+              content: {
+                statusType: 'backgroundMusic',
+                statusData: {
+                  filename: currentSound.filename,
+                  credit: currentSound.credit,
+                  isPlaying: isPlaying,
+                  timestamp: Date.now(),
+                  currentTime: currentTime,
+                },
+              },
             });
-            // Credit is already shown in the player UI, no need for toast
+          }
+        },
+        statusResponse: (content) => {
+          const { statusType, statusData } = content as {
+            statusType: string;
+            statusData: {
+              filename: string;
+              credit?: string;
+              isPlaying: boolean;
+              timestamp?: number;
+              currentTime?: number;
+            };
+          };
+          if (statusType === 'backgroundMusic' && statusData) {
+            if (statusData.isPlaying) {
+              playReceived({
+                filename: statusData.filename,
+                credit: statusData.credit,
+                timestamp: statusData.timestamp,
+                currentTime: statusData.currentTime,
+              });
+            } else {
+              stopReceived();
           }
         }
       }
-    });
+    };
+
+    const handler = messageHandlers[msg.type as keyof typeof messageHandlers];
+    if (handler) {
+      handler(msg.content);
+    }
+  });
   }, [
     addMessageHandler,
     playReceived,

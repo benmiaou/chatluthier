@@ -52,7 +52,7 @@ const SocketContext = createContext<SocketContextValue | null>(null);
 const isLocalhost =
   globalThis.location.hostname === 'localhost' || globalThis.location.hostname === '127.0.0.1';
 const protocol = globalThis.location.protocol === 'https:' ? 'wss:' : 'ws:';
-const WS_URL = isLocalhost ? 'ws://localhost:3000' : `${protocol}//${globalThis.location.host}/ws/`;
+const WS_URL = isLocalhost ? 'ws://localhost:3001' : `${protocol}//${globalThis.location.host}/ws/`;
 
 const RECONNECT_MS = 5000;
 const HEARTBEAT_MS = 30_000;
@@ -83,6 +83,166 @@ export function SocketProvider({
     heartbeatRef.current = null;
   };
 
+  const setupHeartbeat = useCallback((ws: WebSocket) => {
+    clearHeartbeat();
+    heartbeatRef.current = setInterval(() => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'ping' }));
+      }
+    }, HEARTBEAT_MS);
+  }, []);
+
+  const handleSubscription = useCallback((ws: WebSocket, sessionId: string, participants: Array<{ id: string }>) => {
+    // Request background music status from first participant
+    if (ws.readyState === WebSocket.OPEN && participants.length > 0) {
+      const firstParticipantId = participants[0].id;
+      
+      ws.send(
+        JSON.stringify({
+          type: 'requestStatus',
+          id: sessionId,
+          content: {
+            type: 'backgroundMusic',
+            targetParticipantId: firstParticipantId,
+          },
+        })
+      );
+
+      // Request ambiance status from first participant
+      ws.send(
+        JSON.stringify({
+          type: 'requestStatus',
+          id: sessionId,
+          content: {
+            type: 'ambiance',
+            targetParticipantId: firstParticipantId,
+          },
+        })
+      );
+    }
+  }, []);
+
+  const handleSubscribedMessage = useCallback((data: WsMessage) => {
+    setSessionId(data.id ?? null);
+    setStatusMessage(`Joined session: ${data.id ?? ''}`);
+    
+    if (data.participantId) {
+      setParticipantId(data.participantId);
+      localStorage.setItem('wsParticipantId', data.participantId);
+    }
+    
+    if (data.participants) {
+      setParticipants(data.participants);
+      // Request status from first participant if available
+      if (data.participants.length > 0 && data.id) {
+        const currentWs = wsRef.current;
+        if (currentWs) {
+          handleSubscription(currentWs, data.id, data.participants);
+        }
+      }
+    }
+  }, []);
+
+  const handleParticipantJoined = useCallback((data: WsMessage) => {
+    if (data.participant) {
+      setParticipants((prev) => [...prev, data.participant]);
+      setStatusMessage(`New participant joined: ${data.participant.pseudo || 'Anonymous'}`);
+    }
+  }, []);
+
+  const handleParticipantLeft = useCallback((data: WsMessage) => {
+    if (data.participantId) {
+      setParticipants((prev) => prev.filter((p) => p.id !== data.participantId));
+      setStatusMessage('A participant left the session');
+    }
+  }, []);
+
+  const handleMessage = useCallback((event: MessageEvent) => {
+    try {
+      const data = JSON.parse(event.data as string) as WsMessage;
+
+      // Route message to appropriate handler
+      switch (data.type) {
+        case 'subscribed':
+          handleSubscribedMessage(data);
+          break;
+        case 'participantJoined':
+          handleParticipantJoined(data);
+          break;
+        case 'participantLeft':
+          handleParticipantLeft(data);
+          break;
+        default:
+          break;
+      }
+
+      // Notify all handlers
+      handlersRef.current.forEach((h) => h(data));
+    } catch {
+      /* ignore parse errors */
+    }
+  }, []);
+
+  const handleConnectionClose = useCallback(() => {
+    setConnected(false);
+    setStatusMessage(
+      sessionId ? 'Session active. Reconnecting to server...' : 'Disconnected. Reconnecting...'
+    );
+    clearHeartbeat();
+    
+    if (shouldReconnectRef.current) {
+      // eslint-disable-next-line react-hooks/immutability
+      reconnectRef.current = setTimeout(connect, RECONNECT_MS);
+    }
+  }, [sessionId]);
+
+  const handleConnectionError = useCallback(() => {
+    setStatusMessage('Connection error. Retrying...');
+    if (wsRef.current) {
+      wsRef.current.close();
+    }
+  }, []);
+
+  const getSessionIdToJoin = useCallback((): string | null => {
+    // Priority: pending subscribe call > URL param > localStorage
+    const urlParams = new URLSearchParams(globalThis.location.search);
+    const urlId = urlParams.get('sessionId');
+    const idToJoin = pendingIdRef.current ?? urlId ?? localStorage.getItem('lastJoinId');
+    
+    // Clean up URL param if present
+    if (urlId) {
+      urlParams.delete('sessionId');
+      globalThis.history.replaceState(
+        {},
+        '',
+        globalThis.location.pathname + (urlParams.toString() ? `?${urlParams}` : '')
+      );
+    }
+    
+    return idToJoin;
+  }, []);
+
+  const sendSubscriptionRequest = useCallback((ws: WebSocket, sessionId: string) => {
+    const userPseudo = localStorage.getItem('userPseudo') || null;
+    const storedParticipantId =
+      localStorage.getItem('pendingParticipantId') ||
+      localStorage.getItem('wsParticipantId') ||
+      null;
+
+    ws.send(
+      JSON.stringify({
+        type: 'subscribe',
+        id: sessionId,
+        pseudo: userPseudo,
+        participantId: storedParticipantId,
+      })
+    );
+
+    // Clean up pending IDs
+    pendingIdRef.current = null;
+    localStorage.removeItem('pendingParticipantId');
+  }, []);
+
   const connect = useCallback((): void => {
     const ws = new WebSocket(WS_URL);
     wsRef.current = ws;
@@ -95,143 +255,22 @@ export function SocketProvider({
       }
     }, 3000);
 
-    ws.onopen = () => {
+    const handleOpen = () => {
       clearTimeout(connectionTimeout);
-
       setConnected(true);
       setStatusMessage('Connected to session server. Ready to join or create a session.');
-      clearHeartbeat();
-      heartbeatRef.current = setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: 'ping' }));
-        }
-      }, HEARTBEAT_MS);
+      setupHeartbeat(ws);
 
-      // Priority: pending subscribe call > URL param > localStorage
-      const urlParams = new URLSearchParams(globalThis.location.search);
-      const urlId = urlParams.get('sessionId');
-      const idToJoin = pendingIdRef.current ?? urlId ?? localStorage.getItem('lastJoinId');
-
-      if (idToJoin) {
-        // Get pseudo and participant ID
-        const userPseudo = localStorage.getItem('userPseudo') || null;
-        const storedParticipantId =
-          localStorage.getItem('pendingParticipantId') ||
-          localStorage.getItem('wsParticipantId') ||
-          null;
-
-        ws.send(
-          JSON.stringify({
-            type: 'subscribe',
-            id: idToJoin,
-            pseudo: userPseudo,
-            participantId: storedParticipantId,
-          })
-        );
-
-        // Clean up pending IDs
-        pendingIdRef.current = null;
-        localStorage.removeItem('pendingParticipantId');
-
-        if (urlId) {
-          urlParams.delete('sessionId');
-          globalThis.history.replaceState(
-            {},
-            '',
-            globalThis.location.pathname + (urlParams.toString() ? `?${urlParams}` : '')
-          );
-        }
+      const sessionIdToJoin = getSessionIdToJoin();
+      if (sessionIdToJoin) {
+        sendSubscriptionRequest(ws, sessionIdToJoin);
       }
     };
 
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data as string) as WsMessage;
-
-        switch (data.type) {
-          case 'subscribed':
-            setSessionId(data.id ?? null);
-            setStatusMessage(`Joined session: ${data.id ?? ''}`);
-            if (data.participantId) {
-              setParticipantId(data.participantId);
-              // Store participant ID in localStorage for reconnections
-              localStorage.setItem('wsParticipantId', data.participantId);
-            }
-            if (data.participants) {
-              setParticipants(data.participants);
-            }
-
-            // If there are existing participants, request current status from the first participant only
-            if (data.participants && data.participants.length > 0) {
-              const firstParticipantId = data.participants[0]?.id;
-              if (firstParticipantId) {
-                const currentWs = wsRef.current;
-                if (currentWs?.readyState === WebSocket.OPEN) {
-                  // Request background music status from first participant only
-                  currentWs.send(
-                    JSON.stringify({
-                      type: 'requestStatus',
-                      id: data.id,
-                      content: {
-                        type: 'backgroundMusic',
-                        targetParticipantId: firstParticipantId,
-                      },
-                    })
-                  );
-
-                  // Request ambiance status from first participant only
-                  ws.send(
-                    JSON.stringify({
-                      type: 'requestStatus',
-                      id: data.id,
-                      content: {
-                        type: 'ambiance',
-                        targetParticipantId: firstParticipantId,
-                      },
-                    })
-                  );
-                }
-              }
-            }
-            break;
-          case 'participantJoined':
-            if (data.participant) {
-              setParticipants((prev) => [...prev, data.participant]);
-              setStatusMessage(`New participant joined: ${data.participant.pseudo || 'Anonymous'}`);
-            }
-            break;
-          case 'participantLeft':
-            if (data.participantId) {
-              setParticipants((prev) => prev.filter((p) => p.id !== data.participantId));
-              setStatusMessage('A participant left the session');
-            }
-            break;
-          default:
-            break;
-        }
-
-        handlersRef.current.forEach((h) => h(data));
-      } catch {
-        /* ignore parse errors */
-      }
-    };
-
-    ws.onclose = () => {
-      setConnected(false);
-      setStatusMessage(
-        sessionId ? 'Session active. Reconnecting to server...' : 'Disconnected. Reconnecting...'
-      );
-      clearHeartbeat();
-      if (shouldReconnectRef.current) {
-        // eslint-disable-next-line react-hooks/immutability
-        reconnectRef.current = setTimeout(connect, RECONNECT_MS);
-      }
-    };
-
-    ws.onerror = () => {
-      setStatusMessage('Connection error. Retrying...');
-      ws.close();
-    };
+    ws.onopen = handleOpen;
+    ws.onmessage = handleMessage;
+    ws.onclose = handleConnectionClose;
+    ws.onerror = handleConnectionError;
   }, [sessionId]);
 
   useEffect(() => {
@@ -278,21 +317,6 @@ export function SocketProvider({
   }, []);
 
   const disconnect = useCallback(() => {
-    // Notify server about leaving the session
-    if (sessionId && wsRef.current?.readyState === WebSocket.OPEN) {
-      try {
-        wsRef.current.send(
-          JSON.stringify({
-            type: 'unsubscribe',
-            id: sessionId,
-            participantId: participantId,
-          })
-        );
-      } catch {
-        /* ignore errors */
-      }
-    }
-
     // Clear session state but keep the WS alive for future subscriptions
     localStorage.removeItem('lastJoinId');
     localStorage.removeItem('wsParticipantId');
@@ -301,6 +325,22 @@ export function SocketProvider({
     setParticipantId(null);
     setParticipants([]);
     setStatusMessage('Left session.');
+
+    // Notify server about leaving the session
+    const shouldNotifyServer = sessionId && wsRef.current?.readyState === WebSocket.OPEN && participantId;
+    if (shouldNotifyServer) {
+      const unsubscribeMessage = JSON.stringify({
+        type: 'unsubscribe',
+        id: sessionId,
+        participantId: participantId,
+      });
+      
+      try {
+        wsRef.current.send(unsubscribeMessage);
+      } catch {
+        /* ignore errors */
+      }
+    }
   }, [sessionId, participantId]);
 
   const send = useCallback((msg: Record<string, unknown>) => {

@@ -199,56 +199,73 @@ export function AmbianceSounds({
     }
   };
 
-  // Listen for incoming ambiance updates from session peers
-  useEffect(() => {
-    return addMessageHandler((msg: WsMessage) => {
-      if (msg.type === 'ambianceStatusUpdate' && msg.content) {
-        const { ambianceStatus } = msg.content as { ambianceStatus: Record<string, number> };
-        applyStatus(ambianceStatus);
-
-        // Show credits for any sounds that have credits
-        Object.entries(ambianceStatus).forEach(([filename, volume]) => {
-          if (volume > 0) {
-            const sound = bars.find((s) => s.sound.filename === filename);
-            if (sound?.sound?.credit) {
-              showCreditToast(sound.sound.name, sound.sound.credit);
-            }
-          }
-        });
-      } else if (msg.type === 'statusRequest' && msg.content) {
-        const { statusType } = msg.content as { statusType: string };
-        if (statusType === 'ambiance') {
-          // Respond with current ambiance status
-          send({
-            type: 'statusResponse',
-            id: sessionId,
-            content: {
-              statusType: 'ambiance',
-              statusData: getStatus(),
-            },
-          });
-        }
-      } else if (msg.type === 'statusResponse' && msg.content) {
-        const { statusType, statusData } = msg.content as {
-          statusType: string;
-          statusData: Record<string, number>;
-        };
-        if (statusType === 'ambiance' && statusData) {
-          applyStatus(statusData);
-
-          // Show credits for any sounds that have credits
-          Object.entries(statusData).forEach(([filename, volume]) => {
-            if (volume > 0) {
-              const sound = bars.find((s) => s.sound.filename === filename);
-              if (sound?.sound?.credit) {
-                showCreditToast(sound.sound.name, sound.sound.credit);
-              }
-            }
-          });
+  const showCreditsForActiveSounds = useCallback((statusData: Record<string, number>) => {
+    Object.entries(statusData).forEach(([filename, volume]) => {
+      if (volume > 0) {
+        const sound = bars.find((s) => s.sound.filename === filename);
+        if (sound?.sound?.credit) {
+          showCreditToast(sound.sound.name, sound.sound.credit);
         }
       }
     });
-  }, [addMessageHandler, applyStatus, sessionId, send, getStatus, bars]);
+  }, [bars]);
+
+  const handleAmbianceStatusUpdate = useCallback((ambianceStatus: Record<string, number>) => {
+    applyStatus(ambianceStatus);
+    showCreditsForActiveSounds(ambianceStatus);
+  }, [applyStatus, showCreditsForActiveSounds]);
+
+  const handleStatusRequest = useCallback((statusType: string) => {
+    if (statusType === 'ambiance') {
+      send({
+        type: 'statusResponse',
+        id: sessionId,
+        content: {
+          statusType: 'ambiance',
+          statusData: getStatus(),
+        },
+      });
+    }
+  }, [send, sessionId, getStatus]);
+
+  const handleStatusResponse = useCallback((statusType: string, statusData: Record<string, number>) => {
+    if (statusType === 'ambiance' && statusData) {
+      applyStatus(statusData);
+      showCreditsForActiveSounds(statusData);
+    }
+  }, [applyStatus, showCreditsForActiveSounds]);
+
+  const handleAmbianceMessage = useCallback((msg: WsMessage) => {
+    if (!msg.content) return;
+
+    const messageHandlers: Record<string, (content: unknown) => void> = {
+      ambianceStatusUpdate: (content) => {
+        const { ambianceStatus } = content as { ambianceStatus: Record<string, number> };
+        handleAmbianceStatusUpdate(ambianceStatus);
+      },
+      statusRequest: (content) => {
+        const { statusType } = content as { statusType: string };
+        handleStatusRequest(statusType);
+      },
+      statusResponse: (content) => {
+        const { statusType, statusData } = content as {
+          statusType: string;
+          statusData: Record<string, number>;
+        };
+        handleStatusResponse(statusType, statusData);
+      }
+    };
+
+    const handler = messageHandlers[msg.type as keyof typeof messageHandlers];
+    if (handler) {
+      handler(msg.content);
+    }
+  }, [handleAmbianceStatusUpdate, handleStatusRequest, handleStatusResponse]);
+
+  // Listen for incoming ambiance updates from session peers
+  useEffect(() => {
+    return addMessageHandler(handleAmbianceMessage);
+  }, [addMessageHandler, handleAmbianceMessage]);
 
   const presetNames = Object.keys(presets);
 
