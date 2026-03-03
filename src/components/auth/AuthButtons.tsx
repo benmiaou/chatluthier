@@ -18,6 +18,25 @@ import React from 'react';
 
 import { useAuthContext } from '../../contexts/AuthContext';
 
+// Extracted component for pseudo availability status
+const PseudoAvailabilityStatus = ({ checking, available }: { checking: boolean; available: boolean | null }) => {
+  if (checking) {
+    return (
+      <Text size="xs" c="gray">
+        Checking...
+      </Text>
+    );
+  }
+  if (available === true) {
+    return (
+      <Text size="xs" c="green">
+        ✓ Available
+      </Text>
+    );
+  }
+  return null;
+};
+
 export function AuthButtons(): React.ReactElement {
   const {
     isSignedIn,
@@ -465,24 +484,10 @@ export function AuthButtons(): React.ReactElement {
             required
             error={pseudoAvailable === false ? 'Pseudo already taken' : ''}
             rightSection={
-              /* Extract nested ternary to improve readability */
-              (() => {
-                if (pseudoChecking) {
-                  return (
-                    <Text size="xs" c="gray">
-                      Checking...
-                    </Text>
-                  );
-                }
-                if (pseudoAvailable === true) {
-                  return (
-                    <Text size="xs" c="green">
-                      ✓ Available
-                    </Text>
-                  );
-                }
-                return null;
-              })()
+              <PseudoAvailabilityStatus
+                checking={pseudoChecking}
+                available={pseudoAvailable}
+              />
             }
             onKeyDown={(e) => {
               if (e.key === 'Enter') {

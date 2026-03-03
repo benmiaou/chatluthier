@@ -160,13 +160,11 @@ export function EditSoundsModal({
     // Extract all unique contexts from all sounds in the current category
     const userContexts = new Set<string>();
     sounds.forEach((sound) => {
-      if (sound.contexts && Array.isArray(sound.contexts)) {
-        sound.contexts.forEach((context) => {
-          if (context && typeof context === 'string') {
-            userContexts.add(context);
-          }
-        });
-      }
+      sound.contexts?.forEach((context) => {
+        if (typeof context === 'string') {
+          userContexts.add(context);
+        }
+      });
     });
 
     // Merge predefined options with user contexts
@@ -283,42 +281,10 @@ export function EditSoundsModal({
     setSaving(true);
     try {
       const soundsType = SOUNDS_TYPE[selectedCategory];
+      const changes = collectChanges();
 
-      // User: collect all changes and send in a single request if possible
-      const changes = [];
-
-      // Collect all changes
-      Object.entries(edits).forEach(([filename, isEnabled]) => {
-        changes.push({
-          filename,
-          isEnabled,
-          contexts: contextEdits[filename],
-        });
-      });
-
-      // Add context-only changes
-      Object.entries(contextEdits).forEach(([filename, contexts]) => {
-        if (!edits[filename]) {
-          changes.push({
-            filename,
-            contexts,
-          });
-        }
-      });
-
-      // Send all changes in a single batch request if there are changes
       if (changes.length > 0) {
-        const response = await fetch('/update-user-sounds-batch', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId,
-            soundsType,
-            changes,
-          }),
-        });
-
+        const response = await sendChangesToServer(changes, soundsType);
         if (!response.ok) {
           throw new Error('Failed to update user sounds');
         }
@@ -335,6 +301,59 @@ export function EditSoundsModal({
     } finally {
       setSaving(false);
     }
+  };
+
+  const collectChanges = (): Array<{
+    filename: string;
+    isEnabled?: boolean;
+    contexts?: string[];
+  }> => {
+    const changes: Array<{
+      filename: string;
+      isEnabled?: boolean;
+      contexts?: string[];
+    }> = [];
+
+    // Collect all changes
+    Object.entries(edits).forEach(([filename, isEnabled]) => {
+      changes.push({
+        filename,
+        isEnabled,
+        contexts: contextEdits[filename],
+      });
+    });
+
+    // Add context-only changes
+    Object.entries(contextEdits).forEach(([filename, contexts]) => {
+      if (!edits[filename]) {
+        changes.push({
+          filename,
+          contexts,
+        });
+      }
+    });
+
+    return changes;
+  };
+
+  const sendChangesToServer = async (
+    changes: Array<{
+      filename: string;
+      isEnabled?: boolean;
+      contexts?: string[];
+    }>,
+    soundsType: string
+  ) => {
+    return await fetch('/update-user-sounds-batch', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        soundsType,
+        changes,
+      }),
+    });
   };
 
   // Extract nested function to reduce nesting depth
@@ -357,6 +376,10 @@ export function EditSoundsModal({
     if (filteredSounds.length === 0) {
       return <Text c="dimmed">No sounds found matching your search.</Text>;
     }
+    return renderSoundsGrid();
+  };
+
+  const renderSoundsGrid = () => {
     return (
       <div
         style={{
@@ -368,138 +391,161 @@ export function EditSoundsModal({
           paddingRight: '0.5rem',
         }}
       >
-        {filteredSounds.map((sound) => {
-          const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
-          const currentContexts = contextEdits[sound.filename] ?? sound.contexts ?? [];
-          const isEditing = editingSoundId === sound.id;
-
-          return (
-            <Stack
-              key={sound.filename}
-              gap="sm"
-              style={{
-                border: '1px solid var(--mantine-color-dark-4)',
-                padding: '0.5rem',
-                borderRadius: 'var(--mantine-radius-sm)',
-              }}
-            >
-              <Group justify="space-between" wrap="nowrap">
-                <Switch
-                  label={sound.name}
-                  checked={enabled}
-                  onChange={(e) => handleToggle(sound.filename, e.currentTarget.checked)}
-                  size="sm"
-                  style={{ flex: 1 }}
-                />
-                <Button
-                  size="xs"
-                  variant={isEditing ? 'filled' : 'outline'}
-                  onClick={() => setEditingSoundId(isEditing ? null : String(sound.id))}
-                >
-                  {isEditing ? 'Done' : 'Edit'}
-                </Button>
-              </Group>
-
-              {isEditing && (
-                <Stack gap="xs" mt="xs">
-                  <Group gap="xs" align="flex-end">
-                    <TextInput
-                      placeholder="Add new context..."
-                      style={{ flex: 1 }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && e.currentTarget.value.trim()) {
-                          const newContext = e.currentTarget.value.trim();
-                          if (!currentContexts.includes(newContext)) {
-                            setContextEdits((prev) => ({
-                              ...prev,
-                              [sound.filename]: [
-                                ...(prev[sound.filename] ?? sound.contexts ?? []),
-                                newContext,
-                              ],
-                            }));
-                            e.currentTarget.value = '';
-                          }
-                        }
-                      }}
-                    />
-                    <Button
-                      size="xs"
-                      onClick={() => {
-                        const input = document.querySelector(
-                          'input[placeholder="Add new context..."]'
-                        ) as HTMLInputElement;
-                        if (
-                          input &&
-                          input.value.trim() &&
-                          !currentContexts.includes(input.value.trim())
-                        ) {
-                          const newContext = input.value.trim();
-                          setContextEdits((prev) => ({
-                            ...prev,
-                            [sound.filename]: [
-                              ...(prev[sound.filename] ?? sound.contexts ?? []),
-                              newContext,
-                            ],
-                          }));
-                          input.value = '';
-                        }
-                      }}
-                    >
-                      Add
-                    </Button>
-                  </Group>
-
-                  {/* CustomCombobox for choosing existing contexts (like main page) */}
-                  <CustomCombobox
-                    value=""
-                    onChange={(value) => {
-                      if (value && !currentContexts.includes(value)) {
-                        setContextEdits((prev) => ({
-                          ...prev,
-                          [sound.filename]: [
-                            ...(prev[sound.filename] ?? sound.contexts ?? []),
-                            value,
-                          ],
-                        }));
-                      }
-                    }}
-                    data={availableContexts}
-                    placeholder="Add existing context"
-                    width={200}
-                  />
-
-                  {/* Display selected contexts as badges */}
-                  {currentContexts.length > 0 && (
-                    <Group gap="xs" mt="xs">
-                      {currentContexts.map((ctx) => (
-                        <Badge
-                          key={ctx}
-                          variant="light"
-                          size="sm"
-                          c="blue"
-                          rightSection={
-                            <ActionIcon
-                              size="xs"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRemoveContext(sound.filename, ctx);
-                              }}
-                            >
-                              <IconX size={12} />
-                            </ActionIcon>
-                          }
-                        >
-                          {ctx}
-                        </Badge>
-                      ))}
-                    </Group>
-                  )}
-                </Stack>
-              )}
-            </Stack>
-          );
-        })}
+        {filteredSounds.map((sound) => renderSoundItem(sound))}
       </div>
+    );
+  };
+
+  const renderSoundItem = (sound: SoundEdit) => {
+    const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
+    const currentContexts = contextEdits[sound.filename] ?? sound.contexts ?? [];
+    const isEditing = editingSoundId === sound.id;
+
+    return (
+      <Stack
+        key={sound.filename}
+        gap="sm"
+        style={{
+          border: '1px solid var(--mantine-color-dark-4)',
+          padding: '0.5rem',
+          borderRadius: 'var(--mantine-radius-sm)',
+        }}
+      >
+        <Group justify="space-between" wrap="nowrap">
+          <Switch
+            label={sound.name}
+            checked={enabled}
+            onChange={(e) => handleToggle(sound.filename, e.currentTarget.checked)}
+            size="sm"
+            style={{ flex: 1 }}
+          />
+          <Button
+            size="xs"
+            variant={isEditing ? 'filled' : 'outline'}
+            onClick={() => setEditingSoundId(isEditing ? null : String(sound.id))}
+          >
+            {isEditing ? 'Done' : 'Edit'}
+          </Button>
+        </Group>
+
+        {isEditing && renderSoundEditSection(sound, currentContexts)}
+      </Stack>
+    );
+  };
+
+  const renderSoundEditSection = (sound: SoundEdit, currentContexts: string[]) => {
+    return (
+      <Stack gap="xs" mt="xs">
+        <Group gap="xs" align="flex-end">
+          <TextInput
+            placeholder="Add new context..."
+            style={{ flex: 1 }}
+            onKeyDown={(e) => handleNewContextKeyDown(e, sound.filename, currentContexts)}
+          />
+          <Button
+            size="xs"
+            onClick={() => handleAddContextButtonClick(sound.filename, currentContexts)}
+          >
+            Add
+          </Button>
+        </Group>
+
+        {/* CustomCombobox for choosing existing contexts (like main page) */}
+        <CustomCombobox
+          value=""
+          onChange={(value) => handleExistingContextChange(value, sound.filename, currentContexts)}
+          data={availableContexts}
+          placeholder="Add existing context"
+          width={200}
+        />
+
+        {/* Display selected contexts as badges */}
+        {currentContexts.length > 0 && renderContextBadges(sound.filename, currentContexts)}
+      </Stack>
+    );
+  };
+
+  const handleNewContextKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    soundFilename: string,
+    currentContexts: string[]
+  ) => {
+    if (e.key === 'Enter' && e.currentTarget.value?.trim()) {
+      const newContext = e.currentTarget.value.trim();
+      if (!currentContexts.includes(newContext)) {
+        setContextEdits((prev) => ({
+          ...prev,
+          [soundFilename]: [
+            ...(prev[soundFilename] ?? []),
+            newContext,
+          ],
+        }));
+        e.currentTarget.value = '';
+      }
+    }
+  };
+
+  const handleAddContextButtonClick = (soundFilename: string, currentContexts: string[]) => {
+    const input = document.querySelector(
+      'input[placeholder="Add new context..."]'
+    ) as HTMLInputElement;
+    if (
+      input?.value?.trim() &&
+      !currentContexts.includes(input.value.trim())
+    ) {
+      const newContext = input.value.trim();
+      setContextEdits((prev) => ({
+        ...prev,
+        [soundFilename]: [
+          ...(prev[soundFilename] ?? []),
+          newContext,
+        ],
+      }));
+      input.value = '';
+    }
+  };
+
+  const handleExistingContextChange = (
+    value: string,
+    soundFilename: string,
+    currentContexts: string[]
+  ) => {
+    if (value?.trim() && !currentContexts.includes(value)) {
+      setContextEdits((prev) => ({
+        ...prev,
+        [soundFilename]: [
+          ...(prev[soundFilename] ?? []),
+          value,
+        ],
+      }));
+    }
+  };
+
+  const renderContextBadges = (soundFilename: string, currentContexts: string[]) => {
+    return (
+      <Group gap="xs" mt="xs">
+        {currentContexts.map((ctx) => (
+          <Badge
+            key={ctx}
+            variant="light"
+            size="sm"
+            c="blue"
+            rightSection={
+              <ActionIcon
+                size="xs"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveContext(soundFilename, ctx);
+                }}
+              >
+                <IconX size={12} />
+              </ActionIcon>
+            }
+          >
+            {ctx}
+          </Badge>
+        ))}
+      </Group>
     );
   };
 
@@ -589,7 +635,7 @@ export function EditSoundsModal({
                         placeholder="Add new context..."
                         style={{ flex: 1 }}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                          if (e.key === 'Enter' && e.currentTarget.value?.trim()) {
                             const newContext = e.currentTarget.value.trim();
                             if (!currentContexts.includes(newContext)) {
                               setContextEdits((prev) => ({
@@ -611,9 +657,8 @@ export function EditSoundsModal({
                             'input[placeholder="Add new context..."]'
                           ) as HTMLInputElement;
                           if (
-                            input &&
-                              input.value.trim() &&
-                              !currentContexts.includes(input.value.trim())
+                            input?.value?.trim() &&
+                            !currentContexts.includes(input.value.trim())
                           ) {
                             const newContext = input.value.trim();
                             setContextEdits((prev) => ({
@@ -635,7 +680,7 @@ export function EditSoundsModal({
                     <CustomCombobox
                       value=""
                       onChange={(value) => {
-                        if (value && !currentContexts.includes(value)) {
+                        if (value?.trim() && !currentContexts.includes(value)) {
                           setContextEdits((prev) => ({
                             ...prev,
                             [sound.filename]: [
@@ -706,7 +751,7 @@ export function EditSoundsModal({
                   </Button>
                 </Group>
 
-                {sound.credit && (
+                {sound.credit?.trim() && (
                   <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
                     {sound.credit}
                   </Text>

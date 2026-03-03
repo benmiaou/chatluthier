@@ -339,36 +339,8 @@ export function ServerEditSoundsModal({
     setSaving(true);
     try {
       const soundsType = SOUNDS_TYPE[selectedCategory];
-
-      // Admin: send full updated sounds array to /update-main-playlist
-      const updated = sounds.map((s) => {
-        // Handle background music tuple format
-        let finalContexts = contextEdits[s.filename] ?? s.contexts ?? [];
-
-        if (selectedCategory === 'background' && backgroundIntensity[s.filename]) {
-          // Format as tuple: (intensity, context)
-          const intensity = backgroundIntensity[s.filename] || BACKGROUND_INTENSITY_OPTIONS[0];
-          const context = backgroundContext[s.filename] || '';
-          finalContexts = [formatBackgroundContext(intensity, context)];
-        }
-
-        return {
-          ...s,
-          display_name: s.display_name || s.name || s.filename, // Ensure display_name is always set
-          isEnabled: edits[s.filename] ?? s.isEnabled ?? true,
-          contexts: finalContexts,
-          credit: creditEdits[s.filename] ?? s.credit ?? '',
-          // Note: Image uploads would need separate handling via FormData
-          ...(imageFileEdits[s.filename] && { imageFile: imageFileEdits[s.filename] }),
-        };
-      });
-
-      const response = await fetch('/update-main-playlist', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ soundsType, sounds: updated }),
-      });
+      const updatedSounds = prepareUpdatedSounds();
+      const response = await sendUpdatedSoundsToServer(soundsType, updatedSounds);
 
       if (!response?.ok) {
         throw new Error('Failed to update main playlist');
@@ -384,6 +356,41 @@ export function ServerEditSoundsModal({
     } finally {
       setSaving(false);
     }
+  };
+
+  const prepareUpdatedSounds = (): Array<SoundEdit> => {
+    return sounds.map((s) => {
+      const finalContexts = getFinalContextsForSound(s);
+      return {
+        ...s,
+        display_name: s.display_name || s.name || s.filename,
+        isEnabled: edits[s.filename] ?? s.isEnabled ?? true,
+        contexts: finalContexts,
+        credit: creditEdits[s.filename] ?? s.credit ?? '',
+        ...(imageFileEdits[s.filename] && { imageFile: imageFileEdits[s.filename] }),
+      };
+    });
+  };
+
+  const getFinalContextsForSound = (sound: SoundEdit): string[] => {
+    let finalContexts = contextEdits[sound.filename] ?? sound.contexts ?? [];
+
+    if (selectedCategory === 'background' && backgroundIntensity[sound.filename]) {
+      const intensity = backgroundIntensity[sound.filename] || BACKGROUND_INTENSITY_OPTIONS[0];
+      const context = backgroundContext[sound.filename] || '';
+      finalContexts = [formatBackgroundContext(intensity, context)];
+    }
+
+    return finalContexts;
+  };
+
+  const sendUpdatedSoundsToServer = async (soundsType: string, updatedSounds: Array<SoundEdit>) => {
+    return await fetch('/update-main-playlist', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ soundsType, sounds: updatedSounds }),
+    });
   };
 
   // Extract nested function to reduce nesting depth
@@ -406,6 +413,10 @@ export function ServerEditSoundsModal({
     if (filteredSounds.length === 0) {
       return <Text c="dimmed">No sounds found matching your search.</Text>;
     }
+    return renderSoundsGrid();
+  };
+
+  const renderSoundsGrid = () => {
     return (
       <div
         style={{
@@ -522,7 +533,7 @@ export function ServerEditSoundsModal({
                           placeholder="Add new context..."
                           style={{ flex: 1 }}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                            if (e.key === 'Enter' && e.currentTarget.value?.trim()) {
                               const newContext = e.currentTarget.value.trim();
                               if (!currentContexts.includes(newContext)) {
                                 setContextEdits((prev) => ({
@@ -544,8 +555,7 @@ export function ServerEditSoundsModal({
                               'input[placeholder="Add new context..."]'
                             ) as HTMLInputElement;
                             if (
-                              input &&
-                              input.value.trim() &&
+                              input?.value?.trim() &&
                               !currentContexts.includes(input.value.trim())
                             ) {
                               const newContext = input.value.trim();
@@ -568,7 +578,7 @@ export function ServerEditSoundsModal({
                       <CustomCombobox
                         value=""
                         onChange={(value) => {
-                          if (value && !currentContexts.includes(value)) {
+                          if (value?.trim() && !currentContexts.includes(value)) {
                             setContextEdits((prev) => ({
                               ...prev,
                               [sound.filename]: [
@@ -806,7 +816,7 @@ export function ServerEditSoundsModal({
                             placeholder="Add new context..."
                             style={{ flex: 1 }}
                             onKeyDown={(e) => {
-                              if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                              if (e.key === 'Enter' && e.currentTarget.value?.trim()) {
                                 const newContext = e.currentTarget.value.trim();
                                 if (!currentContexts.includes(newContext)) {
                                   setContextEdits((prev) => ({
@@ -828,8 +838,7 @@ export function ServerEditSoundsModal({
                                 'input[placeholder="Add new context..."]'
                               ) as HTMLInputElement;
                               if (
-                                input &&
-                                  input.value.trim() &&
+                                input?.value?.trim() &&
                                   !currentContexts.includes(input.value.trim())
                               ) {
                                 const newContext = input.value.trim();
@@ -852,7 +861,7 @@ export function ServerEditSoundsModal({
                         <CustomCombobox
                           value=""
                           onChange={(value) => {
-                            if (value && !currentContexts.includes(value)) {
+                            if (value?.trim() && !currentContexts.includes(value)) {
                               setContextEdits((prev) => ({
                                 ...prev,
                                 [sound.filename]: [
@@ -969,7 +978,7 @@ export function ServerEditSoundsModal({
                   </Group>
                 )}
 
-                {sound.credit && (
+                {sound.credit?.trim() && (
                   <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
                     {sound.credit}
                   </Text>
