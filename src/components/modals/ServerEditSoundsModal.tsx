@@ -15,7 +15,6 @@ import {
 import { CustomCombobox } from '../audio/CustomCombobox';
 import { useEffect, useState } from 'react';
 import { notifications } from '@mantine/notifications';
-import React from 'react';
 import {
   IconPlayerPlay,
   IconPlayerPause,
@@ -116,9 +115,11 @@ interface ServerEditSoundsModalProps {
 }
 
 interface SoundEdit extends Sound {
+  display_name?: string;
   contextEdits?: string[];
   creditEdits?: string;
   imageFileEdits?: File | string;
+  imageFile?: string;
 }
 
 const ContextBadge = ({
@@ -149,7 +150,7 @@ export function ServerEditSoundsModal({
   opened,
   onClose,
   onAddSound,
-}: ServerEditSoundsModalProps): React.JSX.Element {
+}: Readonly<ServerEditSoundsModalProps>): React.JSX.Element {
   const [sounds, setSounds] = useState<SoundEdit[]>([]);
   const [edits, setEdits] = useState<Record<string, boolean>>({});
   const [contextEdits, setContextEdits] = useState<Record<string, string[]>>({});
@@ -180,9 +181,7 @@ export function ServerEditSoundsModal({
 
   // For server editing, use only predefined contexts (no user-created contexts)
   // Ensure all contexts are strings to prevent MultiSelect errors
-  const availableContexts = (CONTEXT_OPTIONS[selectedCategory] || []).map((context) =>
-    String(context)
-  );
+  const availableContexts = (CONTEXT_OPTIONS[selectedCategory] || []).map(String);
 
   // Helper function to parse background context tuple
   const parseBackgroundContext = (context: string): { intensity: string; context: string } => {
@@ -238,15 +237,16 @@ export function ServerEditSoundsModal({
 
     const processLoadedSounds = (data: unknown[], _safeCategory: SoundCategory) => {
       // Map backend data format to frontend expected format
-      const mappedSounds = data.map((sound: unknown) => ({
+      const mappedSounds = data.map((sound: any) => ({
         id: String(sound.id || sound.filename),
         name: sound.display_name || sound.name || sound.filename,
         filename: sound.filename,
+        category: _safeCategory,
         imageFile: sound.imageFile || sound.image_file,
         // For server editing, show only main playlist contexts (no user custom contexts)
         contexts: Array.isArray(sound.contexts) ? sound.contexts : [],
         credit: sound.credit || '',
-        isEnabled: sound.isEnabled !== undefined ? sound.isEnabled : true,
+        isEnabled: sound.isEnabled ?? true,
       }));
 
       // Extract current images for ambiance sounds
@@ -254,7 +254,7 @@ export function ServerEditSoundsModal({
       const initialBackgroundIntensity: Record<string, string> = {};
       const initialBackgroundContext: Record<string, string> = {};
 
-      data.forEach((sound) => {
+      data.forEach((sound: any) => {
         if (sound.imageFile || sound.image_file) {
           images[sound.filename] = sound.imageFile || sound.image_file;
         }
@@ -306,7 +306,7 @@ export function ServerEditSoundsModal({
 
       if (currentlyPlaying === filename && isPlaying) {
         // Currently playing this sound, pause it
-        player.pause();
+        player.current?.pause();
         setIsPlaying(false);
       } else {
         // Play this sound
@@ -367,7 +367,8 @@ export function ServerEditSoundsModal({
         isEnabled: edits[s.filename] ?? s.isEnabled ?? true,
         contexts: finalContexts,
         credit: creditEdits[s.filename] ?? s.credit ?? '',
-        ...(imageFileEdits[s.filename] && { imageFile: imageFileEdits[s.filename] }),
+        ...(imageFileEdits[s.filename] && typeof imageFileEdits[s.filename] === 'string' && { imageFile: imageFileEdits[s.filename] }),
+        imageFile: undefined,
       };
     });
   };
@@ -416,6 +417,256 @@ export function ServerEditSoundsModal({
     return renderSoundsGrid();
   };
 
+  // Extract nested functions to reduce nesting depth
+  const handleNewContextKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    soundFilename: string,
+    currentContexts: string[]
+  ) => {
+    if (e.key === 'Enter' && e.currentTarget.value?.trim()) {
+      const newContext = e.currentTarget.value.trim();
+      if (!currentContexts.includes(newContext)) {
+        setContextEdits((prev) => ({
+          ...prev,
+          [soundFilename]: [
+            ...(prev[soundFilename] ?? []),
+            newContext,
+          ],
+        }));
+        e.currentTarget.value = '';
+      }
+    }
+  };
+
+  const handleAddContextButtonClick = (soundFilename: string, currentContexts: string[]) => {
+    const input = document.querySelector(
+      'input[placeholder="Add new context..."]'
+    ) as HTMLInputElement;
+    if (
+      input?.value?.trim() &&
+      !currentContexts.includes(input.value.trim())
+    ) {
+      const newContext = input.value.trim();
+      setContextEdits((prev) => ({
+        ...prev,
+        [soundFilename]: [
+          ...(prev[soundFilename] ?? []),
+          newContext,
+        ],
+      }));
+      input.value = '';
+    }
+  };
+
+  const handleExistingContextChange = (value: string, soundFilename: string, currentContexts: string[]) => {
+    if (value?.trim() && !currentContexts.includes(value)) {
+      setContextEdits((prev) => ({
+        ...prev,
+        [soundFilename]: [
+          ...(prev[soundFilename] ?? []),
+          value,
+        ],
+      }));
+    }
+  };
+
+  const renderContextBadges = (soundFilename: string, currentContexts: string[]) => {
+    return (
+      <Group gap="xs" mt="xs">
+        {currentContexts.map((ctx) => {
+          const badgeKey = `${soundFilename}-${ctx}`;
+          return (
+            <Badge
+              key={badgeKey}
+              variant="light"
+              size="sm"
+              c="blue"
+              rightSection={
+                <ActionIcon
+                  size="xs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveContext(soundFilename, ctx);
+                  }}
+                >
+                  <IconX size={12} />
+                </ActionIcon>
+              }
+            >
+              {ctx}
+            </Badge>
+          );
+        })}
+      </Group>
+    );
+  };
+
+  const renderSoundEditSection = (sound: SoundEdit, currentContexts: string[], currentCredit: string) => {
+    return (
+      <Stack gap="xs" mt="xs">
+        {/* Background Music: Simple ComboBox + context */}
+        {selectedCategory === 'background' ? (
+          <>
+            <Text size="xs" c="dimmed" mb="xs">
+              Background Music Settings
+            </Text>
+            <Group gap="xs" align="flex-end" wrap="nowrap">
+              <Stack gap="xs" style={{ flex: 1 }}>
+                <Text size="xs" c="dimmed">
+                  Intensity
+                </Text>
+                <CustomCombobox
+                  value={
+                    backgroundIntensity[sound.filename] ||
+                    BACKGROUND_INTENSITY_OPTIONS[0]
+                  }
+                  onChange={(value) => {
+                    setBackgroundIntensity((prev) => ({
+                      ...prev,
+                      [sound.filename]: value || '',
+                    }));
+                  }}
+                  data={BACKGROUND_INTENSITY_OPTIONS}
+                  placeholder="Select intensity"
+                  width={150}
+                />
+              </Stack>
+
+              <Stack gap="xs" style={{ flex: 2 }}>
+                <Text size="xs" c="dimmed">
+                  Context
+                </Text>
+                <TextInput
+                  placeholder="additional context (optional)"
+                  value={backgroundContext[sound.filename] || ''}
+                  onChange={(e) => {
+                    setBackgroundContext((prev) => ({
+                      ...prev,
+                      [sound.filename]: e.currentTarget.value,
+                    }));
+                  }}
+                  style={{ flex: 1 }}
+                />
+              </Stack>
+            </Group>
+          </>
+        ) : (
+          <>
+            {/* Context Editing (for ambiance and soundboard) - Simplified with Combobox */}
+            <Group gap="xs" align="flex-end">
+              <TextInput
+                placeholder="Add new context..."
+                style={{ flex: 1 }}
+                onKeyDown={(e) => handleNewContextKeyDown(e, sound.filename, currentContexts)}
+              />
+              <Button
+                size="xs"
+                onClick={() => handleAddContextButtonClick(sound.filename, currentContexts)}
+              >
+                Add
+              </Button>
+            </Group>
+
+            {/* CustomCombobox for choosing existing contexts (like main page) */}
+            <CustomCombobox
+              value=""
+              onChange={(value) => handleExistingContextChange(value, sound.filename, currentContexts)}
+              data={availableContexts}
+              placeholder="Add existing context"
+              width={200}
+            />
+
+            {/* Display selected contexts as badges */}
+            {currentContexts.length > 0 && renderContextBadges(sound.filename, currentContexts)}
+          </>
+        )}
+
+        {/* Credit editing */}
+        <TextInput
+          placeholder="Credit (optional)"
+          value={currentCredit}
+          onChange={(e) => {
+            setCreditEdits((prev) => ({
+              ...prev,
+              [sound.filename]: e.currentTarget.value,
+            }));
+          }}
+          mt="xs"
+        />
+
+        {/* Image upload for ambiance sounds */}
+        {selectedCategory === 'ambiance' && (
+          <FileInput
+            label="Upload image"
+            placeholder="Select image file"
+            accept="image/*"
+            onChange={(file) => {
+              if (file) {
+                setImageFileEdits((prev) => ({
+                  ...prev,
+                  [sound.filename]: file,
+                }));
+              }
+            }}
+            mt="xs"
+          />
+        )}
+      </Stack>
+    );
+  };
+
+  const renderSoundItem = (sound: SoundEdit) => {
+    const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
+    // Ensure all contexts are strings to prevent MultiSelect errors
+    const currentContexts = (contextEdits[sound.filename] ?? sound.contexts ?? []).map(String);
+    const currentCredit = creditEdits[sound.filename] ?? sound.credit ?? '';
+    const isEditing = editingSoundId === sound.id;
+
+    return (
+      <Stack
+        key={sound.filename}
+        gap="sm"
+        style={{
+          border: '1px solid var(--mantine-color-dark-4)',
+          padding: '0.5rem',
+          borderRadius: 'var(--mantine-radius-sm)',
+        }}
+      >
+        <Group justify="space-between" wrap="nowrap">
+          <Switch
+            label={sound.name}
+            checked={enabled}
+            onChange={(e) => handleToggle(sound.filename, e.currentTarget.checked)}
+            size="sm"
+            style={{ flex: 1 }}
+          />
+          <Button
+            size="xs"
+            variant={isEditing ? 'filled' : 'outline'}
+            onClick={() => setEditingSoundId(isEditing ? null : String(sound.id))}
+          >
+            {isEditing ? 'Done' : 'Edit'}
+          </Button>
+        </Group>
+
+        {/* Always display current contexts */}
+        {(currentContexts.length > 0 ||
+          (selectedCategory === 'background' && backgroundContext[sound.filename])) && (
+          <Group gap="xs" wrap="nowrap" align="center" mt="xs">
+            <Text size="xs" c="dimmed">
+              Contexts:
+            </Text>
+            {currentContexts.map((ctx) => (
+              <ContextBadge key={ctx} ctx={ctx} selectedCategory={selectedCategory} />
+            ))}
+          </Group>
+        )}
+
+        {isEditing && renderSoundEditSection(sound, currentContexts, currentCredit)}
+      </Stack>
+    );
+  };
+
   const renderSoundsGrid = () => {
     return (
       <div
@@ -428,235 +679,7 @@ export function ServerEditSoundsModal({
           paddingRight: '0.5rem',
         }}
       >
-        {filteredSounds.map((sound) => {
-          const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
-          // Ensure all contexts are strings to prevent MultiSelect errors
-          const currentContexts = (contextEdits[sound.filename] ?? sound.contexts ?? []).map(
-            (c) => String(c)
-          );
-          const currentCredit = creditEdits[sound.filename] ?? sound.credit ?? '';
-          const isEditing = editingSoundId === sound.id;
-
-          return (
-            <Stack
-              key={sound.filename}
-              gap="sm"
-              style={{
-                border: '1px solid var(--mantine-color-dark-4)',
-                padding: '0.5rem',
-                borderRadius: 'var(--mantine-radius-sm)',
-              }}
-            >
-              <Group justify="space-between" wrap="nowrap">
-                <Switch
-                  label={sound.name}
-                  checked={enabled}
-                  onChange={(e) => handleToggle(sound.filename, e.currentTarget.checked)}
-                  size="sm"
-                  style={{ flex: 1 }}
-                />
-                <Button
-                  size="xs"
-                  variant={isEditing ? 'filled' : 'outline'}
-                  onClick={() => setEditingSoundId(isEditing ? null : String(sound.id))}
-                >
-                  {isEditing ? 'Done' : 'Edit'}
-                </Button>
-              </Group>
-
-              {/* Always display current contexts */}
-              {(currentContexts.length > 0 ||
-                (selectedCategory === 'background' && backgroundContext[sound.filename])) && (
-                <Group gap="xs" wrap="nowrap" align="center" mt="xs">
-                  <Text size="xs" c="dimmed">
-                    Contexts:
-                  </Text>
-                  {currentContexts.map((ctx) => (
-                    <ContextBadge key={ctx} ctx={ctx} selectedCategory={selectedCategory} />
-                  ))}
-                </Group>
-              )}
-
-              {isEditing && (
-                <Stack gap="xs" mt="xs">
-                  {/* Background Music: Simple ComboBox + context */}
-                  {selectedCategory === 'background' ? (
-                    <>
-                      <Text size="xs" c="dimmed" mb="xs">
-                        Background Music Settings
-                      </Text>
-                      <Group gap="xs" align="flex-end" wrap="nowrap">
-                        <Stack gap="xs" style={{ flex: 1 }}>
-                          <Text size="xs" c="dimmed">
-                            Intensity
-                          </Text>
-                          <CustomCombobox
-                            value={
-                              backgroundIntensity[sound.filename] ||
-                              BACKGROUND_INTENSITY_OPTIONS[0]
-                            }
-                            onChange={(value) => {
-                              setBackgroundIntensity((prev) => ({
-                                ...prev,
-                                [sound.filename]: value || '',
-                              }));
-                            }}
-                            data={BACKGROUND_INTENSITY_OPTIONS}
-                            placeholder="Select intensity"
-                            width={150}
-                          />
-                        </Stack>
-
-                        <Stack gap="xs" style={{ flex: 2 }}>
-                          <Text size="xs" c="dimmed">
-                            Context
-                          </Text>
-                          <TextInput
-                            placeholder="additional context (optional)"
-                            value={backgroundContext[sound.filename] || ''}
-                            onChange={(e) => {
-                              setBackgroundContext((prev) => ({
-                                ...prev,
-                                [sound.filename]: e.currentTarget.value,
-                              }));
-                            }}
-                            style={{ flex: 1 }}
-                          />
-                        </Stack>
-                      </Group>
-                    </>
-                  ) : (
-                    <>
-                      {/* Context Editing (for ambiance and soundboard) - Simplified with Combobox */}
-                      <Group gap="xs" align="flex-end">
-                        <TextInput
-                          placeholder="Add new context..."
-                          style={{ flex: 1 }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && e.currentTarget.value?.trim()) {
-                              const newContext = e.currentTarget.value.trim();
-                              if (!currentContexts.includes(newContext)) {
-                                setContextEdits((prev) => ({
-                                  ...prev,
-                                  [sound.filename]: [
-                                    ...(prev[sound.filename] ?? []),
-                                    newContext,
-                                  ],
-                                }));
-                                e.currentTarget.value = '';
-                              }
-                            }
-                          }}
-                        />
-                        <Button
-                          size="xs"
-                          onClick={() => {
-                            const input = document.querySelector(
-                              'input[placeholder="Add new context..."]'
-                            ) as HTMLInputElement;
-                            if (
-                              input?.value?.trim() &&
-                              !currentContexts.includes(input.value.trim())
-                            ) {
-                              const newContext = input.value.trim();
-                              setContextEdits((prev) => ({
-                                ...prev,
-                                [sound.filename]: [
-                                  ...(prev[sound.filename] ?? []),
-                                  newContext,
-                                ],
-                              }));
-                              input.value = '';
-                            }
-                          }}
-                        >
-                          Add
-                        </Button>
-                      </Group>
-
-                      {/* CustomCombobox for choosing existing contexts (like main page) */}
-                      <CustomCombobox
-                        value=""
-                        onChange={(value) => {
-                          if (value?.trim() && !currentContexts.includes(value)) {
-                            setContextEdits((prev) => ({
-                              ...prev,
-                              [sound.filename]: [
-                                ...(prev[sound.filename] ?? []),
-                                value,
-                              ],
-                            }));
-                          }
-                        }}
-                        data={availableContexts}
-                        placeholder="Add existing context"
-                        width={200}
-                      />
-
-                      {/* Display selected contexts as badges */}
-                      {currentContexts.length > 0 && (
-                        <Group gap="xs" mt="xs">
-                          {currentContexts.map((ctx) => (
-                            <Badge
-                              key={ctx}
-                              variant="light"
-                              size="sm"
-                              c="blue"
-                              rightSection={
-                                <ActionIcon
-                                  size="xs"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleRemoveContext(sound.filename, ctx);
-                                  }}
-                                >
-                                  <IconX size={12} />
-                                </ActionIcon>
-                              }
-                            >
-                              {ctx}
-                            </Badge>
-                          ))}
-                        </Group>
-                      )}
-                    </>
-                  )}
-
-                  {/* Credit editing */}
-                  <TextInput
-                    placeholder="Credit (optional)"
-                    value={currentCredit}
-                    onChange={(e) => {
-                      setCreditEdits((prev) => ({
-                        ...prev,
-                        [sound.filename]: e.currentTarget.value,
-                      }));
-                    }}
-                    mt="xs"
-                  />
-
-                  {/* Image upload for ambiance sounds */}
-                  {selectedCategory === 'ambiance' && (
-                    <FileInput
-                      label="Upload image"
-                      placeholder="Select image file"
-                      accept="image/*"
-                      onChange={(file) => {
-                        if (file) {
-                          setImageFileEdits((prev) => ({
-                            ...prev,
-                            [sound.filename]: file,
-                          }));
-                        }
-                      }}
-                      mt="xs"
-                    />
-                  )}
-                </Stack>
-              )}
-            </Stack>
-          );
-        })}
+        {filteredSounds.map((sound) => renderSoundItem(sound))}
       </div>
     );
   };
@@ -714,9 +737,7 @@ export function ServerEditSoundsModal({
           {filteredSounds.map((sound) => {
             const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
             // Ensure all contexts are strings to prevent MultiSelect errors
-            const currentContexts = (contextEdits[sound.filename] ?? sound.contexts ?? []).map(
-              (c) => String(c)
-            );
+            const currentContexts = (contextEdits[sound.filename] ?? sound.contexts ?? []).map(String);
             const currentCredit = creditEdits[sound.filename] ?? sound.credit ?? '';
             const isEditing = editingSoundId === sound.id;
 
@@ -925,7 +946,9 @@ export function ServerEditSoundsModal({
                         placeholder="Upload background image"
                         accept="image/*"
                         onChange={(file) => {
-                          setImageFileEdits((prev) => ({ ...prev, [sound.filename]: file }));
+                          if (file) {
+                            setImageFileEdits((prev) => ({ ...prev, [sound.filename]: file }));
+                          }
                         }}
                       />
                     )}

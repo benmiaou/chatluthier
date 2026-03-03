@@ -16,8 +16,8 @@ interface SoundRequest {
 }
 
 interface ReviewRequestsModalProps {
-  opened: boolean;
-  onClose: () => void;
+  readonly opened: boolean;
+  readonly onClose: () => void;
 }
 
 export function ReviewRequestsModal({
@@ -37,7 +37,8 @@ export function ReviewRequestsModal({
       const data = await response.json();
       setRequests(Array.isArray(data) ? data : []);
     } catch (error: unknown) {
-      notifications.show({ message: `Failed to load requests: ${error.message}`, color: 'red' });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      notifications.show({ message: `Failed to load requests: ${errorMessage}`, color: 'red' });
       setRequests([]);
     } finally {
       setLoading(false);

@@ -13,7 +13,6 @@ import {
 import { CustomCombobox } from '../audio/CustomCombobox';
 import { useEffect, useState, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
-import React from 'react';
 import {
   IconPlayerPlay,
   IconPlayerPause,
@@ -129,7 +128,7 @@ export function EditSoundsModal({
   category,
   userId,
   onSave,
-}: EditSoundsModalProps): React.JSX.Element {
+}: Readonly<EditSoundsModalProps>): React.JSX.Element {
   const [sounds, setSounds] = useState<SoundEdit[]>([]);
   const [edits, setEdits] = useState<Record<string, boolean>>({});
   const [contextEdits, setContextEdits] = useState<Record<string, string[]>>({});
@@ -204,14 +203,15 @@ export function EditSoundsModal({
       })
       .then((data: unknown[]) => {
         // Map backend data format to frontend expected format
-        const mappedSounds = data.map((sound: unknown) => ({
+        const mappedSounds = data.map((sound: any) => ({
           id: String(sound.id || sound.filename),
           name: sound.display_name || sound.name || sound.filename,
           filename: sound.filename,
+          category: selectedCategory,
           imageFile: sound.imageFile || sound.image_file,
           contexts: Array.isArray(sound.contexts) ? sound.contexts : [],
           credit: sound.credit || '',
-          isEnabled: sound.isEnabled !== undefined ? sound.isEnabled : true,
+          isEnabled: sound.isEnabled ?? true,
         }));
         setSounds(mappedSounds);
       })
@@ -248,7 +248,7 @@ export function EditSoundsModal({
 
       if (currentlyPlaying === filename && isPlaying) {
         // Currently playing this sound, pause it
-        player.pause();
+        player.current?.pause();
         setIsPlaying(false);
       } else {
         // Play this sound
@@ -396,75 +396,7 @@ export function EditSoundsModal({
     );
   };
 
-  const renderSoundItem = (sound: SoundEdit) => {
-    const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
-    const currentContexts = contextEdits[sound.filename] ?? sound.contexts ?? [];
-    const isEditing = editingSoundId === sound.id;
-
-    return (
-      <Stack
-        key={sound.filename}
-        gap="sm"
-        style={{
-          border: '1px solid var(--mantine-color-dark-4)',
-          padding: '0.5rem',
-          borderRadius: 'var(--mantine-radius-sm)',
-        }}
-      >
-        <Group justify="space-between" wrap="nowrap">
-          <Switch
-            label={sound.name}
-            checked={enabled}
-            onChange={(e) => handleToggle(sound.filename, e.currentTarget.checked)}
-            size="sm"
-            style={{ flex: 1 }}
-          />
-          <Button
-            size="xs"
-            variant={isEditing ? 'filled' : 'outline'}
-            onClick={() => setEditingSoundId(isEditing ? null : String(sound.id))}
-          >
-            {isEditing ? 'Done' : 'Edit'}
-          </Button>
-        </Group>
-
-        {isEditing && renderSoundEditSection(sound, currentContexts)}
-      </Stack>
-    );
-  };
-
-  const renderSoundEditSection = (sound: SoundEdit, currentContexts: string[]) => {
-    return (
-      <Stack gap="xs" mt="xs">
-        <Group gap="xs" align="flex-end">
-          <TextInput
-            placeholder="Add new context..."
-            style={{ flex: 1 }}
-            onKeyDown={(e) => handleNewContextKeyDown(e, sound.filename, currentContexts)}
-          />
-          <Button
-            size="xs"
-            onClick={() => handleAddContextButtonClick(sound.filename, currentContexts)}
-          >
-            Add
-          </Button>
-        </Group>
-
-        {/* CustomCombobox for choosing existing contexts (like main page) */}
-        <CustomCombobox
-          value=""
-          onChange={(value) => handleExistingContextChange(value, sound.filename, currentContexts)}
-          data={availableContexts}
-          placeholder="Add existing context"
-          width={200}
-        />
-
-        {/* Display selected contexts as badges */}
-        {currentContexts.length > 0 && renderContextBadges(sound.filename, currentContexts)}
-      </Stack>
-    );
-  };
-
+  // Extract nested functions to reduce nesting depth
   const handleNewContextKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
     soundFilename: string,
@@ -546,6 +478,75 @@ export function EditSoundsModal({
           </Badge>
         ))}
       </Group>
+    );
+  };
+
+  const renderSoundEditSection = (sound: SoundEdit, currentContexts: string[]) => {
+    return (
+      <Stack gap="xs" mt="xs">
+        <Group gap="xs" align="flex-end">
+          <TextInput
+            placeholder="Add new context..."
+            style={{ flex: 1 }}
+            onKeyDown={(e) => handleNewContextKeyDown(e, sound.filename, currentContexts)}
+          />
+          <Button
+            size="xs"
+            onClick={() => handleAddContextButtonClick(sound.filename, currentContexts)}
+          >
+            Add
+          </Button>
+        </Group>
+
+        {/* CustomCombobox for choosing existing contexts (like main page) */}
+        <CustomCombobox
+          value=""
+          onChange={(value) => handleExistingContextChange(value, sound.filename, currentContexts)}
+          data={availableContexts}
+          placeholder="Add existing context"
+          width={200}
+        />
+
+        {/* Display selected contexts as badges */}
+        {currentContexts.length > 0 && renderContextBadges(sound.filename, currentContexts)}
+      </Stack>
+    );
+  };
+
+  const renderSoundItem = (sound: SoundEdit) => {
+    const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
+    const currentContexts = contextEdits[sound.filename] ?? sound.contexts ?? [];
+    const isEditing = editingSoundId === sound.id;
+
+    return (
+      <Stack
+        key={sound.filename}
+        gap="sm"
+        style={{
+          border: '1px solid var(--mantine-color-dark-4)',
+          padding: '0.5rem',
+          borderRadius: 'var(--mantine-radius-sm)',
+        }}
+      >
+        <Group justify="space-between" wrap="nowrap">
+          <Switch
+            label={sound.name}
+            checked={enabled}
+            onChange={(e) => handleToggle(sound.filename, e.currentTarget.checked)}
+            size="sm"
+            style={{ flex: 1 }}
+          />
+          <Button
+            size="xs"
+            variant={isEditing ? 'filled' : 'outline'}
+            onClick={() => setEditingSoundId(isEditing ? null : String(sound.id))}
+          >
+            {isEditing ? 'Done' : 'Edit'}
+          </Button>
+        </Group>
+
+        {isEditing && renderSoundEditSection(sound, currentContexts)}
+      </Stack>
     );
   };
 
