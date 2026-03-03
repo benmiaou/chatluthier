@@ -59,7 +59,13 @@ export function SessionManager(): React.JSX.Element {
           <Text
             size="xs"
             c={
-              statusMessage.toLowerCase().includes('error') ? 'red' : sessionId ? 'teal' : 'orange'
+              /* Extract nested ternary to improve readability */
+              (() => {
+                if (statusMessage.toLowerCase().includes('error')) {
+                  return 'red';
+                }
+                return sessionId ? 'teal' : 'orange';
+              })()
             }
           >
             {statusMessage}

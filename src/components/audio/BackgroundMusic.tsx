@@ -90,7 +90,7 @@ export function BackgroundMusic({
   // Listen for incoming socket messages
   useEffect(() => {
     return addMessageHandler((msg: WsMessage) => {
-      if (!msg.content) return;
+      if (!msg.content) {return;}
 
       const messageHandlers: Record<string, (content: unknown) => void> = {
         backgroundMusicChange: (content) => {
@@ -146,16 +146,16 @@ export function BackgroundMusic({
               });
             } else {
               stopReceived();
+            }
           }
         }
-      }
-    };
+      };
 
-    const handler = messageHandlers[msg.type as keyof typeof messageHandlers];
-    if (handler) {
-      handler(msg.content);
-    }
-  });
+      const handler = messageHandlers[msg.type as keyof typeof messageHandlers];
+      if (handler) {
+        handler(msg.content);
+      }
+    });
   }, [
     addMessageHandler,
     playReceived,

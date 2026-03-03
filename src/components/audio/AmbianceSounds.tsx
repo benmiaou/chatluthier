@@ -236,7 +236,7 @@ export function AmbianceSounds({
   }, [applyStatus, showCreditsForActiveSounds]);
 
   const handleAmbianceMessage = useCallback((msg: WsMessage) => {
-    if (!msg.content) return;
+    if (!msg.content) {return;}
 
     const messageHandlers: Record<string, (content: unknown) => void> = {
       ambianceStatusUpdate: (content) => {

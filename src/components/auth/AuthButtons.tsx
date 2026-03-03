@@ -465,15 +465,24 @@ export function AuthButtons(): React.ReactElement {
             required
             error={pseudoAvailable === false ? 'Pseudo already taken' : ''}
             rightSection={
-              pseudoChecking ? (
-                <Text size="xs" c="gray">
-                  Checking...
-                </Text>
-              ) : pseudoAvailable === true ? (
-                <Text size="xs" c="green">
-                  ✓ Available
-                </Text>
-              ) : null
+              /* Extract nested ternary to improve readability */
+              (() => {
+                if (pseudoChecking) {
+                  return (
+                    <Text size="xs" c="gray">
+                      Checking...
+                    </Text>
+                  );
+                }
+                if (pseudoAvailable === true) {
+                  return (
+                    <Text size="xs" c="green">
+                      ✓ Available
+                    </Text>
+                  );
+                }
+                return null;
+              })()
             }
             onKeyDown={(e) => {
               if (e.key === 'Enter') {

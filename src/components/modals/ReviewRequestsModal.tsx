@@ -67,55 +67,60 @@ export function ReviewRequestsModal({
 
   return (
     <Modal opened={opened} onClose={onClose} title="Sound Requests (Admin)" size="lg">
-      {loading ? (
-        <Loader />
-      ) : requests.length === 0 ? (
-        <Text c="dimmed">No pending requests.</Text>
-      ) : (
-        <Stack gap="sm">
-          {requests.map((req) => (
-            <Group
-              key={req.id}
-              justify="space-between"
-              p="xs"
-              style={{ borderRadius: 4, background: 'rgba(255,255,255,0.05)' }}
-            >
-              <Stack gap={2}>
-                <Text fw={600}>{req.file}</Text>
-                <Text size="sm" c="dimmed">
-                  {req.category}
-                </Text>
-                <Text size="xs" c="dimmed">
-                  {new Date(req.created_at).toLocaleString()}
-                </Text>
-                {req.sound_url && (
-                  <Text size="xs" c="blue" style={{ wordBreak: 'break-all' }}>
-                    <Anchor
-                      href={req.sound_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      size="xs"
-                    >
-                      Source URL
-                    </Anchor>
-                  </Text>
-                )}
-                <Text size="xs" c="dimmed">
-                  Status: {req.status}
-                </Text>
-              </Stack>
-              <Button
-                size="xs"
-                color="green"
-                onClick={() => closeRequest(req.id)}
-                disabled={req.status === 'closed'}
+      {/* Extract nested ternary to improve readability */}
+      {(() => {
+        if (loading) {
+          return <Loader />;
+        }
+        if (requests.length === 0) {
+          return <Text c="dimmed">No pending requests.</Text>;
+        }
+        return (
+          <Stack gap="sm">
+            {requests.map((req) => (
+              <Group
+                key={req.id}
+                justify="space-between"
+                p="xs"
+                style={{ borderRadius: 4, background: 'rgba(255,255,255,0.05)' }}
               >
-                Close
-              </Button>
-            </Group>
-          ))}
-        </Stack>
-      )}
+                <Stack gap={2}>
+                  <Text fw={600}>{req.file}</Text>
+                  <Text size="sm" c="dimmed">
+                    {req.category}
+                  </Text>
+                  <Text size="xs" c="dimmed">
+                    {new Date(req.created_at).toLocaleString()}
+                  </Text>
+                  {req.sound_url && (
+                    <Text size="xs" c="blue" style={{ wordBreak: 'break-all' }}>
+                      <Anchor
+                        href={req.sound_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        size="xs"
+                      >
+                        Source URL
+                      </Anchor>
+                    </Text>
+                  )}
+                  <Text size="xs" c="dimmed">
+                    Status: {req.status}
+                  </Text>
+                </Stack>
+                <Button
+                  size="xs"
+                  color="green"
+                  onClick={() => closeRequest(req.id)}
+                  disabled={req.status === 'closed'}
+                >
+                  Close
+                </Button>
+              </Group>
+            ))}
+          </Stack>
+        );
+      })()}
     </Modal>
   );
 }

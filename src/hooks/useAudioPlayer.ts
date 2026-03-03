@@ -11,7 +11,7 @@ interface AudioPlayerHook {
 }
 
 export class AudioPlayer {
-  private audio: HTMLAudioElement;
+  private readonly audio: HTMLAudioElement;
 
   constructor() {
     this.audio = new Audio();

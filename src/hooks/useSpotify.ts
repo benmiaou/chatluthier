@@ -28,7 +28,7 @@ export function useSpotify(): {
   next: () => Promise<void>;
   setVolume: (volume: number) => Promise<void>;
   fetchPlaylists: () => Promise<void>;
-} {
+  } {
   const [token, setToken] = useState<SpotifyToken | null>(loadToken);
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     const t = loadToken();

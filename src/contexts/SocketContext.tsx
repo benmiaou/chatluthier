@@ -163,17 +163,17 @@ export function SocketProvider({
 
       // Route message to appropriate handler
       switch (data.type) {
-        case 'subscribed':
-          handleSubscribedMessage(data);
-          break;
-        case 'participantJoined':
-          handleParticipantJoined(data);
-          break;
-        case 'participantLeft':
-          handleParticipantLeft(data);
-          break;
-        default:
-          break;
+      case 'subscribed':
+        handleSubscribedMessage(data);
+        break;
+      case 'participantJoined':
+        handleParticipantJoined(data);
+        break;
+      case 'participantLeft':
+        handleParticipantLeft(data);
+        break;
+      default:
+        break;
       }
 
       // Notify all handlers

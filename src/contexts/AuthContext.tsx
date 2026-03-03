@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import React from 'react';
 
 interface AuthState {
@@ -229,18 +229,29 @@ export function AuthProvider({ children }: { children: ReactNode }): React.React
     return await res.json();
   }, []);
 
+  const contextValue = useMemo(
+    () => ({
+      ...auth,
+      signOut,
+      renderButton,
+      loginWithPseudo,
+      registerWithPseudo,
+      requestPasswordReset,
+      getSecretQuestion,
+    }),
+    [
+      auth,
+      signOut,
+      renderButton,
+      loginWithPseudo,
+      registerWithPseudo,
+      requestPasswordReset,
+      getSecretQuestion,
+    ]
+  );
+
   return (
-    <AuthContext.Provider
-      value={{
-        ...auth,
-        signOut,
-        renderButton,
-        loginWithPseudo,
-        registerWithPseudo,
-        requestPasswordReset,
-        getSecretQuestion,
-      }}
-    >
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
