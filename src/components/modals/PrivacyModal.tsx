@@ -4,10 +4,10 @@ import React from 'react';
 export function PrivacyModal({
   opened,
   onClose,
-}: {
+}: Readonly<{
   opened: boolean;
   onClose: () => void;
-}): React.JSX.Element {
+}>): React.JSX.Element {
   return (
     <Modal
       opened={opened}

@@ -33,7 +33,7 @@ interface SoundEntry {
   creditUrl?: string;
 }
 
-export function CreditsModal({ opened, onClose }: CreditsModalProps): React.JSX.Element {
+export function CreditsModal({ opened, onClose }: Readonly<CreditsModalProps>): React.JSX.Element {
   const [credits, setCredits] = useState<CreditEntry[]>([]);
 
   useEffect(() => {

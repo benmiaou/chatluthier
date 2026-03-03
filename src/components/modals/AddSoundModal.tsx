@@ -4,9 +4,9 @@ import { notifications } from '@mantine/notifications';
 import React from 'react';
 
 interface AddSoundModalProps {
-  opened: boolean;
-  onClose: () => void;
-  onAdded: () => void;
+  readonly opened: boolean;
+  readonly onClose: () => void;
+  readonly onAdded: () => void;
 }
 
 export function AddSoundModal({ opened, onClose, onAdded }: AddSoundModalProps): React.JSX.Element {

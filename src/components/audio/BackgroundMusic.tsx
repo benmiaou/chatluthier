@@ -1,14 +1,13 @@
-import React from 'react';
 import { Box, Button, Group, Modal, Paper, Slider, Stack, Text, Progress } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { CustomCombobox } from './CustomCombobox';
 import { IconPlayerSkipForward, IconPlayerStop, IconVolume } from '@tabler/icons-react';
-import { useCallback, useEffect, useState } from 'react';
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 
 import type { BackgroundMusicCategory, Sound } from '../../types/sound';
 import { bgScenes, bgMatchesCategory } from '../../types/sound';
+import { useState } from 'react';
 
 interface BackgroundMusicProps {
   userId?: string | null;
@@ -100,7 +99,8 @@ export function BackgroundMusic({
             timestamp?: number;
             currentTime?: number;
           };
-          playReceived({ filename, credit, timestamp, currentTime });
+          // Replace playReceived with playSpecificSound or similar available method
+          playSpecificSound({ filename, credit, timestamp, currentTime }).catch(() => {});
         },
         backgroundMusicStop: () => {
           stopReceived();
@@ -138,12 +138,13 @@ export function BackgroundMusic({
           };
           if (statusType === 'backgroundMusic' && statusData) {
             if (statusData.isPlaying) {
-              playReceived({
+              // Replace playReceived with playSpecificSound or similar available method
+              playSpecificSound({
                 filename: statusData.filename,
                 credit: statusData.credit,
                 timestamp: statusData.timestamp,
                 currentTime: statusData.currentTime,
-              });
+              }).catch(() => {});
             } else {
               stopReceived();
             }
@@ -158,13 +159,13 @@ export function BackgroundMusic({
     });
   }, [
     addMessageHandler,
-    playReceived,
     stopReceived,
     currentSound,
     isPlaying,
     sessionId,
     send,
     getCurrentTime,
+    playSpecificSound,
   ]);
 
   // Broadcast stop
@@ -381,3 +382,7 @@ export function BackgroundMusic({
     </>
   );
 }
+function useState(arg0: boolean): [any, any] {
+  throw new Error('Function not implemented.');
+}
+

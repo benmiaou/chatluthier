@@ -92,10 +92,10 @@ export function SocketProvider({
     }, HEARTBEAT_MS);
   }, []);
 
-  const handleSubscription = useCallback((ws: WebSocket, sessionId: string, participants: Array<{ id: string }>) => {
+  const handleSubscription = useCallback((ws: WebSocket, subscriptionSessionId: string, subscriptionParticipants: Array<{ id: string }>) => {
     // Request background music status from first participant
-    if (ws.readyState === WebSocket.OPEN && participants.length > 0) {
-      const firstParticipantId = participants[0].id;
+    if (ws.readyState === WebSocket.OPEN && subscriptionParticipants.length > 0) {
+      const firstParticipantId = subscriptionParticipants[0].id;
       
       ws.send(
         JSON.stringify({
@@ -141,7 +141,7 @@ export function SocketProvider({
         }
       }
     }
-  }, []);
+  }, [handleSubscription]);
 
   const handleParticipantJoined = useCallback((data: WsMessage) => {
     if (data.participant) {
@@ -222,7 +222,7 @@ export function SocketProvider({
     return idToJoin;
   }, []);
 
-  const sendSubscriptionRequest = useCallback((ws: WebSocket, sessionId: string) => {
+  const sendSubscriptionRequest = useCallback((ws: WebSocket, targetSessionId: string) => {
     const userPseudo = localStorage.getItem('userPseudo') || null;
     const storedParticipantId =
       localStorage.getItem('pendingParticipantId') ||
@@ -232,7 +232,7 @@ export function SocketProvider({
     ws.send(
       JSON.stringify({
         type: 'subscribe',
-        id: sessionId,
+        id: targetSessionId,
         pseudo: userPseudo,
         participantId: storedParticipantId,
       })

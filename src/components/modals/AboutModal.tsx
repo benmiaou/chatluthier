@@ -5,10 +5,10 @@ import React from 'react';
 export function AboutModal({
   opened,
   onClose,
-}: {
+}: Readonly<{
   opened: boolean;
   onClose: () => void;
-}): React.ReactElement {
+}>): React.ReactElement {
   return (
     <Modal
       opened={opened}

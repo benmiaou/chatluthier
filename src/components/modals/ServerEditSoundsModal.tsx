@@ -15,6 +15,7 @@ import {
 import { CustomCombobox } from '../audio/CustomCombobox';
 import { useEffect, useState } from 'react';
 import { notifications } from '@mantine/notifications';
+import React from 'react';
 import {
   IconPlayerPlay,
   IconPlayerPause,
@@ -23,6 +24,19 @@ import {
   IconSearch,
 } from '@tabler/icons-react';
 import type { Sound, SoundCategory } from '../../types/sound';
+
+// Backend sound data type
+interface BackendSound {
+  id?: number | string;
+  display_name?: string;
+  name?: string;
+  filename: string;
+  contexts?: string[];
+  isEnabled?: boolean;
+  credit?: string;
+  imageFile?: string;
+  image_file?: string; // Legacy field name
+}
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 
 // Maps UI category to backend soundsType value
@@ -235,9 +249,9 @@ export function ServerEditSoundsModal({
       })
       .finally(() => setLoading(false));
 
-    const processLoadedSounds = (data: unknown[], _safeCategory: SoundCategory) => {
+    const processLoadedSounds = (data: BackendSound[], _safeCategory: SoundCategory) => {
       // Map backend data format to frontend expected format
-      const mappedSounds = data.map((sound: any) => ({
+      const mappedSounds = data.map((sound: BackendSound) => ({
         id: String(sound.id || sound.filename),
         name: sound.display_name || sound.name || sound.filename,
         filename: sound.filename,
@@ -254,7 +268,7 @@ export function ServerEditSoundsModal({
       const initialBackgroundIntensity: Record<string, string> = {};
       const initialBackgroundContext: Record<string, string> = {};
 
-      data.forEach((sound: any) => {
+      data.forEach((sound: BackendSound) => {
         if (sound.imageFile || sound.image_file) {
           images[sound.filename] = sound.imageFile || sound.image_file;
         }

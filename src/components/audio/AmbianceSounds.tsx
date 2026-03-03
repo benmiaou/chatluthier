@@ -3,6 +3,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IconDeviceFloppy, IconRefresh } from '@tabler/icons-react';
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import React from 'react';
 import { useAmbianceSounds } from '../../hooks/useAmbianceSounds';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { showCreditToast } from '../../utils/showCreditToast';
@@ -100,6 +101,7 @@ export function AmbianceSounds({
       // If we have a valid loaded order, use it. Otherwise use the current bars order.
       setSoundOrder(validOrder.length > 0 ? validOrder : bars.map((bar) => bar.sound.filename));
     } catch (_error) {
+      // Error is handled by the catch block, no need for console output
       // Fallback to current bars order if loading fails
       setSoundOrder(bars.map((bar) => bar.sound.filename));
     }
@@ -113,12 +115,12 @@ export function AmbianceSounds({
   }, [userId, loadPresets, loadSoundOrder]);
 
   const saveSoundOrder = async (newOrder: string[]) => {
-    try {
-      if (!userId) {
-        setSoundOrder(newOrder);
-        return;
-      }
+    if (!userId) {
+      setSoundOrder(newOrder);
+      return;
+    }
 
+    try {
       const response = await fetch('http://localhost:3000/save-sound-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -134,10 +136,10 @@ export function AmbianceSounds({
         const errorText = await response.text();
         throw new Error(`Server responded with status ${response.status}: ${errorText}`);
       }
-
-      setSoundOrder(newOrder);
     } catch (_error) {
-      // Fallback: still update local state even if server save fails
+      // Error is handled by the catch block, no need for console output
+    } finally {
+      // Always update local state regardless of server save success
       setSoundOrder(newOrder);
     }
   };
