@@ -78,7 +78,8 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
 
       // If we have a valid loaded order, use it. Otherwise use the current sounds order.
       setSoundOrder(validOrder.length > 0 ? validOrder : sounds.map((sound) => sound.filename));
-    } catch (_error) {
+    } catch (error) {
+      handleError(error, 'Soundboard.loadSoundOrder');
       // Fallback to current sounds order if loading fails
       setSoundOrder(sounds.map((sound) => sound.filename));
     }

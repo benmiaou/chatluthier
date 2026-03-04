@@ -1,6 +1,6 @@
 const { createLogger, format, transports } = require('winston');
 const DailyRotateFile = require('winston-daily-rotate-file');
-const path = require('path');
+const path = require('node:path');
 
 /**
  * Configure Winston logger for backend services
@@ -22,7 +22,29 @@ const logger = createLogger({
       format: format.combine(
         format.colorize(),
         format.printf(({ level, message, timestamp, stack }) => {
-          return `${timestamp} [${level}]: ${stack || message}`;
+          const logMessage = stack || message;
+          const stringifiedMessage =
+            typeof logMessage === 'object'
+              ? (() => {
+                  try {
+                    return JSON.stringify(logMessage, null, 2);
+                  } catch (e) {
+                    logger.error('Failed to stringify log message', e);
+                    return '[Object]';
+                  }
+                })()
+              : (() => {
+                  try {
+                    return JSON.stringify(logMessage);
+                  } catch (e) {
+                    logger.error('Failed to stringify log message', e);
+                    return JSON.stringify({
+                      error: 'Failed to stringify log message',
+                      value: logMessage,
+                    });
+                  }
+                })();
+          return `${timestamp.toISOString()} [${level}]: ${stringifiedMessage}`;
         })
       ),
     }),
@@ -31,7 +53,7 @@ const logger = createLogger({
       filename: path.join(__dirname, '..', 'logs', 'app-%DATE%.log'),
       datePattern: 'YYYY-MM-DD',
       zippedArchive: true,
-      maxSize: process.env.MAX_LOG_FILE_SIZE || '10m',
+      maxSize: process.env.MAX_LOG_FILE_SIZE || '10M',
       maxFiles: process.env.MAX_LOG_FILES || '5',
       level: 'info',
     }),
@@ -68,7 +90,7 @@ const logger = createLogger({
 
 // Create logs directory if it doesn't exist
 const logsDir = path.join(__dirname, '..', 'logs');
-const fs = require('fs');
+const fs = require('node:fs');
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }

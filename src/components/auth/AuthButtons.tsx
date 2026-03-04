@@ -12,9 +12,7 @@ import {
 
 import { IconLogout, IconLogin, IconUserPlus } from '@tabler/icons-react';
 
-import { useState, useEffect } from 'react';
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { handleError } from '../../utils/logger';
 
@@ -165,6 +163,8 @@ export function AuthButtons(): React.ReactElement {
           setPseudoAvailable(true);
         }
       } catch (_error) {
+        // Log the error for debugging purposes
+        handleError(_error, 'AuthButtons.pseudoAvailabilityCheck');
         // If there's an error, assume pseudo is available for development
         setPseudoAvailable(true);
       } finally {

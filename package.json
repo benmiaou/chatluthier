@@ -48,6 +48,7 @@
     "@mantine/modals": "^8.3.15",
     "@mantine/notifications": "^8.3.15",
     "@sentry/react": "^10.42.0",
+    "@sentry/replay": "^7.116.0",
     "@sentry/tracing": "^7.120.4",
     "@tabler/icons-react": "^3.36.1",
     "bcrypt": "^6.0.0",
