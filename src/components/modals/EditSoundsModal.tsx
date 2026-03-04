@@ -13,7 +13,6 @@ import {
 import { CustomCombobox } from '../audio/CustomCombobox';
 import { useEffect, useState, useMemo } from 'react';
 import { notifications } from '@mantine/notifications';
-import React from 'react';
 import {
   IconPlayerPlay,
   IconPlayerPause,
@@ -124,11 +123,11 @@ const CONTEXT_OPTIONS: Record<SoundCategory, string[]> = {
 };
 
 interface EditSoundsModalProps {
-  opened: boolean;
-  onClose: () => void;
-  category: SoundCategory;
-  userId: string | null;
-  onSave?: () => void;
+  readonly opened: boolean;
+  readonly onClose: () => void;
+  readonly category: SoundCategory;
+  readonly userId: string | null;
+  readonly onSave?: () => void;
 }
 
 interface SoundEdit extends Sound {
@@ -245,23 +244,22 @@ export function EditSoundsModal({
     setEdits((prev) => ({ ...prev, [filename]: enabled }));
   };
 
+  const getSoundUrl = (filename: string): string => {
+    switch (selectedCategory) {
+      case 'background':
+        return `/assets/background/${filename}`;
+      case 'ambiance':
+        return `/assets/ambiance/${filename}`;
+      case 'soundboard':
+        return `/assets/soundboard/${filename}`;
+      default:
+        return `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
+    }
+  };
+
   const handlePlayPause = async (filename: string) => {
     try {
-      // Fix audio path based on category
-      let soundUrl;
-      switch (selectedCategory) {
-      case 'background':
-        soundUrl = `/assets/background/${filename}`;
-        break;
-      case 'ambiance':
-        soundUrl = `/assets/ambiance/${filename}`;
-        break;
-      case 'soundboard':
-        soundUrl = `/assets/soundboard/${filename}`;
-        break;
-      default:
-        soundUrl = `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
-      }
+      const soundUrl = getSoundUrl(filename);
 
       if (currentlyPlaying === filename && isPlaying) {
         // Currently playing this sound, pause it
@@ -279,8 +277,9 @@ export function EditSoundsModal({
         setIsPlaying(true);
       }
     } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       notifications.show({
-        message: `Failed to play sound: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        message: `Failed to play sound: ${errorMessage}`,
         color: 'red',
       });
     }
@@ -311,8 +310,9 @@ export function EditSoundsModal({
       onSave?.();
       onClose();
     } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       notifications.show({
-        message: `Failed to save: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        message: `Failed to save: ${errorMessage}`,
         color: 'red',
       });
     } finally {
@@ -360,7 +360,7 @@ export function EditSoundsModal({
       contexts?: string[];
     }>,
     soundsType: string
-  ) => {
+  ): Promise<Response> => {
     return await fetch('/update-user-sounds-batch', {
       method: 'POST',
       credentials: 'include',
@@ -386,7 +386,7 @@ export function EditSoundsModal({
   };
 
   // Helper function to render content based on loading state
-  const renderContent = () => {
+  const renderContent = (): React.ReactNode => {
     if (loading) {
       return <Loader size="sm" />;
     }
@@ -396,7 +396,7 @@ export function EditSoundsModal({
     return renderSoundsGrid();
   };
 
-  const renderSoundsGrid = () => {
+  const renderSoundsGrid = (): React.ReactNode => {
     return (
       <div
         style={{
@@ -419,8 +419,9 @@ export function EditSoundsModal({
     soundFilename: string,
     currentContexts: string[]
   ) => {
-    if (e.key === 'Enter' && e.currentTarget.value?.trim()) {
-      const newContext = e.currentTarget.value.trim();
+    const inputValue = e.currentTarget.value?.trim();
+    if (e.key === 'Enter' && inputValue) {
+      const newContext = inputValue;
       if (!currentContexts.includes(newContext)) {
         addNewContext(soundFilename, newContext);
         e.currentTarget.value = '';
@@ -432,12 +433,9 @@ export function EditSoundsModal({
     const input = document.querySelector(
       'input[placeholder="Add new context..."]'
     ) as HTMLInputElement;
-    if (
-      input?.value?.trim() &&
-      !currentContexts.includes(input.value.trim())
-    ) {
-      const newContext = input.value.trim();
-      addNewContext(soundFilename, newContext);
+    const inputValue = input?.value?.trim();
+    if (inputValue && !currentContexts.includes(inputValue)) {
+      addNewContext(soundFilename, inputValue);
       input.value = '';
     }
   };
@@ -447,8 +445,9 @@ export function EditSoundsModal({
     soundFilename: string,
     currentContexts: string[]
   ) => {
-    if (value?.trim() && !currentContexts.includes(value)) {
-      addNewContext(soundFilename, value);
+    const trimmedValue = value?.trim();
+    if (trimmedValue && !currentContexts.includes(trimmedValue)) {
+      addNewContext(soundFilename, trimmedValue);
     }
   };
 
@@ -462,7 +461,7 @@ export function EditSoundsModal({
     }));
   };
 
-  const renderContextBadges = (soundFilename: string, currentContexts: string[]) => {
+  const renderContextBadges = (soundFilename: string, currentContexts: string[]): React.ReactNode => {
     return (
       <Group gap="xs" mt="xs">
         {currentContexts.map((ctx) => (
@@ -490,7 +489,7 @@ export function EditSoundsModal({
     );
   };
 
-  const renderSoundEditSection = (sound: SoundEdit, currentContexts: string[]) => {
+  const renderSoundEditSection = (sound: SoundEdit, currentContexts: string[]): React.ReactNode => {
     return (
       <Stack gap="xs" mt="xs">
         <Group gap="xs" align="flex-end">
@@ -522,7 +521,7 @@ export function EditSoundsModal({
     );
   };
 
-  const renderSoundItem = (sound: SoundEdit) => {
+  const renderSoundItem = (sound: SoundEdit): React.ReactNode => {
     const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
     const currentContexts = contextEdits[sound.filename] ?? sound.contexts ?? [];
     const isEditing = editingSoundId === sound.id;
@@ -561,7 +560,7 @@ export function EditSoundsModal({
     );
   };
 
-  const renderSoundControls = (sound: SoundEdit) => {
+  const renderSoundControls = (sound: SoundEdit): React.ReactNode => {
     return (
       <Group gap="xs" mt="xs">
         <Button
@@ -592,7 +591,7 @@ export function EditSoundsModal({
     );
   };
 
-  const renderSoundCredit = (sound: SoundEdit) => {
+  const renderSoundCredit = (sound: SoundEdit): React.ReactNode => {
     if (!sound.credit?.trim()) {
       return null;
     }

@@ -34,7 +34,7 @@ process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection', { reason: reason?.message || reason, promise });
 });
 
-// Use top-level await for server initialization
+// Initialize database
 logger.info('Initializing database...');
 
 // Set a timeout for database initialization
@@ -49,27 +49,30 @@ const initPromise = Promise.race([
   ),
 ]);
 
-try {
-  await initPromise;
+// Use async IIFE for server initialization
+(async () => {
+  try {
+    await initPromise;
 
-  server.listen(PORT, '0.0.0.0', () => {
-    logger.info(`Server started on port ${PORT}`);
+    server.listen(PORT, '0.0.0.0', () => {
+      logger.info(`Server started on port ${PORT}`);
 
-    // Initialize WebSocket server on port 3001 (HTTP port + 1)
-    const { initializeWebSocketServer } = require('./sockets/socketServer');
-    initializeWebSocketServer(server, PORT);
-    logger.info(`WebSocket Server started on port ${PORT + 1}`);
-  });
-} catch (error) {
-  logger.error('Failed to initialize database', { error: error.message });
-  logger.warn('Attempting to start server without database initialization...');
-  // Try to start server anyway for development
-  server.listen(PORT, '0.0.0.0', () => {
-    logger.info(`Server started on port ${PORT} (database may not be available)`);
+      // Initialize WebSocket server on port 3001 (HTTP port + 1)
+      const { initializeWebSocketServer } = require('./sockets/socketServer');
+      initializeWebSocketServer(server, PORT);
+      logger.info(`WebSocket Server started on port ${PORT + 1}`);
+    });
+  } catch (error) {
+    logger.error('Failed to initialize database', { error: error.message });
+    logger.warn('Attempting to start server without database initialization...');
+    // Try to start server anyway for development
+    server.listen(PORT, '0.0.0.0', () => {
+      logger.info(`Server started on port ${PORT} (database may not be available)`);
 
-    // Initialize WebSocket server on port 3001 (HTTP port + 1)
-    const { initializeWebSocketServer } = require('./sockets/socketServer');
-    initializeWebSocketServer(server, PORT);
-    logger.info(`WebSocket Server started on port ${PORT + 1}`);
-  });
-}
+      // Initialize WebSocket server on port 3001 (HTTP port + 1)
+      const { initializeWebSocketServer } = require('./sockets/socketServer');
+      initializeWebSocketServer(server, PORT);
+      logger.info(`WebSocket Server started on port ${PORT + 1}`);
+    });
+  }
+})();

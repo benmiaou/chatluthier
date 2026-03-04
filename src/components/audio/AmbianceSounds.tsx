@@ -2,7 +2,7 @@ import { Button, Group, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IconDeviceFloppy, IconRefresh } from '@tabler/icons-react';
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useAmbianceSounds } from '../../hooks/useAmbianceSounds';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { showCreditToast } from '../../utils/showCreditToast';
@@ -99,7 +99,7 @@ export function AmbianceSounds({
 
       // If we have a valid loaded order, use it. Otherwise use the current bars order.
       setSoundOrder(validOrder.length > 0 ? validOrder : bars.map((bar) => bar.sound.filename));
-    } catch (_error) {
+    } catch (error) {
       // Error is handled by the catch block, no need for console output
       // Fallback to current bars order if loading fails
       setSoundOrder(bars.map((bar) => bar.sound.filename));
@@ -135,7 +135,7 @@ export function AmbianceSounds({
         const errorText = await response.text();
         throw new Error(`Server responded with status ${response.status}: ${errorText}`);
       }
-    } catch (_error) {
+    } catch (error) {
       // Error is handled by the catch block, no need for console output
     } finally {
       // Always update local state regardless of server save success
@@ -237,7 +237,9 @@ export function AmbianceSounds({
   }, [applyStatus, showCreditsForActiveSounds]);
 
   const handleAmbianceMessage = useCallback((msg: WsMessage) => {
-    if (!msg.content) {return;}
+    if (!msg.content) {
+      return;
+    }
 
     const messageHandlers: Record<string, (content: unknown) => void> = {
       ambianceStatusUpdate: (content) => {

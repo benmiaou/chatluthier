@@ -15,7 +15,6 @@ import {
 import { CustomCombobox } from '../audio/CustomCombobox';
 import { useEffect, useState } from 'react';
 import { notifications } from '@mantine/notifications';
-import React from 'react';
 import {
   IconPlayerPlay,
   IconPlayerPause,
@@ -123,9 +122,9 @@ const CONTEXT_OPTIONS: Record<SoundCategory, string[]> = {
 };
 
 interface ServerEditSoundsModalProps {
-  opened: boolean;
-  onClose: () => void;
-  onAddSound?: () => void;
+  readonly opened: boolean;
+  readonly onClose: () => void;
+  readonly onAddSound?: () => void;
 }
 
 interface SoundEdit extends Sound {
@@ -195,7 +194,7 @@ export function ServerEditSoundsModal({
 
   // For server editing, use only predefined contexts (no user-created contexts)
   // Ensure all contexts are strings to prevent MultiSelect errors
-  const availableContexts = (CONTEXT_OPTIONS[selectedCategory] || []).map(String);
+  const availableContexts = CONTEXT_OPTIONS[selectedCategory] || [];
 
   // Helper function to parse background context tuple
   const parseBackgroundContext = (context: string): { intensity: string; context: string } => {
@@ -300,23 +299,22 @@ export function ServerEditSoundsModal({
     setEdits((prev) => ({ ...prev, [filename]: enabled }));
   };
 
+  const getSoundUrl = (filename: string): string => {
+    switch (selectedCategory) {
+      case 'background':
+        return `/assets/background/${filename}`;
+      case 'ambiance':
+        return `/assets/ambiance/${filename}`;
+      case 'soundboard':
+        return `/assets/soundboard/${filename}`;
+      default:
+        return `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
+    }
+  };
+
   const handlePlayPause = async (filename: string) => {
     try {
-      // Fix audio path based on category
-      let soundUrl;
-      switch (selectedCategory) {
-      case 'background':
-        soundUrl = `/assets/background/${filename}`;
-        break;
-      case 'ambiance':
-        soundUrl = `/assets/ambiance/${filename}`;
-        break;
-      case 'soundboard':
-        soundUrl = `/assets/soundboard/${filename}`;
-        break;
-      default:
-        soundUrl = `/assets/${SOUNDS_TYPE[selectedCategory]}/${filename}`;
-      }
+      const soundUrl = getSoundUrl(filename);
 
       if (currentlyPlaying === filename && isPlaying) {
         // Currently playing this sound, pause it
@@ -334,8 +332,9 @@ export function ServerEditSoundsModal({
         setIsPlaying(true);
       }
     } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       notifications.show({
-        message: `Failed to play sound: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        message: `Failed to play sound: ${errorMessage}`,
         color: 'red',
       });
     }
@@ -363,8 +362,9 @@ export function ServerEditSoundsModal({
       notifications.show({ message: 'Server sounds updated successfully!', color: 'teal' });
       onClose();
     } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       notifications.show({
-        message: `Failed to save: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        message: `Failed to save: ${errorMessage}`,
         color: 'red',
       });
     } finally {
@@ -421,7 +421,7 @@ export function ServerEditSoundsModal({
   };
 
   // Helper function to render content based on loading state
-  const renderContent = () => {
+  const renderContent = (): React.ReactNode => {
     if (loading) {
       return <Loader size="sm" />;
     }
@@ -437,8 +437,9 @@ export function ServerEditSoundsModal({
     soundFilename: string,
     currentContexts: string[]
   ) => {
-    if (e.key === 'Enter' && e.currentTarget.value?.trim()) {
-      const newContext = e.currentTarget.value.trim();
+    const inputValue = e.currentTarget.value?.trim();
+    if (e.key === 'Enter' && inputValue) {
+      const newContext = inputValue;
       if (!currentContexts.includes(newContext)) {
         addNewContext(soundFilename, newContext);
         e.currentTarget.value = '';
@@ -450,19 +451,17 @@ export function ServerEditSoundsModal({
     const input = document.querySelector(
       'input[placeholder="Add new context..."]'
     ) as HTMLInputElement;
-    if (
-      input?.value?.trim() &&
-      !currentContexts.includes(input.value.trim())
-    ) {
-      const newContext = input.value.trim();
-      addNewContext(soundFilename, newContext);
+    const inputValue = input?.value?.trim();
+    if (inputValue && !currentContexts.includes(inputValue)) {
+      addNewContext(soundFilename, inputValue);
       input.value = '';
     }
   };
 
   const handleExistingContextChange = (value: string, soundFilename: string, currentContexts: string[]) => {
-    if (value?.trim() && !currentContexts.includes(value)) {
-      addNewContext(soundFilename, value);
+    const trimmedValue = value?.trim();
+    if (trimmedValue && !currentContexts.includes(trimmedValue)) {
+      addNewContext(soundFilename, trimmedValue);
     }
   };
 
@@ -507,7 +506,37 @@ export function ServerEditSoundsModal({
     );
   };
 
-  const renderSoundEditSection = (sound: SoundEdit, currentContexts: string[], currentCredit: string) => {
+  const renderSoundEditSection = (sound: SoundEdit, currentContexts: string[], currentCredit: string): React.ReactNode => {
+    const handleIntensityChange = (value: string) => {
+      setBackgroundIntensity((prev) => ({
+        ...prev,
+        [sound.filename]: value || '',
+      }));
+    };
+
+    const handleContextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setBackgroundContext((prev) => ({
+        ...prev,
+        [sound.filename]: e.currentTarget.value,
+      }));
+    };
+
+    const handleCreditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setCreditEdits((prev) => ({
+        ...prev,
+        [sound.filename]: e.currentTarget.value,
+      }));
+    };
+
+    const handleImageFileChange = (file: File | null) => {
+      if (file) {
+        setImageFileEdits((prev) => ({
+          ...prev,
+          [sound.filename]: file,
+        }));
+      }
+    };
+
     return (
       <Stack gap="xs" mt="xs">
         {/* Background Music: Simple ComboBox + context */}
@@ -522,16 +551,8 @@ export function ServerEditSoundsModal({
                   Intensity
                 </Text>
                 <CustomCombobox
-                  value={
-                    backgroundIntensity[sound.filename] ||
-                    BACKGROUND_INTENSITY_OPTIONS[0]
-                  }
-                  onChange={(value) => {
-                    setBackgroundIntensity((prev) => ({
-                      ...prev,
-                      [sound.filename]: value || '',
-                    }));
-                  }}
+                  value={backgroundIntensity[sound.filename] || BACKGROUND_INTENSITY_OPTIONS[0]}
+                  onChange={handleIntensityChange}
                   data={BACKGROUND_INTENSITY_OPTIONS}
                   placeholder="Select intensity"
                   width={150}
@@ -545,12 +566,7 @@ export function ServerEditSoundsModal({
                 <TextInput
                   placeholder="additional context (optional)"
                   value={backgroundContext[sound.filename] || ''}
-                  onChange={(e) => {
-                    setBackgroundContext((prev) => ({
-                      ...prev,
-                      [sound.filename]: e.currentTarget.value,
-                    }));
-                  }}
+                  onChange={handleContextChange}
                   style={{ flex: 1 }}
                 />
               </Stack>
@@ -591,12 +607,7 @@ export function ServerEditSoundsModal({
         <TextInput
           placeholder="Credit (optional)"
           value={currentCredit}
-          onChange={(e) => {
-            setCreditEdits((prev) => ({
-              ...prev,
-              [sound.filename]: e.currentTarget.value,
-            }));
-          }}
+          onChange={handleCreditChange}
           mt="xs"
         />
 
@@ -606,14 +617,7 @@ export function ServerEditSoundsModal({
             label="Upload image"
             placeholder="Select image file"
             accept="image/*"
-            onChange={(file) => {
-              if (file) {
-                setImageFileEdits((prev) => ({
-                  ...prev,
-                  [sound.filename]: file,
-                }));
-              }
-            }}
+            onChange={handleImageFileChange}
             mt="xs"
           />
         )}
@@ -621,10 +625,10 @@ export function ServerEditSoundsModal({
     );
   };
 
-  const renderSoundItem = (sound: SoundEdit) => {
+  const renderSoundItem = (sound: SoundEdit): React.ReactNode => {
     const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
     // Ensure all contexts are strings to prevent MultiSelect errors
-    const currentContexts = (contextEdits[sound.filename] ?? sound.contexts ?? []).map(String);
+    const currentContexts = contextEdits[sound.filename] ?? sound.contexts ?? [];
     const currentCredit = creditEdits[sound.filename] ?? sound.credit ?? '';
     const isEditing = editingSoundId === sound.id;
 
@@ -664,7 +668,7 @@ export function ServerEditSoundsModal({
     );
   };
 
-  const renderSoundContexts = (sound: SoundEdit, currentContexts: string[]) => {
+  const renderSoundContexts = (sound: SoundEdit, currentContexts: string[]): React.ReactNode => {
     if (currentContexts.length === 0 && !(selectedCategory === 'background' && backgroundContext[sound.filename])) {
       return null;
     }
@@ -680,7 +684,7 @@ export function ServerEditSoundsModal({
     );
   };
 
-  const renderSoundControls = (sound: SoundEdit) => {
+  const renderSoundControls = (sound: SoundEdit): React.ReactNode => {
     return (
       <Group gap="xs" mt="xs">
         <Button
@@ -711,7 +715,7 @@ export function ServerEditSoundsModal({
     );
   };
 
-  const renderSoundImage = (sound: SoundEdit) => {
+  const renderSoundImage = (sound: SoundEdit): React.ReactNode => {
     if (selectedCategory !== 'ambiance' || !currentImages[sound.filename]) {
       return null;
     }
@@ -727,7 +731,7 @@ export function ServerEditSoundsModal({
     );
   };
 
-  const renderSoundCreditText = (sound: SoundEdit) => {
+  const renderSoundCreditText = (sound: SoundEdit): React.ReactNode => {
     if (!sound.credit?.trim()) {
       return null;
     }
@@ -738,7 +742,7 @@ export function ServerEditSoundsModal({
     );
   };
 
-  const renderSoundsGrid = () => {
+  const renderSoundsGrid = (): React.ReactNode => {
     return (
       <div
         style={{

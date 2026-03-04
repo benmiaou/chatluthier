@@ -4,7 +4,7 @@ import { CustomCombobox } from './CustomCombobox';
 import { IconPlayerSkipForward, IconPlayerStop, IconVolume } from '@tabler/icons-react';
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import type { BackgroundMusicCategory, Sound } from '../../types/sound';
 import { bgScenes, bgMatchesCategory } from '../../types/sound';
@@ -88,7 +88,9 @@ export function BackgroundMusic({
   // Listen for incoming socket messages
   useEffect(() => {
     return addMessageHandler((msg: WsMessage) => {
-      if (!msg.content) {return;}
+      if (!msg.content) {
+        return;
+      }
 
       const messageHandlers: Record<string, (content: unknown) => void> = {
         backgroundMusicChange: (content) => {
@@ -196,7 +198,7 @@ export function BackgroundMusic({
     // If there's a current sound that was blocked, play it specifically
     if (currentSound) {
       // Use the specific sound play method to play exactly this sound
-      playSpecificSound(currentSound).catch((_e) => {
+      playSpecificSound(currentSound).catch((error) => {
         // Silently handle playback errors
       });
     }
