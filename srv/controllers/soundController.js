@@ -84,7 +84,6 @@ async function deleteSound(req, res) {
     }
 }
 
-
 async function addSound(req, res) {
     const { category, display_name, contexts, credit } = req.body;
     const accessToken = req.cookies.accessToken;
@@ -137,10 +136,18 @@ async function addSound(req, res) {
             sounds = JSON.parse(fs.readFileSync(jsonFilePath, 'utf-8'));
         }
 
+        // Parse contexts as JSON
+        let parsedContexts;
+        try {
+            parsedContexts = JSON.parse(contexts);
+        } catch (e) {
+            return res.status(400).json({ error: 'Invalid contexts format.' });
+        }
+
         const newSound = {
             filename: sanitizedFileName,
             display_name: display_name,
-            contexts: contexts.split(',').map(context => context.trim()),
+            contexts: parsedContexts,
             credit: credit
         };
 
@@ -157,7 +164,6 @@ async function addSound(req, res) {
         return res.status(500).json({ error: 'Failed to add sound.' });
     }
 }
-
 
 async function updateMainPlaylist(req, res) {
     const { soundsType, sounds } = req.body;

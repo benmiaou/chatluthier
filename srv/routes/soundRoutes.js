@@ -2,8 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { getData, updateMainPlaylist, updateUserSound, savePreset, loadPresets, addSound, deleteSound } = require('../controllers/soundController');
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
 
+// Configure multer with a file size limit
+const upload = multer({
+    dest: 'uploads/',
+    limits: { fileSize: 100 * 1024 * 1024 } // Set limit to 50 MB
+  });
+
+  
 router.get('/backgroundMusic', (req, res) => {
     const userId = req.query.userId || req.headers['user-id'] || req.body.userId;
     const backgroundMusicData = getData(userId, 'backgroundMusic');

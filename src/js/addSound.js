@@ -152,6 +152,7 @@ function displayAddSoundForm() {
         contextsLabel.style.marginBottom = '5px';
 
         const addContextButton = document.createElement('button');
+        addContextButton.type = 'button';
         addContextButton.textContent = 'Add Context';
         addContextButton.className = "button-primary";
         addContextButton.style.marginBottom = '20px';
@@ -247,7 +248,7 @@ async function handleAddSoundFormSubmit(event) {
     const category = document.getElementById('category').value;
     const fileInput = document.getElementById('fileInput');
     const displayName = document.getElementById('displayName').value;
-    const contexts = document.getElementById('contexts').value;
+    let contexts = [];
     const credit = document.getElementById('credit').value;
 
     // Validate that all required fields are not empty
@@ -266,9 +267,26 @@ async function handleAddSoundFormSubmit(event) {
         return;
     }
 
-    if (!contexts.trim()) {
-        alert('Please enter contexts.');
-        return;
+    if (category === 'ambianceSounds' || category === 'soundboard') {
+        const contextsInput = document.getElementById('contexts').value;
+        if (!contextsInput.trim()) {
+            alert('Please enter contexts.');
+            return;
+        }
+        contexts = contextsInput.split(',').map(context => context.trim());
+    } else if (category === 'backgroundMusic') {
+        const contextWrappers = document.querySelectorAll('#contextsContainer > div');
+        if (contextWrappers.length === 0) {
+            alert('Please add at least one context.');
+            return;
+        }
+        contextWrappers.forEach(wrapper => {
+            const typeSelect = wrapper.querySelector('select');
+            const contextInput = wrapper.querySelector('input');
+            if (typeSelect && contextInput) {
+                contexts.push([typeSelect.value, contextInput.value]);
+            }
+        });
     }
 
     if (!credit.trim()) {
@@ -284,12 +302,14 @@ async function handleAddSoundFormSubmit(event) {
         }
     }
 
+    console.log("contexts : " + JSON.stringify(contexts));
+
     const file = fileInput.files[0];
     const formData = new FormData();
     formData.append('category', category);
     formData.append('file', file);
     formData.append('display_name', displayName);
-    formData.append('contexts', contexts);
+    formData.append('contexts',  JSON.stringify(contexts)); // Ensure contexts is a JSON string
     formData.append('credit', credit);
 
     if (category === 'ambianceSounds') {
@@ -301,7 +321,7 @@ async function handleAddSoundFormSubmit(event) {
         const response = await fetch('/add-sound', {
             method: 'POST',
             body: formData,
-            credentials: 'include', 
+            credentials: 'include',
         });
 
         const data = await response.json();
