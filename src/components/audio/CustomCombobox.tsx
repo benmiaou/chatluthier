@@ -66,7 +66,8 @@ export function CustomCombobox({
         <div
           style={{
             padding: '8px',
-            sticky: 'top',
+            position: 'sticky',
+            top: 0,
             backgroundColor: 'var(--main-background-color)',
             zIndex: 1,
             width: '100%',

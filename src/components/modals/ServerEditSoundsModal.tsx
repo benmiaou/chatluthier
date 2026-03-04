@@ -269,7 +269,7 @@ export function ServerEditSoundsModal({
 
       data.forEach((sound: BackendSound) => {
         if (sound.imageFile || sound.image_file) {
-          images[sound.filename] = sound.imageFile || sound.image_file;
+          images[sound.filename] = sound.imageFile || sound.image_file || '';
         }
 
         // Parse background contexts for initial values

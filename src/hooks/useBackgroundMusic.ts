@@ -5,7 +5,7 @@ import { BackgroundMusicCategories, bgMatchesCategory, bgScenes } from '../types
 
 const ASSET_PREFIX = '/assets/background/';
 
-type BackgroundMusicCategory = keyof typeof BackgroundMusicCategories;
+type BackgroundMusicCategory = typeof BackgroundMusicCategories[keyof typeof BackgroundMusicCategories];
 
 interface BackgroundMusicHook {
   sounds: Sound[];
@@ -15,15 +15,25 @@ interface BackgroundMusicHook {
   volume: number;
   progress: number;
   context: string;
+  userInteracted: boolean;
+  setUserInteracted: (interacted: boolean) => void;
   loadSounds: () => Promise<void>;
   playCategory: (category: BackgroundMusicCategory) => Promise<void>;
   playSpecificSound: (sound: Sound) => Promise<void>;
   next: () => void;
   stop: () => void;
   setVolume: (volume: number) => void;
+  handleSetVolume: (volume: number) => void;
   seekTo: (time: number) => void;
-  setContext: (context: string) => void;
+  handleSetContext: (context: string) => void;
   getCurrentTime: () => number;
+  playReceived: (musicData: {
+    filename: string;
+    credit?: string;
+    timestamp?: number;
+    currentTime?: number;
+  }) => Promise<void>;
+  stopReceived: () => void;
 }
 
 export function useBackgroundMusic(
@@ -35,9 +45,9 @@ export function useBackgroundMusic(
   const [currentSound, setCurrentSound] = useState<Sound | null>(null);
   const [activeCategory, setActiveCategory] = useState<BackgroundMusicCategory | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolumeState] = useState(0.5);
-  const [progress, setProgress] = useState(0); // 0–100
-  const [context, setContextState] = useState('All');
+  const [volume, setVolume] = useState(0.5);
+  const [progress, setProgress] = useState(0);
+  const [context, setContext] = useState('All');
   const [userInteracted, setUserInteracted] = useState(false);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -53,13 +63,11 @@ export function useBackgroundMusic(
       const merged = main.map((s) => {
         const u = userSounds.find((us) => us.filename === s.filename);
         const base = u ? { ...s, ...u } : s;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return { ...base, name: base.name ?? (base as any).display_name ?? base.filename };
+        return { ...base, name: base.name ?? base.filename };
       });
       setSounds(merged);
       precacheAudio(merged.map((s) => `${ASSET_PREFIX}${s.filename}`));
     } catch (error) {
-      // Failed to load background sounds
       console.error('Failed to load background sounds:', error);
     }
   }, [userId]);
@@ -99,10 +107,15 @@ export function useBackgroundMusic(
     async (sound: Sound) => {
       setCurrentSound(sound);
 
-      // Find which category this sound belongs to
-      const soundCategory = Object.values(BackgroundMusicCategories).find((category) =>
+      const categories: BackgroundMusicCategory[] = [
+        BackgroundMusicCategories.CALM,
+        BackgroundMusicCategories.DYNAMIC,
+        BackgroundMusicCategories.INTENSE,
+        BackgroundMusicCategories.ALL,
+      ];
+      const soundCategory = categories.find((category) =>
         bgMatchesCategory(sound, category)
-      ) as BackgroundMusicCategory | undefined;
+      );
 
       if (soundCategory) {
         setActiveCategory(soundCategory);
@@ -111,11 +124,7 @@ export function useBackgroundMusic(
       const audio = playerRef.current.getElement();
       audio.src = `${ASSET_PREFIX}${sound.filename}`;
       audio.volume = volume;
-      // Note: Auto-advance is handled by the playCategory function, not here
-      // This avoids circular dependency issues
-      audio.onended = () => {
-        // No auto-advance here to avoid circular dependency
-      };
+      audio.onended = () => {};
       await audio.play();
       setIsPlaying(true);
       startProgressTracking();
@@ -129,7 +138,7 @@ export function useBackgroundMusic(
     async (category: BackgroundMusicCategory) => {
       const filtered = sounds.filter(
         (s) =>
-          bgMatchesCategory(s, category) && (context === 'All' || bgScenes(s).includes(context))
+          bgMatchesCategory(s, category) && (context.toLowerCase() === 'all' || bgScenes(s).includes(context.toLowerCase()))
       );
       if (!filtered.length) {
         return;
@@ -141,13 +150,11 @@ export function useBackgroundMusic(
       const audio = playerRef.current.getElement();
       audio.src = `${ASSET_PREFIX}${pick.filename}`;
       audio.volume = volume;
-      // Auto-advance to next in category when current sound ends
       audio.onended = () => {
         if (activeCategory === category) {
-          // Manually implement next logic to avoid circular dependency
           const autoAdvanceFiltered = sounds.filter(
             (s) =>
-              bgMatchesCategory(s, category) && (context === 'All' || bgScenes(s).includes(context))
+              bgMatchesCategory(s, category) && (context.toLowerCase() === 'all' || bgScenes(s).includes(context.toLowerCase()))
           );
           if (autoAdvanceFiltered.length > 0) {
             const currentIndex = autoAdvanceFiltered.findIndex((s) => s.filename === pick.filename);
@@ -156,7 +163,7 @@ export function useBackgroundMusic(
             playSpecificSound(nextSound).catch(() => {});
           }
         }
-      }; // auto-advance to next in category
+      };
       await audio.play();
       setIsPlaying(true);
       startProgressTracking();
@@ -178,8 +185,8 @@ export function useBackgroundMusic(
     stopProgressTracking();
   }, []);
 
-  const setVolume = useCallback((v: number) => {
-    setVolumeState(v);
+  const handleSetVolume = useCallback((v: number) => {
+    setVolume(v);
     playerRef.current.setVolume(v);
   }, []);
 
@@ -195,8 +202,8 @@ export function useBackgroundMusic(
     return el.currentTime;
   }, []);
 
-  const setContext = useCallback((ctx: string) => {
-    setContextState(ctx);
+  const handleSetContext = useCallback((ctx: string) => {
+    setContext(ctx);
   }, []);
 
   // ─── Remote playback (received via socket) ────────────────────────────────
@@ -204,7 +211,7 @@ export function useBackgroundMusic(
   const calculateAdjustedTime = useCallback((timestamp: number, currentTime: number): number => {
     const now = Date.now();
     const delay = now - timestamp;
-    return currentTime + delay / 1000; // Convert delay from ms to seconds
+    return currentTime + delay / 1000;
   }, []);
 
   const handlePlayAttempt = useCallback(async (audio: HTMLAudioElement): Promise<boolean> => {
@@ -225,7 +232,6 @@ export function useBackgroundMusic(
         setIsPlaying(true);
         return true;
       }
-      
       handleAutoplayBlocked();
       return false;
     } catch (error) {
@@ -250,7 +256,8 @@ export function useBackgroundMusic(
         filename: musicData.filename,
         credit: musicData.credit,
         name: musicData.filename,
-        display_name: musicData.filename,
+        id: '',
+        category: '',
       } as Sound);
     }
   }, [sounds]);
@@ -266,17 +273,12 @@ export function useBackgroundMusic(
       audio.src = `${ASSET_PREFIX}${musicData.filename}`;
       audio.volume = volume;
 
-      // Set adjusted time if timestamp and currentTime are provided
       if (musicData.timestamp && musicData.currentTime !== undefined) {
         audio.currentTime = calculateAdjustedTime(musicData.timestamp, musicData.currentTime);
       }
 
-      // Attempt to play the audio
       await handlePlayAttempt(audio);
-
-      // Update current sound state
       updateCurrentSound(musicData);
-
       startProgressTracking();
     },
     [volume, sounds, userInteracted, onAutoplayBlocked, calculateAdjustedTime, handlePlayAttempt, updateCurrentSound]
@@ -303,9 +305,10 @@ export function useBackgroundMusic(
     playSpecificSound,
     next,
     stop,
-    setVolume,
+    setVolume: handleSetVolume,
+    handleSetVolume,
     seekTo,
-    setContext,
+    handleSetContext,
     playReceived,
     stopReceived,
     getCurrentTime,

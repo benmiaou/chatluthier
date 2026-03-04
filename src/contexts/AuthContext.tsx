@@ -5,13 +5,16 @@ interface AuthState {
   isSignedIn: boolean;
   userId: string | null;
   userName: string | null;
+  userPicture: string | null;
   isAdmin: boolean;
   token: string | null;
 }
 
 interface AuthContextValue extends AuthState {
-  signOut: () => void;
-  renderButton: (container: HTMLElement) => void;
+  isSignedIn: boolean;
+  userName: string | null;
+  userPicture: string | null;  // Add this line
+  signOut: () => Promise<void>;
   loginWithPseudo: (pseudo: string, password: string) => Promise<void>;
   registerWithPseudo: (
     pseudo: string,
@@ -19,12 +22,12 @@ interface AuthContextValue extends AuthState {
     secretQuestion: string,
     secretAnswer: string
   ) => Promise<void>;
+  getSecretQuestion: (pseudo: string) => Promise<{ secretQuestion: string }>;
   requestPasswordReset: (
     pseudo: string,
     secretAnswer: string,
     newPassword: string
-  ) => Promise<{ success: boolean }>;
-  getSecretQuestion: (pseudo: string) => Promise<{ secretQuestion: string }>;
+  ) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -34,14 +37,15 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): R
     isSignedIn: false,
     userId: null,
     userName: null,
+    userPicture: null,
     isAdmin: false,
     token: null,
   });
 
-  const signOut = useCallback(() => {
+  const signOut = useCallback(async () => {
     // Clear pseudo from localStorage
     localStorage.removeItem('userPseudo');
-    setAuth({ isSignedIn: false, userId: null, userName: null, isAdmin: false, token: null });
+    setAuth({ isSignedIn: false, userId: null, userName: null, userPicture: null, isAdmin: false, token: null });
   }, []);
 
   // Check for existing session on initial load
@@ -60,6 +64,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): R
               isSignedIn: true,
               userId: data.userId,
               userName: data.email || data.pseudo || null,
+              userPicture: data.userPicture || null,
               isAdmin: data.isAdmin || false,
               token: null,
             });
@@ -142,6 +147,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): R
       isSignedIn: true,
       userId: data.userId,
       userName: data.pseudo,
+      userPicture: data.userPicture || null,
       isAdmin: data.isAdmin ?? false,
       token: null,
     });
@@ -181,6 +187,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): R
         isSignedIn: true,
         userId: data.userId,
         userName: data.pseudo,
+        userPicture: data.userPicture || null,
         isAdmin: false, // New users are not admins
         token: null,
       });

@@ -32,6 +32,7 @@ export interface WsMessage {
   message?: string;
   participants?: Array<{ pseudo: string | null; isAnonymous: boolean; id: string }>;
   participant?: { pseudo: string | null; isAnonymous: boolean; id: string };
+  participantId?: string;
 }
 
 type MessageHandler = (msg: WsMessage) => void;
@@ -92,11 +93,11 @@ export function SocketProvider({
     }, HEARTBEAT_MS);
   }, []);
 
-  const handleSubscription = useCallback((ws: WebSocket, subscriptionSessionId: string, subscriptionParticipants: Array<{ id: string }>) => {
+  const handleSubscription = useCallback((ws: WebSocket, subscriptionParticipants: Array<{ id: string }>) => {
     // Request background music status from first participant
     if (ws.readyState === WebSocket.OPEN && subscriptionParticipants.length > 0) {
       const firstParticipantId = subscriptionParticipants[0].id;
-      
+
       ws.send(
         JSON.stringify({
           type: 'requestStatus',
@@ -137,18 +138,22 @@ export function SocketProvider({
       if (data.participants.length > 0 && data.id) {
         const currentWs = wsRef.current;
         if (currentWs) {
-          handleSubscription(currentWs, data.id, data.participants);
+          handleSubscription(currentWs, data.participants);
         }
       }
     }
   }, [handleSubscription]);
 
-  const handleParticipantJoined = useCallback((data: WsMessage) => {
-    if (data.participant) {
-      setParticipants((prev) => [...prev, data.participant]);
-      setStatusMessage(`New participant joined: ${data.participant.pseudo || 'Anonymous'}`);
-    }
-  }, []);
+const handleParticipantJoined = useCallback((data: WsMessage) => {
+  if (data.participant !== undefined) {
+    setParticipants((prev) => [...prev, {
+      pseudo: data.participant.pseudo ?? null,
+      isAnonymous: data.participant.isAnonymous ?? false,
+      id: data.participant.id
+    }]);
+    setStatusMessage(`New participant joined: ${data.participant.pseudo || 'Anonymous'}`);
+  }
+}, []);
 
   const handleParticipantLeft = useCallback((data: WsMessage) => {
     if (data.participantId) {
@@ -334,9 +339,9 @@ export function SocketProvider({
         id: sessionId,
         participantId: participantId,
       });
-      
+
       try {
-        wsRef.current.send(unsubscribeMessage);
+        wsRef.current?.send(unsubscribeMessage);
       } catch {
         /* ignore errors */
       }

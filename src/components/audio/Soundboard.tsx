@@ -15,7 +15,7 @@ interface SoundboardProps {
 
 export function Soundboard({ userId = null }: SoundboardProps): React.ReactElement {
   const { send, addMessageHandler, sessionId } = useSocketContext();
-  const { sounds, allSounds, volume, context, setContext, playSound, setVolume } =
+  const { sounds, volume, context, setContext, playSound, setVolume } =
     useSoundboard(userId);
 
   // Initialize soundOrder with the current order of sounds
@@ -78,8 +78,9 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
 
       // If we have a valid loaded order, use it. Otherwise use the current sounds order.
       setSoundOrder(validOrder.length > 0 ? validOrder : sounds.map((sound) => sound.filename));
-    } catch (_error) {
+    } catch (error) {
       // Fallback to current sounds order if loading fails
+      console.error('Failed to load sound order:', error);
       setSoundOrder(sounds.map((sound) => sound.filename));
     }
   }, [userId, sounds]);
@@ -91,12 +92,12 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
   }, [userId, loadSoundOrder]);
 
   const saveSoundOrder = async (newOrder: string[]) => {
-    try {
-      if (!userId) {
-        setSoundOrder(newOrder);
-        return;
-      }
+    if (!userId) {
+      setSoundOrder(newOrder);
+      return;
+    }
 
+    try {
       const response = await fetch('http://localhost:3000/save-sound-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -111,12 +112,12 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
       }
-
-      setSoundOrder(newOrder);
-    } catch (_error) {
-      // Fallback: still update local state even if server save fails
-      setSoundOrder(newOrder);
+    } catch (error) {
+      console.error('Failed to save sound order:', error);
     }
+
+    // Always update local state, whether server save succeeds or fails
+    setSoundOrder(newOrder);
   };
 
   const handleDragEnd = (fromIndex: number, toIndex: number) => {
@@ -141,15 +142,17 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
 
   const contexts = [
     'All',
-    ...Array.from(new Set(allSounds.flatMap((s) => s.contexts ?? []))),
+    ...Array.from(new Set(sounds.flatMap((s) => s.contexts ?? []))),
   ].filter(Boolean);
 
   const handlePlay = (filename: string) => {
-    playSound(filename);
+    const sound = sounds.find((s) => s.filename === filename);
+    if (!sound) return;
+
+    playSound(sound);
 
     // Always try to show credits, regardless of session
-    const sound = sounds.find((s) => s.filename === filename);
-    if (sound?.credit) {
+    if (sound.credit) {
       showCreditToast(sound.name, sound.credit);
     }
 
@@ -160,8 +163,8 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
         id: sessionId,
         content: {
           filename,
-          credit: sound?.credit,
-          name: sound?.name,
+          credit: sound.credit,
+          name: sound.name,
         },
       });
     }
@@ -176,14 +179,17 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
           credit?: string;
           name?: string;
         };
-        playSound(filename);
-        // Show credit for received soundboard sounds
-        if (credit && name) {
-          showCreditToast(name, credit);
+        const sound = sounds.find((s) => s.filename === filename);
+        if (sound) {
+          playSound(sound);
+          // Show credit for received soundboard sounds
+          if (credit && name) {
+            showCreditToast(name, credit);
+          }
         }
       }
     });
-  }, [addMessageHandler, playSound]);
+  }, [addMessageHandler, playSound, sounds]);
 
   return (
     <Paper p="xs" radius="md" withBorder>

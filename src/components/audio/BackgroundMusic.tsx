@@ -28,6 +28,10 @@ export function BackgroundMusic({
   // Autoplay permission modal state
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const [modalOpened, { open, close }] = useDisclosure(false);
+  // Track if user has interacted with audio controls
+  const [userInteracted, setUserInteracted] = useState(false);
+  // Context state for filtering sounds
+  const [filterContext, setFilterContext] = useState<string>('All');
 
   const {
     currentSound,
@@ -35,19 +39,14 @@ export function BackgroundMusic({
     isPlaying,
     volume,
     progress,
-    context,
     playCategory,
     playSpecificSound,
     next,
     stop,
     setVolume,
     seekTo,
-    setContext,
     sounds,
-    stopReceived,
     getCurrentTime,
-    userInteracted,
-    setUserInteracted,
   } = useBackgroundMusic(userId, () => {
     // This callback is called when autoplay is blocked
     if (!autoplayBlocked) {
@@ -92,17 +91,15 @@ export function BackgroundMusic({
     timestamp?: number;
     currentTime?: number;
   }) => {
-    playSpecificSound({ 
-      filename: content.filename, 
-      credit: content.credit, 
-      timestamp: content.timestamp, 
-      currentTime: content.currentTime 
-    }).catch(() => {});
-  }, [playSpecificSound]);
+    const sound = sounds.find(s => s.filename === content.filename);
+    if (sound) {
+      playSpecificSound(sound).catch(() => {});
+    }
+  }, [playSpecificSound, sounds]);
 
   const handleBackgroundMusicStop = useCallback(() => {
-    stopReceived();
-  }, [stopReceived]);
+    stop();
+  }, [stop]);
 
   const handleStatusRequest = useCallback((content: { statusType: string }) => {
     if (content.statusType === 'backgroundMusic' && currentSound) {
@@ -136,17 +133,15 @@ export function BackgroundMusic({
   }) => {
     if (content.statusType === 'backgroundMusic' && content.statusData) {
       if (content.statusData.isPlaying) {
-        playSpecificSound({
-          filename: content.statusData.filename,
-          credit: content.statusData.credit,
-          timestamp: content.statusData.timestamp,
-          currentTime: content.statusData.currentTime,
-        }).catch(() => {});
+        const sound = sounds.find(s => s.filename === content.statusData.filename);
+        if (sound) {
+          playSpecificSound(sound).catch(() => {});
+        }
       } else {
-        stopReceived();
+        stop();
       }
     }
-  }, [playSpecificSound, stopReceived]);
+  }, [playSpecificSound, stop, sounds]);
 
   // Listen for incoming socket messages
   useEffect(() => {
@@ -156,10 +151,10 @@ export function BackgroundMusic({
       }
 
       const messageHandlers: Record<string, (content: unknown) => void> = {
-        backgroundMusicChange: handleBackgroundMusicChange,
+        backgroundMusicChange: (content) => handleBackgroundMusicChange(content as { filename: string; credit?: string; timestamp?: number; currentTime?: number }),
         backgroundMusicStop: handleBackgroundMusicStop,
-        statusRequest: handleStatusRequest,
-        statusResponse: handleStatusResponse
+        statusRequest: (content) => handleStatusRequest(content as { statusType: string }),
+        statusResponse: (content) => handleStatusResponse(content as { statusType: string; statusData: { filename: string; credit?: string; isPlaying: boolean; timestamp?: number; currentTime?: number; } })
       };
 
       const handler = messageHandlers[msg.type as keyof typeof messageHandlers];
@@ -204,7 +199,7 @@ export function BackgroundMusic({
     // If there's a current sound that was blocked, play it specifically
     if (currentSound) {
       // Use the specific sound play method to play exactly this sound
-      playSpecificSound(currentSound).catch((error) => {
+      playSpecificSound(currentSound).catch(() => {
         // Silently handle playback errors
       });
     }
@@ -284,13 +279,13 @@ export function BackgroundMusic({
             {CATEGORIES.map(({ value, label }) => {
               // Filter sounds by current context first, then by category
               const count = sounds.filter((s) =>
-                filterSoundsByContextAndCategory(s, context, value)
+                filterSoundsByContextAndCategory(s, filterContext, value)
               ).length;
               return (
                 <Button
                   key={value}
                   size="xs"
-                  variant={activeCategory === value ? 'filled' : 'default'}
+                  variant={activeCategory === value.toUpperCase() ? 'filled' : 'default'}
                   onClick={() => handlePlayCategory(value)}
                 >
                   Play {label} ({count})
@@ -299,8 +294,8 @@ export function BackgroundMusic({
             })}
             {/* Context dropdown - exact same size as buttons */}
             <CustomCombobox
-              value={context}
-              onChange={setContext}
+              value={filterContext}
+              onChange={setFilterContext}
               data={contexts}
               placeholder="Context"
             />

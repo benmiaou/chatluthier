@@ -100,8 +100,8 @@ export function AmbianceSounds({
       // If we have a valid loaded order, use it. Otherwise use the current bars order.
       setSoundOrder(validOrder.length > 0 ? validOrder : bars.map((bar) => bar.sound.filename));
     } catch (error) {
-      // Error is handled by the catch block, no need for console output
       // Fallback to current bars order if loading fails
+      console.warn('Failed to load sound order:', error);
       setSoundOrder(bars.map((bar) => bar.sound.filename));
     }
   }, [userId, bars]);
@@ -136,7 +136,7 @@ export function AmbianceSounds({
         throw new Error(`Server responded with status ${response.status}: ${errorText}`);
       }
     } catch (error) {
-      // Error is handled by the catch block, no need for console output
+      console.error('Failed to save sound order:', error);
     } finally {
       // Always update local state regardless of server save success
       setSoundOrder(newOrder);

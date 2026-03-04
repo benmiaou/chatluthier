@@ -6,7 +6,7 @@ export interface Sound {
   imageFile?: string;
   credit?: string;
   creditUrl?: string;
-  /** ambiance/soundboard: string[]; backgroundMusic: [category, scene][] stored as unknown[] */
+  display_name?: string; 
   contexts?: string[];
   isEnabled?: boolean;
 }

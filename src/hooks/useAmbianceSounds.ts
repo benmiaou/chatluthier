@@ -59,8 +59,8 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
 
       barsRef.current = newBars;
       setBars(newBars);
-    } catch (_err) {
-      // Failed to load ambiance sounds
+    } catch (err) {
+      console.error('Failed to load ambiance sounds:', err);
     }
   }, [userId]);
 
@@ -168,6 +168,26 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
     [presets, applyStatus]
   );
 
+  const deletePreset = useCallback(
+    async (name: string) => {
+      if (!userId) {
+        return;
+      }
+      setPresets((prev) => {
+        const newPresets = { ...prev };
+        delete newPresets[name];
+        return newPresets;
+      });
+      await fetch('/delete-preset', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, presetName: name }),
+      });
+    },
+    [userId]
+  );
+
   // Cleanup audio on unmount
   useEffect(() => {
     return () => {
@@ -192,6 +212,7 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
     applyStatus,
     loadPresets,
     savePreset,
+    deletePreset,
     applyPreset,
   };
 }

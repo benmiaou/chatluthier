@@ -1,7 +1,6 @@
 import { Button, Group, Loader, Modal, Stack, Text, Anchor } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { notifications } from '@mantine/notifications';
-import React from 'react';
 
 // Backend stores: { id, category, file, contexts, created_at, status, etc. }
 interface SoundRequest {

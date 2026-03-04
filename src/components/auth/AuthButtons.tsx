@@ -268,7 +268,7 @@ export function AuthButtons(): React.ReactElement {
 
       setPasswordResetModalOpen(false);
     } catch (error) {
-      setError(error.message || 'Failed to retrieve secret question');
+      setError(error instanceof Error ? error.message : 'Failed to retrieve secret question');
     }
   };
 
@@ -334,7 +334,7 @@ export function AuthButtons(): React.ReactElement {
 
       // Password reset successfully!
     } catch (error) {
-      setError(error.message || 'Password reset failed');
+      setError(error instanceof Error ? error.message : 'Password reset failed');
     }
   };
 

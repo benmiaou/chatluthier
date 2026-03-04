@@ -5,6 +5,7 @@ const ASSET_PREFIX = '/assets/soundboard/';
 
 export function useSoundboard(userId: string | null): {
   sounds: Sound[];
+  allSounds: Sound[];
   volume: number;
   setVolume: (volume: number) => void;
   context: string;
@@ -16,7 +17,7 @@ export function useSoundboard(userId: string | null): {
   applyStatus: (status: Record<string, boolean>) => void;
 } {
   const [sounds, setSounds] = useState<Sound[]>([]);
-  const [volume, setVolumeState] = useState(0.5);
+  const [volume, setVolume] = useState(0.5);
   const [context, setContext] = useState('All');
 
   const loadSounds = useCallback(async () => {
@@ -33,8 +34,8 @@ export function useSoundboard(userId: string | null): {
         return { ...base, name: base.name ?? (base as any).display_name ?? base.filename };
       });
       setSounds(merged.filter((s) => s.isEnabled !== false));
-    } catch (_err) {
-      // Failed to load soundboard
+    } catch (err) {
+      console.error('Failed to load soundboard:', err);
     }
   }, [userId]);
 
@@ -46,17 +47,31 @@ export function useSoundboard(userId: string | null): {
   }, [loadSounds]);
 
   const playSound = useCallback(
-    (filename: string): HTMLAudioElement => {
-      const audio = new Audio(`${ASSET_PREFIX}${filename}`);
+    (sound: Sound): void => {
+      const audio = new Audio(`${ASSET_PREFIX}${sound.filename}`);
       audio.volume = volume;
       audio.play().catch(() => {});
-      return audio;
     },
     [volume]
   );
 
-  const setVolume = useCallback((v: number) => {
-    setVolumeState(v);
+  const handleSetVolume = useCallback((v: number) => {
+    setVolume(v);
+  }, []);
+
+  const stopAll = useCallback(() => {
+    // Implementation for stopping all sounds
+    // You might need to track active audio elements to stop them
+  }, []);
+
+  const getStatus = useCallback((): Record<string, boolean> => {
+    // Implementation for getting sound statuses
+    return {};
+  }, []);
+
+  const applyStatus = useCallback((status: Record<string, boolean>) => {
+    // Implementation for applying sound statuses
+    console.log('Applying status:', status);
   }, []);
 
   return {
@@ -68,6 +83,9 @@ export function useSoundboard(userId: string | null): {
     setContext,
     loadSounds,
     playSound,
-    setVolume,
+    setVolume: handleSetVolume,
+    stopAll,
+    getStatus,
+    applyStatus,
   };
 }

@@ -12,21 +12,18 @@ import {
   ActionIcon,
 } from '@mantine/core';
 import { CustomCombobox } from '../audio/CustomCombobox';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { notifications } from '@mantine/notifications';
 import { IconX } from '@tabler/icons-react';
-import React from 'react';
 
 interface RequestSoundModalProps {
   opened: boolean;
   onClose: () => void;
-  userId?: string | null;
 }
 
 export function RequestSoundModal({
   opened,
   onClose,
-  _userId,
 }: Readonly<RequestSoundModalProps>): React.JSX.Element {
   const [soundName, setSoundName] = useState('');
   const [soundUrl, setSoundUrl] = useState('');
@@ -117,7 +114,6 @@ export function RequestSoundModal({
         />
 
         <CustomCombobox
-          label="Category"
           value={getCategoryDisplayName(category)}
           onChange={(v) => setCategory(categoryMapping[v] || 'soundboard')}
           data={['Background Music', 'Ambiance', 'Soundboard']}
@@ -153,19 +149,7 @@ export function RequestSoundModal({
           ]}
           searchable
           clearable
-          creatable
-          getCreateLabel={(query) => `+ Add "${query}"`}
-          onCreate={(query) => {
-            const newContext = query.trim();
-            if (newContext && !contexts.includes(newContext)) {
-              setContexts([...contexts, newContext]);
-              return newContext;
-            }
-            return query;
-          }}
-          createLabel="Add custom context"
           maxDropdownHeight={200}
-          withinPortal={true}
         />
 
         {contexts.length > 0 && (
