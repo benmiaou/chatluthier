@@ -73,4 +73,4 @@ if (process.argv.length < 3) {
 }
 
 const userIdentifier = process.argv[2];
-removeUserAdmin(userIdentifier);
+await removeUserAdmin(userIdentifier);

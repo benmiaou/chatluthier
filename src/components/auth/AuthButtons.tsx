@@ -435,7 +435,7 @@ export function AuthButtons(): React.ReactElement {
           />
 
           {error && (
-            <Text color="red" size="sm">
+            <Text c="red" size="sm">
               {error}
             </Text>
           )}
@@ -559,7 +559,7 @@ export function AuthButtons(): React.ReactElement {
           />
 
           {error && (
-            <Text color="red" size="sm">
+            <Text c="red" size="sm">
               {error}
             </Text>
           )}
@@ -604,7 +604,7 @@ export function AuthButtons(): React.ReactElement {
           />
 
           {error && (
-            <Text color="red" size="sm">
+            <Text c="red" size="sm">
               {error}
             </Text>
           )}
@@ -679,7 +679,7 @@ export function AuthButtons(): React.ReactElement {
           />
 
           {error && (
-            <Text color="red" size="sm">
+            <Text c="red" size="sm">
               {error}
             </Text>
           )}

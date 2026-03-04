@@ -58,8 +58,9 @@ export function useBackgroundMusic(
       });
       setSounds(merged);
       precacheAudio(merged.map((s) => `${ASSET_PREFIX}${s.filename}`));
-    } catch (_err) {
+    } catch (error) {
       // Failed to load background sounds
+      console.error('Failed to load background sounds:', error);
     }
   }, [userId]);
 

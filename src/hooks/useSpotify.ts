@@ -42,7 +42,7 @@ export function useSpotify(): {
   // ─── Auto-handle auth callback on mount ──────────────────────────────────
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(globalThis.location.search);
     const code = params.get('code');
     if (!code) {
       return;
@@ -50,7 +50,7 @@ export function useSpotify(): {
 
     params.delete('code');
     params.delete('state');
-    window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+    globalThis.history.replaceState({}, '', `${globalThis.location.pathname}?${params}`);
 
     exchangeSpotifyCode(code)
       .then((t) => {
@@ -82,7 +82,7 @@ export function useSpotify(): {
   const connect = useCallback(async () => {
     setIsConnecting(true);
     const url = await getSpotifyAuthUrl();
-    window.location.href = url;
+    globalThis.location.href = url;
   }, []);
 
   const disconnect = useCallback(() => {

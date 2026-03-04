@@ -85,6 +85,69 @@ export function BackgroundMusic({
     }
   }, [currentSound, sessionId, send, getCurrentTime]);
 
+  // Message handler functions extracted to reduce nesting
+  const handleBackgroundMusicChange = useCallback((content: {
+    filename: string;
+    credit?: string;
+    timestamp?: number;
+    currentTime?: number;
+  }) => {
+    playSpecificSound({ 
+      filename: content.filename, 
+      credit: content.credit, 
+      timestamp: content.timestamp, 
+      currentTime: content.currentTime 
+    }).catch(() => {});
+  }, [playSpecificSound]);
+
+  const handleBackgroundMusicStop = useCallback(() => {
+    stopReceived();
+  }, [stopReceived]);
+
+  const handleStatusRequest = useCallback((content: { statusType: string }) => {
+    if (content.statusType === 'backgroundMusic' && currentSound) {
+      const currentTime = getCurrentTime();
+      send({
+        type: 'statusResponse',
+        id: sessionId,
+        content: {
+          statusType: 'backgroundMusic',
+          statusData: {
+            filename: currentSound.filename,
+            credit: currentSound.credit,
+            isPlaying: isPlaying,
+            timestamp: Date.now(),
+            currentTime: currentTime,
+          },
+        },
+      });
+    }
+  }, [currentSound, isPlaying, sessionId, send, getCurrentTime]);
+
+  const handleStatusResponse = useCallback((content: {
+    statusType: string;
+    statusData: {
+      filename: string;
+      credit?: string;
+      isPlaying: boolean;
+      timestamp?: number;
+      currentTime?: number;
+    };
+  }) => {
+    if (content.statusType === 'backgroundMusic' && content.statusData) {
+      if (content.statusData.isPlaying) {
+        playSpecificSound({
+          filename: content.statusData.filename,
+          credit: content.statusData.credit,
+          timestamp: content.statusData.timestamp,
+          currentTime: content.statusData.currentTime,
+        }).catch(() => {});
+      } else {
+        stopReceived();
+      }
+    }
+  }, [playSpecificSound, stopReceived]);
+
   // Listen for incoming socket messages
   useEffect(() => {
     return addMessageHandler((msg: WsMessage) => {
@@ -93,64 +156,10 @@ export function BackgroundMusic({
       }
 
       const messageHandlers: Record<string, (content: unknown) => void> = {
-        backgroundMusicChange: (content) => {
-          const { filename, credit, timestamp, currentTime } = content as {
-            filename: string;
-            credit?: string;
-            timestamp?: number;
-            currentTime?: number;
-          };
-          // Replace playReceived with playSpecificSound or similar available method
-          playSpecificSound({ filename, credit, timestamp, currentTime }).catch(() => {});
-        },
-        backgroundMusicStop: () => {
-          stopReceived();
-        },
-        statusRequest: (content) => {
-          const { statusType } = content as { statusType: string };
-          if (statusType === 'backgroundMusic' && currentSound) {
-            const currentTime = getCurrentTime();
-            send({
-              type: 'statusResponse',
-              id: sessionId,
-              content: {
-                statusType: 'backgroundMusic',
-                statusData: {
-                  filename: currentSound.filename,
-                  credit: currentSound.credit,
-                  isPlaying: isPlaying,
-                  timestamp: Date.now(),
-                  currentTime: currentTime,
-                },
-              },
-            });
-          }
-        },
-        statusResponse: (content) => {
-          const { statusType, statusData } = content as {
-            statusType: string;
-            statusData: {
-              filename: string;
-              credit?: string;
-              isPlaying: boolean;
-              timestamp?: number;
-              currentTime?: number;
-            };
-          };
-          if (statusType === 'backgroundMusic' && statusData) {
-            if (statusData.isPlaying) {
-              // Replace playReceived with playSpecificSound or similar available method
-              playSpecificSound({
-                filename: statusData.filename,
-                credit: statusData.credit,
-                timestamp: statusData.timestamp,
-                currentTime: statusData.currentTime,
-              }).catch(() => {});
-            } else {
-              stopReceived();
-            }
-          }
-        }
+        backgroundMusicChange: handleBackgroundMusicChange,
+        backgroundMusicStop: handleBackgroundMusicStop,
+        statusRequest: handleStatusRequest,
+        statusResponse: handleStatusResponse
       };
 
       const handler = messageHandlers[msg.type as keyof typeof messageHandlers];
@@ -160,13 +169,10 @@ export function BackgroundMusic({
     });
   }, [
     addMessageHandler,
-    stopReceived,
-    currentSound,
-    isPlaying,
-    sessionId,
-    send,
-    getCurrentTime,
-    playSpecificSound,
+    handleBackgroundMusicChange,
+    handleBackgroundMusicStop,
+    handleStatusRequest,
+    handleStatusResponse
   ]);
 
   // Broadcast stop
