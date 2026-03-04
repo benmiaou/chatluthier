@@ -1,5 +1,6 @@
 import { Button, FileInput, Modal, Select, Stack, TextInput } from '@mantine/core';
 import { useState } from 'react';
+import type React from 'react';
 import { notifications } from '@mantine/notifications';
 
 interface AddSoundModalProps {

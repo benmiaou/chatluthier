@@ -14,7 +14,7 @@ interface AppLayoutProps {
   children: ReactNode;
 }
 
-export function AppLayout({ children }: AppLayoutProps): React.ReactElement {
+export function AppLayout({ children }: Readonly<AppLayoutProps>): React.ReactElement {
   return (
     <AppShell header={{ height: SETTINGS.HEADER_HEIGHT }} footer={{ height: 48 }} padding="md">
       <AppShell.Header>

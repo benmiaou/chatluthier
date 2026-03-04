@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Sound } from '../types/sound';
+import { handleError } from '../utils/logger';
 
 const ASSET_PREFIX = '/assets/ambiance/';
 
@@ -60,7 +61,7 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
       barsRef.current = newBars;
       setBars(newBars);
     } catch (err) {
-      console.error('Failed to load ambiance sounds:', err);
+      handleError(err, 'useAmbianceSounds.loadSounds');
     }
   }, [userId]);
 
@@ -82,18 +83,21 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
     }
   }, []);
 
-  const setBarVolume = useCallback((filename: string, volume: number) => {
-    setBars((prev) => {
-      const shouldUpdateBar = (bar: AmbianceBar) => bar.sound.filename === filename;
-      return prev.map((b) => {
-        if (!shouldUpdateBar(b)) {
-          return b;
-        }
-        updateBarAudio(b, volume);
-        return { ...b, volume };
+  const setBarVolume = useCallback(
+    (filename: string, volume: number) => {
+      setBars((prev) => {
+        const shouldUpdateBar = (bar: AmbianceBar) => bar.sound.filename === filename;
+        return prev.map((b) => {
+          if (!shouldUpdateBar(b)) {
+            return b;
+          }
+          updateBarAudio(b, volume);
+          return { ...b, volume };
+        });
       });
-    });
-  }, []);
+    },
+    [updateBarAudio]
+  );
 
   const reset = useCallback(() => {
     setBars((prev) =>
@@ -111,16 +115,19 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
     return Object.fromEntries(barsRef.current.map((b) => [b.sound.filename, b.volume]));
   }, []);
 
-  const applyStatus = useCallback((status: Record<string, number>) => {
-    setBars((prev) => {
-      const getVolumeForBar = (bar: AmbianceBar) => status[bar.sound.filename] ?? 0;
-      return prev.map((b) => {
-        const vol = getVolumeForBar(b);
-        updateBarAudio(b, vol);
-        return { ...b, volume: vol };
+  const applyStatus = useCallback(
+    (status: Record<string, number>) => {
+      setBars((prev) => {
+        const getVolumeForBar = (bar: AmbianceBar) => status[bar.sound.filename] ?? 0;
+        return prev.map((b) => {
+          const vol = getVolumeForBar(b);
+          updateBarAudio(b, vol);
+          return { ...b, volume: vol };
+        });
       });
-    });
-  }, []);
+    },
+    [updateBarAudio]
+  );
 
   // Keep barsRef in sync
   useEffect(() => {

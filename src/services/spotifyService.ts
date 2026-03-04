@@ -23,18 +23,24 @@ async function generateCodeVerifier(): Promise<string> {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
   return btoa(String.fromCodePoint(...array))
-    .split('+').join('-')
-    .split('/').join('_')
-    .split('=').join('');
+    .split('+')
+    .join('-')
+    .split('/')
+    .join('_')
+    .split('=')
+    .join('');
 }
 
 async function generateCodeChallenge(verifier: string): Promise<string> {
   const data = new TextEncoder().encode(verifier);
   const digest = await crypto.subtle.digest('SHA-256', data);
   return btoa(String.fromCodePoint(...new Uint8Array(digest)))
-    .split('+').join('-')
-    .split('/').join('_')
-    .split('=').join('');
+    .split('+')
+    .join('-')
+    .split('/')
+    .join('_')
+    .split('=')
+    .join('');
 }
 
 // ─── Auth URL ────────────────────────────────────────────────────────────────

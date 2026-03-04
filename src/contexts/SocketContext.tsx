@@ -93,67 +93,77 @@ export function SocketProvider({
     }, HEARTBEAT_MS);
   }, []);
 
-  const handleSubscription = useCallback((ws: WebSocket, subscriptionParticipants: Array<{ id: string }>) => {
-    // Request background music status from first participant
-    if (ws.readyState === WebSocket.OPEN && subscriptionParticipants.length > 0) {
-      const firstParticipantId = subscriptionParticipants[0].id;
+  const handleSubscription = useCallback(
+    (ws: WebSocket, subscriptionParticipants: Array<{ id: string }>) => {
+      // Request background music status from first participant
+      if (ws.readyState === WebSocket.OPEN && subscriptionParticipants.length > 0) {
+        const firstParticipantId = subscriptionParticipants[0].id;
 
-      ws.send(
-        JSON.stringify({
-          type: 'requestStatus',
-          id: sessionId,
-          content: {
-            type: 'backgroundMusic',
-            targetParticipantId: firstParticipantId,
-          },
-        })
-      );
+        ws.send(
+          JSON.stringify({
+            type: 'requestStatus',
+            id: sessionId,
+            content: {
+              type: 'backgroundMusic',
+              targetParticipantId: firstParticipantId,
+            },
+          })
+        );
 
-      // Request ambiance status from first participant
-      ws.send(
-        JSON.stringify({
-          type: 'requestStatus',
-          id: sessionId,
-          content: {
-            type: 'ambiance',
-            targetParticipantId: firstParticipantId,
-          },
-        })
-      );
-    }
-  }, []);
+        // Request ambiance status from first participant
+        ws.send(
+          JSON.stringify({
+            type: 'requestStatus',
+            id: sessionId,
+            content: {
+              type: 'ambiance',
+              targetParticipantId: firstParticipantId,
+            },
+          })
+        );
+      }
+    },
+    [sessionId]
+  );
 
-  const handleSubscribedMessage = useCallback((data: WsMessage) => {
-    setSessionId(data.id ?? null);
-    setStatusMessage(`Joined session: ${data.id ?? ''}`);
-    
-    if (data.participantId) {
-      setParticipantId(data.participantId);
-      localStorage.setItem('wsParticipantId', data.participantId);
-    }
-    
-    if (data.participants) {
-      setParticipants(data.participants);
-      // Request status from first participant if available
-      if (data.participants.length > 0 && data.id) {
-        const currentWs = wsRef.current;
-        if (currentWs) {
-          handleSubscription(currentWs, data.participants);
+  const handleSubscribedMessage = useCallback(
+    (data: WsMessage) => {
+      setSessionId(data.id ?? null);
+      setStatusMessage(`Joined session: ${data.id ?? ''}`);
+
+      if (data.participantId) {
+        setParticipantId(data.participantId);
+        localStorage.setItem('wsParticipantId', data.participantId);
+      }
+
+      if (data.participants) {
+        setParticipants(data.participants);
+        // Request status from first participant if available
+        if (data.participants.length > 0 && data.id) {
+          const currentWs = wsRef.current;
+          if (currentWs) {
+            handleSubscription(currentWs, data.participants);
+          }
         }
       }
-    }
-  }, [handleSubscription]);
+    },
+    [handleSubscription]
+  );
 
-const handleParticipantJoined = useCallback((data: WsMessage) => {
-  if (data.participant !== undefined) {
-    setParticipants((prev) => [...prev, {
-      pseudo: data.participant.pseudo ?? null,
-      isAnonymous: data.participant.isAnonymous ?? false,
-      id: data.participant.id
-    }]);
-    setStatusMessage(`New participant joined: ${data.participant.pseudo || 'Anonymous'}`);
-  }
-}, []);
+  const handleParticipantJoined = useCallback((data: WsMessage) => {
+    if (data.participant !== undefined) {
+      const participant = data.participant; // TypeScript now knows `participant` is defined
+      setParticipants((prev) => [
+        ...prev,
+        {
+          pseudo: participant.pseudo ?? null,
+          isAnonymous: participant.isAnonymous ?? false,
+          id: participant.id,
+        },
+      ]);
+      setStatusMessage(`New participant joined: ${participant.pseudo || 'Anonymous'}`);
+    }
+  }, []);
 
   const handleParticipantLeft = useCallback((data: WsMessage) => {
     if (data.participantId) {
@@ -162,31 +172,34 @@ const handleParticipantJoined = useCallback((data: WsMessage) => {
     }
   }, []);
 
-  const handleMessage = useCallback((event: MessageEvent) => {
-    try {
-      const data = JSON.parse(event.data as string) as WsMessage;
+  const handleMessage = useCallback(
+    (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data as string) as WsMessage;
 
-      // Route message to appropriate handler
-      switch (data.type) {
-      case 'subscribed':
-        handleSubscribedMessage(data);
-        break;
-      case 'participantJoined':
-        handleParticipantJoined(data);
-        break;
-      case 'participantLeft':
-        handleParticipantLeft(data);
-        break;
-      default:
-        break;
+        // Route message to appropriate handler
+        switch (data.type) {
+          case 'subscribed':
+            handleSubscribedMessage(data);
+            break;
+          case 'participantJoined':
+            handleParticipantJoined(data);
+            break;
+          case 'participantLeft':
+            handleParticipantLeft(data);
+            break;
+          default:
+            break;
+        }
+
+        // Notify all handlers
+        handlersRef.current.forEach((h) => h(data));
+      } catch {
+        /* ignore parse errors */
       }
-
-      // Notify all handlers
-      handlersRef.current.forEach((h) => h(data));
-    } catch {
-      /* ignore parse errors */
-    }
-  }, []);
+    },
+    [handleSubscribedMessage, handleParticipantJoined, handleParticipantLeft]
+  );
 
   const handleConnectionClose = useCallback(() => {
     setConnected(false);
@@ -194,11 +207,11 @@ const handleParticipantJoined = useCallback((data: WsMessage) => {
       sessionId ? 'Session active. Reconnecting to server...' : 'Disconnected. Reconnecting...'
     );
     clearHeartbeat();
-    
+
     if (shouldReconnectRef.current) {
-      // eslint-disable-next-line react-hooks/immutability
       reconnectRef.current = setTimeout(connect, RECONNECT_MS);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
 
   const handleConnectionError = useCallback(() => {
@@ -213,7 +226,7 @@ const handleParticipantJoined = useCallback((data: WsMessage) => {
     const urlParams = new URLSearchParams(globalThis.location.search);
     const urlId = urlParams.get('sessionId');
     const idToJoin = pendingIdRef.current ?? urlId ?? localStorage.getItem('lastJoinId');
-    
+
     // Clean up URL param if present
     if (urlId) {
       urlParams.delete('sessionId');
@@ -223,7 +236,7 @@ const handleParticipantJoined = useCallback((data: WsMessage) => {
         globalThis.location.pathname + (urlParams.toString() ? `?${urlParams}` : '')
       );
     }
-    
+
     return idToJoin;
   }, []);
 
@@ -276,7 +289,14 @@ const handleParticipantJoined = useCallback((data: WsMessage) => {
     ws.onmessage = handleMessage;
     ws.onclose = handleConnectionClose;
     ws.onerror = handleConnectionError;
-  }, [sessionId]);
+  }, [
+    handleMessage,
+    handleConnectionClose,
+    handleConnectionError,
+    getSessionIdToJoin,
+    sendSubscriptionRequest,
+    setupHeartbeat,
+  ]);
 
   useEffect(() => {
     // Add a small delay to ensure page is fully loaded before connecting
@@ -332,7 +352,8 @@ const handleParticipantJoined = useCallback((data: WsMessage) => {
     setStatusMessage('Left session.');
 
     // Notify server about leaving the session
-    const shouldNotifyServer = sessionId && wsRef.current?.readyState === WebSocket.OPEN && participantId;
+    const shouldNotifyServer =
+      sessionId && wsRef.current?.readyState === WebSocket.OPEN && participantId;
     if (shouldNotifyServer) {
       const unsubscribeMessage = JSON.stringify({
         type: 'unsubscribe',

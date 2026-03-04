@@ -8,7 +8,7 @@
  * This script updates the user's is_admin flag in the database to grant administrative privileges.
  */
 
-const path = require('path');
+const path = require('node:path');
 const db = require('../srv/database/db');
 
 async function makeUserAdmin(userIdentifier) {

@@ -25,17 +25,25 @@ class Database {
       // Open database connection
       this.db = new sqlite3.Database(this.config.filename, (err) => {
         if (err) {
-          console.error('Error opening database connection:', err.message);
+          const winstonLogger = require('../utils/logger');
+          winstonLogger.error('Error opening database connection', {
+            error: err.message,
+            context: 'database',
+          });
           reject(err);
           return;
         }
 
-        console.log('Database connection established');
+        const winstonLogger = require('../utils/logger');
+        winstonLogger.info('Database connection established', { context: 'database' });
 
         // Enable foreign key constraints
         this.db.run('PRAGMA foreign_keys = ON', (err) => {
           if (err) {
-            console.warn('Could not enable foreign keys:', err.message);
+            winstonLogger.warn('Could not enable foreign keys', {
+              error: err.message,
+              context: 'database',
+            });
           }
           resolve(this.db);
         });
@@ -54,7 +62,13 @@ class Database {
     return new Promise((resolve, reject) => {
       this.db.all(sql, params, (err, rows) => {
         if (err) {
-          console.error('Query error:', sql, params, err.message);
+          const winstonLogger = require('../utils/logger');
+          winstonLogger.error('Query error', {
+            sql,
+            params,
+            error: err.message,
+            context: 'database',
+          });
           reject(err);
           return;
         }
@@ -82,7 +96,13 @@ class Database {
     return new Promise((resolve, reject) => {
       this.db.run(sql, params, function (err) {
         if (err) {
-          console.error('Execute error:', sql, params, err.message);
+          const winstonLogger = require('../utils/logger');
+          winstonLogger.error('Execute error', {
+            sql,
+            params,
+            error: err.message,
+            context: 'database',
+          });
           reject(err);
           return;
         }

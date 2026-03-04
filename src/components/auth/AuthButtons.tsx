@@ -14,7 +14,9 @@ import { IconLogout, IconLogin, IconUserPlus } from '@tabler/icons-react';
 
 import { useState, useEffect } from 'react';
 
+import React from 'react';
 import { useAuthContext } from '../../contexts/AuthContext';
+import { handleError } from '../../utils/logger';
 
 // Extracted component for pseudo availability status
 interface PseudoAvailabilityStatusProps {
@@ -22,7 +24,10 @@ interface PseudoAvailabilityStatusProps {
   readonly available: boolean | null;
 }
 
-const PseudoAvailabilityStatus = ({ checking, available }: PseudoAvailabilityStatusProps): React.ReactNode => {
+const PseudoAvailabilityStatus = ({
+  checking,
+  available,
+}: PseudoAvailabilityStatusProps): React.ReactNode => {
   if (checking) {
     return (
       <Text size="xs" c="gray">
@@ -159,9 +164,8 @@ export function AuthButtons(): React.ReactElement {
 
           setPseudoAvailable(true);
         }
-      } catch (error) {
+      } catch (_error) {
         // If there's an error, assume pseudo is available for development
-        console.warn('Pseudo availability check failed, assuming available for development:', error);
         setPseudoAvailable(true);
       } finally {
         setPseudoChecking(false);
@@ -184,9 +188,9 @@ export function AuthButtons(): React.ReactElement {
       setLoginPseudo('');
 
       setLoginPassword('');
-    } catch (error) {
+    } catch (_error) {
       // Show a simple, user-friendly error message for login failures
-      console.warn('Login failed:', error);
+      handleError(_error, 'AuthButtons.handleLogin');
       setError('Incorrect login or password');
     }
   };
@@ -244,8 +248,8 @@ export function AuthButtons(): React.ReactElement {
       setRegisterSecretQuestion('');
 
       setRegisterSecretAnswer('');
-    } catch (error) {
-      console.warn('Registration failed:', error);
+    } catch (_error) {
+      handleError(_error, 'AuthButtons.handleRegister');
       setError('Registration failed');
     }
   };
@@ -267,8 +271,8 @@ export function AuthButtons(): React.ReactElement {
       setSecretQuestionModalOpen(true);
 
       setPasswordResetModalOpen(false);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to retrieve secret question');
+    } catch (_error) {
+      setError(_error instanceof Error ? _error.message : 'Failed to retrieve secret question');
     }
   };
 
@@ -333,8 +337,8 @@ export function AuthButtons(): React.ReactElement {
       setResetConfirmPassword('');
 
       // Password reset successfully!
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Password reset failed');
+    } catch (_error) {
+      setError(_error instanceof Error ? _error.message : 'Password reset failed');
     }
   };
 
@@ -488,10 +492,7 @@ export function AuthButtons(): React.ReactElement {
             required
             error={pseudoAvailable === false ? 'Pseudo already taken' : ''}
             rightSection={
-              <PseudoAvailabilityStatus
-                checking={pseudoChecking}
-                available={pseudoAvailable}
-              />
+              <PseudoAvailabilityStatus checking={pseudoChecking} available={pseudoAvailable} />
             }
             onKeyDown={(e) => {
               if (e.key === 'Enter') {

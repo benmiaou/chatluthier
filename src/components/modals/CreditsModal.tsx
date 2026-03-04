@@ -1,6 +1,7 @@
 import { Modal, Stack, Text, Group, Tabs, rem } from '@mantine/core';
 
 import { useEffect, useState } from 'react';
+import type React from 'react';
 
 import { IconMusic, IconCloud, IconSpeakerphone } from '@tabler/icons-react';
 

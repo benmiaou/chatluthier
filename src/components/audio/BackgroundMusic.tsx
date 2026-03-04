@@ -5,6 +5,7 @@ import { IconPlayerSkipForward, IconPlayerStop, IconVolume } from '@tabler/icons
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { useState, useCallback, useEffect } from 'react';
+import type React from 'react';
 
 import type { BackgroundMusicCategory, Sound } from '../../types/sound';
 import { bgScenes, bgMatchesCategory } from '../../types/sound';
@@ -85,63 +86,67 @@ export function BackgroundMusic({
   }, [currentSound, sessionId, send, getCurrentTime]);
 
   // Message handler functions extracted to reduce nesting
-  const handleBackgroundMusicChange = useCallback((content: {
-    filename: string;
-    credit?: string;
-    timestamp?: number;
-    currentTime?: number;
-  }) => {
-    const sound = sounds.find(s => s.filename === content.filename);
-    if (sound) {
-      playSpecificSound(sound).catch(() => {});
-    }
-  }, [playSpecificSound, sounds]);
+  const handleBackgroundMusicChange = useCallback(
+    (content: { filename: string; credit?: string; timestamp?: number; currentTime?: number }) => {
+      const sound = sounds.find((s) => s.filename === content.filename);
+      if (sound) {
+        playSpecificSound(sound).catch(() => {});
+      }
+    },
+    [playSpecificSound, sounds]
+  );
 
   const handleBackgroundMusicStop = useCallback(() => {
     stop();
   }, [stop]);
 
-  const handleStatusRequest = useCallback((content: { statusType: string }) => {
-    if (content.statusType === 'backgroundMusic' && currentSound) {
-      const currentTime = getCurrentTime();
-      send({
-        type: 'statusResponse',
-        id: sessionId,
-        content: {
-          statusType: 'backgroundMusic',
-          statusData: {
-            filename: currentSound.filename,
-            credit: currentSound.credit,
-            isPlaying: isPlaying,
-            timestamp: Date.now(),
-            currentTime: currentTime,
+  const handleStatusRequest = useCallback(
+    (content: { statusType: string }) => {
+      if (content.statusType === 'backgroundMusic' && currentSound) {
+        const currentTime = getCurrentTime();
+        send({
+          type: 'statusResponse',
+          id: sessionId,
+          content: {
+            statusType: 'backgroundMusic',
+            statusData: {
+              filename: currentSound.filename,
+              credit: currentSound.credit,
+              isPlaying: isPlaying,
+              timestamp: Date.now(),
+              currentTime: currentTime,
+            },
           },
-        },
-      });
-    }
-  }, [currentSound, isPlaying, sessionId, send, getCurrentTime]);
-
-  const handleStatusResponse = useCallback((content: {
-    statusType: string;
-    statusData: {
-      filename: string;
-      credit?: string;
-      isPlaying: boolean;
-      timestamp?: number;
-      currentTime?: number;
-    };
-  }) => {
-    if (content.statusType === 'backgroundMusic' && content.statusData) {
-      if (content.statusData.isPlaying) {
-        const sound = sounds.find(s => s.filename === content.statusData.filename);
-        if (sound) {
-          playSpecificSound(sound).catch(() => {});
-        }
-      } else {
-        stop();
+        });
       }
-    }
-  }, [playSpecificSound, stop, sounds]);
+    },
+    [currentSound, isPlaying, sessionId, send, getCurrentTime]
+  );
+
+  const handleStatusResponse = useCallback(
+    (content: {
+      statusType: string;
+      statusData: {
+        filename: string;
+        credit?: string;
+        isPlaying: boolean;
+        timestamp?: number;
+        currentTime?: number;
+      };
+    }) => {
+      if (content.statusType === 'backgroundMusic' && content.statusData) {
+        if (content.statusData.isPlaying) {
+          const sound = sounds.find((s) => s.filename === content.statusData.filename);
+          if (sound) {
+            playSpecificSound(sound).catch(() => {});
+          }
+        } else {
+          stop();
+        }
+      }
+    },
+    [playSpecificSound, stop, sounds]
+  );
 
   // Listen for incoming socket messages
   useEffect(() => {
@@ -151,10 +156,30 @@ export function BackgroundMusic({
       }
 
       const messageHandlers: Record<string, (content: unknown) => void> = {
-        backgroundMusicChange: (content) => handleBackgroundMusicChange(content as { filename: string; credit?: string; timestamp?: number; currentTime?: number }),
+        backgroundMusicChange: (content) =>
+          handleBackgroundMusicChange(
+            content as {
+              filename: string;
+              credit?: string;
+              timestamp?: number;
+              currentTime?: number;
+            }
+          ),
         backgroundMusicStop: handleBackgroundMusicStop,
         statusRequest: (content) => handleStatusRequest(content as { statusType: string }),
-        statusResponse: (content) => handleStatusResponse(content as { statusType: string; statusData: { filename: string; credit?: string; isPlaying: boolean; timestamp?: number; currentTime?: number; } })
+        statusResponse: (content) =>
+          handleStatusResponse(
+            content as {
+              statusType: string;
+              statusData: {
+                filename: string;
+                credit?: string;
+                isPlaying: boolean;
+                timestamp?: number;
+                currentTime?: number;
+              };
+            }
+          ),
       };
 
       const handler = messageHandlers[msg.type as keyof typeof messageHandlers];
@@ -167,7 +192,7 @@ export function BackgroundMusic({
     handleBackgroundMusicChange,
     handleBackgroundMusicStop,
     handleStatusRequest,
-    handleStatusResponse
+    handleStatusResponse,
   ]);
 
   // Broadcast stop
@@ -384,5 +409,3 @@ export function BackgroundMusic({
     </>
   );
 }
-
-

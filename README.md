@@ -150,4 +150,6 @@ public/             Static assets (fonts, favicons)
 
 ## Refactoring Progress
 
-See [PLAN.md](PLAN.md) for the detailed migration checklist and remaining tasks.
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

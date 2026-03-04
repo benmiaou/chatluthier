@@ -6,7 +6,7 @@ export interface Sound {
   imageFile?: string;
   credit?: string;
   creditUrl?: string;
-  display_name?: string; 
+  display_name?: string;
   contexts?: string[];
   isEnabled?: boolean;
 }

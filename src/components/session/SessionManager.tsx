@@ -12,6 +12,7 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { useState } from 'react';
+import type React from 'react';
 import { useSocketContext } from '../../contexts/SocketContext';
 import { IconCopy, IconCheck, IconPlugConnectedX, IconUsers } from '@tabler/icons-react';
 

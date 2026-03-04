@@ -1,4 +1,4 @@
 {
-    "sonarQubeUri": "https://sonar.chatluthier.org",
-    "projectKey": "Chatluthier"
+  "sonarQubeUri": "https://sonar.chatluthier.org",
+  "projectKey": "Chatluthier"
 }

@@ -3,6 +3,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IconDeviceFloppy, IconRefresh } from '@tabler/icons-react';
 import { useEffect, useState, useMemo, useCallback } from 'react';
+import React from 'react';
 import { useAmbianceSounds } from '../../hooks/useAmbianceSounds';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { showCreditToast } from '../../utils/showCreditToast';
@@ -99,12 +100,14 @@ export function AmbianceSounds({
 
       // If we have a valid loaded order, use it. Otherwise use the current bars order.
       setSoundOrder(validOrder.length > 0 ? validOrder : bars.map((bar) => bar.sound.filename));
-    } catch (error) {
+    } catch (_error) {
       // Fallback to current bars order if loading fails
-      console.warn('Failed to load sound order:', error);
       setSoundOrder(bars.map((bar) => bar.sound.filename));
     }
   }, [userId, bars]);
+
+  // Import logger at the top of the file
+  import { handleError } from '../../utils/logger';
 
   useEffect(() => {
     if (userId) {
@@ -135,8 +138,8 @@ export function AmbianceSounds({
         const errorText = await response.text();
         throw new Error(`Server responded with status ${response.status}: ${errorText}`);
       }
-    } catch (error) {
-      console.error('Failed to save sound order:', error);
+    } catch (_error) {
+      handleError(_error, 'AmbianceSounds.saveSoundOrder');
     } finally {
       // Always update local state regardless of server save success
       setSoundOrder(newOrder);
@@ -200,70 +203,85 @@ export function AmbianceSounds({
     }
   };
 
-  const showCreditsForActiveSounds = useCallback((statusData: Record<string, number>) => {
-    Object.entries(statusData).forEach(([filename, volume]) => {
-      if (volume > 0) {
-        const sound = bars.find((s) => s.sound.filename === filename);
-        if (sound?.sound?.credit) {
-          showCreditToast(sound.sound.name, sound.sound.credit);
+  const showCreditsForActiveSounds = useCallback(
+    (statusData: Record<string, number>) => {
+      Object.entries(statusData).forEach(([filename, volume]) => {
+        if (volume > 0) {
+          const sound = bars.find((s) => s.sound.filename === filename);
+          if (sound?.sound?.credit) {
+            showCreditToast(sound.sound.name, sound.sound.credit);
+          }
         }
-      }
-    });
-  }, [bars]);
-
-  const handleAmbianceStatusUpdate = useCallback((ambianceStatus: Record<string, number>) => {
-    applyStatus(ambianceStatus);
-    showCreditsForActiveSounds(ambianceStatus);
-  }, [applyStatus, showCreditsForActiveSounds]);
-
-  const handleStatusRequest = useCallback((statusType: string) => {
-    if (statusType === 'ambiance') {
-      send({
-        type: 'statusResponse',
-        id: sessionId,
-        content: {
-          statusType: 'ambiance',
-          statusData: getStatus(),
-        },
       });
-    }
-  }, [send, sessionId, getStatus]);
+    },
+    [bars]
+  );
 
-  const handleStatusResponse = useCallback((statusType: string, statusData: Record<string, number>) => {
-    if (statusType === 'ambiance' && statusData) {
-      applyStatus(statusData);
-      showCreditsForActiveSounds(statusData);
-    }
-  }, [applyStatus, showCreditsForActiveSounds]);
+  const handleAmbianceStatusUpdate = useCallback(
+    (ambianceStatus: Record<string, number>) => {
+      applyStatus(ambianceStatus);
+      showCreditsForActiveSounds(ambianceStatus);
+    },
+    [applyStatus, showCreditsForActiveSounds]
+  );
 
-  const handleAmbianceMessage = useCallback((msg: WsMessage) => {
-    if (!msg.content) {
-      return;
-    }
-
-    const messageHandlers: Record<string, (content: unknown) => void> = {
-      ambianceStatusUpdate: (content) => {
-        const { ambianceStatus } = content as { ambianceStatus: Record<string, number> };
-        handleAmbianceStatusUpdate(ambianceStatus);
-      },
-      statusRequest: (content) => {
-        const { statusType } = content as { statusType: string };
-        handleStatusRequest(statusType);
-      },
-      statusResponse: (content) => {
-        const { statusType, statusData } = content as {
-          statusType: string;
-          statusData: Record<string, number>;
-        };
-        handleStatusResponse(statusType, statusData);
+  const handleStatusRequest = useCallback(
+    (statusType: string) => {
+      if (statusType === 'ambiance') {
+        send({
+          type: 'statusResponse',
+          id: sessionId,
+          content: {
+            statusType: 'ambiance',
+            statusData: getStatus(),
+          },
+        });
       }
-    };
+    },
+    [send, sessionId, getStatus]
+  );
 
-    const handler = messageHandlers[msg.type as keyof typeof messageHandlers];
-    if (handler) {
-      handler(msg.content);
-    }
-  }, [handleAmbianceStatusUpdate, handleStatusRequest, handleStatusResponse]);
+  const handleStatusResponse = useCallback(
+    (statusType: string, statusData: Record<string, number>) => {
+      if (statusType === 'ambiance' && statusData) {
+        applyStatus(statusData);
+        showCreditsForActiveSounds(statusData);
+      }
+    },
+    [applyStatus, showCreditsForActiveSounds]
+  );
+
+  const handleAmbianceMessage = useCallback(
+    (msg: WsMessage) => {
+      if (!msg.content) {
+        return;
+      }
+
+      const messageHandlers: Record<string, (content: unknown) => void> = {
+        ambianceStatusUpdate: (content) => {
+          const { ambianceStatus } = content as { ambianceStatus: Record<string, number> };
+          handleAmbianceStatusUpdate(ambianceStatus);
+        },
+        statusRequest: (content) => {
+          const { statusType } = content as { statusType: string };
+          handleStatusRequest(statusType);
+        },
+        statusResponse: (content) => {
+          const { statusType, statusData } = content as {
+            statusType: string;
+            statusData: Record<string, number>;
+          };
+          handleStatusResponse(statusType, statusData);
+        },
+      };
+
+      const handler = messageHandlers[msg.type as keyof typeof messageHandlers];
+      if (handler) {
+        handler(msg.content);
+      }
+    },
+    [handleAmbianceStatusUpdate, handleStatusRequest, handleStatusResponse]
+  );
 
   // Listen for incoming ambiance updates from session peers
   useEffect(() => {

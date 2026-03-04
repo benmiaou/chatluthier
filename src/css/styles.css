@@ -3,6 +3,44 @@
 @import './pages.css';
 @import './modal.css';
 @import './progressBar.css';
+
+/* Error Fallback Styles */
+.error-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  min-height: 100vh;
+  background-color: var(--mantine-color-dark-7);
+  color: var(--mantine-color-text);
+  text-align: center;
+}
+
+.error-fallback h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.error-fallback p {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  max-width: 400px;
+}
+
+.error-fallback button {
+  padding: 0.5rem 1rem;
+  background-color: var(--mantine-primary-color-filled);
+  color: white;
+  border: none;
+  border-radius: var(--mantine-radius-sm);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.error-fallback button:hover {
+  background-color: var(--mantine-primary-color-filled-hover);
+}
 @import './sessionManagement.css';
 @import './sounConteiner.css';
 @import './preset.css';

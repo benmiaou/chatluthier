@@ -2,10 +2,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AudioPlayer, precacheAudio } from './useAudioPlayer';
 import type { Sound } from '../types/sound';
 import { BackgroundMusicCategories, bgMatchesCategory, bgScenes } from '../types/sound';
+import { handleError } from '../utils/logger';
 
 const ASSET_PREFIX = '/assets/background/';
 
-type BackgroundMusicCategory = typeof BackgroundMusicCategories[keyof typeof BackgroundMusicCategories];
+type BackgroundMusicCategory =
+  (typeof BackgroundMusicCategories)[keyof typeof BackgroundMusicCategories];
 
 interface BackgroundMusicHook {
   sounds: Sound[];
@@ -68,7 +70,7 @@ export function useBackgroundMusic(
       setSounds(merged);
       precacheAudio(merged.map((s) => `${ASSET_PREFIX}${s.filename}`));
     } catch (error) {
-      console.error('Failed to load background sounds:', error);
+      handleError(error, 'useBackgroundMusic.loadSounds');
     }
   }, [userId]);
 
@@ -113,9 +115,7 @@ export function useBackgroundMusic(
         BackgroundMusicCategories.INTENSE,
         BackgroundMusicCategories.ALL,
       ];
-      const soundCategory = categories.find((category) =>
-        bgMatchesCategory(sound, category)
-      );
+      const soundCategory = categories.find((category) => bgMatchesCategory(sound, category));
 
       if (soundCategory) {
         setActiveCategory(soundCategory);
@@ -138,7 +138,8 @@ export function useBackgroundMusic(
     async (category: BackgroundMusicCategory) => {
       const filtered = sounds.filter(
         (s) =>
-          bgMatchesCategory(s, category) && (context.toLowerCase() === 'all' || bgScenes(s).includes(context.toLowerCase()))
+          bgMatchesCategory(s, category) &&
+          (context.toLowerCase() === 'all' || bgScenes(s).includes(context.toLowerCase()))
       );
       if (!filtered.length) {
         return;
@@ -154,7 +155,8 @@ export function useBackgroundMusic(
         if (activeCategory === category) {
           const autoAdvanceFiltered = sounds.filter(
             (s) =>
-              bgMatchesCategory(s, category) && (context.toLowerCase() === 'all' || bgScenes(s).includes(context.toLowerCase()))
+              bgMatchesCategory(s, category) &&
+              (context.toLowerCase() === 'all' || bgScenes(s).includes(context.toLowerCase()))
           );
           if (autoAdvanceFiltered.length > 0) {
             const currentIndex = autoAdvanceFiltered.findIndex((s) => s.filename === pick.filename);
@@ -214,53 +216,56 @@ export function useBackgroundMusic(
     return currentTime + delay / 1000;
   }, []);
 
-  const handlePlayAttempt = useCallback(async (audio: HTMLAudioElement): Promise<boolean> => {
-    const handleAutoplayBlocked = () => {
-      setIsPlaying(false);
-      if (onAutoplayBlocked) {
-        onAutoplayBlocked();
-      }
-    };
+  const handlePlayAttempt = useCallback(
+    async (audio: HTMLAudioElement): Promise<boolean> => {
+      const handleAutoplayBlocked = () => {
+        setIsPlaying(false);
+        if (onAutoplayBlocked) {
+          onAutoplayBlocked();
+        }
+      };
 
-    const handleOtherErrors = () => {
-      setIsPlaying(false);
-    };
+      const handleOtherErrors = () => {
+        setIsPlaying(false);
+      };
 
-    try {
-      if (userInteracted) {
-        await audio.play();
-        setIsPlaying(true);
-        return true;
-      }
-      handleAutoplayBlocked();
-      return false;
-    } catch (error) {
-      if (error instanceof Error && error.name === 'NotAllowedError') {
+      try {
+        if (userInteracted) {
+          await audio.play();
+          setIsPlaying(true);
+          return true;
+        }
         handleAutoplayBlocked();
-      } else {
-        handleOtherErrors();
+        return false;
+      } catch (error) {
+        if (error instanceof Error && error.name === 'NotAllowedError') {
+          handleAutoplayBlocked();
+        } else {
+          handleOtherErrors();
+        }
+        return false;
       }
-      return false;
-    }
-  }, [userInteracted, onAutoplayBlocked]);
+    },
+    [userInteracted, onAutoplayBlocked]
+  );
 
-  const updateCurrentSound = useCallback((musicData: {
-    filename: string;
-    credit?: string;
-  }) => {
-    const soundToPlay = sounds.find((s) => s.filename === musicData.filename);
-    if (soundToPlay) {
-      setCurrentSound({ ...soundToPlay, credit: musicData.credit });
-    } else {
-      setCurrentSound({
-        filename: musicData.filename,
-        credit: musicData.credit,
-        name: musicData.filename,
-        id: '',
-        category: '',
-      } as Sound);
-    }
-  }, [sounds]);
+  const updateCurrentSound = useCallback(
+    (musicData: { filename: string; credit?: string }) => {
+      const soundToPlay = sounds.find((s) => s.filename === musicData.filename);
+      if (soundToPlay) {
+        setCurrentSound({ ...soundToPlay, credit: musicData.credit });
+      } else {
+        setCurrentSound({
+          filename: musicData.filename,
+          credit: musicData.credit,
+          name: musicData.filename,
+          id: '',
+          category: '',
+        } as Sound);
+      }
+    },
+    [sounds]
+  );
 
   const playReceived = useCallback(
     async (musicData: {
@@ -281,7 +286,7 @@ export function useBackgroundMusic(
       updateCurrentSound(musicData);
       startProgressTracking();
     },
-    [volume, sounds, userInteracted, onAutoplayBlocked, calculateAdjustedTime, handlePlayAttempt, updateCurrentSound]
+    [volume, calculateAdjustedTime, handlePlayAttempt, updateCurrentSound]
   );
 
   const stopReceived = useCallback(() => {

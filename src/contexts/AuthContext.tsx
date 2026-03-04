@@ -1,5 +1,14 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import React from 'react';
+import { handleError } from '../utils/logger';
 
 interface AuthState {
   isSignedIn: boolean;
@@ -13,7 +22,7 @@ interface AuthState {
 interface AuthContextValue extends AuthState {
   isSignedIn: boolean;
   userName: string | null;
-  userPicture: string | null;  // Add this line
+  userPicture: string | null; // Add this line
   signOut: () => Promise<void>;
   loginWithPseudo: (pseudo: string, password: string) => Promise<void>;
   registerWithPseudo: (
@@ -45,7 +54,14 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): R
   const signOut = useCallback(async () => {
     // Clear pseudo from localStorage
     localStorage.removeItem('userPseudo');
-    setAuth({ isSignedIn: false, userId: null, userName: null, userPicture: null, isAdmin: false, token: null });
+    setAuth({
+      isSignedIn: false,
+      userId: null,
+      userName: null,
+      userPicture: null,
+      isAdmin: false,
+      token: null,
+    });
   }, []);
 
   // Check for existing session on initial load
@@ -71,7 +87,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): R
           }
         }
       } catch (err: unknown) {
-        console.error('Session check failed:', err);
+        handleError(err, 'AuthContext.checkSession');
       }
     };
 
@@ -105,7 +121,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): R
             signOut();
           }
         } catch (err: unknown) {
-          console.error('Token refresh failed:', err);
+          handleError(err, 'AuthContext.tokenRefresh');
           signOut();
         }
       },
@@ -251,11 +267,7 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): R
     ]
   );
 
-  return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }
 
 export function useAuthContext(): AuthContextValue {

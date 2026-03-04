@@ -2,12 +2,15 @@ const app = require('./app');
 const http = require('node:http');
 const server = http.createServer(app);
 const db = require('./database/db');
-const logger = require('./utils/logger');
+const winstonLogger = require('./utils/logger');
 
 const PORT = 3000;
 
+// Initialize Winston logger
+winstonLogger.info('Starting ChatLuthier server...');
+
 // Wrap database methods to log SQL queries
-const loggedDb = logger.wrapDatabaseMethods(db);
+const loggedDb = winstonLogger.wrapDatabaseMethods(db);
 
 // Handle process termination gracefully
 process.on('SIGINT', () => {
@@ -19,25 +22,34 @@ process.on('SIGINT', () => {
 });
 
 process.on('SIGTERM', () => {
-  logger.info('Received SIGTERM, shutting down gracefully...');
+  winstonLogger.info('Received SIGTERM, shutting down gracefully...');
   server.close(() => {
-    logger.info('Server closed');
+    winstonLogger.info('Server closed');
     process.exit(0);
   });
 });
 
 process.on('uncaughtException', (error) => {
-  logger.fatal('Uncaught Exception', { error: error.message, stack: error.stack }, 1);
+  winstonLogger.error('Uncaught Exception', {
+    error: error.message,
+    stack: error.stack,
+    context: 'server',
+  });
+  process.exit(1);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection', { reason: reason?.message || reason, promise });
+  winstonLogger.error('Unhandled Rejection', {
+    reason: reason?.message || reason,
+    promise: promise.toString(),
+    context: 'server',
+  });
 });
 
 // Initialize database and start server
 function initializeServer() {
   logger.info('Initializing database...');
-  
+
   // Set a timeout for database initialization
   const initPromise = Promise.race([
     (async () => {

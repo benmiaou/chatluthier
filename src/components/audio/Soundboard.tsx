@@ -8,6 +8,7 @@ import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { showCreditToast } from '../../utils/showCreditToast';
 import { CustomCombobox } from './CustomCombobox';
 import { DraggableSoundButton } from './DraggableSoundButton';
+import { handleError } from '../../utils/logger';
 
 interface SoundboardProps {
   readonly userId?: string | null;
@@ -15,8 +16,7 @@ interface SoundboardProps {
 
 export function Soundboard({ userId = null }: SoundboardProps): React.ReactElement {
   const { send, addMessageHandler, sessionId } = useSocketContext();
-  const { sounds, volume, context, setContext, playSound, setVolume } =
-    useSoundboard(userId);
+  const { sounds, volume, context, setContext, playSound, setVolume } = useSoundboard(userId);
 
   // Initialize soundOrder with the current order of sounds
   const [soundOrder, setSoundOrder] = useState<string[]>(() => {
@@ -78,9 +78,8 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
 
       // If we have a valid loaded order, use it. Otherwise use the current sounds order.
       setSoundOrder(validOrder.length > 0 ? validOrder : sounds.map((sound) => sound.filename));
-    } catch (error) {
+    } catch (_error) {
       // Fallback to current sounds order if loading fails
-      console.error('Failed to load sound order:', error);
       setSoundOrder(sounds.map((sound) => sound.filename));
     }
   }, [userId, sounds]);
@@ -112,8 +111,8 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
       }
-    } catch (error) {
-      console.error('Failed to save sound order:', error);
+    } catch (_error) {
+      handleError(_error, 'Soundboard.saveSoundOrder');
     }
 
     // Always update local state, whether server save succeeds or fails
@@ -140,14 +139,15 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
     // The visual order will update automatically via the orderedSounds memo
   };
 
-  const contexts = [
-    'All',
-    ...Array.from(new Set(sounds.flatMap((s) => s.contexts ?? []))),
-  ].filter(Boolean);
+  const contexts = ['All', ...Array.from(new Set(sounds.flatMap((s) => s.contexts ?? [])))].filter(
+    Boolean
+  );
 
   const handlePlay = (filename: string) => {
     const sound = sounds.find((s) => s.filename === filename);
-    if (!sound) return;
+    if (!sound) {
+      return;
+    }
 
     playSound(sound);
 

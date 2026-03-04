@@ -14,6 +14,7 @@ import {
 } from '@mantine/core';
 import { CustomCombobox } from '../audio/CustomCombobox';
 import { useEffect, useState } from 'react';
+import type React from 'react';
 import { notifications } from '@mantine/notifications';
 import {
   IconPlayerPlay,
@@ -381,7 +382,10 @@ export function ServerEditSoundsModal({
         isEnabled: edits[s.filename] ?? s.isEnabled ?? true,
         contexts: finalContexts,
         credit: creditEdits[s.filename] ?? s.credit ?? '',
-        ...(imageFileEdits[s.filename] && typeof imageFileEdits[s.filename] === 'string' && { imageFile: imageFileEdits[s.filename] }),
+        ...(imageFileEdits[s.filename] &&
+          typeof imageFileEdits[s.filename] === 'string' && {
+            imageFile: imageFileEdits[s.filename],
+          }),
         imageFile: undefined,
       };
     });
@@ -458,7 +462,11 @@ export function ServerEditSoundsModal({
     }
   };
 
-  const handleExistingContextChange = (value: string, soundFilename: string, currentContexts: string[]) => {
+  const handleExistingContextChange = (
+    value: string,
+    soundFilename: string,
+    currentContexts: string[]
+  ) => {
     const trimmedValue = value?.trim();
     if (trimmedValue && !currentContexts.includes(trimmedValue)) {
       addNewContext(soundFilename, trimmedValue);
@@ -468,10 +476,7 @@ export function ServerEditSoundsModal({
   const addNewContext = (soundFilename: string, newContext: string) => {
     setContextEdits((prev) => ({
       ...prev,
-      [soundFilename]: [
-        ...(prev[soundFilename] ?? []),
-        newContext,
-      ],
+      [soundFilename]: [...(prev[soundFilename] ?? []), newContext],
     }));
   };
 
@@ -506,7 +511,11 @@ export function ServerEditSoundsModal({
     );
   };
 
-  const renderSoundEditSection = (sound: SoundEdit, currentContexts: string[], currentCredit: string): React.ReactNode => {
+  const renderSoundEditSection = (
+    sound: SoundEdit,
+    currentContexts: string[],
+    currentCredit: string
+  ): React.ReactNode => {
     const handleIntensityChange = (value: string) => {
       setBackgroundIntensity((prev) => ({
         ...prev,
@@ -592,7 +601,9 @@ export function ServerEditSoundsModal({
             {/* CustomCombobox for choosing existing contexts (like main page) */}
             <CustomCombobox
               value=""
-              onChange={(value) => handleExistingContextChange(value, sound.filename, currentContexts)}
+              onChange={(value) =>
+                handleExistingContextChange(value, sound.filename, currentContexts)
+              }
               data={availableContexts}
               placeholder="Add existing context"
               width={200}
@@ -669,7 +680,10 @@ export function ServerEditSoundsModal({
   };
 
   const renderSoundContexts = (sound: SoundEdit, currentContexts: string[]): React.ReactNode => {
-    if (currentContexts.length === 0 && !(selectedCategory === 'background' && backgroundContext[sound.filename])) {
+    if (
+      currentContexts.length === 0 &&
+      !(selectedCategory === 'background' && backgroundContext[sound.filename])
+    ) {
       return null;
     }
     return (

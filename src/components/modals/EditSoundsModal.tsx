@@ -12,6 +12,7 @@ import {
 } from '@mantine/core';
 import { CustomCombobox } from '../audio/CustomCombobox';
 import { useEffect, useState, useMemo } from 'react';
+import type React from 'react';
 import { notifications } from '@mantine/notifications';
 import {
   IconPlayerPlay,
@@ -454,14 +455,14 @@ export function EditSoundsModal({
   const addNewContext = (soundFilename: string, newContext: string) => {
     setContextEdits((prev) => ({
       ...prev,
-      [soundFilename]: [
-        ...(prev[soundFilename] ?? []),
-        newContext,
-      ],
+      [soundFilename]: [...(prev[soundFilename] ?? []), newContext],
     }));
   };
 
-  const renderContextBadges = (soundFilename: string, currentContexts: string[]): React.ReactNode => {
+  const renderContextBadges = (
+    soundFilename: string,
+    currentContexts: string[]
+  ): React.ReactNode => {
     return (
       <Group gap="xs" mt="xs">
         {currentContexts.map((ctx) => (

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Sound } from '../types/sound';
+import { handleError } from '../utils/logger';
 
 const ASSET_PREFIX = '/assets/soundboard/';
 
@@ -35,7 +36,7 @@ export function useSoundboard(userId: string | null): {
       });
       setSounds(merged.filter((s) => s.isEnabled !== false));
     } catch (err) {
-      console.error('Failed to load soundboard:', err);
+      handleError(err, 'useSoundboard.loadSounds');
     }
   }, [userId]);
 
@@ -69,9 +70,8 @@ export function useSoundboard(userId: string | null): {
     return {};
   }, []);
 
-  const applyStatus = useCallback((status: Record<string, boolean>) => {
+  const applyStatus = useCallback((_status: Record<string, boolean>) => {
     // Implementation for applying sound statuses
-    console.log('Applying status:', status);
   }, []);
 
   return {

@@ -1,5 +1,6 @@
 import { Button, Group, Loader, Modal, Stack, Text, Anchor } from '@mantine/core';
 import { useEffect, useState } from 'react';
+import type React from 'react';
 import { notifications } from '@mantine/notifications';
 
 // Backend stores: { id, category, file, contexts, created_at, status, etc. }

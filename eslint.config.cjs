@@ -48,7 +48,7 @@ module.exports = [
       ...pluginJs.configs.recommended.rules,
       ...pluginReact.configs.recommended.rules,
       ...pluginReactHooks.configs.recommended.rules,
-      indent: ['error', 2],
+      // indent: ['error', 2],
       // 'linebreak-style': ['error', 'windows'], // Disabled for Windows compatibility
       quotes: ['error', 'single'],
       semi: ['error', 'always'],
