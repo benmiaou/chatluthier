@@ -80,7 +80,7 @@ function initializeWebSocketServer(httpServer, httpPort) {
     }
   }
 
-  function handleBroadcast(data, ws) {
+  function handleBroadcast(data, ws, connectedId) {
     if (!connectedId) {
       ws.send(JSON.stringify({ type: 'error', message: 'Client not connected to any ID.' }));
       return;
@@ -102,7 +102,7 @@ function initializeWebSocketServer(httpServer, httpPort) {
     }
   }
 
-  function handleRequestStatus(data, ws) {
+  function handleRequestStatus(data, ws, connectedId, participantId) {
     if (!connectedId || !data.content?.type) return;
 
     const { type: statusType, targetParticipantId } = data.content;
@@ -123,7 +123,7 @@ function initializeWebSocketServer(httpServer, httpPort) {
     }
   }
 
-  function handleStatusResponse(data, ws) {
+  function handleStatusResponse(data, ws, connectedId) {
     if (!connectedId || !data.content) return;
 
     const { statusType, statusData, responderId } = data.content;
@@ -147,7 +147,7 @@ function initializeWebSocketServer(httpServer, httpPort) {
     }
   }
 
-  function handleUnsubscribe() {
+  function handleUnsubscribe(connectedId, participantId) {
     if (!connectedId || !participantId) return;
 
     participantToWs.delete(participantId);
@@ -192,6 +192,8 @@ function initializeWebSocketServer(httpServer, httpPort) {
         switch (data.type) {
           case 'subscribe':
             handleSubscribe(data, ws);
+            connectedId = data.id;
+            participantId = data.participantId || Math.random().toString(36).substring(2, 10);
             break;
 
           case 'message':
@@ -200,19 +202,19 @@ function initializeWebSocketServer(httpServer, httpPort) {
           case 'backgroundMusicVolumeChange':
           case 'backgroundMusicStop':
           case 'playSoundboardSound':
-            handleBroadcast(data, ws);
+            handleBroadcast(data, ws, connectedId);
             break;
 
           case 'requestStatus':
-            handleRequestStatus(data, ws);
+            handleRequestStatus(data, ws, connectedId, participantId);
             break;
 
           case 'statusResponse':
-            handleStatusResponse(data, ws);
+            handleStatusResponse(data, ws, connectedId);
             break;
 
           case 'unsubscribe':
-            handleUnsubscribe();
+            handleUnsubscribe(connectedId, participantId);
             break;
 
           case 'ping':

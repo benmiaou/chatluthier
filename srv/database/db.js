@@ -233,32 +233,10 @@ class Database {
   }
 
   /**
-   * Get contexts for a sound (not used in new schema - contexts are stored as JSON)
-   */
-  async getSoundContexts(soundId) {
-    console.warn(
-      'getSoundContexts is deprecated - contexts are now stored as JSON in sound tables'
-    );
-    return [];
-  }
-
-  /**
    * Get user-specific sound overrides (NEW: single JSON entry per user)
    */
   async getUserSoundOverrides(userId) {
     try {
-      // Try new table first
-      const sql = `
-                SELECT sound_overrides 
-                FROM user_sounds_json 
-                WHERE user_id = ?
-            `;
-      const result = await this.queryOne(sql, [userId]);
-      if (result) {
-        return result.sound_overrides;
-      }
-
-      // Fallback to old format (for backward compatibility)
       const legacySql = `
                 SELECT sound_overrides 
                 FROM user_sounds 
@@ -270,28 +248,6 @@ class Database {
       console.error('Error retrieving user sound overrides:', error.message);
       return null;
     }
-  }
-
-  /**
-   * Get user-specific sound overrides (OLD: per-sound entries - kept for backward compatibility)
-   */
-  async getUserSound(userId, soundId) {
-    const sql = `
-            SELECT * 
-            FROM user_sounds 
-            WHERE user_id = ? AND sound_id = ?
-        `;
-    return this.queryOne(sql, [userId, soundId]);
-  }
-
-  /**
-   * Get user-specific sound contexts (not used in new schema - contexts are stored differently)
-   */
-  async getUserSoundContexts(userSoundId) {
-    console.warn(
-      'getUserSoundContexts is deprecated - user contexts are now stored in user_sound_contexts table'
-    );
-    return [];
   }
 }
 

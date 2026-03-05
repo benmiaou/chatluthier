@@ -38,6 +38,8 @@ export const theme = createTheme({
     Button: {
       defaultProps: {
         radius: 'sm',
+        color: 'maroon', // Force buttons to use maroon color by default
+        variant: 'filled', // Force filled variant to ensure color is applied
       },
     },
     Slider: {

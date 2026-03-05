@@ -3,6 +3,14 @@
 @import './pages.css';
 @import './modal.css';
 @import './progressBar.css';
+@import './sessionManagement.css';
+@import './sounConteiner.css';
+@import './preset.css';
+@import './credits.css';
+@import './buttons.css';
+@import './dropDownMenu.css';
+@import './editSounds.css';
+@import './ambianceControls.css';
 
 /* Error Fallback Styles */
 .error-fallback {
@@ -41,14 +49,6 @@
 .error-fallback button:hover {
   background-color: var(--mantine-primary-color-filled-hover);
 }
-@import './sessionManagement.css';
-@import './sounConteiner.css';
-@import './preset.css';
-@import './credits.css';
-@import './buttons.css';
-@import './dropDownMenu.css';
-@import './editSounds.css';
-@import './ambianceControls.css';
 
 /* Basic reset for styling */
 * {

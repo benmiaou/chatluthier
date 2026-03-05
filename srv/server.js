@@ -4,7 +4,11 @@ const server = http.createServer(app);
 const db = require('./database/db');
 const winstonLogger = require('./utils/logger');
 
-const PORT = 3000;
+let PORT = process.argv[2] ? Number.parseInt(process.argv[2]) : 3000;
+if (Number.isNaN(PORT) || PORT <= 0) {
+  console.error(`Invalid port: ${process.argv[2]}, using default port 3000`);
+  PORT = 3000;
+}
 
 // Initialize Winston logger
 winstonLogger.info('Starting ChatLuthier server...');
@@ -48,6 +52,7 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Initialize database and start server
 function initializeServer() {
+  const logger = winstonLogger; // Use the winstonLogger instance
   logger.info('Initializing database...');
 
   // Set a timeout for database initialization
@@ -64,27 +69,45 @@ function initializeServer() {
 
   initPromise
     .then(() => {
-      server.listen(PORT, '0.0.0.0', () => {
-        logger.info(`Server started on port ${PORT}`);
+      server
+        .listen(PORT, '0.0.0.0', () => {
+          logger.info(`Server started on port ${PORT}`);
 
-        // Initialize WebSocket server on port 3001 (HTTP port + 1)
-        const { initializeWebSocketServer } = require('./sockets/socketServer');
-        initializeWebSocketServer(server, PORT);
-        logger.info(`WebSocket Server started on port ${PORT + 1}`);
-      });
+          // Initialize WebSocket server on port 3001 (HTTP port + 1)
+          const { initializeWebSocketServer } = require('./sockets/socketServer');
+          initializeWebSocketServer(server, PORT);
+          logger.info(`WebSocket Server started on port ${PORT + 1}`);
+        })
+        .on('error', (error) => {
+          logger.error(`Failed to bind to port ${PORT}`, { error: error.message });
+          if (error.code === 'EADDRINUSE') {
+            logger.error(`Port ${PORT} is already in use`);
+          }
+          process.exit(1);
+        });
     })
     .catch((error) => {
       logger.error('Failed to initialize database', { error: error.message });
       logger.warn('Attempting to start server without database initialization...');
       // Try to start server anyway for development
-      server.listen(PORT, '0.0.0.0', () => {
-        logger.info(`Server started on port ${PORT} (database may not be available)`);
+      server
+        .listen(PORT, '0.0.0.0', () => {
+          logger.info(`Server started on port ${PORT} (database may not be available)`);
 
-        // Initialize WebSocket server on port 3001 (HTTP port + 1)
-        const { initializeWebSocketServer } = require('./sockets/socketServer');
-        initializeWebSocketServer(server, PORT);
-        logger.info(`WebSocket Server started on port ${PORT + 1}`);
-      });
+          // Initialize WebSocket server on port 3001 (HTTP port + 1)
+          const { initializeWebSocketServer } = require('./sockets/socketServer');
+          initializeWebSocketServer(server, PORT);
+          logger.info(`WebSocket Server started on port ${PORT + 1}`);
+        })
+        .on('error', (error) => {
+          logger.error(`Failed to bind to port ${PORT} (fallback attempt)`, {
+            error: error.message,
+          });
+          if (error.code === 'EADDRINUSE') {
+            logger.error(`Port ${PORT} is already in use`);
+          }
+          process.exit(1);
+        });
     });
 }
 

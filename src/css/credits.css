@@ -12,6 +12,19 @@
   text-decoration: underline;
 }
 
+/* Style for links in credit text */
+.credit-text a,
+span a {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+.credit-text a:hover,
+span a:hover {
+  text-decoration: none;
+  cursor: pointer;
+}
+
 .credit-modal-template,
 .all-credits-modal {
   display: none;

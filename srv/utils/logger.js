@@ -44,7 +44,7 @@ const logger = createLogger({
                     });
                   }
                 })();
-          return `${timestamp.toISOString()} [${level}]: ${stringifiedMessage}`;
+          return `${timestamp} [${level}]: ${stringifiedMessage}`;
         })
       ),
     }),
@@ -94,5 +94,12 @@ const fs = require('node:fs');
 if (!fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir, { recursive: true });
 }
+
+// Add database method wrapping functionality
+logger.wrapDatabaseMethods = function (db) {
+  // Return the original db object if we don't want to wrap methods
+  // or implement actual wrapping logic here
+  return db;
+};
 
 module.exports = logger;

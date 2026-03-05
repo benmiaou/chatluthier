@@ -10,7 +10,9 @@ const logger = require('./utils/logger');
 const app = express();
 
 // Add logging middleware
-app.use(logger.expressMiddleware());
+// Note: Winston logger doesn't have expressMiddleware method
+// Using morgan or similar would be needed for HTTP request logging
+// app.use(logger.expressMiddleware()); // Commented out as it causes errors
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(cookieParser());
 app.use(
@@ -22,6 +24,9 @@ app.use(
 app.use(express.json({ limit: '100mb' }));
 app.use(express.static(path.join(__dirname, '../dist')));
 app.use('/assets', express.static(path.join(__dirname, '../assets')));
+app.use('/images', express.static(path.join(__dirname, '../assets/images')));
+app.use('/fonts', express.static(path.join(__dirname, '../public/fonts')));
+app.use('/css', express.static(path.join(__dirname, '../src/css')));
 
 // Handle preflight requests
 app.options('*', (req, res) => {
