@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const { accessTokenSecret, refreshTokenSecret } = require('../config/secret')();
-const { isAdminUser } = require('../utils/tokenUtils');
 const logger = require('../utils/logger');
 
 // Database and filesystem imports for pseudo/password authentication

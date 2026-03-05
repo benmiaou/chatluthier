@@ -111,7 +111,7 @@ export function BackgroundMusic({
             statusType: 'backgroundMusic',
             statusData: {
               filename: currentSound.filename,
-              credit: currentSound.credit,
+              credit: currentSound.credit || '',
               isPlaying: isPlaying,
               timestamp: Date.now(),
               currentTime: currentTime,

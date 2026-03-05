@@ -3,7 +3,6 @@ const fs = require('node:fs');
 const db = require('../database/db');
 const config = require('../database/config');
 const { verifyjwt } = require('./authController');
-const { isAdminUser } = require('../utils/tokenUtils');
 
 /**
  * SQL-based Sound Controller for ChatLuthier

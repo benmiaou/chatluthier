@@ -65,7 +65,7 @@ export function useBackgroundMusic(
       const merged = main.map((s) => {
         const u = userSounds.find((us) => us.filename === s.filename);
         const base = u ? { ...s, ...u } : s;
-        return { ...base, name: base.name ?? base.filename };
+        return { ...base, name: base.name ?? (base as Sound).display_name ?? base.filename };
       });
       setSounds(merged);
       precacheAudio(merged.map((s) => `${ASSET_PREFIX}${s.filename}`));

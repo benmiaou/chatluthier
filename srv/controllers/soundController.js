@@ -1,7 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { verifyjwt } = require('./authController');
-const { isAdminUser } = require('../utils/tokenUtils');
 
 function getData(userId, filename) {
   const defaultFilePath = path.join(__dirname, '..', 'srv_data', `${filename}.json`);

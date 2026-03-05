@@ -73,10 +73,10 @@ function initializeServer() {
         .listen(PORT, '0.0.0.0', () => {
           logger.info(`Server started on port ${PORT}`);
 
-          // Initialize WebSocket server on port 3001 (HTTP port + 1)
+          // Initialize WebSocket server (attached to HTTP server)
           const { initializeWebSocketServer } = require('./sockets/socketServer');
           initializeWebSocketServer(server, PORT);
-          logger.info(`WebSocket Server started on port ${PORT + 1}`);
+          logger.info(`WebSocket Server started on port ${PORT}`);
         })
         .on('error', (error) => {
           logger.error(`Failed to bind to port ${PORT}`, { error: error.message });

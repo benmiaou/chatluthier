@@ -1,4 +1,3 @@
-const { isAdminUser } = require('../utils/tokenUtils');
 const { verifyjwt } = require('./authController');
 const db = require('../database/db');
 

@@ -52,8 +52,12 @@ const SocketContext = createContext<SocketContextValue | null>(null);
 
 const isLocalhost =
   globalThis.location.hostname === 'localhost' || globalThis.location.hostname === '127.0.0.1';
+const isDevServer = globalThis.location.hostname === 'dev.chatluthier.org';
 const protocol = globalThis.location.protocol === 'https:' ? 'wss:' : 'ws:';
-const WS_URL = isLocalhost ? 'ws://localhost:3001' : `${protocol}//${globalThis.location.host}/ws/`;
+const _WS_PORT = isLocalhost ? 3001 : isDevServer ? 4001 : Number(globalThis.location.port) + 1;
+const WS_URL = isLocalhost
+  ? 'ws://localhost:3001'
+  : `${protocol}//${globalThis.location.hostname}/ws/`;
 
 const RECONNECT_MS = 5000;
 const HEARTBEAT_MS = 30_000;
