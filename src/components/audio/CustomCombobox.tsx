@@ -63,24 +63,26 @@ export function CustomCombobox({
           width: 'max-content',
         }}
       >
-        <div
-          style={{
-            padding: '8px',
-            position: 'sticky',
-            top: 0,
-            backgroundColor: 'var(--main-background-color)',
-            zIndex: 1,
-            width: '100%',
-          }}
-        >
-          <TextInput
-            placeholder="Search contexts..."
-            value={searchValue}
-            onChange={(event) => setSearchValue(event.currentTarget.value)}
-            size="xs"
-            style={{ marginBottom: '8px', width: '100%' }}
-          />
-        </div>
+        {data.length > 5 && (
+          <div
+            style={{
+              padding: '8px',
+              position: 'sticky',
+              top: 0,
+              backgroundColor: 'var(--main-background-color)',
+              zIndex: 1,
+              width: '100%',
+            }}
+          >
+            <TextInput
+              placeholder="Search contexts..."
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.currentTarget.value)}
+              size="xs"
+              style={{ marginBottom: '8px', width: '100%' }}
+            />
+          </div>
+        )}
         <Combobox.Options>
           {filteredOptions.length > 0 ? (
             filteredOptions.map((item) => (
