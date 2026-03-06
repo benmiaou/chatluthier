@@ -890,6 +890,56 @@ async function saveSoundOrderV2(req, res) {
   }
 }
 
+async function getAllContexts(req, res) {
+  try {
+    // Query all contexts from all sound tables
+    const tables = ['ambiance_sounds', 'background_sounds', 'soundboard'];
+    const allContexts = new Set();
+
+    for (const table of tables) {
+      const sql = `SELECT contexts FROM ${table} WHERE contexts IS NOT NULL AND contexts != '[]'`;
+      const results = await db.query(sql);
+
+      for (const row of results) {
+        try {
+          if (row.contexts) {
+            const contexts = JSON.parse(row.contexts);
+            if (Array.isArray(contexts)) {
+              // Handle both flat arrays and tuple arrays for background music
+              contexts.forEach((context) => {
+                if (typeof context === 'string') {
+                  allContexts.add(context);
+                } else if (Array.isArray(context) && context.length > 1) {
+                  // For background music tuple contexts, add the scene (second element)
+                  allContexts.add(context[1]);
+                }
+              });
+            }
+          }
+        } catch (e) {
+          console.error(`Error parsing contexts for ${table}:`, e.message);
+        }
+      }
+    }
+
+    // Also get contexts from user_sound_contexts table
+    const userContextsSql = 'SELECT DISTINCT context FROM user_sound_contexts';
+    const userContexts = await db.query(userContextsSql);
+    userContexts.forEach((row) => {
+      if (row.context) {
+        allContexts.add(row.context);
+      }
+    });
+
+    // Convert to array and sort alphabetically
+    const contextsArray = Array.from(allContexts).sort();
+    res.json(contextsArray);
+  } catch (error) {
+    console.error('Error getting all contexts:', error);
+    res.status(500).json({ error: 'Failed to get contexts' });
+  }
+}
+
 module.exports = {
   getData,
   updateMainPlaylist,
@@ -901,6 +951,7 @@ module.exports = {
   addSound,
   deleteSound,
   updateUserSoundsBatch,
+  getAllContexts,
 };
 
 async function updateUserSoundsBatch(req, res) {

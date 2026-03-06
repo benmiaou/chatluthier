@@ -11,6 +11,7 @@ const {
   addSound,
   deleteSound,
   updateUserSoundsBatch,
+  getAllContexts,
 } = require('../controllers/soundController.sql');
 const multer = require('multer');
 
@@ -62,5 +63,6 @@ router.post('/update-main-playlist', updateMainPlaylist);
 router.post('/update-user-sound', updateUserSound);
 router.post('/update-user-sounds-batch', updateUserSoundsBatch);
 router.post('/add-sound', upload.fields([{ name: 'file' }, { name: 'imageFile' }]), addSound); // Add the addSound route
+router.get('/contexts', getAllContexts);
 
 module.exports = router;
