@@ -1,0 +1,31 @@
+/* Critical fix for notification blocking issue */
+.mantine-Notifications-root {
+  pointer-events: none !important;
+}
+
+/* Allow individual notifications to be clickable */
+.mantine-Notification-root {
+  pointer-events: auto !important;
+  z-index: 100 !important;
+}
+
+/* Specific fixes for credit toasts */
+.credit-toast {
+  pointer-events: none !important;
+}
+
+.credit-notification {
+  pointer-events: auto !important;
+  z-index: 150 !important;
+}
+
+/* Make links in credits clickable */
+.credit-notification a {
+  pointer-events: auto !important;
+  color: var(--mantine-primary-color-6) !important;
+  text-decoration: underline !important;
+}
+
+.credit-notification a:hover {
+  color: var(--mantine-primary-color-8) !important;
+}

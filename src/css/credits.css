@@ -1,49 +1,62 @@
 #background-music-Credit {
-    text-align: center;
-    margin: 10px 0;
+  text-align: center;
+  margin: 10px 0;
 }
 
 #background-music-Credit a {
-    color: var(--link-color);
-    margin-bottom: 0;
+  color: var(--link-color);
+  margin-bottom: 0;
 }
 
 #background-music-Credit a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
+}
+
+/* Style for links in credit text */
+.credit-text a,
+span a {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+.credit-text a:hover,
+span a:hover {
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .credit-modal-template,
 .all-credits-modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    overflow-y: auto;
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  overflow-y: auto;
 }
 
 .credit-modal-template {
-    top: 10px;
-    right: 10px;
-    background-color: var(--main-background-color-transparency);
-    color: var(--main-text);
-    padding: 10px;
-    border-radius: 5px;
+  top: 10px;
+  right: 10px;
+  background-color: var(--main-background-color-transparency);
+  color: var(--main-text);
+  padding: 10px;
+  border-radius: 5px;
 }
 
 .credit-content {
-    text-align: left;
+  text-align: left;
 }
 
 .close-btn {
-    float: right;
-    font-size: 40px;
-    cursor: pointer;
+  float: right;
+  font-size: 40px;
+  cursor: pointer;
 }
 
 .all-credits-modal {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    padding: 20px;
-    background-color: var(--main-background-color);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  background-color: var(--main-background-color);
 }

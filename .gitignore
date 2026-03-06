@@ -142,8 +142,12 @@ Tokens
 
 adminGoogleIds.json
 srv_data
-package-lock.json
 assets
 uploads
 backups
 requests
+.DS_Store
+srv/database/chatluthier.db
+LeChat/
+scripts/deploy-prod.bat
+scripts/deploy-dev.bat
