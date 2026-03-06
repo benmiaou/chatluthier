@@ -54,7 +54,16 @@ const isLocalhost =
   globalThis.location.hostname === 'localhost' || globalThis.location.hostname === '127.0.0.1';
 const isDevServer = globalThis.location.hostname === 'dev.chatluthier.org';
 const protocol = globalThis.location.protocol === 'https:' ? 'wss:' : 'ws:';
-const _WS_PORT = isLocalhost ? 3001 : isDevServer ? 4001 : Number(globalThis.location.port) + 1;
+
+let _WS_PORT;
+if (isLocalhost) {
+  _WS_PORT = 3001;
+} else if (isDevServer) {
+  _WS_PORT = 4001;
+} else {
+  _WS_PORT = Number(globalThis.location.port) + 1;
+}
+
 const WS_URL = isLocalhost
   ? 'ws://localhost:3001'
   : `${protocol}//${globalThis.location.hostname}/ws/`;
