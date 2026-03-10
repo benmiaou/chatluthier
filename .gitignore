@@ -140,7 +140,6 @@ Tokens
 # Jetbrains
 .idea*
 
-adminGoogleIds.json
 srv_data
 assets
 uploads

@@ -31,7 +31,6 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/assets': { target: 'http://localhost:3000', changeOrigin: true },
       '/api/sounds/backgroundMusic': { target: 'http://localhost:3000', changeOrigin: true },
       '/api/sounds/ambianceSounds': { target: 'http://localhost:3000', changeOrigin: true },
       '/api/sounds/soundboard': { target: 'http://localhost:3000', changeOrigin: true },
@@ -54,6 +53,7 @@ export default defineConfig({
       '/close-request': { target: 'http://localhost:3000', changeOrigin: true },
       '/get-sound-order': { target: 'http://localhost:3000', changeOrigin: true },
       '/save-sound-order': { target: 'http://localhost:3000', changeOrigin: true },
+      '/contexts': { target: 'http://localhost:3000', changeOrigin: true },
       '/register': { target: 'http://localhost:3000', changeOrigin: true },
       '/login': { target: 'http://localhost:3000', changeOrigin: true },
       '/request-password-reset': { target: 'http://localhost:3000', changeOrigin: true },

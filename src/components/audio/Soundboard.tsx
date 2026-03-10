@@ -53,12 +53,9 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
   // Load sound order when user logs in
   const loadSoundOrder = useCallback(async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3000/get-sound-order?userId=${userId}&soundType=soundboard`,
-        {
-          credentials: 'include',
-        }
-      );
+      const response = await fetch(`/get-sound-order?userId=${userId}&soundType=soundboard`, {
+        credentials: 'include',
+      });
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
       }
@@ -98,7 +95,7 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
     }
 
     try {
-      const response = await fetch('http://localhost:3000/save-sound-order', {
+      const response = await fetch('/save-sound-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

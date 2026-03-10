@@ -29,10 +29,6 @@ Connect your Spotify Premium account to use your own playlists as background mus
 
 Create or join a **live session** via WebSocket. Every background music change, ambiance update, and soundboard trigger is broadcast in real time to all participants. Share the invite link and your whole group hears the same thing.
 
-### 🔐 Google Sign-In
-
-Log in with Google to unlock personalised sound lists — enable or disable individual tracks and effects to build your own curated library without affecting other users.
-
 ### 🛠 Admin Panel
 
 Admins get extra controls inline and in the toolbar:
@@ -64,7 +60,6 @@ Developers can enable file-based logging for both client and server during devel
 | Frontend | React 18 + TypeScript + [Mantine v7](https://mantine.dev) + [Vite](https://vite.dev) |
 | Routing  | React Router v7                                                                      |
 | Backend  | Express + WebSocket (Node.js)                                                        |
-| Auth     | Google Identity Services (GSI)                                                       |
 | Music    | Spotify Web API — PKCE OAuth                                                         |
 | Styling  | Mantine dark theme + original CSS variables (BagnardSans font, maroon palette)       |
 
@@ -79,7 +74,6 @@ Developers can enable file-based logging for both client and server during devel
 
 ```bash
 npm install
-cp .env.example .env          # fill in your Spotify and Google client IDs
 cp srv/Tokens.example srv/Tokens  # fill in your JWT secrets
 npm run build
 npm run dev                   # starts Express + WebSocket server

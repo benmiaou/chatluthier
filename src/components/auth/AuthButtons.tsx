@@ -8,6 +8,7 @@ import {
   TextInput,
   PasswordInput,
   Stack,
+  Checkbox,
 } from '@mantine/core';
 
 import { IconLogout, IconLogin, IconUserPlus } from '@tabler/icons-react';
@@ -73,6 +74,8 @@ export function AuthButtons(): React.ReactElement {
   const [loginPseudo, setLoginPseudo] = useState('');
 
   const [loginPassword, setLoginPassword] = useState('');
+
+  const [rememberMe, setRememberMe] = useState(false);
 
   const [registerPseudo, setRegisterPseudo] = useState('');
 
@@ -181,7 +184,7 @@ export function AuthButtons(): React.ReactElement {
     try {
       setError('');
 
-      await loginWithPseudo(loginPseudo, loginPassword);
+      await loginWithPseudo(loginPseudo, loginPassword, rememberMe);
 
       setLoginModalOpen(false);
 
@@ -437,6 +440,14 @@ export function AuthButtons(): React.ReactElement {
               }
             }}
           />
+
+          <Group justify="space-between" mt="md">
+            <Checkbox
+              label="Remember me"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.currentTarget.checked)}
+            />
+          </Group>
 
           {error && (
             <Text c="red" size="sm">

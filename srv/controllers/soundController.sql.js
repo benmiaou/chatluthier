@@ -892,13 +892,61 @@ async function saveSoundOrderV2(req, res) {
 
 async function getAllContexts(req, res) {
   try {
-    // Query all contexts from all sound tables
-    const tables = ['ambiance_sounds', 'background_sounds', 'soundboard'];
-    const allContexts = new Set();
+    const { category } = req.query;
+    console.log('getAllContexts called with category:', category);
+    const serverContexts = new Set();
 
-    for (const table of tables) {
-      const sql = `SELECT contexts FROM ${table} WHERE contexts IS NOT NULL AND contexts != '[]'`;
+    // Determine which table to query based on category parameter
+    let tableName;
+    switch (category) {
+      case 'ambiance':
+        tableName = 'ambiance_sounds';
+        break;
+      case 'background':
+        tableName = 'background_sounds';
+        break;
+      case 'soundboard':
+        tableName = 'soundboard';
+        break;
+      default:
+        // If no category specified, query all tables (backward compatibility)
+        const tables = ['ambiance_sounds', 'background_sounds', 'soundboard'];
+        for (const table of tables) {
+          const sql = `SELECT contexts FROM ${table} WHERE contexts IS NOT NULL AND contexts != '[]'`;
+          console.log(`Querying ${table}:`, sql);
+          const results = await db.query(sql);
+          console.log(`Found ${results.length} results in ${table}`);
+
+          for (const row of results) {
+            try {
+              if (row.contexts) {
+                const contexts = JSON.parse(row.contexts);
+                if (Array.isArray(contexts)) {
+                  // Handle both flat arrays and tuple arrays for background music
+                  contexts.forEach((context) => {
+                    if (typeof context === 'string') {
+                      serverContexts.add(context);
+                    } else if (Array.isArray(context) && context.length > 1) {
+                      // For background music tuple contexts, add the scene (second element)
+                      serverContexts.add(context[1]);
+                    }
+                  });
+                }
+              }
+            } catch (e) {
+              console.error(`Error parsing contexts for ${table}:`, e.message);
+            }
+          }
+        }
+        break;
+    }
+
+    // If specific category was requested, query only that table
+    if (tableName) {
+      const sql = `SELECT contexts FROM ${tableName} WHERE contexts IS NOT NULL AND contexts != '[]'`;
+      console.log(`Querying specific table ${tableName}:`, sql);
       const results = await db.query(sql);
+      console.log(`Found ${results.length} results in ${tableName} for category ${category}`);
 
       for (const row of results) {
         try {
@@ -908,32 +956,49 @@ async function getAllContexts(req, res) {
               // Handle both flat arrays and tuple arrays for background music
               contexts.forEach((context) => {
                 if (typeof context === 'string') {
-                  allContexts.add(context);
+                  serverContexts.add(context);
                 } else if (Array.isArray(context) && context.length > 1) {
                   // For background music tuple contexts, add the scene (second element)
-                  allContexts.add(context[1]);
+                  serverContexts.add(context[1]);
                 }
               });
             }
           }
         } catch (e) {
-          console.error(`Error parsing contexts for ${table}:`, e.message);
+          console.error(`Error parsing contexts for ${tableName}:`, e.message);
         }
       }
     }
 
-    // Also get contexts from user_sound_contexts table
-    const userContextsSql = 'SELECT DISTINCT context FROM user_sound_contexts';
-    const userContexts = await db.query(userContextsSql);
-    userContexts.forEach((row) => {
-      if (row.context) {
-        allContexts.add(row.context);
-      }
+    console.log('Server contexts collected:', Array.from(serverContexts));
+
+    // Get contexts from user_sound_contexts table (user contexts)
+    let userContextsSql = 'SELECT DISTINCT context FROM user_sound_contexts';
+    let userContextsResult = await db.query(userContextsSql);
+    let userContexts = userContextsResult.map((row) => row.context).filter(Boolean);
+
+    // If category is specified, filter user contexts to only that category
+    if (category) {
+      userContextsSql = 'SELECT DISTINCT context FROM user_sound_contexts WHERE sound_type = ?';
+      userContextsResult = await db.query(userContextsSql, [category]);
+      userContexts = userContextsResult.map((row) => row.context).filter(Boolean);
+    }
+
+    console.log('User contexts collected:', userContexts);
+
+    // Convert to sorted arrays
+    const serverContextsArray = Array.from(serverContexts).sort();
+    const userContextsArray = Array.from(new Set(userContexts)).sort();
+
+    console.log('Final response:', {
+      serverContexts: serverContextsArray,
+      userContexts: userContextsArray,
     });
 
-    // Convert to array and sort alphabetically
-    const contextsArray = Array.from(allContexts).sort();
-    res.json(contextsArray);
+    res.json({
+      serverContexts: serverContextsArray,
+      userContexts: userContextsArray,
+    });
   } catch (error) {
     console.error('Error getting all contexts:', error);
     res.status(500).json({ error: 'Failed to get contexts' });

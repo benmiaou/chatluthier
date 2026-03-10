@@ -43,6 +43,7 @@ createRoot(rootElement).render(
             },
           }}
         />
+
         <AuthProvider>
           <SocketProvider>
             <Sentry.ErrorBoundary

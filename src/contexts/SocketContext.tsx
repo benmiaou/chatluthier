@@ -57,7 +57,7 @@ const protocol = globalThis.location.protocol === 'https:' ? 'wss:' : 'ws:';
 
 let _WS_PORT;
 if (isLocalhost) {
-  _WS_PORT = 3001;
+  _WS_PORT = 3000; // WebSocket server runs on same port as HTTP server
 } else if (isDevServer) {
   _WS_PORT = 4001;
 } else {
@@ -65,7 +65,7 @@ if (isLocalhost) {
 }
 
 const WS_URL = isLocalhost
-  ? 'ws://localhost:3001'
+  ? `wss://${import.meta.env.VITE_WS_HOST || window.location.hostname}`
   : `${protocol}//${globalThis.location.hostname}/ws/`;
 
 const RECONNECT_MS = 5000;

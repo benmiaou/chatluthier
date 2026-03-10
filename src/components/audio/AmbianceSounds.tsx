@@ -74,12 +74,9 @@ export function AmbianceSounds({
   // Load presets and sound order when user logs in
   const loadSoundOrder = useCallback(async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3000/get-sound-order?userId=${userId}&soundType=ambianceSounds`,
-        {
-          credentials: 'include',
-        }
-      );
+      const response = await fetch(`/get-sound-order?userId=${userId}&soundType=ambianceSounds`, {
+        credentials: 'include',
+      });
 
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
@@ -121,7 +118,7 @@ export function AmbianceSounds({
     }
 
     try {
-      const response = await fetch('http://localhost:3000/save-sound-order', {
+      const response = await fetch('/save-sound-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

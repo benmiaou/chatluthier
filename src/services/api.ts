@@ -1,5 +1,5 @@
-/** Base URL for API calls. Empty string works both in dev (via Vite proxy) and prod. */
-const BASE = '';
+/** Base URL for API calls. Empty string for dev (relative paths), full URL for production. */
+const BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 interface RequestInit {
   method?: string;

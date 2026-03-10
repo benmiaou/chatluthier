@@ -7,6 +7,8 @@ interface ContextSelectorProps {
   readonly onChange: (value: string[]) => void;
   readonly placeholder?: string;
   readonly maxDropdownHeight?: number;
+  readonly showUserContexts?: boolean;
+  readonly category?: 'ambiance' | 'background' | 'soundboard';
 }
 
 export function ContextSelector({
@@ -14,38 +16,66 @@ export function ContextSelector({
   onChange,
   placeholder = 'Search or add contexts...',
   maxDropdownHeight = 200,
+  showUserContexts = true,
+  category,
 }: ContextSelectorProps): React.JSX.Element {
-  const [allContexts, setAllContexts] = useState<string[]>([]);
+  // Ensure category is defined to prevent reference errors
+  const safeCategory = category || undefined;
+  const [serverContexts, setServerContexts] = useState<string[]>([]);
+  const [userContexts, setUserContexts] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch all unique contexts from the server
+  // Fetch server and user contexts from the server
   useEffect(() => {
     const fetchContexts = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/contexts');
+        let url = '/contexts';
+        if (safeCategory) {
+          url = `/contexts?category=${safeCategory}`;
+        }
+        const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
-          setAllContexts(data);
+          setServerContexts(data.serverContexts || []);
+          setUserContexts(data.userContexts || []);
+        } else {
+          // Fallback to default contexts if API fails
+          setServerContexts([]);
+          setUserContexts([]);
         }
-      } catch (fetchError) {
-        console.error('Error fetching contexts:', fetchError);
+      } catch (_) {
+        // Fallback to default contexts if API fails
+        setServerContexts([]);
+        setUserContexts([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchContexts();
-  }, []);
+  }, [safeCategory]);
 
   const handleRemoveContext = (contextToRemove: string) => {
     onChange(value.filter((context) => context !== contextToRemove));
   };
 
-  // Combine server contexts with user-added contexts
-  const availableContexts = Array.from(
-    new Set([...allContexts, ...value.filter((context) => !allContexts.includes(context))])
+  // Separate user-added contexts (not in server or user contexts)
+  const userAddedContexts = value.filter(
+    (context) => !serverContexts.includes(context) && !userContexts.includes(context)
   );
+
+  // Combine all available contexts
+  const availableContexts = [
+    ...serverContexts,
+    ...(showUserContexts ? userContexts : []),
+    ...userAddedContexts,
+  ];
+
+  // Add some default contexts if no contexts are available
+  const defaultContexts = ['loading...'];
+
+  const finalContexts = availableContexts.length > 0 ? availableContexts : defaultContexts;
 
   return (
     <div>
@@ -54,7 +84,7 @@ export function ContextSelector({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        data={availableContexts}
+        data={finalContexts}
         searchable
         creatable
         clearable
@@ -65,6 +95,9 @@ export function ContextSelector({
           onChange([...value, query]);
           return item;
         }}
+        // Ensure dropdown shows all options
+        nothingFound="Press Enter to create"
+        hidePickedOptions={false}
       />
 
       {value.length > 0 && (

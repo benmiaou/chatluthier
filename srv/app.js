@@ -2,12 +2,33 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('node:path');
+const helmet = require('helmet');
 const authRoutes = require('./routes/authRoutes');
 const soundRoutes = require('./routes/soundRoutes');
 const requestRoutes = require('./routes/requestRoutes');
 const logger = require('./utils/logger');
+const config = require('./config/appConfig');
 
 const app = express();
+
+// Validate required environment variables
+const requiredEnvVars = ['NODE_ENV'];
+if (config.backend.nodeEnv === 'production') {
+  requiredEnvVars.push('VITE_API_BASE_URL');
+}
+
+const missingEnvVars = requiredEnvVars.filter((varName) => !process.env[varName]);
+if (missingEnvVars.length > 0) {
+  console.error(`❌ Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  if (config.backend.nodeEnv === 'production') {
+    process.exit(1);
+  }
+}
+
+// Note: CSP is handled by nginx in production, so we disable it here
+// to avoid duplicate CSP headers. The nginx configuration includes
+// the proper CSP header with correct syntax.
+// app.use(helmet.contentSecurityPolicy({ directives: config.security.contentSecurityPolicy }));
 
 // Add logging middleware
 // Note: Winston logger doesn't have expressMiddleware method
@@ -17,37 +38,56 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: 'http://localhost:5173',
-    credentials: true,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      // Check if origin is in the allowed list
+      if (config.security.cors.allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
+
+      // Origin not allowed - reject with error
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: config.security.cors.credentials,
+    methods: config.security.cors.methods,
+    allowedHeaders: config.security.cors.allowedHeaders,
   })
 );
 app.use(express.json({ limit: '100mb' }));
 app.use(express.static(path.join(__dirname, '../dist')));
-app.use('/assets', express.static(path.join(__dirname, '../assets')));
-app.use('/images', express.static(path.join(__dirname, '../assets/images')));
-app.use('/fonts', express.static(path.join(__dirname, '../public/fonts')));
-app.use('/css', express.static(path.join(__dirname, '../src/css')));
+app.use('/assets', express.static(path.join(__dirname, '../dist/assets')));
+app.use('/images', express.static(path.join(__dirname, '../dist/assets/images')));
+app.use('/fonts', express.static(path.join(__dirname, '../dist/fonts')));
+app.use('/css', express.static(path.join(__dirname, '../dist/css')));
 
 // Handle preflight requests
 app.options('*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:5173');
-  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, Content-Length, X-Requested-With'
-  );
-  res.header('Access-Control-Allow-Credentials', 'true');
+  const origin = req.headers.origin;
+
+  // Set CORS headers based on configuration
+  if (origin && config.security.cors.allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
+  res.header('Access-Control-Allow-Methods', config.security.cors.methods.join(', '));
+  res.header('Access-Control-Allow-Headers', config.security.cors.allowedHeaders.join(', '));
   res.sendStatus(200);
 });
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:5173');
-  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, Content-Length, X-Requested-With'
-  );
-  res.header('Access-Control-Allow-Credentials', 'true');
+  const origin = req.headers.origin;
+
+  // Set CORS headers based on configuration
+  if (origin && config.security.cors.allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
+  res.header('Access-Control-Allow-Methods', config.security.cors.methods.join(', '));
+  res.header('Access-Control-Allow-Headers', config.security.cors.allowedHeaders.join(', '));
   next();
 });
 
