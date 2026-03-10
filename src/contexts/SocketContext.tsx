@@ -55,18 +55,36 @@ const isLocalhost =
 const isDevServer = globalThis.location.hostname === 'dev.chatluthier.org';
 const protocol = globalThis.location.protocol === 'https:' ? 'wss:' : 'ws:';
 
-let _WS_PORT;
+// Determine WebSocket port based on environment
+let wsPort;
+let wsHost;
+let wsPath = '';
+
 if (isLocalhost) {
-  _WS_PORT = 3000; // WebSocket server runs on same port as HTTP server
+  // Local development: WebSocket server runs on port 3001
+  wsPort = 3001;
+  wsHost = import.meta.env.VITE_WS_HOST || window.location.hostname;
+  console.log(`[WebSocket] Local development: connecting to ${wsHost}:${wsPort}`);
 } else if (isDevServer) {
-  _WS_PORT = 4001;
+  // Dev server: WebSocket server runs on port 4001 with /ws/ path
+  wsPort = 4001;
+  wsHost = globalThis.location.hostname;
+  wsPath = '/ws/';
+  console.log(`[WebSocket] Dev server: connecting to ${protocol}//${wsHost}:${wsPort}${wsPath}`);
 } else {
-  _WS_PORT = Number(globalThis.location.port) + 1;
+  // Production: WebSocket server runs on HTTP port + 1
+  const httpPort = Number(globalThis.location.port) || (protocol === 'https:' ? 443 : 80);
+  wsPort = httpPort + 1;
+  wsHost = globalThis.location.hostname;
+  console.log(`[WebSocket] Production: connecting to ${protocol}//${wsHost}:${wsPort}`);
 }
 
+// Construct WebSocket URL
 const WS_URL = isLocalhost
-  ? `wss://${import.meta.env.VITE_WS_HOST || window.location.hostname}`
-  : `${protocol}//${globalThis.location.hostname}/ws/`;
+  ? `${protocol}//${wsHost}:${wsPort}`
+  : `${protocol}//${wsHost}:${wsPort}${wsPath}`;
+
+console.log(`[WebSocket] Using URL: ${WS_URL}`);
 
 const RECONNECT_MS = 5000;
 const HEARTBEAT_MS = 30_000;
@@ -217,7 +235,9 @@ export function SocketProvider({
   const handleConnectionClose = useCallback(() => {
     setConnected(false);
     setStatusMessage(
-      sessionId ? 'Session active. Reconnecting to server...' : 'Disconnected. Reconnecting...'
+      sessionId
+        ? `Session active. Reconnecting to server (${wsHost}:${wsPort})...`
+        : `Disconnected. Reconnecting to ${wsHost}:${wsPort}...`
     );
     clearHeartbeat();
 
@@ -228,7 +248,7 @@ export function SocketProvider({
   }, [sessionId]);
 
   const handleConnectionError = useCallback(() => {
-    setStatusMessage('Connection error. Retrying...');
+    setStatusMessage(`Connection error to ${wsHost}:${wsPort}. Retrying...`);
     if (wsRef.current) {
       wsRef.current.close();
     }
@@ -289,7 +309,9 @@ export function SocketProvider({
     const handleOpen = () => {
       clearTimeout(connectionTimeout);
       setConnected(true);
-      setStatusMessage('Connected to session server. Ready to join or create a session.');
+      setStatusMessage(
+        `Connected to session server (${wsHost}:${wsPort}). Ready to join or create a session.`
+      );
       setupHeartbeat(ws);
 
       const sessionIdToJoin = getSessionIdToJoin();

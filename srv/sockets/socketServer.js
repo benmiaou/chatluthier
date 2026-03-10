@@ -22,10 +22,13 @@ function isRateLimited(clientId) {
   return false;
 }
 
-function initializeWebSocketServer(httpServer, httpPort) {
-  // Create a separate WebSocket server on port (HTTP port + 1)
-  wsServer = new WebSocket.Server({ server: httpServer });
-  console.log(`WebSocket server initialized on port ${httpPort}`);
+function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
+  // Determine the WebSocket port
+  const websocketPort = wsPort !== null ? wsPort : httpPort + 1;
+
+  // Always create a standalone WebSocket server on the specified port
+  wsServer = new WebSocket.Server({ port: websocketPort });
+  console.log(`WebSocket server initialized on port ${websocketPort}`);
 
   function handleSubscribe(data, ws) {
     const connectedId = data.id;

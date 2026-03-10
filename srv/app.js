@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const path = require('node:path');
-const helmet = require('helmet');
 const authRoutes = require('./routes/authRoutes');
 const soundRoutes = require('./routes/soundRoutes');
 const requestRoutes = require('./routes/requestRoutes');
@@ -29,6 +28,10 @@ if (missingEnvVars.length > 0) {
 // to avoid duplicate CSP headers. The nginx configuration includes
 // the proper CSP header with correct syntax.
 // app.use(helmet.contentSecurityPolicy({ directives: config.security.contentSecurityPolicy }));
+
+// Disable helmet completely to prevent duplicate security headers
+// since we handle CSP and other security headers in nginx
+app.disable('x-powered-by');
 
 // Add logging middleware
 // Note: Winston logger doesn't have expressMiddleware method

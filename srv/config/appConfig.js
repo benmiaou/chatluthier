@@ -19,6 +19,9 @@ function getAppConfig() {
       // Server port
       port: process.env.PORT || 3000,
 
+      // WebSocket port (null for auto: HTTP_PORT + 1)
+      wsPort: process.env.WS_PORT || null,
+
       // CORS configuration
       allowedOrigins: [
         'http://localhost:5173',
@@ -48,7 +51,12 @@ function getAppConfig() {
       // Using kebab-case directive names and array format for helmet compatibility
       contentSecurityPolicy: {
         'default-src': ["'self'"],
-        'connect-src': ["'self'", 'wss://dev.chatluthier.org/ws/'],
+        'connect-src': [
+          "'self'",
+          'ws://localhost:3001',
+          'wss://localhost:3001',
+          'wss://dev.chatluthier.org/ws/',
+        ],
         'script-src': ["'self'", "'unsafe-eval'"],
         'style-src': ["'self'", "'unsafe-inline'"],
         'img-src': ["'self'", 'data:', 'https://mirrors.creativecommons.org'],
