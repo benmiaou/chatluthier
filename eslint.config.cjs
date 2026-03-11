@@ -50,7 +50,7 @@ module.exports = [
       ...pluginReactHooks.configs.recommended.rules,
       // indent: ['error', 2],
       // 'linebreak-style': ['error', 'windows'], // Disabled for Windows compatibility
-      quotes: ['error', 'single'],
+      quotes: ['error', 'single', { avoidEscape: true }],
       semi: ['error', 'always'],
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [

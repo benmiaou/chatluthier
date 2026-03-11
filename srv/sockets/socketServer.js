@@ -33,6 +33,7 @@ function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
   function handleSubscribe(data, ws) {
     const connectedId = data.id;
     const participantId = data.participantId || Math.random().toString(36).substring(2, 10);
+    // Return the assigned participantId so the caller can sync the closure variable
 
     if (!subscribers.has(connectedId)) {
       subscribers.set(connectedId, new Set());
@@ -79,6 +80,7 @@ function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
         `New client joined ID: ${connectedId} with pseudo: ${data.pseudo || 'Anonymous'}`
       );
     }
+    return participantId;
   }
 
   function handleBroadcast(data, ws, connectedId) {
@@ -192,9 +194,8 @@ function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
 
         switch (data.type) {
           case 'subscribe':
-            handleSubscribe(data, ws);
             connectedId = data.id;
-            participantId = data.participantId || Math.random().toString(36).substring(2, 10);
+            participantId = handleSubscribe(data, ws);
             break;
 
           case 'message':
@@ -272,4 +273,11 @@ function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
   return wsServer;
 }
 
-module.exports = { initializeWebSocketServer, wsServer: () => wsServer };
+function _resetStateForTests() {
+  subscribers.clear();
+  sessionParticipants.clear();
+  participantToWs.clear();
+  messageTimestamps.clear();
+}
+
+module.exports = { initializeWebSocketServer, wsServer: () => wsServer, _resetStateForTests };

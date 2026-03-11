@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { apiFetch } from '../services/api';
 import type { Sound, ExternalProvider } from '../types/sound';
 import { useDeezer } from './useDeezer';
@@ -6,6 +6,7 @@ import { useSoundCloud } from './useSoundCloud';
 import { useSpotify } from './useSpotify';
 import { handleError } from '../utils/logger';
 import type { ExternalSoundPayload } from '../contexts/SocketContext';
+import { resolveExternalSound } from '../utils/resolveExternalSound';
 
 export interface ExternalSoundRecord {
   id: string;
@@ -73,11 +74,14 @@ export function useExternalSounds(userId: string | null): {
   const isDeezerConnected = deezer.isAuthenticated;
   const isSoundCloudConnected = soundCloud.isAuthenticated;
 
-  const connectedProviders: ExternalProvider[] = [
-    ...(isSpotifyConnected ? ['spotify' as ExternalProvider] : []),
-    ...(isDeezerConnected ? ['deezer' as ExternalProvider] : []),
-    ...(isSoundCloudConnected ? ['soundcloud' as ExternalProvider] : []),
-  ];
+  const connectedProviders = useMemo<ExternalProvider[]>(
+    () => [
+      ...(isSpotifyConnected ? ['spotify' as ExternalProvider] : []),
+      ...(isDeezerConnected ? ['deezer' as ExternalProvider] : []),
+      ...(isSoundCloudConnected ? ['soundcloud' as ExternalProvider] : []),
+    ],
+    [isSpotifyConnected, isDeezerConnected, isSoundCloudConnected]
+  );
 
   const reload = useCallback(async () => {
     if (!userId) {
@@ -220,107 +224,12 @@ export function useExternalSounds(userId: string | null): {
    */
   const resolveAndPlayExternal = useCallback(
     async (payload: ExternalSoundPayload): Promise<Sound | null> => {
-      const senderProvider = payload.provider;
-      const query = [payload.artist, payload.title].filter(Boolean).join(' ');
-
-      // Helper: build a Sound from a search result
-      const buildSound = (
-        provider: ExternalProvider,
-        trackId: string,
-        artist: string,
-        title: string,
-        album?: string,
-        thumbnailUrl?: string,
-        previewUrl?: string,
-        permalinkUrl?: string
-      ): Sound => ({
-        id: `ext_recv_${provider}_${trackId}`,
-        name: `${artist} – ${title}`,
-        filename: null,
-        category: 'background',
-        isExternal: true,
-        provider,
-        providerTrackId: trackId,
-        artist,
-        title,
-        album,
-        thumbnailUrl,
-        previewUrl,
-        permalinkUrl,
-      });
-
-      // 1. Sender's provider is available → play directly
-      if (connectedProviders.includes(senderProvider)) {
-        const sound = buildSound(
-          senderProvider,
-          payload.trackId,
-          payload.artist ?? '',
-          payload.title ?? '',
-          payload.album,
-          payload.thumbnailUrl,
-          payload.previewUrl
-        );
-        await playExternal(sound);
-        return sound;
-      }
-
-      // 2. Fall back: search on the first connected provider
-      if (!query || connectedProviders.length === 0) {
-        return null;
-      }
-
-      const fallbackProvider = connectedProviders[0];
-
       try {
-        let sound: Sound | null = null;
-
-        if (fallbackProvider === 'spotify') {
-          const results = await spotify.search(query);
-          const hit = results[0];
-          if (hit) {
-            sound = buildSound(
-              'spotify',
-              hit.trackId,
-              hit.artist,
-              hit.title,
-              hit.album,
-              hit.thumbnailUrl,
-              hit.previewUrl,
-              hit.permalinkUrl
-            );
-          }
-        } else if (fallbackProvider === 'deezer') {
-          const results = await deezer.search(query);
-          const hit = results[0];
-          if (hit) {
-            sound = buildSound(
-              'deezer',
-              hit.trackId,
-              hit.artist,
-              hit.title,
-              hit.album,
-              hit.thumbnailUrl,
-              hit.previewUrl,
-              hit.permalinkUrl
-            );
-          }
-        } else if (fallbackProvider === 'soundcloud') {
-          const results = await soundCloud.search(query);
-          const hit = results[0];
-          if (hit) {
-            sound = buildSound(
-              'soundcloud',
-              hit.trackId,
-              hit.artist,
-              hit.title,
-              hit.album,
-              hit.thumbnailUrl,
-              hit.previewUrl,
-              hit.permalinkUrl
-            );
-          }
-        }
-
+        const sound = await resolveExternalSound(payload, connectedProviders, {
+          spotify: spotify.search,
+          deezer: deezer.search,
+          soundcloud: soundCloud.search,
+        });
         if (sound) {
           await playExternal(sound);
         }
@@ -330,7 +239,7 @@ export function useExternalSounds(userId: string | null): {
         return null;
       }
     },
-    [connectedProviders, playExternal, spotify, deezer, soundCloud]
+    [connectedProviders, playExternal, spotify.search, deezer.search, soundCloud.search]
   );
 
   return {
