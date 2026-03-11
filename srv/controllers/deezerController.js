@@ -34,6 +34,7 @@ async function search(req, res) {
       durationMs: (track.duration || 0) * 1000,
       thumbnailUrl: track.album?.cover_medium || track.album?.cover || '',
       previewUrl: track.preview || '',
+      permalinkUrl: track.link || '',
       provider: 'deezer',
     }));
 

@@ -218,6 +218,7 @@ app.get('/api/spotify/search', async (req, res) => {
       thumbnailUrl: track.album.images[1]?.url || track.album.images[0]?.url || '',
       previewUrl: track.preview_url || '',
       spotifyUri: track.uri,
+      permalinkUrl: track.external_urls?.spotify || '',
       provider: 'spotify',
     }));
 

@@ -144,6 +144,7 @@ CREATE TABLE IF NOT EXISTS external_sounds (
     duration_ms INTEGER,
     thumbnail_url TEXT,
     preview_url TEXT,
+    permalink_url TEXT,
     contexts TEXT, -- JSON array of tuples: [["calm","adventure"],["dynamic","city"]]
     is_enabled BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

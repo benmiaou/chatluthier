@@ -19,6 +19,7 @@ export interface Sound {
   durationMs?: number;
   thumbnailUrl?: string;
   previewUrl?: string;
+  permalinkUrl?: string;
 }
 
 /** Returns true if a background music sound matches the given category (contexts are tuples) */

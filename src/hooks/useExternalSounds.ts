@@ -24,6 +24,7 @@ export interface ExternalSoundRecord {
   durationMs?: number;
   thumbnailUrl?: string;
   previewUrl?: string;
+  permalinkUrl?: string;
 }
 
 export interface AddExternalSoundPayload {
@@ -36,6 +37,7 @@ export interface AddExternalSoundPayload {
   durationMs?: number;
   thumbnailUrl?: string;
   previewUrl?: string;
+  permalinkUrl?: string;
   contexts?: [string, string][];
 }
 

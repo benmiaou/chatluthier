@@ -32,6 +32,7 @@ interface SearchResult {
   durationMs: number;
   thumbnailUrl: string;
   previewUrl: string;
+  permalinkUrl: string;
   provider: ExternalProvider;
 }
 
@@ -145,6 +146,7 @@ export function ExternalSoundSearchModal({
           durationMs: result.durationMs,
           thumbnailUrl: result.thumbnailUrl,
           previewUrl: result.previewUrl,
+          permalinkUrl: result.permalinkUrl,
           contexts: selectedContexts[result.trackId] ?? [],
         });
         // Remove from results to give visual feedback

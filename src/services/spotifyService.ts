@@ -188,6 +188,7 @@ export interface SpotifySearchResult {
   thumbnailUrl: string;
   previewUrl: string;
   spotifyUri: string;
+  permalinkUrl: string;
   provider: 'spotify';
 }
 

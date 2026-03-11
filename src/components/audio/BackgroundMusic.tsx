@@ -398,13 +398,36 @@ export function BackgroundMusic({
           <Group gap="xs" align="center">
             <Text size="xs" c="dimmed" truncate style={{ flex: 1 }}>
               {currentSound
-                ? `♪ ${currentSound.name ?? `${currentSound.artist} – ${currentSound.title}`}`
+                ? `♪ ${currentSound.isExternal ? `${currentSound.artist ?? ''} – ${currentSound.title ?? ''}` : (currentSound.name ?? '')}`
                 : 'No track playing'}
             </Text>
             {currentSound?.isExternal && currentSound.provider && (
               <ExternalSoundBadge provider={currentSound.provider} compact />
             )}
           </Group>
+          {currentSound?.isExternal && currentSound.provider && (
+            <Group gap={6} align="center">
+              <ExternalSoundBadge provider={currentSound.provider} />
+              {currentSound.permalinkUrl ? (
+                <Text
+                  size="xs"
+                  c="dimmed"
+                  component="a"
+                  href={currentSound.permalinkUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: 'underline dotted', fontSize: 11 }}
+                >
+                  Open on{' '}
+                  {currentSound.provider === 'soundcloud'
+                    ? 'SoundCloud'
+                    : currentSound.provider === 'deezer'
+                      ? 'Deezer'
+                      : 'Spotify'}
+                </Text>
+              ) : null}
+            </Group>
+          )}
           {currentSound?.credit && !currentSound.isExternal && (
             <Text
               size="xs"

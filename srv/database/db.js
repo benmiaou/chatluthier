@@ -234,6 +234,10 @@ class Database {
           CREATE INDEX IF NOT EXISTS idx_external_sounds_provider ON external_sounds(provider);
         `,
       },
+      {
+        name: 'add_external_sounds_permalink',
+        sql: `ALTER TABLE external_sounds ADD COLUMN permalink_url TEXT`,
+      },
     ];
 
     for (const migration of migrations) {

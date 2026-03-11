@@ -34,6 +34,7 @@ async function getExternalSounds(req, res) {
       durationMs: row.duration_ms,
       thumbnailUrl: row.thumbnail_url,
       previewUrl: row.preview_url,
+      permalinkUrl: row.permalink_url || null,
     }));
 
     return res.json(sounds);
@@ -59,6 +60,7 @@ async function addExternalSound(req, res) {
     durationMs,
     thumbnailUrl,
     previewUrl,
+    permalinkUrl,
     contexts,
   } = req.body;
 
@@ -79,8 +81,8 @@ async function addExternalSound(req, res) {
     const contextsJson = contexts ? JSON.stringify(contexts) : '[]';
     const result = await db.execute(
       `INSERT INTO external_sounds
-        (user_id, provider, provider_track_id, artist, title, album, duration_ms, thumbnail_url, preview_url, contexts)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (user_id, provider, provider_track_id, artist, title, album, duration_ms, thumbnail_url, preview_url, permalink_url, contexts)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         userId,
         provider,
@@ -91,6 +93,7 @@ async function addExternalSound(req, res) {
         durationMs || null,
         thumbnailUrl || null,
         previewUrl || null,
+        permalinkUrl || null,
         contextsJson,
       ]
     );
@@ -116,6 +119,7 @@ async function addExternalSound(req, res) {
       durationMs: inserted.duration_ms,
       thumbnailUrl: inserted.thumbnail_url,
       previewUrl: inserted.preview_url,
+      permalinkUrl: inserted.permalink_url || null,
     });
   } catch (error) {
     if (error.message && error.message.includes('UNIQUE constraint failed')) {

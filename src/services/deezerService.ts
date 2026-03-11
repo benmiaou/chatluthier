@@ -24,6 +24,7 @@ export interface DeezerSearchResult {
   durationMs: number;
   thumbnailUrl: string;
   previewUrl: string;
+  permalinkUrl: string;
   provider: 'deezer';
 }
 
