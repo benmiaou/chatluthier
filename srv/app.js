@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
 const path = require('node:path');
 const authRoutes = require('./routes/authRoutes');
 const soundRoutes = require('./routes/soundRoutes');
@@ -25,13 +26,9 @@ if (missingEnvVars.length > 0) {
   }
 }
 
-// Note: CSP is handled by nginx in production, so we disable it here
-// to avoid duplicate CSP headers. The nginx configuration includes
-// the proper CSP header with correct syntax.
-// app.use(helmet.contentSecurityPolicy({ directives: config.security.contentSecurityPolicy }));
-
-// Disable helmet completely to prevent duplicate security headers
-// since we handle CSP and other security headers in nginx
+// CSP is handled by nginx in production — disable it in helmet to avoid duplicate headers.
+// All other helmet headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, etc.) are enabled.
+app.use(helmet({ contentSecurityPolicy: false }));
 app.disable('x-powered-by');
 
 // Add logging middleware
@@ -114,8 +111,7 @@ app.post('/api/spotify/token', async (req, res) => {
         grant_type: 'authorization_code',
         code: code,
         redirect_uri: redirect_uri,
-        client_id: process.env.SPOTIFY_CLIENT_ID || 'e03effcac1d94e0ebe56813e98c815dc',
-        code_verifier: code_verifier,
+        client_id: process.env.SPOTIFY_CLIENT_ID,
       }),
     });
 
@@ -158,7 +154,7 @@ app.post('/api/spotify/refresh', async (req, res) => {
       body: new URLSearchParams({
         grant_type: 'refresh_token',
         refresh_token: refresh_token,
-        client_id: process.env.SPOTIFY_CLIENT_ID || 'e03effcac1d94e0ebe56813e98c815dc',
+        client_id: process.env.SPOTIFY_CLIENT_ID,
       }),
     });
 
