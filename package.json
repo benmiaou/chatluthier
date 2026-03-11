@@ -19,7 +19,6 @@
     "test:auth": "node tests/test_auth_system.js",
     "test:cookies": "node tests/test_cookie_transmission.js",
     "test:jwt": "node tests/test_jwt_direct.js",
-    "test:external-unit": "node tests/test_external_sounds_unit.js",
     "test:external-api": "node tests/test_external_sounds_api.js",
     "test:jest": "jest --config jest.config.cjs",
     "test:jest:unit": "jest --config jest.config.cjs --selectProjects backend",
