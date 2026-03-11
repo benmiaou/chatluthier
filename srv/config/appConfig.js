@@ -22,13 +22,10 @@ function getAppConfig() {
       // WebSocket port (null for auto: HTTP_PORT + 1)
       wsPort: process.env.WS_PORT || null,
 
-      // CORS configuration
-      allowedOrigins: [
-        'http://localhost:5173',
-        'http://localhost:3000',
-        'https://dev.chatluthier.org:4000',
-        'https://chatluthier.org',
-      ],
+      // CORS configuration — set CORS_ORIGINS in .env as a comma-separated list
+      allowedOrigins: process.env.CORS_ORIGINS
+        ? process.env.CORS_ORIGINS.split(',').map((s) => s.trim())
+        : ['http://localhost:5173', 'http://localhost:3000'],
 
       // Environment
       nodeEnv: process.env.NODE_ENV || 'development',
@@ -51,11 +48,12 @@ function getAppConfig() {
       // Using kebab-case directive names and array format for helmet compatibility
       contentSecurityPolicy: {
         'default-src': ["'self'"],
+        // WS origins for CSP — set WS_ORIGINS in .env as a comma-separated list
         'connect-src': [
           "'self'",
-          'ws://localhost:3001',
-          'wss://localhost:3001',
-          'wss://dev.chatluthier.org/ws/',
+          ...(process.env.WS_ORIGINS
+            ? process.env.WS_ORIGINS.split(',').map((s) => s.trim())
+            : ['ws://localhost:3001', 'wss://localhost:3001']),
         ],
         'script-src': ["'self'", "'unsafe-eval'"],
         'style-src': ["'self'", "'unsafe-inline'"],
@@ -69,15 +67,14 @@ function getAppConfig() {
         'upgrade-insecure-requests': [],
       },
 
-      // CORS configuration - properly configurable, not dangerous "allow all"
+      // CORS configuration — set CORS_ORIGINS in .env as a comma-separated list
       cors: {
-        // List of allowed origins - empty array means no CORS (secure by default)
-        allowedOrigins: [
-          'http://localhost:5173', // Vite dev server
-          'http://localhost:3000', // Local backend
-          'https://dev.chatluthier.org:4000', // Dev server
-          'https://chatluthier.org', // Production
-        ],
+        allowedOrigins: process.env.CORS_ORIGINS
+          ? process.env.CORS_ORIGINS.split(',').map((s) => s.trim())
+          : [
+              'http://localhost:5173', // Vite dev server
+              'http://localhost:3000', // Local backend
+            ],
 
         // Credentials support
         credentials: true,
