@@ -1,7 +1,7 @@
 export interface Sound {
   id: string;
   name: string;
-  filename: string;
+  filename: string | null;
   category: string;
   imageFile?: string;
   credit?: string;
@@ -9,6 +9,17 @@ export interface Sound {
   display_name?: string;
   contexts?: string[];
   isEnabled?: boolean;
+  /** External provider fields — only present when isExternal is true */
+  isExternal?: boolean;
+  provider?: ExternalProvider;
+  providerTrackId?: string;
+  artist?: string;
+  title?: string;
+  album?: string;
+  durationMs?: number;
+  thumbnailUrl?: string;
+  previewUrl?: string;
+  permalinkUrl?: string;
 }
 
 /** Returns true if a background music sound matches the given category (contexts are tuples) */
@@ -35,6 +46,8 @@ export function bgScenes(sound: Sound): string[] {
 export type SoundCategory = 'background' | 'ambiance' | 'soundboard';
 
 export type BackgroundMusicCategory = 'calm' | 'dynamic' | 'intense' | 'all';
+
+export type ExternalProvider = 'spotify' | 'deezer' | 'soundcloud';
 
 // Runtime object for BackgroundMusicCategory values
 export const BackgroundMusicCategories = {

@@ -2,7 +2,6 @@ import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import './css/styles.css';
 import './css/notificationFix.css';
-import './css/variables.js';
 
 import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
@@ -43,6 +42,7 @@ createRoot(rootElement).render(
             },
           }}
         />
+
         <AuthProvider>
           <SocketProvider>
             <Sentry.ErrorBoundary

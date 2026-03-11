@@ -9,6 +9,7 @@ import {
 } from 'react';
 import React from 'react';
 import { handleError } from '../utils/logger';
+import { apiFetch } from '../services/api';
 
 interface AuthState {
   isSignedIn: boolean;
@@ -24,7 +25,7 @@ interface AuthContextValue extends AuthState {
   userName: string | null;
   userPicture: string | null; // Add this line
   signOut: () => Promise<void>;
-  loginWithPseudo: (pseudo: string, password: string) => Promise<void>;
+  loginWithPseudo: (pseudo: string, password: string, rememberMe?: boolean) => Promise<void>;
   registerWithPseudo: (
     pseudo: string,
     password: string,
@@ -68,22 +69,71 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): R
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const res = await fetch('/check-session', {
-          method: 'GET',
-          credentials: 'include',
-        });
+        // First, try to check the session with the current access token
+        try {
+          const data = await apiFetch<{
+            isSignedIn: boolean;
+            userId?: string;
+            email?: string;
+            pseudo?: string;
+            userPicture?: string;
+            isAdmin?: boolean;
+            error?: string;
+          }>('/check-session');
 
-        if (res.ok) {
-          const data = await res.json();
           if (data.isSignedIn) {
             setAuth({
               isSignedIn: true,
-              userId: data.userId,
+              userId: data.userId ?? null,
               userName: data.email || data.pseudo || null,
               userPicture: data.userPicture || null,
               isAdmin: data.isAdmin || false,
               token: null,
             });
+          }
+        } catch (_sessionErr) {
+          // If session check fails, try to refresh the token
+          try {
+            await apiFetch('/refresh-token', { method: 'POST' });
+
+            // After successful refresh, try session check again
+            const retryData = await apiFetch<{
+              isSignedIn: boolean;
+              userId?: string;
+              email?: string;
+              pseudo?: string;
+              userPicture?: string;
+              isAdmin?: boolean;
+            }>('/check-session');
+
+            if (retryData.isSignedIn) {
+              setAuth({
+                isSignedIn: true,
+                userId: retryData.userId ?? null,
+                userName: retryData.email || retryData.pseudo || null,
+                userPicture: retryData.userPicture || null,
+                isAdmin: retryData.isAdmin || false,
+                token: null,
+              });
+            }
+          } catch (_refreshErr) {
+            // FALLBACK: Check localStorage for tokens (development workaround)
+            const storedUser = localStorage.getItem('persistentUser');
+            if (storedUser) {
+              try {
+                const userData = JSON.parse(storedUser);
+                setAuth({
+                  isSignedIn: true,
+                  userId: userData.userId ?? null,
+                  userName: userData.userName,
+                  userPicture: userData.userPicture || null,
+                  isAdmin: userData.isAdmin || false,
+                  token: null,
+                });
+              } catch (_localStorageErr) {
+                // Silent error handling for localStorage parsing
+              }
+            }
           }
         }
       } catch (err: unknown) {
@@ -133,41 +183,49 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): R
     };
   }, [auth.isSignedIn, signOut]);
 
-  const renderButton = useCallback((_container: HTMLElement): void => {
-    // No longer used - Google authentication has been removed
-    // Keep empty function for backward compatibility
-  }, []);
+  const loginWithPseudo = useCallback(
+    async (pseudo: string, _password: string, rememberMe = false) => {
+      const data = await apiFetch<{
+        userId: string;
+        pseudo: string;
+        isAdmin: boolean;
+        userPicture?: string;
+      }>('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pseudo, password: _password, rememberMe }),
+      });
 
-  const loginWithPseudo = useCallback(async (pseudo: string, _password: string) => {
-    const res = await fetch('/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pseudo, password: _password }),
-      credentials: 'include',
-    });
+      // Store pseudo in localStorage for WebSocket session tracking
+      localStorage.setItem('userPseudo', data.pseudo);
 
-    const responseText = await res.text();
+      // Also store user data in localStorage as fallback for cookie issues
+      if (rememberMe) {
+        // Store complete user data for session persistence fallback
+        const persistentUser = {
+          userId: data.userId,
+          userName: data.pseudo,
+          userPicture: data.userPicture,
+          isAdmin: data.isAdmin ?? false,
+          timestamp: new Date().toISOString(),
+        };
+        localStorage.setItem('persistentUser', JSON.stringify(persistentUser));
+      } else {
+        // Clear fallback data if not using remember me
+        localStorage.removeItem('persistentUser');
+      }
 
-    if (!res.ok) {
-      // Simple error handling - just throw with response text or default message
-      const errorMessage =
-        responseText && responseText !== 'Login failed' ? responseText : 'Login failed';
-      throw new Error(errorMessage);
-    }
-
-    const data = JSON.parse(responseText);
-    // Store pseudo in localStorage for WebSocket session tracking
-    localStorage.setItem('userPseudo', data.pseudo);
-
-    setAuth({
-      isSignedIn: true,
-      userId: data.userId,
-      userName: data.pseudo,
-      userPicture: data.userPicture || null,
-      isAdmin: data.isAdmin ?? false,
-      token: null,
-    });
-  }, []);
+      setAuth({
+        isSignedIn: true,
+        userId: data.userId,
+        userName: data.pseudo,
+        userPicture: data.userPicture || null,
+        isAdmin: data.isAdmin ?? false,
+        token: null,
+      });
+    },
+    []
+  );
 
   const registerWithPseudo = useCallback(
     async (pseudo: string, password: string, secretQuestion: string, secretAnswer: string) => {
@@ -250,21 +308,12 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): R
     () => ({
       ...auth,
       signOut,
-      renderButton,
       loginWithPseudo,
       registerWithPseudo,
       requestPasswordReset,
       getSecretQuestion,
     }),
-    [
-      auth,
-      signOut,
-      renderButton,
-      loginWithPseudo,
-      registerWithPseudo,
-      requestPasswordReset,
-      getSecretQuestion,
-    ]
+    [auth, signOut, loginWithPseudo, registerWithPseudo, requestPasswordReset, getSecretQuestion]
   );
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;

@@ -23,7 +23,18 @@ export type WsMessageType =
   | 'statusRequest'
   | 'statusResponse'
   | 'unsubscribe'
+  | 'externalSoundsDisabled'
   | 'error';
+
+export interface ExternalSoundPayload {
+  provider: 'spotify' | 'deezer' | 'soundcloud';
+  trackId: string;
+  artist?: string;
+  title?: string;
+  album?: string;
+  thumbnailUrl?: string;
+  previewUrl?: string;
+}
 
 export interface WsMessage {
   type: WsMessageType;
@@ -52,21 +63,34 @@ const SocketContext = createContext<SocketContextValue | null>(null);
 
 const isLocalhost =
   globalThis.location.hostname === 'localhost' || globalThis.location.hostname === '127.0.0.1';
-const isDevServer = globalThis.location.hostname === 'dev.chatluthier.org';
 const protocol = globalThis.location.protocol === 'https:' ? 'wss:' : 'ws:';
 
-let _WS_PORT;
+// VITE_WS_PORT / VITE_WS_PATH / VITE_WS_HOST can be set in .env to override defaults.
+// For any non-local deployment, set these in your environment's .env file.
+const wsPortEnv = import.meta.env.VITE_WS_PORT ? Number(import.meta.env.VITE_WS_PORT) : null;
+const wsPathEnv: string = import.meta.env.VITE_WS_PATH ?? '';
+const wsHostEnv: string = import.meta.env.VITE_WS_HOST || globalThis.location.hostname;
+
+// Determine WebSocket connection parameters
+let wsPort: number;
+let wsPath: string;
+let wsHost: string;
+
 if (isLocalhost) {
-  _WS_PORT = 3001;
-} else if (isDevServer) {
-  _WS_PORT = 4001;
+  wsPort = wsPortEnv ?? 3001;
+  wsPath = wsPathEnv;
+  wsHost = wsHostEnv;
 } else {
-  _WS_PORT = Number(globalThis.location.port) + 1;
+  const httpPort = Number(globalThis.location.port) || (protocol === 'wss:' ? 443 : 80);
+  wsPort = wsPortEnv ?? httpPort + 1;
+  wsPath = wsPathEnv;
+  wsHost = wsHostEnv;
 }
 
-const WS_URL = isLocalhost
-  ? 'ws://localhost:3001'
-  : `${protocol}//${globalThis.location.hostname}/ws/`;
+// Construct WebSocket URL
+const WS_URL = `${protocol}//${wsHost}:${wsPort}${wsPath}`;
+
+console.log(`[WebSocket] Using URL: ${WS_URL}`);
 
 const RECONNECT_MS = 5000;
 const HEARTBEAT_MS = 30_000;
@@ -217,7 +241,9 @@ export function SocketProvider({
   const handleConnectionClose = useCallback(() => {
     setConnected(false);
     setStatusMessage(
-      sessionId ? 'Session active. Reconnecting to server...' : 'Disconnected. Reconnecting...'
+      sessionId
+        ? `Session active. Reconnecting to server (${wsHost}:${wsPort})...`
+        : `Disconnected. Reconnecting to ${wsHost}:${wsPort}...`
     );
     clearHeartbeat();
 
@@ -228,7 +254,7 @@ export function SocketProvider({
   }, [sessionId]);
 
   const handleConnectionError = useCallback(() => {
-    setStatusMessage('Connection error. Retrying...');
+    setStatusMessage(`Connection error to ${wsHost}:${wsPort}. Retrying...`);
     if (wsRef.current) {
       wsRef.current.close();
     }
@@ -289,7 +315,9 @@ export function SocketProvider({
     const handleOpen = () => {
       clearTimeout(connectionTimeout);
       setConnected(true);
-      setStatusMessage('Connected to session server. Ready to join or create a session.');
+      setStatusMessage(
+        `Connected to session server (${wsHost}:${wsPort}). Ready to join or create a session.`
+      );
       setupHeartbeat(ws);
 
       const sessionIdToJoin = getSessionIdToJoin();

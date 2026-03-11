@@ -22,14 +22,18 @@ function isRateLimited(clientId) {
   return false;
 }
 
-function initializeWebSocketServer(httpServer, httpPort) {
-  // Create a separate WebSocket server on port (HTTP port + 1)
-  wsServer = new WebSocket.Server({ server: httpServer });
-  console.log(`WebSocket server initialized on port ${httpPort}`);
+function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
+  // Determine the WebSocket port
+  const websocketPort = wsPort !== null ? wsPort : httpPort + 1;
+
+  // Always create a standalone WebSocket server on the specified port
+  wsServer = new WebSocket.Server({ port: websocketPort });
+  console.log(`WebSocket server initialized on port ${websocketPort}`);
 
   function handleSubscribe(data, ws) {
     const connectedId = data.id;
     const participantId = data.participantId || Math.random().toString(36).substring(2, 10);
+    // Return the assigned participantId so the caller can sync the closure variable
 
     if (!subscribers.has(connectedId)) {
       subscribers.set(connectedId, new Set());
@@ -76,6 +80,7 @@ function initializeWebSocketServer(httpServer, httpPort) {
         `New client joined ID: ${connectedId} with pseudo: ${data.pseudo || 'Anonymous'}`
       );
     }
+    return participantId;
   }
 
   function handleBroadcast(data, ws, connectedId) {
@@ -189,9 +194,8 @@ function initializeWebSocketServer(httpServer, httpPort) {
 
         switch (data.type) {
           case 'subscribe':
-            handleSubscribe(data, ws);
             connectedId = data.id;
-            participantId = data.participantId || Math.random().toString(36).substring(2, 10);
+            participantId = handleSubscribe(data, ws);
             break;
 
           case 'message':
@@ -269,4 +273,11 @@ function initializeWebSocketServer(httpServer, httpPort) {
   return wsServer;
 }
 
-module.exports = { initializeWebSocketServer, wsServer: () => wsServer };
+function _resetStateForTests() {
+  subscribers.clear();
+  sessionParticipants.clear();
+  participantToWs.clear();
+  messageTimestamps.clear();
+}
+
+module.exports = { initializeWebSocketServer, wsServer: () => wsServer, _resetStateForTests };

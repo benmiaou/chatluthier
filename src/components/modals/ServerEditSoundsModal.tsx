@@ -129,6 +129,7 @@ interface ServerEditSoundsModalProps {
 }
 
 interface SoundEdit extends Sound {
+  filename: string; // local-only sounds always have a filename
   display_name?: string;
   contextEdits?: string[];
   creditEdits?: string;
@@ -181,11 +182,13 @@ export function ServerEditSoundsModal({
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Filter sounds based on search term
+  // Filter sounds based on search term (external sounds are excluded — they have no local file)
   const filteredSounds = sounds.filter(
-    (sound) =>
-      sound.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      sound.filename.toLowerCase().includes(searchTerm.toLowerCase())
+    (sound): sound is Sound & { filename: string } =>
+      !sound.isExternal &&
+      sound.filename !== null &&
+      (sound.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        sound.filename.toLowerCase().includes(searchTerm.toLowerCase()))
   );
   const [editingSoundId, setEditingSoundId] = useState<string | null>(null);
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);

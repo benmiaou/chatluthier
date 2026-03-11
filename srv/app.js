@@ -1,13 +1,35 @@
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
 const path = require('node:path');
 const authRoutes = require('./routes/authRoutes');
 const soundRoutes = require('./routes/soundRoutes');
 const requestRoutes = require('./routes/requestRoutes');
+const externalSoundsRoutes = require('./routes/externalSoundsRoutes');
 const logger = require('./utils/logger');
+const config = require('./config/appConfig');
 
 const app = express();
+
+// Validate required environment variables
+const requiredEnvVars = ['NODE_ENV'];
+if (config.backend.nodeEnv === 'production') {
+  requiredEnvVars.push('VITE_API_BASE_URL');
+}
+
+const missingEnvVars = requiredEnvVars.filter((varName) => !process.env[varName]);
+if (missingEnvVars.length > 0) {
+  console.error(`❌ Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  if (config.backend.nodeEnv === 'production') {
+    process.exit(1);
+  }
+}
+
+// CSP is handled by nginx in production — disable it in helmet to avoid duplicate headers.
+// All other helmet headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, etc.) are enabled.
+app.use(helmet({ contentSecurityPolicy: false }));
+app.disable('x-powered-by');
 
 // Add logging middleware
 // Note: Winston logger doesn't have expressMiddleware method
@@ -17,37 +39,56 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: 'http://localhost:5173',
-    credentials: true,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      // Check if origin is in the allowed list
+      if (config.security.cors.allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
+
+      // Origin not allowed - reject with error
+      return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: config.security.cors.credentials,
+    methods: config.security.cors.methods,
+    allowedHeaders: config.security.cors.allowedHeaders,
   })
 );
 app.use(express.json({ limit: '100mb' }));
 app.use(express.static(path.join(__dirname, '../dist')));
-app.use('/assets', express.static(path.join(__dirname, '../assets')));
-app.use('/images', express.static(path.join(__dirname, '../assets/images')));
-app.use('/fonts', express.static(path.join(__dirname, '../public/fonts')));
-app.use('/css', express.static(path.join(__dirname, '../src/css')));
+app.use('/assets', express.static(path.join(__dirname, '../dist/assets')));
+app.use('/images', express.static(path.join(__dirname, '../dist/assets/images')));
+app.use('/fonts', express.static(path.join(__dirname, '../dist/fonts')));
+app.use('/css', express.static(path.join(__dirname, '../dist/css')));
 
 // Handle preflight requests
 app.options('*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:5173');
-  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, Content-Length, X-Requested-With'
-  );
-  res.header('Access-Control-Allow-Credentials', 'true');
+  const origin = req.headers.origin;
+
+  // Set CORS headers based on configuration
+  if (origin && config.security.cors.allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
+  res.header('Access-Control-Allow-Methods', config.security.cors.methods.join(', '));
+  res.header('Access-Control-Allow-Headers', config.security.cors.allowedHeaders.join(', '));
   res.sendStatus(200);
 });
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:5173');
-  res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, Content-Length, X-Requested-With'
-  );
-  res.header('Access-Control-Allow-Credentials', 'true');
+  const origin = req.headers.origin;
+
+  // Set CORS headers based on configuration
+  if (origin && config.security.cors.allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
+  res.header('Access-Control-Allow-Methods', config.security.cors.methods.join(', '));
+  res.header('Access-Control-Allow-Headers', config.security.cors.allowedHeaders.join(', '));
   next();
 });
 
@@ -70,8 +111,7 @@ app.post('/api/spotify/token', async (req, res) => {
         grant_type: 'authorization_code',
         code: code,
         redirect_uri: redirect_uri,
-        client_id: process.env.SPOTIFY_CLIENT_ID || 'e03effcac1d94e0ebe56813e98c815dc',
-        code_verifier: code_verifier,
+        client_id: process.env.SPOTIFY_CLIENT_ID,
       }),
     });
 
@@ -114,7 +154,7 @@ app.post('/api/spotify/refresh', async (req, res) => {
       body: new URLSearchParams({
         grant_type: 'refresh_token',
         refresh_token: refresh_token,
-        client_id: process.env.SPOTIFY_CLIENT_ID || 'e03effcac1d94e0ebe56813e98c815dc',
+        client_id: process.env.SPOTIFY_CLIENT_ID,
       }),
     });
 
@@ -139,10 +179,75 @@ app.post('/api/spotify/refresh', async (req, res) => {
   }
 });
 
+// Spotify search endpoint — proxies search to the Spotify Web API
+app.get('/api/spotify/search', async (req, res) => {
+  const { q, limit = 20 } = req.query;
+  const authHeader = req.headers.authorization;
+
+  if (!q) {
+    return res.status(400).json({ error: 'Missing search query' });
+  }
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Missing Authorization header' });
+  }
+
+  try {
+    const url = new URL('https://api.spotify.com/v1/search');
+    url.searchParams.set('q', q);
+    url.searchParams.set('type', 'track');
+    url.searchParams.set('limit', String(limit));
+
+    const response = await fetch(url.toString(), {
+      headers: { Authorization: authHeader },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return res
+        .status(response.status)
+        .json({ error: data.error?.message || 'Spotify search failed' });
+    }
+
+    const results = (data.tracks?.items || []).map((track) => ({
+      trackId: track.id,
+      title: track.name,
+      artist: track.artists.map((a) => a.name).join(', '),
+      album: track.album.name,
+      durationMs: track.duration_ms,
+      thumbnailUrl: track.album.images[1]?.url || track.album.images[0]?.url || '',
+      previewUrl: track.preview_url || '',
+      spotifyUri: track.uri,
+      permalinkUrl: track.external_urls?.spotify || '',
+      provider: 'spotify',
+    }));
+
+    return res.json({ results });
+  } catch (error) {
+    console.error('Spotify search error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Deezer search proxy
+const { search: deezerSearch } = require('./controllers/deezerController');
+app.get('/api/deezer/search', deezerSearch);
+
+// SoundCloud endpoints
+const {
+  exchangeToken: scExchangeToken,
+  refreshToken: scRefreshToken,
+  search: scSearch,
+} = require('./controllers/soundcloudController');
+app.post('/api/soundcloud/token', scExchangeToken);
+app.post('/api/soundcloud/refresh', scRefreshToken);
+app.get('/api/soundcloud/search', scSearch);
+
 // API routes must come before the catch-all route
 app.use(authRoutes);
 app.use(soundRoutes);
 app.use(requestRoutes);
+app.use(externalSoundsRoutes);
 
 // SPA fallback — serve index.html for all non-API routes so React Router works
 app.get('*', (req, res) => {

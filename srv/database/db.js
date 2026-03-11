@@ -180,6 +180,7 @@ class Database {
 
     if (isInitialized) {
       console.log('Database schema already initialized');
+      await this.runMigrations();
       return;
     }
 
@@ -201,6 +202,66 @@ class Database {
         resolve();
       });
     });
+  }
+
+  /**
+   * Run incremental migrations for existing databases
+   */
+  async runMigrations() {
+    const migrations = [
+      {
+        name: 'add_external_sounds_table',
+        sql: `
+          CREATE TABLE IF NOT EXISTS external_sounds (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            provider TEXT NOT NULL CHECK(provider IN ('spotify', 'deezer', 'soundcloud')),
+            provider_track_id TEXT NOT NULL,
+            artist TEXT NOT NULL,
+            title TEXT NOT NULL,
+            album TEXT,
+            duration_ms INTEGER,
+            thumbnail_url TEXT,
+            preview_url TEXT,
+            contexts TEXT,
+            is_enabled BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            UNIQUE(user_id, provider, provider_track_id)
+          );
+          CREATE INDEX IF NOT EXISTS idx_external_sounds_user ON external_sounds(user_id);
+          CREATE INDEX IF NOT EXISTS idx_external_sounds_provider ON external_sounds(provider);
+        `,
+      },
+      {
+        name: 'add_external_sounds_permalink',
+        sql: `ALTER TABLE external_sounds ADD COLUMN permalink_url TEXT`,
+      },
+    ];
+
+    for (const migration of migrations) {
+      try {
+        const existing = await this.query(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+          [migration.name.replace('add_', '').replace('_table', '')]
+        );
+        // For index/table creation migrations, just run them (IF NOT EXISTS is safe)
+        await new Promise((resolve, reject) => {
+          this.db.exec(migration.sql, (err) => {
+            if (err) {
+              console.error(`Migration ${migration.name} error:`, err.message);
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+        console.log(`Migration ${migration.name} applied`);
+      } catch (error) {
+        console.error(`Migration ${migration.name} failed:`, error.message);
+      }
+    }
   }
 
   /**

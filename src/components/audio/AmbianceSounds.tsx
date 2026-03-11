@@ -41,7 +41,7 @@ export function AmbianceSounds({
 
   // Initialize soundOrder with the current order of bars
   const [soundOrder, setSoundOrder] = useState<string[]>(() => {
-    return bars.map((bar) => bar.sound.filename);
+    return bars.map((bar) => bar.sound.filename ?? '');
   });
 
   // Add moveItem function for react-dnd
@@ -65,8 +65,8 @@ export function AmbianceSounds({
 
     // Sort bars based on the soundOrder
     return [...bars].sort((a, b) => {
-      const aIndex = orderMap.get(a.sound.filename) ?? Infinity;
-      const bIndex = orderMap.get(b.sound.filename) ?? Infinity;
+      const aIndex = orderMap.get(a.sound.filename ?? '') ?? Infinity;
+      const bIndex = orderMap.get(b.sound.filename ?? '') ?? Infinity;
       return aIndex - bIndex;
     });
   }, [bars, soundOrder]);
@@ -74,12 +74,9 @@ export function AmbianceSounds({
   // Load presets and sound order when user logs in
   const loadSoundOrder = useCallback(async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3000/get-sound-order?userId=${userId}&soundType=ambianceSounds`,
-        {
-          credentials: 'include',
-        }
-      );
+      const response = await fetch(`/get-sound-order?userId=${userId}&soundType=ambianceSounds`, {
+        credentials: 'include',
+      });
 
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
@@ -99,11 +96,13 @@ export function AmbianceSounds({
       );
 
       // If we have a valid loaded order, use it. Otherwise use the current bars order.
-      setSoundOrder(validOrder.length > 0 ? validOrder : bars.map((bar) => bar.sound.filename));
+      setSoundOrder(
+        validOrder.length > 0 ? validOrder : bars.map((bar) => bar.sound.filename ?? '')
+      );
     } catch (_error) {
       handleError(_error, 'AmbianceSounds.loadSoundOrder');
       // Fallback to current bars order if loading fails
-      setSoundOrder(bars.map((bar) => bar.sound.filename));
+      setSoundOrder(bars.map((bar) => bar.sound.filename ?? ''));
     }
   }, [userId, bars]);
 
@@ -121,7 +120,7 @@ export function AmbianceSounds({
     }
 
     try {
-      const response = await fetch('http://localhost:3000/save-sound-order', {
+      const response = await fetch('/save-sound-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

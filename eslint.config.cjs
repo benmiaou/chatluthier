@@ -50,7 +50,7 @@ module.exports = [
       ...pluginReactHooks.configs.recommended.rules,
       // indent: ['error', 2],
       // 'linebreak-style': ['error', 'windows'], // Disabled for Windows compatibility
-      quotes: ['error', 'single'],
+      quotes: ['error', 'single', { avoidEscape: true }],
       semi: ['error', 'always'],
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
@@ -135,6 +135,20 @@ module.exports = [
       react: {
         version: 'detect',
       },
+    },
+  },
+  {
+    files: ['tests/jest/**/*.{js,ts,tsx}', '**/*.test.{js,ts,tsx}', '**/*.spec.{js,ts,tsx}'],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
+    rules: {
+      'no-undef': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'dot-notation': 'off',
     },
   },
 ];

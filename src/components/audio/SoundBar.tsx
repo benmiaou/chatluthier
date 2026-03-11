@@ -85,7 +85,7 @@ export function SoundBar({
       setLocalVolume(vol);
       updateLocalAudio(vol); // Final audio update
       // Now send the final value to server
-      handleChange(bar.sound.filename, vol);
+      handleChange(bar.sound.filename ?? '', vol);
     }
   };
 

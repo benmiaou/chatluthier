@@ -1,21 +1,8 @@
-import {
-  Button,
-  Modal,
-  Stack,
-  TextInput,
-  Text,
-  Anchor,
-  List,
-  MultiSelect,
-  Group,
-  Badge,
-  ActionIcon,
-} from '@mantine/core';
+import { Button, Modal, Stack, TextInput, Text, Anchor, List } from '@mantine/core';
 import { CustomCombobox } from '../audio/CustomCombobox';
+import { ContextSelector } from '../audio/ContextSelector';
 import React, { useState } from 'react';
 import { notifications } from '@mantine/notifications';
-import { IconX } from '@tabler/icons-react';
-
 interface RequestSoundModalProps {
   opened: boolean;
   onClose: () => void;
@@ -121,77 +108,18 @@ export function RequestSoundModal({
           width="100%"
         />
 
-        <MultiSelect
-          label="Contexts (optional) - Describe when this sound should be used"
-          placeholder="Search or add contexts..."
+        <ContextSelector
           value={contexts}
           onChange={setContexts}
-          data={[
-            'animal',
-            'nature',
-            'city',
-            'fantasy',
-            'medieval',
-            'modern',
-            'magic',
-            'weather',
-            'water',
-            'fire',
-            'battle',
-            'peaceful',
-            'horror',
-            'sci-fi',
-            'technology',
-            'vehicle',
-            'music',
-            'voice',
-            ...contexts,
-          ]}
-          searchable
-          clearable
+          category={
+            category === 'ambianceSounds'
+              ? 'ambiance'
+              : category === 'backgroundMusic'
+                ? 'background'
+                : 'soundboard'
+          }
           maxDropdownHeight={200}
         />
-
-        {contexts.length > 0 && (
-          <div
-            style={{
-              maxHeight: 80,
-              overflowY: 'auto',
-              padding: '0.5rem',
-              border: '1px solid var(--mantine-color-dark-4)',
-              borderRadius: 'var(--mantine-radius-sm)',
-              marginTop: '0.5rem',
-            }}
-          >
-            <Text size="sm" fw={500} mb="xs">
-              Selected Contexts ({contexts.length}):
-            </Text>
-            <Group gap="xs" wrap="wrap">
-              {contexts.map((context, index) => (
-                <Badge
-                  key={`${context}-${index}`}
-                  variant="light"
-                  size="sm"
-                  rightSection={
-                    <ActionIcon
-                      size="xs"
-                      variant="subtle"
-                      color="red"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setContexts(contexts.filter((c) => c !== context));
-                      }}
-                    >
-                      <IconX size={12} />
-                    </ActionIcon>
-                  }
-                >
-                  {context}
-                </Badge>
-              ))}
-            </Group>
-          </div>
-        )}
 
         <Text size="sm" fw={500} mt="sm">
           Recommended sources for Creative Commons sounds:

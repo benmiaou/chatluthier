@@ -12,9 +12,15 @@ async function verifyjwt(accessToken) {
 }
 
 function refreshToken(req, res) {
-  const refreshToken = req.cookies.refreshToken;
+  // Check for refresh token in cookies first, then in request body
+  let refreshToken = req.cookies.refreshToken;
+
+  // If no token in cookies, try request body
+  if (!refreshToken && req.body.refreshToken) {
+    refreshToken = req.body.refreshToken;
+  }
+
   if (!refreshToken) {
-    logger.warn('Refresh token attempt with no token provided');
     return res.status(401).json({ error: 'No refresh token provided.' });
   }
   try {
@@ -41,18 +47,23 @@ function refreshToken(req, res) {
       { expiresIn: '7d' }
     );
 
+    // For localhost development, use lax sameSite and non-secure cookies
+    // In production, use secure cookies with sameSite=none
+    const isLocalhost = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isDevelopment ? false : true, // Secure only in production
+      sameSite: isLocalhost ? 'lax' : 'none', // Lax for localhost, none for production
       maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
       path: '/',
     });
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+      secure: isDevelopment ? false : true, // Secure only in production
+      sameSite: isLocalhost ? 'lax' : 'none', // Lax for localhost, none for production
+      maxAge: 365 * 24 * 60 * 60 * 1000, // 365 days in milliseconds
       path: '/',
     });
     return res.json({ accessToken });
@@ -63,10 +74,16 @@ function refreshToken(req, res) {
 }
 
 function checkSession(req, res) {
-  const accessToken = req.cookies.accessToken;
-  logger.info('checkSession called, accessToken present:', !!accessToken);
+  // Check for access token in cookies first, then in Authorization header
+  let accessToken = req.cookies.accessToken;
+  const authHeader = req.headers['authorization'];
+
+  // If no token in cookies, try Authorization header
+  if (!accessToken && authHeader && authHeader.startsWith('Bearer ')) {
+    accessToken = authHeader.substring(7); // Remove 'Bearer ' prefix
+  }
+
   if (!accessToken) {
-    logger.info('No access token found in cookies');
     return res.status(401).json({ isSignedIn: false });
   }
   try {
@@ -85,6 +102,16 @@ function checkSession(req, res) {
     });
   } catch (error) {
     logger.error('Session verification failed', { error: error.message });
+    // If token is expired, check if we have a refresh token and suggest refresh
+    const refreshToken = req.cookies.refreshToken;
+    if (error.name === 'TokenExpiredError' && refreshToken) {
+      logger.info('Access token expired, refresh token available - client should refresh');
+      return res.status(401).json({
+        isSignedIn: false,
+        error: 'token_expired',
+        message: 'Access token expired, please refresh',
+      });
+    }
     return res.status(401).json({ isSignedIn: false });
   }
 }
@@ -241,7 +268,7 @@ async function checkPseudoAvailable(req, res) {
 
 async function loginWithPseudo(req, res) {
   try {
-    const { pseudo, password } = req.body;
+    const { pseudo, password, rememberMe = false } = req.body;
 
     // Find user (case-insensitive)
     const user = await db.queryOne(
@@ -267,25 +294,30 @@ async function loginWithPseudo(req, res) {
     const refreshToken = jwt.sign(
       { userId: user.id, pseudo: user.pseudo, isAdmin: user.is_admin },
       refreshTokenSecret,
-      { expiresIn: '7d' }
+      { expiresIn: rememberMe ? '365d' : '7d' }
     );
 
     console.log('Setting cookies for user:', user.id);
     console.log('Access token expires in: 24h');
-    console.log('Refresh token expires in: 24h');
+    console.log('Refresh token expires in:', rememberMe ? '365 days' : '7 days');
+
+    // For localhost development, use lax sameSite and non-secure cookies
+    // In production, use secure cookies with sameSite=none
+    const isLocalhost = req.hostname === 'localhost' || req.hostname === '127.0.0.1';
+    const isDevelopment = process.env.NODE_ENV !== 'production';
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isDevelopment ? false : true, // Secure only in production
+      sameSite: isLocalhost ? 'lax' : 'none', // Lax for localhost, none for production
       maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
       path: '/',
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+      secure: isDevelopment ? false : true, // Secure only in production
+      sameSite: isLocalhost ? 'lax' : 'none', // Lax for localhost, none for production
+      maxAge: rememberMe ? 365 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000, // 365 days or 7 days in milliseconds
       path: '/',
     });
 

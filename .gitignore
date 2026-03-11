@@ -140,7 +140,6 @@ Tokens
 # Jetbrains
 .idea*
 
-adminGoogleIds.json
 srv_data
 assets
 uploads
@@ -151,3 +150,4 @@ srv/database/chatluthier.db
 LeChat/
 scripts/deploy-prod.bat
 scripts/deploy-dev.bat
+temp_dev_nginx.conf

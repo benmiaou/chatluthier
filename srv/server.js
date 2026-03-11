@@ -3,8 +3,11 @@ const http = require('node:http');
 const server = http.createServer(app);
 const db = require('./database/db');
 const winstonLogger = require('./utils/logger');
+const config = require('./config/appConfig');
 
-let PORT = process.argv[2] ? Number.parseInt(process.argv[2]) : 3000;
+let PORT = process.argv[2]
+  ? Number.parseInt(process.argv[2])
+  : Number.parseInt(process.env.PORT ?? '3000');
 if (Number.isNaN(PORT) || PORT <= 0) {
   console.error(`Invalid port: ${process.argv[2]}, using default port 3000`);
   PORT = 3000;
@@ -18,9 +21,9 @@ const loggedDb = winstonLogger.wrapDatabaseMethods(db);
 
 // Handle process termination gracefully
 process.on('SIGINT', () => {
-  logger.info('Received SIGINT, shutting down gracefully...');
+  winstonLogger.info('Received SIGINT, shutting down gracefully...');
   server.close(() => {
-    logger.info('Server closed');
+    winstonLogger.info('Server closed');
     process.exit(0);
   });
 });
@@ -55,6 +58,18 @@ function initializeServer() {
   const logger = winstonLogger; // Use the winstonLogger instance
   logger.info('Initializing database...');
 
+  // Determine WebSocket port based on environment
+  const backendConfig = config.backend;
+  const explicitWsPort = backendConfig.wsPort;
+
+  // WebSocket port logic:
+  // 1. Use explicit WS_PORT from config if set
+  // 2. For dev server (4000): WebSocket on 4001
+  // 3. Otherwise: HTTP_PORT + 1
+  const isDevServer =
+    process.env.VITE_API_BASE_URL && process.env.VITE_API_BASE_URL.includes('dev.chatluthier.org');
+  const wsPort = explicitWsPort !== null ? explicitWsPort : isDevServer ? 4001 : PORT + 1;
+
   // Set a timeout for database initialization
   const initPromise = Promise.race([
     (async () => {
@@ -73,10 +88,10 @@ function initializeServer() {
         .listen(PORT, '0.0.0.0', () => {
           logger.info(`Server started on port ${PORT}`);
 
-          // Initialize WebSocket server (attached to HTTP server)
+          // Initialize WebSocket server on separate port
           const { initializeWebSocketServer } = require('./sockets/socketServer');
-          initializeWebSocketServer(server, PORT);
-          logger.info(`WebSocket Server started on port ${PORT}`);
+          initializeWebSocketServer(server, PORT, wsPort);
+          logger.info(`WebSocket Server started on port ${wsPort}`);
         })
         .on('error', (error) => {
           logger.error(`Failed to bind to port ${PORT}`, { error: error.message });
@@ -94,10 +109,10 @@ function initializeServer() {
         .listen(PORT, '0.0.0.0', () => {
           logger.info(`Server started on port ${PORT} (database may not be available)`);
 
-          // Initialize WebSocket server on port 3001 (HTTP port + 1)
+          // Initialize WebSocket server on separate port
           const { initializeWebSocketServer } = require('./sockets/socketServer');
-          initializeWebSocketServer(server, PORT);
-          logger.info(`WebSocket Server started on port ${PORT + 1}`);
+          initializeWebSocketServer(server, PORT, wsPort);
+          logger.info(`WebSocket Server started on port ${wsPort}`);
         })
         .on('error', (error) => {
           logger.error(`Failed to bind to port ${PORT} (fallback attempt)`, {

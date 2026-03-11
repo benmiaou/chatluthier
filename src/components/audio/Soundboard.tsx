@@ -20,7 +20,7 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
 
   // Initialize soundOrder with the current order of sounds
   const [soundOrder, setSoundOrder] = useState<string[]>(() => {
-    return sounds.map((sound) => sound.filename);
+    return sounds.map((sound) => sound.filename ?? '');
   });
 
   // Add moveItem function for react-dnd
@@ -44,8 +44,8 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
 
     // Sort sounds based on the soundOrder
     return [...sounds].sort((a, b) => {
-      const aIndex = orderMap.get(a.filename) ?? Infinity;
-      const bIndex = orderMap.get(b.filename) ?? Infinity;
+      const aIndex = orderMap.get(a.filename ?? '') ?? Infinity;
+      const bIndex = orderMap.get(b.filename ?? '') ?? Infinity;
       return aIndex - bIndex;
     });
   }, [sounds, soundOrder]);
@@ -53,12 +53,9 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
   // Load sound order when user logs in
   const loadSoundOrder = useCallback(async () => {
     try {
-      const response = await fetch(
-        `http://localhost:3000/get-sound-order?userId=${userId}&soundType=soundboard`,
-        {
-          credentials: 'include',
-        }
-      );
+      const response = await fetch(`/get-sound-order?userId=${userId}&soundType=soundboard`, {
+        credentials: 'include',
+      });
       if (!response.ok) {
         throw new Error(`Server responded with status ${response.status}`);
       }
@@ -77,11 +74,13 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
       );
 
       // If we have a valid loaded order, use it. Otherwise use the current sounds order.
-      setSoundOrder(validOrder.length > 0 ? validOrder : sounds.map((sound) => sound.filename));
+      setSoundOrder(
+        validOrder.length > 0 ? validOrder : sounds.map((sound) => sound.filename ?? '')
+      );
     } catch (error) {
       handleError(error, 'Soundboard.loadSoundOrder');
       // Fallback to current sounds order if loading fails
-      setSoundOrder(sounds.map((sound) => sound.filename));
+      setSoundOrder(sounds.map((sound) => sound.filename ?? ''));
     }
   }, [userId, sounds]);
 
@@ -98,7 +97,7 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
     }
 
     try {
-      const response = await fetch('http://localhost:3000/save-sound-order', {
+      const response = await fetch('/save-sound-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
