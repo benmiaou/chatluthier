@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Le Chat Luthier is your immersive sound companion for enhancing role-playing games, storytelling sessions, or any experience that benefits from atmospheric audio. Use `npm run local` or `npm run npm:local` to start the local development server.",
   "main": "main.js",
-  "license": "ISC",
+  "license": "MIT",
   "scripts": {
     "build": "vite build",
     "preview": "vite preview",
