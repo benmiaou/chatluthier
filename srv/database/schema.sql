@@ -132,6 +132,29 @@ CREATE TABLE IF NOT EXISTS sound_requests (
 CREATE INDEX IF NOT EXISTS idx_sound_requests_created ON sound_requests(created_at);
 CREATE INDEX IF NOT EXISTS idx_sound_requests_status ON sound_requests(status);
 
+-- External sounds - user-added tracks from external providers (Spotify, Deezer, SoundCloud)
+CREATE TABLE IF NOT EXISTS external_sounds (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    provider TEXT NOT NULL CHECK(provider IN ('spotify', 'deezer', 'soundcloud')),
+    provider_track_id TEXT NOT NULL,
+    artist TEXT NOT NULL,
+    title TEXT NOT NULL,
+    album TEXT,
+    duration_ms INTEGER,
+    thumbnail_url TEXT,
+    preview_url TEXT,
+    contexts TEXT, -- JSON array of tuples: [["calm","adventure"],["dynamic","city"]]
+    is_enabled BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE(user_id, provider, provider_track_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_external_sounds_user ON external_sounds(user_id);
+CREATE INDEX IF NOT EXISTS idx_external_sounds_provider ON external_sounds(provider);
+
 -- Initial sound categories
 INSERT OR IGNORE INTO sound_categories (id, name, description) VALUES 
     (1, 'ambianceSounds', 'Ambient sounds for background atmosphere'),

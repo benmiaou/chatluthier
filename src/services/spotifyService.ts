@@ -178,3 +178,33 @@ export async function spotifyGetPlaylists(accessToken: string): Promise<unknown[
   const data = await res.json();
   return data.items ?? [];
 }
+
+export interface SpotifySearchResult {
+  trackId: string;
+  title: string;
+  artist: string;
+  album: string;
+  durationMs: number;
+  thumbnailUrl: string;
+  previewUrl: string;
+  spotifyUri: string;
+  provider: 'spotify';
+}
+
+export async function spotifySearch(
+  query: string,
+  accessToken: string,
+  limit = 20
+): Promise<SpotifySearchResult[]> {
+  const response = await fetch(
+    `/api/spotify/search?q=${encodeURIComponent(query)}&limit=${limit}`,
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+
+  if (!response.ok) {
+    throw new Error('Spotify search failed');
+  }
+
+  const data = await response.json();
+  return data.results as SpotifySearchResult[];
+}

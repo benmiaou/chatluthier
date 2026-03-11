@@ -5,6 +5,7 @@ const path = require('node:path');
 const authRoutes = require('./routes/authRoutes');
 const soundRoutes = require('./routes/soundRoutes');
 const requestRoutes = require('./routes/requestRoutes');
+const externalSoundsRoutes = require('./routes/externalSoundsRoutes');
 const logger = require('./utils/logger');
 const config = require('./config/appConfig');
 
@@ -182,10 +183,68 @@ app.post('/api/spotify/refresh', async (req, res) => {
   }
 });
 
+// Spotify search endpoint — proxies search to the Spotify Web API
+app.get('/api/spotify/search', async (req, res) => {
+  const { q, limit = 20 } = req.query;
+  const authHeader = req.headers.authorization;
+
+  if (!q) {
+    return res.status(400).json({ error: 'Missing search query' });
+  }
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Missing Authorization header' });
+  }
+
+  try {
+    const url = new URL('https://api.spotify.com/v1/search');
+    url.searchParams.set('q', q);
+    url.searchParams.set('type', 'track');
+    url.searchParams.set('limit', String(limit));
+
+    const response = await fetch(url.toString(), {
+      headers: { Authorization: authHeader },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return res.status(response.status).json({ error: data.error?.message || 'Spotify search failed' });
+    }
+
+    const results = (data.tracks?.items || []).map((track) => ({
+      trackId: track.id,
+      title: track.name,
+      artist: track.artists.map((a) => a.name).join(', '),
+      album: track.album.name,
+      durationMs: track.duration_ms,
+      thumbnailUrl: track.album.images[1]?.url || track.album.images[0]?.url || '',
+      previewUrl: track.preview_url || '',
+      spotifyUri: track.uri,
+      provider: 'spotify',
+    }));
+
+    return res.json({ results });
+  } catch (error) {
+    console.error('Spotify search error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Deezer search proxy
+const { search: deezerSearch } = require('./controllers/deezerController');
+app.get('/api/deezer/search', deezerSearch);
+
+// SoundCloud endpoints
+const { exchangeToken: scExchangeToken, refreshToken: scRefreshToken, search: scSearch } = require('./controllers/soundcloudController');
+app.post('/api/soundcloud/token', scExchangeToken);
+app.post('/api/soundcloud/refresh', scRefreshToken);
+app.get('/api/soundcloud/search', scSearch);
+
 // API routes must come before the catch-all route
 app.use(authRoutes);
 app.use(soundRoutes);
 app.use(requestRoutes);
+app.use(externalSoundsRoutes);
 
 // SPA fallback — serve index.html for all non-API routes so React Router works
 app.get('*', (req, res) => {

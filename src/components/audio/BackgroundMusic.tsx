@@ -1,14 +1,37 @@
-import { Box, Button, Group, Modal, Paper, Slider, Stack, Text, Progress } from '@mantine/core';
+import {
+  Box,
+  Button,
+  Group,
+  Modal,
+  Paper,
+  Slider,
+  Stack,
+  Text,
+  Progress,
+  Switch,
+  Tooltip,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { CustomCombobox } from './CustomCombobox';
-import { IconPlayerSkipForward, IconPlayerStop, IconVolume } from '@tabler/icons-react';
+import {
+  IconPlayerSkipForward,
+  IconPlayerStop,
+  IconVolume,
+  IconPlugConnected,
+  IconSearch,
+  IconCloudOff,
+} from '@tabler/icons-react';
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
+import { useExternalSounds } from '../../hooks/useExternalSounds';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { useState, useCallback, useEffect } from 'react';
 import type React from 'react';
 
 import type { BackgroundMusicCategory, Sound } from '../../types/sound';
 import { bgScenes, bgMatchesCategory } from '../../types/sound';
+import { ExternalSoundBadge } from './ExternalSoundBadge';
+import { ExternalSoundProviderModal } from './ExternalSoundProviderModal';
+import { ExternalSoundSearchModal } from './ExternalSoundSearchModal';
 
 interface BackgroundMusicProps {
   userId?: string | null;
@@ -26,13 +49,16 @@ export function BackgroundMusic({
   userId = null,
 }: Readonly<BackgroundMusicProps>): React.JSX.Element {
   const { send, addMessageHandler, sessionId } = useSocketContext();
-  // Autoplay permission modal state
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const [modalOpened, { open, close }] = useDisclosure(false);
-  // Track if user has interacted with audio controls
+  const [providerModalOpened, { open: openProviderModal, close: closeProviderModal }] =
+    useDisclosure(false);
+  const [searchModalOpened, { open: openSearchModal, close: closeSearchModal }] =
+    useDisclosure(false);
   const [userInteracted, setUserInteracted] = useState(false);
-  // Context state for filtering sounds
   const [filterContext, setFilterContext] = useState<string>('All');
+
+  const externalSoundsHook = useExternalSounds(userId);
 
   const {
     currentSound,
@@ -48,52 +74,86 @@ export function BackgroundMusic({
     seekTo,
     sounds,
     getCurrentTime,
-  } = useBackgroundMusic(userId, () => {
-    // This callback is called when autoplay is blocked
-    if (!autoplayBlocked) {
-      setAutoplayBlocked(true);
-      open(); // Open the permission modal
-    }
-  });
+    disableExternalSounds,
+    setDisableExternalSounds,
+    playExternalReceived,
+  } = useBackgroundMusic(
+    userId,
+    () => {
+      if (!autoplayBlocked) {
+        setAutoplayBlocked(true);
+        open();
+      }
+    },
+    externalSoundsHook.playExternal,
+    externalSoundsHook.stopExternal
+  );
 
   // Broadcast music change to session peers
   const handlePlayCategory = useCallback(
     async (category: BackgroundMusicCategory) => {
-      // Mark that user has interacted with audio controls
-      if (!userInteracted) {
-        setUserInteracted(true);
-      }
+      if (!userInteracted) setUserInteracted(true);
       await playCategory(category);
     },
-    [playCategory, userInteracted, setUserInteracted]
+    [playCategory, userInteracted]
   );
 
-  // When a track starts, broadcast to session
+  // When a track starts, broadcast to session (with external sound info when applicable)
   useEffect(() => {
     if (currentSound && sessionId) {
       const currentTime = getCurrentTime();
-      send({
-        type: 'backgroundMusicChange',
-        id: sessionId,
-        content: {
-          filename: currentSound.filename,
-          credit: currentSound.credit,
-          timestamp: Date.now(),
-          currentTime: currentTime,
-        },
-      });
+      const content: Record<string, unknown> = {
+        filename: currentSound.isExternal ? null : currentSound.filename,
+        credit: currentSound.credit,
+        timestamp: Date.now(),
+        currentTime,
+      };
+
+      if (currentSound.isExternal) {
+        content['externalSound'] = {
+          provider: currentSound.provider,
+          trackId: currentSound.providerTrackId,
+          artist: currentSound.artist,
+          title: currentSound.title,
+          album: currentSound.album,
+          thumbnailUrl: currentSound.thumbnailUrl,
+          previewUrl: currentSound.previewUrl,
+        };
+      }
+
+      send({ type: 'backgroundMusicChange', id: sessionId, content });
     }
   }, [currentSound, sessionId, send, getCurrentTime]);
 
-  // Message handler functions extracted to reduce nesting
+  // Message handler functions
   const handleBackgroundMusicChange = useCallback(
-    (content: { filename: string; credit?: string; timestamp?: number; currentTime?: number }) => {
-      const sound = sounds.find((s) => s.filename === content.filename);
-      if (sound) {
-        playSpecificSound(sound).catch(() => {});
+    (content: {
+      filename?: string | null;
+      credit?: string;
+      timestamp?: number;
+      currentTime?: number;
+      externalSound?: {
+        provider: 'spotify' | 'deezer' | 'soundcloud';
+        trackId: string;
+        artist?: string;
+        title?: string;
+        album?: string;
+        thumbnailUrl?: string;
+        previewUrl?: string;
+      };
+    }) => {
+      if (content.externalSound) {
+        playExternalReceived(content.externalSound).catch(() => {});
+        return;
+      }
+      if (content.filename) {
+        const sound = sounds.find((s) => s.filename === content.filename);
+        if (sound) {
+          playSpecificSound(sound).catch(() => {});
+        }
       }
     },
-    [playSpecificSound, sounds]
+    [playSpecificSound, playExternalReceived, sounds]
   );
 
   const handleBackgroundMusicStop = useCallback(() => {
@@ -104,20 +164,20 @@ export function BackgroundMusic({
     (content: { statusType: string }) => {
       if (content.statusType === 'backgroundMusic' && currentSound) {
         const currentTime = getCurrentTime();
-        send({
-          type: 'statusResponse',
-          id: sessionId,
-          content: {
-            statusType: 'backgroundMusic',
-            statusData: {
-              filename: currentSound.filename,
-              credit: currentSound.credit || '',
-              isPlaying: isPlaying,
-              timestamp: Date.now(),
-              currentTime: currentTime,
-            },
-          },
-        });
+        const statusData: Record<string, unknown> = {
+          filename: currentSound.isExternal ? null : currentSound.filename,
+          credit: currentSound.credit || '',
+          isPlaying,
+          timestamp: Date.now(),
+          currentTime,
+        };
+        if (currentSound.isExternal) {
+          statusData['externalSound'] = {
+            provider: currentSound.provider,
+            trackId: currentSound.providerTrackId,
+          };
+        }
+        send({ type: 'statusResponse', id: sessionId, content: { statusType: 'backgroundMusic', statusData } });
       }
     },
     [currentSound, isPlaying, sessionId, send, getCurrentTime]
@@ -127,65 +187,55 @@ export function BackgroundMusic({
     (content: {
       statusType: string;
       statusData: {
-        filename: string;
+        filename?: string;
         credit?: string;
         isPlaying: boolean;
         timestamp?: number;
         currentTime?: number;
+        externalSound?: { provider: 'spotify' | 'deezer' | 'soundcloud'; trackId: string };
       };
     }) => {
       if (content.statusType === 'backgroundMusic' && content.statusData) {
         if (content.statusData.isPlaying) {
-          const sound = sounds.find((s) => s.filename === content.statusData.filename);
-          if (sound) {
-            playSpecificSound(sound).catch(() => {});
+          if (content.statusData.externalSound) {
+            playExternalReceived(content.statusData.externalSound).catch(() => {});
+          } else if (content.statusData.filename) {
+            const sound = sounds.find((s) => s.filename === content.statusData.filename);
+            if (sound) playSpecificSound(sound).catch(() => {});
           }
         } else {
           stop();
         }
       }
     },
-    [playSpecificSound, stop, sounds]
+    [playSpecificSound, playExternalReceived, stop, sounds]
   );
 
-  // Listen for incoming socket messages
+  const handleExternalSoundsDisabled = useCallback(
+    (content: { disabled: boolean }) => {
+      setDisableExternalSounds(content.disabled);
+      // If external sounds are now disabled and we're playing one, stop
+      if (content.disabled && currentSound?.isExternal) {
+        stop();
+      }
+    },
+    [setDisableExternalSounds, currentSound, stop]
+  );
+
   useEffect(() => {
     return addMessageHandler((msg: WsMessage) => {
-      if (!msg.content) {
-        return;
-      }
+      if (!msg.content && msg.type !== 'backgroundMusicStop') return;
 
-      const messageHandlers: Record<string, (content: unknown) => void> = {
-        backgroundMusicChange: (content) =>
-          handleBackgroundMusicChange(
-            content as {
-              filename: string;
-              credit?: string;
-              timestamp?: number;
-              currentTime?: number;
-            }
-          ),
-        backgroundMusicStop: handleBackgroundMusicStop,
-        statusRequest: (content) => handleStatusRequest(content as { statusType: string }),
-        statusResponse: (content) =>
-          handleStatusResponse(
-            content as {
-              statusType: string;
-              statusData: {
-                filename: string;
-                credit?: string;
-                isPlaying: boolean;
-                timestamp?: number;
-                currentTime?: number;
-              };
-            }
-          ),
+      const handlers: Record<string, (content: unknown) => void> = {
+        backgroundMusicChange: (c) => handleBackgroundMusicChange(c as Parameters<typeof handleBackgroundMusicChange>[0]),
+        backgroundMusicStop: () => handleBackgroundMusicStop(),
+        statusRequest: (c) => handleStatusRequest(c as { statusType: string }),
+        statusResponse: (c) => handleStatusResponse(c as Parameters<typeof handleStatusResponse>[0]),
+        externalSoundsDisabled: (c) => handleExternalSoundsDisabled(c as { disabled: boolean }),
       };
 
-      const handler = messageHandlers[msg.type as keyof typeof messageHandlers];
-      if (handler) {
-        handler(msg.content);
-      }
+      const handler = handlers[msg.type];
+      if (handler) handler(msg.content);
     });
   }, [
     addMessageHandler,
@@ -193,98 +243,85 @@ export function BackgroundMusic({
     handleBackgroundMusicStop,
     handleStatusRequest,
     handleStatusResponse,
+    handleExternalSoundsDisabled,
   ]);
 
-  // Broadcast stop
+  const handleToggleDisableExternal = useCallback(
+    (disabled: boolean) => {
+      setDisableExternalSounds(disabled);
+      if (sessionId) {
+        send({ type: 'externalSoundsDisabled', id: sessionId, content: { disabled } });
+      }
+      if (disabled && currentSound?.isExternal) {
+        stop();
+      }
+    },
+    [setDisableExternalSounds, send, sessionId, currentSound, stop]
+  );
+
   const handleVolumeChange = useCallback(
     (v: number) => {
-      // Mark user interaction when changing volume
-      if (!userInteracted) {
-        setUserInteracted(true);
-      }
+      if (!userInteracted) setUserInteracted(true);
       setVolume(v);
     },
-    [setVolume, userInteracted, setUserInteracted]
+    [setVolume, userInteracted]
   );
 
   const handleNext = useCallback(() => {
-    // Mark user interaction when going to next track
-    if (!userInteracted) {
-      setUserInteracted(true);
-    }
+    if (!userInteracted) setUserInteracted(true);
     next();
-  }, [next, userInteracted, setUserInteracted]);
+  }, [next, userInteracted]);
 
   const handlePlayCurrentSound = useCallback(() => {
-    // Mark user interaction and play the current sound
-    if (!userInteracted) {
-      setUserInteracted(true);
-    }
-
-    // If there's a current sound that was blocked, play it specifically
+    if (!userInteracted) setUserInteracted(true);
     if (currentSound) {
-      // Use the specific sound play method to play exactly this sound
-      playSpecificSound(currentSound).catch(() => {
-        // Silently handle playback errors
-      });
+      playSpecificSound(currentSound).catch(() => {});
     }
-  }, [currentSound, playSpecificSound, userInteracted, setUserInteracted]);
+  }, [currentSound, playSpecificSound, userInteracted]);
 
   const handleStop = useCallback(() => {
-    // Mark user interaction when stopping
-    if (!userInteracted) {
-      setUserInteracted(true);
-    }
+    if (!userInteracted) setUserInteracted(true);
     stop();
-    if (sessionId) {
-      send({ type: 'backgroundMusicStop', id: sessionId });
-    }
-  }, [stop, send, sessionId, userInteracted, setUserInteracted]);
+    if (sessionId) send({ type: 'backgroundMusicStop', id: sessionId });
+  }, [stop, send, sessionId, userInteracted]);
 
   const contexts = ['All', ...Array.from(new Set(sounds.flatMap((s) => bgScenes(s))))];
 
-  // Helper function to filter sounds by both context and category
   const filterSoundsByContextAndCategory = (
     sound: Sound,
     contextFilter: string,
     categoryFilter: BackgroundMusicCategory
   ) => {
-    // If context is 'All', only filter by category
     if (contextFilter === 'All') {
       return categoryFilter === 'all' || bgMatchesCategory(sound, categoryFilter);
     }
-
-    // If context is specific, filter by both scene and category
     const soundScenes = bgScenes(sound);
-    const matchesScene = soundScenes.includes(contextFilter);
-    const matchesCategory = categoryFilter === 'all' || bgMatchesCategory(sound, categoryFilter);
-
-    return matchesScene && matchesCategory;
+    return soundScenes.includes(contextFilter) && (categoryFilter === 'all' || bgMatchesCategory(sound, categoryFilter));
   };
 
   const handleSeek = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      // Mark user interaction when seeking
-      if (!userInteracted) {
-        setUserInteracted(true);
-      }
+      if (!userInteracted) setUserInteracted(true);
+      if (currentSound?.isExternal) return; // Can't seek external sounds via progress bar
       const rect = e.currentTarget.getBoundingClientRect();
-      const pct = ((e.clientX - rect.left) / rect.width) * 100;
-      seekTo(pct);
+      seekTo(((e.clientX - rect.left) / rect.width) * 100);
     },
-    [seekTo, userInteracted, setUserInteracted]
+    [seekTo, userInteracted, currentSound]
   );
+
+  const hasConnectedProviders = externalSoundsHook.connectedProviders.length > 0;
+  const externalCount = sounds.filter((s) => s.isExternal).length;
 
   return (
     <>
       <Paper p="md" radius="md" withBorder>
         <Stack gap="sm">
           {/* Title with volume control */}
-          <Group justify="center" align="center">
+          <Group justify="space-between" align="center">
             <Text fw={600} size="sm" tt="uppercase" c="dimmed">
               Background Music
             </Text>
-            <Group gap={6} align="center" ml={8}>
+            <Group gap={6} align="center">
               <IconVolume size={16} color="var(--mantine-color-dimmed)" />
               <Slider
                 size="xs"
@@ -299,25 +336,25 @@ export function BackgroundMusic({
             </Group>
           </Group>
 
-          {/* Category buttons with counts and aligned context dropdown */}
+          {/* Category buttons + context filter */}
           <Group gap="xs" align="center">
             {CATEGORIES.map(({ value, label }) => {
-              // Filter sounds by current context first, then by category
-              const count = sounds.filter((s) =>
-                filterSoundsByContextAndCategory(s, filterContext, value)
+              const count = sounds.filter(
+                (s) =>
+                  !(s.isExternal && disableExternalSounds) &&
+                  filterSoundsByContextAndCategory(s, filterContext, value)
               ).length;
               return (
                 <Button
                   key={value}
                   size="xs"
-                  variant={activeCategory === value.toUpperCase() ? 'filled' : 'default'}
+                  variant={activeCategory === value ? 'filled' : 'default'}
                   onClick={() => handlePlayCategory(value)}
                 >
                   Play {label} ({count})
                 </Button>
               );
             })}
-            {/* Context dropdown - exact same size as buttons */}
             <CustomCombobox
               value={filterContext}
               onChange={setFilterContext}
@@ -329,10 +366,15 @@ export function BackgroundMusic({
           {/* Current track info */}
           <Group gap="xs" align="center">
             <Text size="xs" c="dimmed" truncate style={{ flex: 1 }}>
-              {currentSound ? `♪ ${currentSound.name}` : 'No track playing'}
+              {currentSound
+                ? `♪ ${currentSound.name ?? `${currentSound.artist} – ${currentSound.title}`}`
+                : 'No track playing'}
             </Text>
+            {currentSound?.isExternal && currentSound.provider && (
+              <ExternalSoundBadge provider={currentSound.provider} compact />
+            )}
           </Group>
-          {currentSound?.credit && (
+          {currentSound?.credit && !currentSound.isExternal && (
             <Text
               size="xs"
               c="dimmed"
@@ -342,31 +384,82 @@ export function BackgroundMusic({
             />
           )}
 
-          {/* Progress bar */}
-          <Box style={{ cursor: 'pointer' }} onClick={handleSeek}>
-            <Progress value={progress} size="sm" radius="xs" color="maroon" />
-          </Box>
+          {/* Progress bar (not shown for external sounds) */}
+          {!currentSound?.isExternal && (
+            <Box style={{ cursor: 'pointer' }} onClick={handleSeek}>
+              <Progress value={progress} size="sm" radius="xs" color="maroon" />
+            </Box>
+          )}
 
           {/* Controls row */}
-          <Group gap="xs" align="center">
-            <Button
-              size="xs"
-              variant="subtle"
-              leftSection={<IconPlayerStop size={14} />}
-              onClick={handleStop}
-              disabled={!isPlaying}
-            >
-              Stop
-            </Button>
-            <Button
-              size="xs"
-              variant="subtle"
-              leftSection={<IconPlayerSkipForward size={14} />}
-              onClick={handleNext}
-              disabled={!isPlaying}
-            >
-              Next
-            </Button>
+          <Group gap="xs" align="center" justify="space-between">
+            <Group gap="xs">
+              <Button
+                size="xs"
+                variant="subtle"
+                leftSection={<IconPlayerStop size={14} />}
+                onClick={handleStop}
+                disabled={!isPlaying}
+              >
+                Stop
+              </Button>
+              <Button
+                size="xs"
+                variant="subtle"
+                leftSection={<IconPlayerSkipForward size={14} />}
+                onClick={handleNext}
+                disabled={!isPlaying || currentSound?.isExternal}
+              >
+                Next
+              </Button>
+            </Group>
+
+            {/* External sounds controls */}
+            <Group gap="xs">
+              {externalCount > 0 && (
+                <Tooltip
+                  label={
+                    disableExternalSounds
+                      ? 'External sounds disabled for this session'
+                      : 'Disable external sounds for this session'
+                  }
+                  withArrow
+                >
+                  <Group gap={4}>
+                    <IconCloudOff size={14} color="var(--mantine-color-dimmed)" />
+                    <Switch
+                      size="xs"
+                      checked={disableExternalSounds}
+                      onChange={(e) => handleToggleDisableExternal(e.currentTarget.checked)}
+                      label={<Text size="xs" c="dimmed">Disable ext.</Text>}
+                    />
+                  </Group>
+                </Tooltip>
+              )}
+              <Tooltip label="Manage external sound providers" withArrow>
+                <Button
+                  size="xs"
+                  variant={hasConnectedProviders ? 'light' : 'subtle'}
+                  color={hasConnectedProviders ? 'green' : undefined}
+                  leftSection={<IconPlugConnected size={14} />}
+                  onClick={openProviderModal}
+                >
+                  Providers
+                </Button>
+              </Tooltip>
+              {hasConnectedProviders && (
+                <Tooltip label="Search and add external tracks" withArrow>
+                  <Button
+                    size="xs"
+                    variant="subtle"
+                    leftSection={<IconSearch size={14} />}
+                    onClick={openSearchModal}
+                  >
+                    Add track
+                  </Button>
+                </Tooltip>
+              )}
+            </Group>
           </Group>
         </Stack>
       </Paper>
@@ -385,27 +478,31 @@ export function BackgroundMusic({
             enable background music.
           </Text>
           <Group justify="flex-end" gap="sm">
-            <Button
-              variant="default"
-              onClick={() => {
-                close();
-                setAutoplayBlocked(false);
-              }}
-            >
+            <Button variant="default" onClick={() => { close(); setAutoplayBlocked(false); }}>
               Not Now
             </Button>
-            <Button
-              variant="filled"
-              onClick={() => {
-                // Play the current sound using the proper method
-                handlePlayCurrentSound();
-              }}
-            >
+            <Button variant="filled" onClick={handlePlayCurrentSound}>
               Allow Audio
             </Button>
           </Group>
         </Stack>
       </Modal>
+
+      {/* External Sound Provider Modal */}
+      <ExternalSoundProviderModal
+        opened={providerModalOpened}
+        onClose={closeProviderModal}
+        externalSoundsHook={externalSoundsHook}
+      />
+
+      {/* External Sound Search Modal */}
+      <ExternalSoundSearchModal
+        opened={searchModalOpened}
+        onClose={closeSearchModal}
+        userId={userId}
+        externalSoundsHook={externalSoundsHook}
+      />
     </>
   );
 }
+

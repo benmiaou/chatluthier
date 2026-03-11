@@ -23,7 +23,18 @@ export type WsMessageType =
   | 'statusRequest'
   | 'statusResponse'
   | 'unsubscribe'
+  | 'externalSoundsDisabled'
   | 'error';
+
+export interface ExternalSoundPayload {
+  provider: 'spotify' | 'deezer' | 'soundcloud';
+  trackId: string;
+  artist?: string;
+  title?: string;
+  album?: string;
+  thumbnailUrl?: string;
+  previewUrl?: string;
+}
 
 export interface WsMessage {
   type: WsMessageType;

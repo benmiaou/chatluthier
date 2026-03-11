@@ -118,7 +118,7 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
   const applyStatus = useCallback(
     (status: Record<string, number>) => {
       setBars((prev) => {
-        const getVolumeForBar = (bar: AmbianceBar) => status[bar.sound.filename] ?? 0;
+        const getVolumeForBar = (bar: AmbianceBar) => status[bar.sound.filename!] ?? 0;
         return prev.map((b) => {
           const vol = getVolumeForBar(b);
           updateBarAudio(b, vol);
