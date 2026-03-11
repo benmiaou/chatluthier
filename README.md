@@ -284,6 +284,11 @@ SOUNDCLOUD_CLIENT_SECRET=your_soundcloud_client_secret
 # ── Logging ───────────────────────────────────────────────────────────────────
 LOG_LEVEL=warn
 LOG_FILE=/var/log/chatluthier/app.log
+
+# ── Assets Path (for dynamic sound uploads) ──────────────────────────────────
+# The path where dynamically uploaded sounds are stored
+# This should match the nginx alias configuration for /assets/
+ASSETS_DIR=/path/to/chatluthier/dist/assets
 ```
 
 ---
@@ -315,7 +320,8 @@ server {
 }
 
 server {
-    listen 443 ssl http2;
+    listen 443 ssl;
+    http2 on;
     server_name yourDomain.org;
 
     ssl_certificate     /etc/letsencrypt/live/yourDomain.org/fullchain.pem;
@@ -325,17 +331,7 @@ server {
 
     # ── Content-Security-Policy (helmet CSP is disabled — set it here only) ───
     # Adjust connect-src if you add more external WebSocket or API origins.
-    add_header Content-Security-Policy
-        "default-src 'self'; "
-        "script-src 'self' 'unsafe-eval'; "
-        "style-src 'self' 'unsafe-inline'; "
-        "img-src 'self' data: https://mirrors.creativecommons.org; "
-        "font-src 'self'; "
-        "connect-src 'self' wss://yourDomain.org; "
-        "object-src 'none'; "
-        "base-uri 'self'; "
-        "frame-src 'self';"
-        always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-eval'; script-src-elem 'self'; style-src 'self' 'unsafe-inline'; style-src-elem 'self'; img-src 'self' data: https://mirrors.creativecommons.org; font-src 'self'; connect-src 'self' wss://yourDomain.org; manifest-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'self';" always;
 
     # ── Serve the Vite-built React SPA ────────────────────────────────────────
     root /path/to/chatluthier/dist;
@@ -376,6 +372,12 @@ server {
     location ~* \.(js|css|woff2?|ttf|otf|png|jpg|ico|svg|gif)$ {
         expires 1y;
         add_header Cache-Control "public, immutable";
+    }
+
+    # ── Serve all assets from dist/assets directory ─────────────────────────
+    location /assets/ {
+        alias /path/to/chatluthier/dist/assets/;
+        try_files $uri =404;
     }
 }
 ```

@@ -90,7 +90,7 @@ if (isLocalhost) {
 // Construct WebSocket URL
 const WS_URL = `${protocol}//${wsHost}:${wsPort}${wsPath}`;
 
-console.log(`[WebSocket] Using URL: ${WS_URL}`);
+// WebSocket URL: ${WS_URL}
 
 const RECONNECT_MS = 5000;
 const HEARTBEAT_MS = 30_000;

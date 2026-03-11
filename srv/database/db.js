@@ -242,22 +242,31 @@ class Database {
 
     for (const migration of migrations) {
       try {
-        const existing = await this.query(
-          "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-          [migration.name.replace('add_', '').replace('_table', '')]
-        );
-        // For index/table creation migrations, just run them (IF NOT EXISTS is safe)
-        await new Promise((resolve, reject) => {
-          this.db.exec(migration.sql, (err) => {
-            if (err) {
-              console.error(`Migration ${migration.name} error:`, err.message);
-              reject(err);
-            } else {
-              resolve();
-            }
+        if (migration.name === 'add_external_sounds_table') {
+          // For table creation, just run it (IF NOT EXISTS is safe)
+          await new Promise((resolve, reject) => {
+            this.db.exec(migration.sql, (err) => {
+              if (err) {
+                console.error(`Migration ${migration.name} error:`, err.message);
+                reject(err);
+              } else {
+                console.log(`Migration ${migration.name} applied`);
+                resolve();
+              }
+            });
           });
-        });
-        console.log(`Migration ${migration.name} applied`);
+        } else if (migration.name === 'add_external_sounds_permalink') {
+          // For column addition, check if column already exists first
+          const columnCheck = await this.query('PRAGMA table_info(external_sounds)');
+          const hasPermalink = columnCheck.some((col) => col.name === 'permalink_url');
+
+          if (!hasPermalink) {
+            await this.execute(migration.sql);
+            console.log(`Migration ${migration.name} applied`);
+          } else {
+            console.log(`Migration ${migration.name} skipped - column already exists`);
+          }
+        }
       } catch (error) {
         console.error(`Migration ${migration.name} failed:`, error.message);
       }

@@ -1,3 +1,6 @@
+// Load environment variables from .env file
+require('dotenv').config();
+
 const app = require('./app');
 const http = require('node:http');
 const server = http.createServer(app);

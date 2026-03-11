@@ -97,7 +97,7 @@ function testCspHeaders() {
 // Test the configuration directly
 console.log('🔧 Testing CSP Configuration...');
 try {
-  const config = require('../srv/config/appConfig');
+  const config = require('../srv/config/appConfig.js');
   const csp = config.security.contentSecurityPolicy;
 
   console.log('   ✅ CSP configuration loaded');
