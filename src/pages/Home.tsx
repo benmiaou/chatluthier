@@ -12,16 +12,6 @@ import { ServerEditSoundsModal } from '../components/modals/ServerEditSoundsModa
 import { ReviewRequestsModal } from '../components/modals/ReviewRequestsModal';
 import { useAuthContext } from '../contexts/AuthContext';
 
-// Feature flag to toggle Spotify integration
-const ENABLE_SPOTIFY = false;
-
-// Conditional import for Spotify
-let SpotifyPlayer: React.ComponentType<unknown> | null = null;
-if (ENABLE_SPOTIFY) {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  SpotifyPlayer = require('../components/spotify/SpotifyPlayer').SpotifyPlayer;
-}
-
 export function Home(): React.ReactElement {
   const { userId, isAdmin } = useAuthContext();
   const [_requestOpened, { open: _openRequest, close: closeRequest }] = useDisclosure(false);
@@ -36,7 +26,6 @@ export function Home(): React.ReactElement {
       <BackgroundMusic userId={userId} isAdmin={isAdmin} />
       <AmbianceSounds userId={userId} isAdmin={isAdmin} />
       <Soundboard userId={userId} isAdmin={isAdmin} />
-      {ENABLE_SPOTIFY && SpotifyPlayer && <SpotifyPlayer />}
       <SessionManager />
 
       <Group justify="center" gap="sm" wrap="wrap">
