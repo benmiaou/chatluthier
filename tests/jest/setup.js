@@ -1,0 +1,38 @@
+/**
+ * Jest setup file — runs before each test suite in the frontend project.
+ * Polyfills import.meta.env so TypeScript service modules load correctly.
+ */
+globalThis.__importMeta = {
+  env: {
+    VITE_DEEZER_APP_ID: 'test-deezer-app-id',
+    VITE_SOUNDCLOUD_CLIENT_ID: 'test-sc-client-id',
+    VITE_SOUNDCLOUD_REDIRECT_URI_LOCAL: 'http://localhost:3000/sc-callback',
+    VITE_SOUNDCLOUD_REDIRECT_URI_PROD: 'https://prod.example.com/sc-callback',
+    VITE_SPOTIFY_CLIENT_ID: 'test-spotify-client-id',
+    VITE_REDIRECT_URI_LOCAL: 'http://localhost:5173/callback',
+    VITE_REDIRECT_URI_PROD: 'https://prod.example.com/callback',
+    VITE_API_BASE_URL: '',
+  },
+};
+
+// Polyfill TextEncoder / TextDecoder (not included by all jsdom versions)
+const { TextEncoder, TextDecoder } = require('util');
+if (!globalThis.TextEncoder) globalThis.TextEncoder = TextEncoder;
+if (!globalThis.TextDecoder) globalThis.TextDecoder = TextDecoder;
+
+// Polyfill Web Crypto API (required by PKCE helpers in services)
+// jsdom sets globalThis.crypto without crypto.subtle — force override with Node webcrypto
+const { webcrypto } = require('crypto');
+Object.defineProperty(globalThis, 'crypto', {
+  value: webcrypto,
+  writable: true,
+  configurable: true,
+});
+
+// Polyfill fetch for jsdom environment
+if (typeof globalThis.fetch === 'undefined') {
+  globalThis.fetch = jest.fn();
+} else {
+  // Wrap existing fetch so tests can spy on it
+  globalThis.fetch = jest.fn(globalThis.fetch);
+}
