@@ -96,19 +96,18 @@ Developers can enable file-based logging for both client and server during devel
 
 ```bash
 npm install
-cp srv/Tokens.example srv/Tokens  # fill in your JWT secrets
+cp .env.example .env   # fill in JWT secrets and any provider credentials
 npm run build
-npm run dev                        # starts Express + WebSocket server
+npm run dev            # starts Express + WebSocket server
 ```
 
-The `srv/Tokens` file holds JWT signing secrets (gitignored). Generate strong random strings for production:
+Generate JWT secrets with:
 
-```json
-{
-  "ACCESS_TOKEN_SECRET": "a-long-random-string",
-  "REFRESH_TOKEN_SECRET": "another-long-random-string"
-}
+```bash
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
+
+Run it twice — once for `ACCESS_TOKEN_SECRET`, once for `REFRESH_TOKEN_SECRET`. The server will refuse to start if either is missing.
 
 ### Development with hot reload
 
@@ -191,13 +190,9 @@ src/
   contexts/       AuthContext, SocketContext (WebSocket message types)
   hooks/          useBackgroundMusic, useAmbianceSounds, useSoundboard,
                   useSpotify, useDeezer, useSoundCloud, useExternalSounds, …
-  pages/          Home, Privacy, About
+  pages/          Home
   services/       api.ts, spotifyService.ts, deezerService.ts, soundcloudService.ts
   types/          sound.ts, spotify.ts
-  css/            Original CSS (imported alongside Mantine)
-srv/
-  controllers/    authController, soundController, externalSoundsController,
-                  deezerController, soundcloudController, requestController
   database/       db.js (SQLite singleton), schema.sql, migrations
   routes/         authRoutes, soundRoutes, externalSoundsRoutes, requestRoutes
   sockets/        socketServer.js (WebSocket broadcast)
@@ -228,6 +223,165 @@ npm run test:jest
 npm run test:external-api   # external sounds CRUD + /backgroundMusic merge
 npm test                    # all plain Node tests (auth, cookies, JWT, WebSocket, …)
 ```
+
+---
+
+## Production Deployment
+
+This section covers deploying Le Chat Luthier on a server running **nginx** as a reverse proxy (e.g. `yourDomain.org`).
+
+### Files to configure
+
+| File              | What to set                                                          |
+| ----------------- | -------------------------------------------------------------------- |
+| `.env`            | All secrets, ports, origins, and `VITE_*` provider credentials       |
+| nginx site config | Domain, SSL certificates, reverse proxy, WebSocket proxy, CSP header |
+
+---
+
+### 1. Environment file (`.env`)
+
+`VITE_*` variables are **inlined at build time** — set them before running `npm run build`.
+
+```env
+NODE_ENV=production
+
+# ── JWT secrets ───────────────────────────────────────────────────────────────
+# Generate: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+ACCESS_TOKEN_SECRET=<64-char-random-hex>
+REFRESH_TOKEN_SECRET=<64-char-different-random-hex>
+
+# ── Server ────────────────────────────────────────────────────────────────────
+PORT=3000
+
+# ── CORS (comma-separated, no trailing slash) ─────────────────────────────────
+CORS_ORIGINS=https://yourDomain.org
+
+# ── CSP WebSocket origins (must match the nginx /ws/ proxy below) ─────────────
+WS_ORIGINS=wss://yourDomain.org
+
+# ── Frontend — API served from same origin, no base URL needed ────────────────
+VITE_API_BASE_URL=
+
+# ── Frontend — WebSocket (nginx proxies /ws/ → Express :3001) ─────────────────
+VITE_WS_HOST=yourDomain.org
+VITE_WS_PORT=443
+VITE_WS_PATH=/ws/
+
+# ── Spotify ───────────────────────────────────────────────────────────────────
+VITE_SPOTIFY_CLIENT_ID=your_spotify_client_id
+VITE_SPOTIFY_REDIRECT_URI=https://yourDomain.org/callback
+
+# ── Deezer ────────────────────────────────────────────────────────────────────
+VITE_DEEZER_APP_ID=your_deezer_app_id
+VITE_DEEZER_REDIRECT_URI=https://yourDomain.org/deezer-callback
+
+# ── SoundCloud ────────────────────────────────────────────────────────────────
+VITE_SOUNDCLOUD_CLIENT_ID=your_soundcloud_client_id
+VITE_SOUNDCLOUD_REDIRECT_URI=https://yourDomain.org/soundcloud-callback
+SOUNDCLOUD_CLIENT_SECRET=your_soundcloud_client_secret
+
+# ── Logging ───────────────────────────────────────────────────────────────────
+LOG_LEVEL=warn
+LOG_FILE=/var/log/chatluthier/app.log
+```
+
+---
+
+### 2. Build and start
+
+```bash
+npm ci
+npm run build          # bundles frontend into dist/ (VITE_* vars are read here)
+node srv/server.js     # or use pm2 / systemd
+```
+
+---
+
+### 3. Nginx configuration
+
+[Helmet](https://helmetjs.github.io/) is active and sets most security headers automatically:
+`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `X-XSS-Protection`, `Strict-Transport-Security`, and others.
+
+**Content-Security-Policy is intentionally disabled in Helmet** to avoid duplicate headers.
+Set it once in nginx as shown below.
+
+```nginx
+# Redirect HTTP → HTTPS
+server {
+    listen 80;
+    server_name yourDomain.org;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name yourDomain.org;
+
+    ssl_certificate     /etc/letsencrypt/live/yourDomain.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/yourDomain.org/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    # ── Content-Security-Policy (helmet CSP is disabled — set it here only) ───
+    # Adjust connect-src if you add more external WebSocket or API origins.
+    add_header Content-Security-Policy
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-eval'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https://mirrors.creativecommons.org; "
+        "font-src 'self'; "
+        "connect-src 'self' wss://yourDomain.org; "
+        "object-src 'none'; "
+        "base-uri 'self'; "
+        "frame-src 'self';"
+        always;
+
+    # ── Serve the Vite-built React SPA ────────────────────────────────────────
+    root /path/to/chatluthier/dist;
+    index index.html;
+
+    # SPA fallback — React Router handles client-side navigation
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # ── API proxy → Express :3000 ─────────────────────────────────────────────
+    location ~ ^/(api|login|logout|register|verify-login|refresh-token|check-session|
+                  save-preset|load-presets|delete-sound|update-main-playlist|
+                  update-user-sound|add-sound|request-sound|get-requests|close-request|
+                  get-sound-order|save-sound-order|contexts|request-password-reset|
+                  get-secret-question|check-pseudo-available|change-password|
+                  backgroundMusic|ambianceSounds|soundboard) {
+        proxy_pass         http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+
+    # ── WebSocket proxy → Express :3001 ───────────────────────────────────────
+    # Matches VITE_WS_PATH=/ws/ set in .env
+    location /ws/ {
+        proxy_pass         http://127.0.0.1:3001;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade    $http_upgrade;
+        proxy_set_header   Connection "upgrade";
+        proxy_set_header   Host       $host;
+        proxy_read_timeout 86400s;     # keep alive for long sessions
+    }
+
+    # ── Long-lived cache for static assets ────────────────────────────────────
+    location ~* \.(js|css|woff2?|ttf|otf|png|jpg|ico|svg|gif)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+> **How the WebSocket URL is resolved at runtime:**
+> With `VITE_WS_HOST=yourDomain.org`, `VITE_WS_PORT=443`, and `VITE_WS_PATH=/ws/` in `.env`, the frontend builds the URL `wss://yourDomain.org:443/ws/`. Nginx receives the upgrade request on port 443 and proxies it internally to Express on port 3001 — no extra port needs to be opened in your firewall.
 
 ---
 
