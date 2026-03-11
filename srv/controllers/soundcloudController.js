@@ -42,7 +42,10 @@ async function exchangeToken(req, res) {
 
     const response = await fetch('https://secure.soundcloud.com/oauth/token', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json; charset=utf-8' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/json; charset=utf-8',
+      },
       body,
     });
 
@@ -83,7 +86,10 @@ async function refreshToken(req, res) {
   try {
     const response = await fetch('https://secure.soundcloud.com/oauth/token', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json; charset=utf-8' },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/json; charset=utf-8',
+      },
       body: new URLSearchParams({
         grant_type: 'refresh_token',
         client_id: SOUNDCLOUD_CLIENT_ID,
@@ -146,7 +152,7 @@ async function search(req, res) {
     }
 
     const data = await response.json();
-    const collection = Array.isArray(data) ? data : (data.collection || []);
+    const collection = Array.isArray(data) ? data : data.collection || [];
 
     const results = collection.map((track) => ({
       trackId: String(track.id),
@@ -157,7 +163,7 @@ async function search(req, res) {
       thumbnailUrl: track.artwork_url?.replace('-large', '-t300x300') || '',
       previewUrl: track.stream_url
         ? `${track.stream_url}?client_id=${clientId}`
-        : (track.permalink_url || ''),
+        : track.permalink_url || '',
       streamUrl: track.stream_url || '',
       permalinkUrl: track.permalink_url || '',
       provider: 'soundcloud',

@@ -64,8 +64,12 @@ export function useBackgroundMusic(
   // Keep callbacks in refs so closures always see latest values
   const onPlayExternalRef = useRef(onPlayExternal);
   const onStopExternalRef = useRef(onStopExternal);
-  useEffect(() => { onPlayExternalRef.current = onPlayExternal; }, [onPlayExternal]);
-  useEffect(() => { onStopExternalRef.current = onStopExternal; }, [onStopExternal]);
+  useEffect(() => {
+    onPlayExternalRef.current = onPlayExternal;
+  }, [onPlayExternal]);
+  useEffect(() => {
+    onStopExternalRef.current = onStopExternal;
+  }, [onStopExternal]);
 
   // ─── Load sounds ──────────────────────────────────────────────────────────
 
@@ -98,9 +102,7 @@ export function useBackgroundMusic(
 
       setSounds(withExternal);
       precacheAudio(
-        merged
-          .filter((s) => !s.isExternal && s.filename)
-          .map((s) => `${ASSET_PREFIX}${s.filename}`)
+        merged.filter((s) => !s.isExternal && s.filename).map((s) => `${ASSET_PREFIX}${s.filename}`)
       );
     } catch (error) {
       handleError(error, 'useBackgroundMusic.loadSounds');
@@ -335,6 +337,42 @@ export function useBackgroundMusic(
     [sounds]
   );
 
+  /** Called when receiving a backgroundMusicChange with an externalSound payload */
+  const playExternalReceived = useCallback(
+    async (payload: ExternalSoundPayload) => {
+      if (disableExternalSounds) {
+        return;
+      }
+
+      // Find the matching sound in our list (if the user has it saved)
+      const match = sounds.find(
+        (s) =>
+          s.isExternal && s.provider === payload.provider && s.providerTrackId === payload.trackId
+      );
+
+      const soundToPlay: Sound = match ?? {
+        id: `ext_recv_${payload.trackId}`,
+        name: payload.title ? `${payload.artist} – ${payload.title}` : payload.trackId,
+        filename: null,
+        category: 'background',
+        isExternal: true,
+        provider: payload.provider,
+        providerTrackId: payload.trackId,
+        artist: payload.artist,
+        title: payload.title,
+        thumbnailUrl: payload.thumbnailUrl,
+        previewUrl: payload.previewUrl,
+      };
+
+      setCurrentSound(soundToPlay);
+      if (onPlayExternalRef.current) {
+        await onPlayExternalRef.current(soundToPlay);
+        setIsPlaying(true);
+      }
+    },
+    [sounds, disableExternalSounds]
+  );
+
   const playReceived = useCallback(
     async (musicData: {
       filename: string;
@@ -361,40 +399,7 @@ export function useBackgroundMusic(
       updateCurrentSound(musicData);
       startProgressTracking();
     },
-    [volume, calculateAdjustedTime, handlePlayAttempt, updateCurrentSound]
-  );
-
-  /** Called when receiving a backgroundMusicChange with an externalSound payload */
-  const playExternalReceived = useCallback(
-    async (payload: ExternalSoundPayload) => {
-      if (disableExternalSounds) return;
-
-      // Find the matching sound in our list (if the user has it saved)
-      const match = sounds.find(
-        (s) => s.isExternal && s.provider === payload.provider && s.providerTrackId === payload.trackId
-      );
-
-      const soundToPlay: Sound = match ?? {
-        id: `ext_recv_${payload.trackId}`,
-        name: payload.title ? `${payload.artist} – ${payload.title}` : payload.trackId,
-        filename: null,
-        category: 'background',
-        isExternal: true,
-        provider: payload.provider,
-        providerTrackId: payload.trackId,
-        artist: payload.artist,
-        title: payload.title,
-        thumbnailUrl: payload.thumbnailUrl,
-        previewUrl: payload.previewUrl,
-      };
-
-      setCurrentSound(soundToPlay);
-      if (onPlayExternalRef.current) {
-        await onPlayExternalRef.current(soundToPlay);
-        setIsPlaying(true);
-      }
-    },
-    [sounds, disableExternalSounds]
+    [volume, calculateAdjustedTime, handlePlayAttempt, updateCurrentSound, playExternalReceived]
   );
 
   const stopReceived = useCallback(() => {

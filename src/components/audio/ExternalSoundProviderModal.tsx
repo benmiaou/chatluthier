@@ -71,15 +71,23 @@ export function ExternalSoundProviderModal({
   const isConnected = (provider: ExternalProvider) => connectedProviders.includes(provider);
 
   const handleConnect = (provider: ExternalProvider) => {
-    if (provider === 'spotify') spotify.connect().catch(() => {});
-    else if (provider === 'deezer') deezer.connect();
-    else if (provider === 'soundcloud') soundCloud.connect().catch(() => {});
+    if (provider === 'spotify') {
+      spotify.connect().catch(() => {});
+    } else if (provider === 'deezer') {
+      deezer.connect();
+    } else if (provider === 'soundcloud') {
+      soundCloud.connect().catch(() => {});
+    }
   };
 
   const handleDisconnect = (provider: ExternalProvider) => {
-    if (provider === 'spotify') spotify.disconnect();
-    else if (provider === 'deezer') deezer.disconnect();
-    else if (provider === 'soundcloud') soundCloud.disconnect();
+    if (provider === 'spotify') {
+      spotify.disconnect();
+    } else if (provider === 'deezer') {
+      deezer.disconnect();
+    } else if (provider === 'soundcloud') {
+      soundCloud.disconnect();
+    }
   };
 
   return (
@@ -122,7 +130,7 @@ export function ExternalSoundProviderModal({
                 align="flex-start"
                 p="sm"
                 style={{
-                  border: `1px solid ${connected ? provider.color + '60' : 'var(--mantine-color-default-border)'}`,
+                  border: `1px solid ${connected ? `${provider.color}60` : 'var(--mantine-color-default-border)'}`,
                   borderRadius: 8,
                   background: connected ? `${provider.color}10` : undefined,
                 }}
@@ -165,7 +173,7 @@ export function ExternalSoundProviderModal({
                   <Button
                     size="xs"
                     variant="light"
-                    style={{ color: provider.color, borderColor: provider.color + '40' }}
+                    style={{ color: provider.color, borderColor: `${provider.color}40` }}
                     leftSection={<IconPlugConnected size={14} />}
                     loading={
                       (provider.id === 'spotify' && spotify.isConnecting) ||

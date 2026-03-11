@@ -92,7 +92,9 @@ export function BackgroundMusic({
   // Broadcast music change to session peers
   const handlePlayCategory = useCallback(
     async (category: BackgroundMusicCategory) => {
-      if (!userInteracted) setUserInteracted(true);
+      if (!userInteracted) {
+        setUserInteracted(true);
+      }
       await playCategory(category);
     },
     [playCategory, userInteracted]
@@ -110,7 +112,7 @@ export function BackgroundMusic({
       };
 
       if (currentSound.isExternal) {
-        content['externalSound'] = {
+        content.externalSound = {
           provider: currentSound.provider,
           trackId: currentSound.providerTrackId,
           artist: currentSound.artist,
@@ -172,12 +174,16 @@ export function BackgroundMusic({
           currentTime,
         };
         if (currentSound.isExternal) {
-          statusData['externalSound'] = {
+          statusData.externalSound = {
             provider: currentSound.provider,
             trackId: currentSound.providerTrackId,
           };
         }
-        send({ type: 'statusResponse', id: sessionId, content: { statusType: 'backgroundMusic', statusData } });
+        send({
+          type: 'statusResponse',
+          id: sessionId,
+          content: { statusType: 'backgroundMusic', statusData },
+        });
       }
     },
     [currentSound, isPlaying, sessionId, send, getCurrentTime]
@@ -201,7 +207,9 @@ export function BackgroundMusic({
             playExternalReceived(content.statusData.externalSound).catch(() => {});
           } else if (content.statusData.filename) {
             const sound = sounds.find((s) => s.filename === content.statusData.filename);
-            if (sound) playSpecificSound(sound).catch(() => {});
+            if (sound) {
+              playSpecificSound(sound).catch(() => {});
+            }
           }
         } else {
           stop();
@@ -224,18 +232,24 @@ export function BackgroundMusic({
 
   useEffect(() => {
     return addMessageHandler((msg: WsMessage) => {
-      if (!msg.content && msg.type !== 'backgroundMusicStop') return;
+      if (!msg.content && msg.type !== 'backgroundMusicStop') {
+        return;
+      }
 
       const handlers: Record<string, (content: unknown) => void> = {
-        backgroundMusicChange: (c) => handleBackgroundMusicChange(c as Parameters<typeof handleBackgroundMusicChange>[0]),
+        backgroundMusicChange: (c) =>
+          handleBackgroundMusicChange(c as Parameters<typeof handleBackgroundMusicChange>[0]),
         backgroundMusicStop: () => handleBackgroundMusicStop(),
         statusRequest: (c) => handleStatusRequest(c as { statusType: string }),
-        statusResponse: (c) => handleStatusResponse(c as Parameters<typeof handleStatusResponse>[0]),
+        statusResponse: (c) =>
+          handleStatusResponse(c as Parameters<typeof handleStatusResponse>[0]),
         externalSoundsDisabled: (c) => handleExternalSoundsDisabled(c as { disabled: boolean }),
       };
 
       const handler = handlers[msg.type];
-      if (handler) handler(msg.content);
+      if (handler) {
+        handler(msg.content);
+      }
     });
   }, [
     addMessageHandler,
@@ -261,28 +275,38 @@ export function BackgroundMusic({
 
   const handleVolumeChange = useCallback(
     (v: number) => {
-      if (!userInteracted) setUserInteracted(true);
+      if (!userInteracted) {
+        setUserInteracted(true);
+      }
       setVolume(v);
     },
     [setVolume, userInteracted]
   );
 
   const handleNext = useCallback(() => {
-    if (!userInteracted) setUserInteracted(true);
+    if (!userInteracted) {
+      setUserInteracted(true);
+    }
     next();
   }, [next, userInteracted]);
 
   const handlePlayCurrentSound = useCallback(() => {
-    if (!userInteracted) setUserInteracted(true);
+    if (!userInteracted) {
+      setUserInteracted(true);
+    }
     if (currentSound) {
       playSpecificSound(currentSound).catch(() => {});
     }
   }, [currentSound, playSpecificSound, userInteracted]);
 
   const handleStop = useCallback(() => {
-    if (!userInteracted) setUserInteracted(true);
+    if (!userInteracted) {
+      setUserInteracted(true);
+    }
     stop();
-    if (sessionId) send({ type: 'backgroundMusicStop', id: sessionId });
+    if (sessionId) {
+      send({ type: 'backgroundMusicStop', id: sessionId });
+    }
   }, [stop, send, sessionId, userInteracted]);
 
   const contexts = ['All', ...Array.from(new Set(sounds.flatMap((s) => bgScenes(s))))];
@@ -296,13 +320,20 @@ export function BackgroundMusic({
       return categoryFilter === 'all' || bgMatchesCategory(sound, categoryFilter);
     }
     const soundScenes = bgScenes(sound);
-    return soundScenes.includes(contextFilter) && (categoryFilter === 'all' || bgMatchesCategory(sound, categoryFilter));
+    return (
+      soundScenes.includes(contextFilter) &&
+      (categoryFilter === 'all' || bgMatchesCategory(sound, categoryFilter))
+    );
   };
 
   const handleSeek = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!userInteracted) setUserInteracted(true);
-      if (currentSound?.isExternal) return; // Can't seek external sounds via progress bar
+      if (!userInteracted) {
+        setUserInteracted(true);
+      }
+      if (currentSound?.isExternal) {
+        return;
+      } // Can't seek external sounds via progress bar
       const rect = e.currentTarget.getBoundingClientRect();
       seekTo(((e.clientX - rect.left) / rect.width) * 100);
     },
@@ -431,7 +462,11 @@ export function BackgroundMusic({
                       size="xs"
                       checked={disableExternalSounds}
                       onChange={(e) => handleToggleDisableExternal(e.currentTarget.checked)}
-                      label={<Text size="xs" c="dimmed">Disable ext.</Text>}
+                      label={
+                        <Text size="xs" c="dimmed">
+                          Disable ext.
+                        </Text>
+                      }
                     />
                   </Group>
                 </Tooltip>
@@ -478,7 +513,13 @@ export function BackgroundMusic({
             enable background music.
           </Text>
           <Group justify="flex-end" gap="sm">
-            <Button variant="default" onClick={() => { close(); setAutoplayBlocked(false); }}>
+            <Button
+              variant="default"
+              onClick={() => {
+                close();
+                setAutoplayBlocked(false);
+              }}
+            >
               Not Now
             </Button>
             <Button variant="filled" onClick={handlePlayCurrentSound}>
@@ -505,4 +546,3 @@ export function BackgroundMusic({
     </>
   );
 }
-

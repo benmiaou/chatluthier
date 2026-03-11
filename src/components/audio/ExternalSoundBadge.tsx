@@ -2,10 +2,7 @@ import React from 'react';
 import { Badge, Tooltip } from '@mantine/core';
 import type { ExternalProvider } from '../../types/sound';
 
-const PROVIDER_CONFIG: Record<
-  ExternalProvider,
-  { label: string; color: string; bg: string }
-> = {
+const PROVIDER_CONFIG: Record<ExternalProvider, { label: string; color: string; bg: string }> = {
   spotify: { label: 'Spotify', color: '#1DB954', bg: '#1DB95420' },
   deezer: { label: 'Deezer', color: '#EF5466', bg: '#EF546620' },
   soundcloud: { label: 'SoundCloud', color: '#FF5500', bg: '#FF550020' },
@@ -41,7 +38,11 @@ export function ExternalSoundBadge({
   );
 
   if (compact) {
-    return <Tooltip label={cfg.label} withArrow position="top">{badge}</Tooltip>;
+    return (
+      <Tooltip label={cfg.label} withArrow position="top">
+        {badge}
+      </Tooltip>
+    );
   }
 
   return badge;

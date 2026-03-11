@@ -50,7 +50,10 @@ export function useExternalSounds(userId: string | null): {
   soundCloud: ReturnType<typeof useSoundCloud>;
   addExternalSound: (payload: AddExternalSoundPayload) => Promise<ExternalSoundRecord | null>;
   removeExternalSound: (dbId: number) => Promise<void>;
-  updateExternalSound: (dbId: number, changes: { contexts?: [string, string][]; isEnabled?: boolean }) => Promise<void>;
+  updateExternalSound: (
+    dbId: number,
+    changes: { contexts?: [string, string][]; isEnabled?: boolean }
+  ) => Promise<void>;
   playExternal: (sound: Sound) => Promise<void>;
   stopExternal: () => Promise<void>;
   reload: () => Promise<void>;
@@ -74,6 +77,7 @@ export function useExternalSounds(userId: string | null): {
 
   const reload = useCallback(async () => {
     if (!userId) {
+      await Promise.resolve();
       setExternalSounds([]);
       return;
     }
@@ -86,7 +90,9 @@ export function useExternalSounds(userId: string | null): {
   }, [userId]);
 
   useEffect(() => {
-    reload();
+    Promise.resolve()
+      .then(reload)
+      .catch(() => {});
   }, [reload]);
 
   const addExternalSound = useCallback(
@@ -106,14 +112,17 @@ export function useExternalSounds(userId: string | null): {
     []
   );
 
-  const removeExternalSound = useCallback(async (dbId: number) => {
-    try {
-      await apiFetch(`/external-sounds/${dbId}?userId=${userId}`, { method: 'DELETE' });
-      setExternalSounds((prev) => prev.filter((s) => s.dbId !== dbId));
-    } catch (error) {
-      handleError(error, 'useExternalSounds.removeExternalSound');
-    }
-  }, [userId]);
+  const removeExternalSound = useCallback(
+    async (dbId: number) => {
+      try {
+        await apiFetch(`/external-sounds/${dbId}?userId=${userId}`, { method: 'DELETE' });
+        setExternalSounds((prev) => prev.filter((s) => s.dbId !== dbId));
+      } catch (error) {
+        handleError(error, 'useExternalSounds.removeExternalSound');
+      }
+    },
+    [userId]
+  );
 
   const updateExternalSound = useCallback(
     async (dbId: number, changes: { contexts?: [string, string][]; isEnabled?: boolean }) => {
@@ -142,14 +151,20 @@ export function useExternalSounds(userId: string | null): {
 
   const playExternal = useCallback(
     async (sound: Sound) => {
-      if (!sound.isExternal || !sound.provider || !sound.providerTrackId) return;
+      if (!sound.isExternal || !sound.provider || !sound.providerTrackId) {
+        return;
+      }
 
       // Stop the previously active provider if switching
       if (activeProviderRef.current && activeProviderRef.current !== sound.provider) {
         const prev = activeProviderRef.current;
-        if (prev === 'spotify') spotify.pause().catch(() => {});
-        else if (prev === 'deezer') deezer.pause();
-        else if (prev === 'soundcloud') soundCloud.pause().catch(() => {});
+        if (prev === 'spotify') {
+          spotify.pause().catch(() => {});
+        } else if (prev === 'deezer') {
+          deezer.pause();
+        } else if (prev === 'soundcloud') {
+          soundCloud.pause().catch(() => {});
+        }
       }
 
       activeProviderRef.current = sound.provider;
@@ -169,19 +184,27 @@ export function useExternalSounds(userId: string | null): {
           await soundCloud.play(sound.providerTrackId);
           break;
         }
+        default:
+          break;
       }
     },
     [spotify, deezer, soundCloud]
   );
 
   const stopExternal = useCallback(async () => {
-    if (!activeProviderRef.current) return;
+    if (!activeProviderRef.current) {
+      return;
+    }
     const provider = activeProviderRef.current;
     activeProviderRef.current = null;
 
-    if (provider === 'spotify') spotify.pause().catch(() => {});
-    else if (provider === 'deezer') deezer.pause();
-    else if (provider === 'soundcloud') soundCloud.pause().catch(() => {});
+    if (provider === 'spotify') {
+      spotify.pause().catch(() => {});
+    } else if (provider === 'deezer') {
+      deezer.pause();
+    } else if (provider === 'soundcloud') {
+      soundCloud.pause().catch(() => {});
+    }
   }, [spotify, deezer, soundCloud]);
 
   return {

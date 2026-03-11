@@ -40,10 +40,14 @@ export function useSoundCloud(): {
   useEffect(() => {
     const params = new URLSearchParams(globalThis.location.search);
     const code = params.get('code');
-    if (!code) return;
+    if (!code) {
+      return;
+    }
 
     // Check we're on the SoundCloud callback (verifier stored in sessionStorage)
-    if (!sessionStorage.getItem('soundcloud_code_verifier')) return;
+    if (!sessionStorage.getItem('soundcloud_code_verifier')) {
+      return;
+    }
 
     params.delete('code');
     params.delete('state');
@@ -64,9 +68,13 @@ export function useSoundCloud(): {
   // Auto-refresh when token is near expiry
   const ensureValidToken = useCallback(async (): Promise<string | null> => {
     let t = token;
-    if (!t) return null;
+    if (!t) {
+      return null;
+    }
     if (isSoundCloudTokenExpired(t)) {
-      if (!t.refresh_token) return null;
+      if (!t.refresh_token) {
+        return null;
+      }
       try {
         t = await refreshSoundCloudToken(t.refresh_token);
         setToken(t);

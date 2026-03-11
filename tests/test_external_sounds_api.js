@@ -137,7 +137,11 @@ async function runTests() {
     const res = await request(`${BASE}/external-sounds`, {
       method: 'POST',
       body: JSON.stringify({
-        userId, provider: 'napster', trackId: 't1', artist: 'A', title: 'B',
+        userId,
+        provider: 'napster',
+        trackId: 't1',
+        artist: 'A',
+        title: 'B',
       }),
     });
     if (res.status !== 400) throw new Error(`Expected 400, got ${res.status}`);
@@ -215,7 +219,8 @@ async function runTests() {
     });
     if (res.status !== 409) throw new Error(`Expected 409, got ${res.status}`);
     const data = await res.json();
-    if (!data.error.includes('already in your playlist')) throw new Error(`Wrong error: ${data.error}`);
+    if (!data.error.includes('already in your playlist'))
+      throw new Error(`Wrong error: ${data.error}`);
   });
 
   // ── GET (with sounds) ─────────────────────────────────────────────────────────
@@ -226,15 +231,26 @@ async function runTests() {
     const data = await res.json();
     if (!Array.isArray(data)) throw new Error('Expected array');
     if (data.length !== 3) throw new Error(`Expected 3 sounds, got ${data.length}`);
-    if (!data.every((s) => s.isExternal === true)) throw new Error('Not all sounds have isExternal=true');
-    if (!data.every((s) => s.filename === null)) throw new Error('Not all sounds have filename=null');
+    if (!data.every((s) => s.isExternal === true))
+      throw new Error('Not all sounds have isExternal=true');
+    if (!data.every((s) => s.filename === null))
+      throw new Error('Not all sounds have filename=null');
   });
 
   await test('each sound has required fields', async () => {
     const res = await request(`${BASE}/external-sounds?userId=${userId}`);
     const data = await res.json();
     for (const s of data) {
-      for (const field of ['id', 'dbId', 'provider', 'providerTrackId', 'artist', 'title', 'contexts', 'isEnabled']) {
+      for (const field of [
+        'id',
+        'dbId',
+        'provider',
+        'providerTrackId',
+        'artist',
+        'title',
+        'contexts',
+        'isEnabled',
+      ]) {
         if (!(field in s)) throw new Error(`Missing field "${field}" in sound ${s.id}`);
       }
     }
@@ -317,7 +333,9 @@ async function runTests() {
   });
 
   await test('returns 404 for non-existent id', async () => {
-    const res = await request(`${BASE}/external-sounds/99999999?userId=${userId}`, { method: 'DELETE' });
+    const res = await request(`${BASE}/external-sounds/99999999?userId=${userId}`, {
+      method: 'DELETE',
+    });
     if (res.status !== 404) throw new Error(`Expected 404, got ${res.status}`);
   });
 

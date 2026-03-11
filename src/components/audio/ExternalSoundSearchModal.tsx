@@ -16,13 +16,7 @@ import {
   Loader,
   Divider,
 } from '@mantine/core';
-import {
-  IconSearch,
-  IconPlus,
-  IconAlertCircle,
-  IconX,
-  IconPlayerPlay,
-} from '@tabler/icons-react';
+import { IconSearch, IconPlus, IconAlertCircle, IconX, IconPlayerPlay } from '@tabler/icons-react';
 import type { ExternalProvider } from '../../types/sound';
 import type { useExternalSounds } from '../../hooks/useExternalSounds';
 import { ExternalSoundBadge } from './ExternalSoundBadge';
@@ -80,7 +74,9 @@ export function ExternalSoundSearchModal({
   const [newIntensity, setNewIntensity] = useState<Record<string, Intensity>>({});
 
   const handleSearch = useCallback(async () => {
-    if (!query.trim() || !selectedProvider) return;
+    if (!query.trim() || !selectedProvider) {
+      return;
+    }
 
     setIsSearching(true);
     setSearchError(null);
@@ -91,7 +87,9 @@ export function ExternalSoundSearchModal({
 
       if (selectedProvider === 'spotify') {
         const token = spotify.token;
-        if (!token) throw new Error('Not connected to Spotify');
+        if (!token) {
+          throw new Error('Not connected to Spotify');
+        }
         const { spotifySearch } = await import('../../services/spotifyService');
         searchResults = (await spotifySearch(query, token.access_token)) as SearchResult[];
       } else if (selectedProvider === 'deezer') {
@@ -111,7 +109,9 @@ export function ExternalSoundSearchModal({
   const addContext = (trackId: string) => {
     const intensity = newIntensity[trackId] ?? 'calm';
     const scene = (newScene[trackId] ?? '').trim();
-    if (!scene) return;
+    if (!scene) {
+      return;
+    }
 
     setSelectedContexts((prev) => ({
       ...prev,
@@ -129,7 +129,9 @@ export function ExternalSoundSearchModal({
 
   const handleAdd = useCallback(
     async (result: SearchResult) => {
-      if (!userId || !selectedProvider) return;
+      if (!userId || !selectedProvider) {
+        return;
+      }
 
       setAddingId(result.trackId);
       try {

@@ -31,32 +31,39 @@ export function useDeezer(): {
   setVolume: (volume: number) => void;
   search: (query: string) => Promise<DeezerSearchResult[]>;
 } {
-  const [token, setToken] = useState<DeezerToken | null>(loadDeezerToken);
+  // Process OAuth redirect hash once at initialization time (lazy initializer avoids effect setState)
+  const [hashToken] = useState<DeezerToken | null>(() => {
+    const hash = globalThis.location.hash;
+    if (!hash.includes('access_token')) {
+      return null;
+    }
+    const parsed = parseDeezerCallback(hash);
+    if (!parsed) {
+      return null;
+    }
+    saveDeezerToken(parsed);
+    return parsed;
+  });
+
+  const [token, setToken] = useState<DeezerToken | null>(() => hashToken ?? loadDeezerToken());
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const t = loadDeezerToken();
+    const t = hashToken ?? loadDeezerToken();
     return Boolean(t) && !isDeezerTokenExpired(t);
   });
   const [isConnecting, setIsConnecting] = useState(false);
 
-  // Handle OAuth implicit-grant redirect (token arrives in URL hash)
+  // Side-effects only for OAuth redirect: clean URL and load SDK
   useEffect(() => {
-    const hash = globalThis.location.hash;
-    if (!hash.includes('access_token')) return;
-
-    const parsed = parseDeezerCallback(hash);
-    if (!parsed) return;
-
-    // Clean the hash from the URL
-    globalThis.history.replaceState({}, '', globalThis.location.pathname + globalThis.location.search);
-
-    saveDeezerToken(parsed);
-    setToken(parsed);
-    setIsAuthenticated(true);
-    setIsConnecting(false);
-
-    // Load the SDK now that we have a token
+    if (!hashToken) {
+      return;
+    }
+    globalThis.history.replaceState(
+      {},
+      '',
+      globalThis.location.pathname + globalThis.location.search
+    );
     loadDeezerSdk(CHANNEL_URL).catch(() => {});
-  }, []);
+  }, [hashToken]);
 
   // Load the SDK if already authenticated
   useEffect(() => {
@@ -93,17 +100,14 @@ export function useDeezer(): {
     deezerSetVolume(volume);
   }, []);
 
-  const search = useCallback(
-    async (query: string): Promise<DeezerSearchResult[]> => {
-      try {
-        return await deezerSearch(query);
-      } catch (error) {
-        handleError(error, 'useDeezer.search');
-        return [];
-      }
-    },
-    []
-  );
+  const search = useCallback(async (query: string): Promise<DeezerSearchResult[]> => {
+    try {
+      return await deezerSearch(query);
+    } catch (error) {
+      handleError(error, 'useDeezer.search');
+      return [];
+    }
+  }, []);
 
   return {
     isAuthenticated,

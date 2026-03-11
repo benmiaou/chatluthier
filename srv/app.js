@@ -208,7 +208,9 @@ app.get('/api/spotify/search', async (req, res) => {
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(response.status).json({ error: data.error?.message || 'Spotify search failed' });
+      return res
+        .status(response.status)
+        .json({ error: data.error?.message || 'Spotify search failed' });
     }
 
     const results = (data.tracks?.items || []).map((track) => ({
@@ -235,7 +237,11 @@ const { search: deezerSearch } = require('./controllers/deezerController');
 app.get('/api/deezer/search', deezerSearch);
 
 // SoundCloud endpoints
-const { exchangeToken: scExchangeToken, refreshToken: scRefreshToken, search: scSearch } = require('./controllers/soundcloudController');
+const {
+  exchangeToken: scExchangeToken,
+  refreshToken: scRefreshToken,
+  search: scSearch,
+} = require('./controllers/soundcloudController');
 app.post('/api/soundcloud/token', scExchangeToken);
 app.post('/api/soundcloud/refresh', scRefreshToken);
 app.get('/api/soundcloud/search', scSearch);

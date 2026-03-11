@@ -47,7 +47,9 @@ export function clearDeezerToken(): void {
 }
 
 export function isDeezerTokenExpired(token: DeezerToken | null): boolean {
-  if (!token) return true;
+  if (!token) {
+    return true;
+  }
   return Date.now() >= token.expires_at - 60_000;
 }
 
@@ -69,7 +71,9 @@ export function parseDeezerCallback(hash: string): DeezerToken | null {
   const accessToken = params.get('access_token');
   const expiresIn = Number(params.get('expires'));
 
-  if (!accessToken) return null;
+  if (!accessToken) {
+    return null;
+  }
 
   return {
     access_token: accessToken,
@@ -80,9 +84,7 @@ export function parseDeezerCallback(hash: string): DeezerToken | null {
 // ─── Search ──────────────────────────────────────────────────────────────────
 
 export async function deezerSearch(query: string, limit = 20): Promise<DeezerSearchResult[]> {
-  const response = await fetch(
-    `/api/deezer/search?q=${encodeURIComponent(query)}&limit=${limit}`
-  );
+  const response = await fetch(`/api/deezer/search?q=${encodeURIComponent(query)}&limit=${limit}`);
 
   if (!response.ok) {
     throw new Error('Deezer search failed');
@@ -97,7 +99,11 @@ export async function deezerSearch(query: string, limit = 20): Promise<DeezerSea
 declare global {
   interface Window {
     DZ?: {
-      init: (options: { appId: string; channelUrl: string; player?: { onload: () => void } }) => void;
+      init: (options: {
+        appId: string;
+        channelUrl: string;
+        player?: { onload: () => void };
+      }) => void;
       player: {
         playTracks: (ids: string[], startIndex?: number, offset?: number) => void;
         pause: () => void;
@@ -114,7 +120,9 @@ let sdkReady = false;
 const readyCallbacks: Array<() => void> = [];
 
 export function loadDeezerSdk(channelUrl: string): Promise<void> {
-  if (sdkReady) return Promise.resolve();
+  if (sdkReady) {
+    return Promise.resolve();
+  }
   if (sdkLoaded) {
     return new Promise((resolve) => readyCallbacks.push(resolve));
   }

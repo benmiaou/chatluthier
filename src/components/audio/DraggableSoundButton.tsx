@@ -118,7 +118,7 @@ export function DraggableSoundButton({
           }}
           size="compact-xs"
           variant="default"
-          onClick={() => onPlay(sound.filename!)}
+          onClick={() => onPlay(sound.filename ?? '')}
           title={sound.name}
         >
           {sound.name}

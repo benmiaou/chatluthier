@@ -158,7 +158,7 @@ export function EditSoundsModal({
   const filteredSounds = sounds.filter(
     (sound): sound is Sound & { filename: string } =>
       !sound.isExternal &&
-      sound.filename != null &&
+      sound.filename !== null &&
       (sound.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         sound.filename.toLowerCase().includes(searchTerm.toLowerCase()))
   );

@@ -187,7 +187,13 @@ describe('addExternalSound', () => {
 
     expect(db.execute).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO external_sounds'),
-      expect.arrayContaining(['user-abc', 'spotify', 'spotify-track-001', 'Daft Punk', 'One More Time'])
+      expect.arrayContaining([
+        'user-abc',
+        'spotify',
+        'spotify-track-001',
+        'Daft Punk',
+        'One More Time',
+      ])
     );
     expect(res.statusCode).toBe(201);
     expect(res._json).toMatchObject({
@@ -238,14 +244,20 @@ describe('deleteExternalSound', () => {
   it('returns 404 when sound is not found / not owned', async () => {
     db.execute.mockResolvedValue({ changes: 0 });
     const res = mockRes();
-    await deleteExternalSound(mockReq({ params: { id: '42' }, query: { userId: 'user-abc' } }), res);
+    await deleteExternalSound(
+      mockReq({ params: { id: '42' }, query: { userId: 'user-abc' } }),
+      res
+    );
     expect(res.status).toHaveBeenCalledWith(404);
   });
 
   it('deletes sound and returns { success: true }', async () => {
     db.execute.mockResolvedValue({ changes: 1 });
     const res = mockRes();
-    await deleteExternalSound(mockReq({ params: { id: '42' }, query: { userId: 'user-abc' } }), res);
+    await deleteExternalSound(
+      mockReq({ params: { id: '42' }, query: { userId: 'user-abc' } }),
+      res
+    );
 
     expect(db.execute).toHaveBeenCalledWith(
       expect.stringContaining('DELETE FROM external_sounds'),

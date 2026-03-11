@@ -12,10 +12,7 @@ module.exports = (api) => {
     return {
       visitor: {
         MetaProperty(path) {
-          if (
-            path.node.meta.name === 'import' &&
-            path.node.property.name === 'meta'
-          ) {
+          if (path.node.meta.name === 'import' && path.node.property.name === 'meta') {
             path.replaceWith(
               t.memberExpression(t.identifier('globalThis'), t.identifier('__importMeta'))
             );

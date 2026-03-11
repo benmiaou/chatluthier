@@ -63,12 +63,16 @@ async function addExternalSound(req, res) {
   } = req.body;
 
   if (!userId || !provider || !trackId || !artist || !title) {
-    return res.status(400).json({ error: 'Missing required fields: userId, provider, trackId, artist, title' });
+    return res
+      .status(400)
+      .json({ error: 'Missing required fields: userId, provider, trackId, artist, title' });
   }
 
   const validProviders = ['spotify', 'deezer', 'soundcloud'];
   if (!validProviders.includes(provider)) {
-    return res.status(400).json({ error: 'Invalid provider. Must be spotify, deezer, or soundcloud' });
+    return res
+      .status(400)
+      .json({ error: 'Invalid provider. Must be spotify, deezer, or soundcloud' });
   }
 
   try {
@@ -77,10 +81,23 @@ async function addExternalSound(req, res) {
       `INSERT INTO external_sounds
         (user_id, provider, provider_track_id, artist, title, album, duration_ms, thumbnail_url, preview_url, contexts)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [userId, provider, trackId, artist, title, album || null, durationMs || null, thumbnailUrl || null, previewUrl || null, contextsJson]
+      [
+        userId,
+        provider,
+        trackId,
+        artist,
+        title,
+        album || null,
+        durationMs || null,
+        thumbnailUrl || null,
+        previewUrl || null,
+        contextsJson,
+      ]
     );
 
-    const inserted = await db.queryOne('SELECT * FROM external_sounds WHERE id = ?', [result.lastID]);
+    const inserted = await db.queryOne('SELECT * FROM external_sounds WHERE id = ?', [
+      result.lastID,
+    ]);
     return res.status(201).json({
       id: `ext_${inserted.id}`,
       dbId: inserted.id,
@@ -122,10 +139,10 @@ async function deleteExternalSound(req, res) {
   }
 
   try {
-    const result = await db.execute(
-      'DELETE FROM external_sounds WHERE id = ? AND user_id = ?',
-      [id, userId]
-    );
+    const result = await db.execute('DELETE FROM external_sounds WHERE id = ? AND user_id = ?', [
+      id,
+      userId,
+    ]);
 
     if (result.changes === 0) {
       return res.status(404).json({ error: 'External sound not found or not owned by this user' });

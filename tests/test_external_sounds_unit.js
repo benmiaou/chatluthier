@@ -101,12 +101,9 @@ async function runTests() {
   patchDbSingleton();
 
   // Require controller AFTER patching the singleton
-  const {
-    getExternalSounds,
-    addExternalSound,
-    deleteExternalSound,
-    updateExternalSound,
-  } = require(path.join(__dirname, '../srv/controllers/externalSoundsController'));
+  const { getExternalSounds, addExternalSound, deleteExternalSound, updateExternalSound } = require(
+    path.join(__dirname, '../srv/controllers/externalSoundsController')
+  );
 
   const userId = 'unit-test-user-1';
 

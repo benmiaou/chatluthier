@@ -75,7 +75,9 @@ export function clearSoundCloudToken(): void {
 }
 
 export function isSoundCloudTokenExpired(token: SoundCloudToken | null): boolean {
-  if (!token) return true;
+  if (!token) {
+    return true;
+  }
   return Date.now() >= token.expires_at - 60_000;
 }
 
@@ -152,7 +154,7 @@ export async function soundCloudSearch(
 ): Promise<SoundCloudSearchResult[]> {
   const headers: Record<string, string> = {};
   if (accessToken) {
-    headers['Authorization'] = `OAuth ${accessToken}`;
+    headers.Authorization = `OAuth ${accessToken}`;
   }
 
   const response = await fetch(
@@ -191,7 +193,9 @@ let widget: SoundCloudWidget | null = null;
 let sdkLoaded = false;
 
 export function loadSoundCloudWidget(): Promise<SoundCloudWidget> {
-  if (widget) return Promise.resolve(widget);
+  if (widget) {
+    return Promise.resolve(widget);
+  }
 
   return new Promise((resolve) => {
     const init = () => {
@@ -199,12 +203,15 @@ export function loadSoundCloudWidget(): Promise<SoundCloudWidget> {
         widgetIframe = document.createElement('iframe');
         widgetIframe.id = 'sc-widget';
         widgetIframe.src = 'https://w.soundcloud.com/player/?url=https%3A//soundcloud.com';
-        widgetIframe.style.cssText = 'width:0;height:0;border:none;position:absolute;visibility:hidden;';
+        widgetIframe.style.cssText =
+          'width:0;height:0;border:none;position:absolute;visibility:hidden;';
         document.body.appendChild(widgetIframe);
       }
 
-      widget = window.SC!.Widget(widgetIframe);
-      resolve(widget);
+      widget = window.SC?.Widget(widgetIframe) ?? null;
+      if (widget) {
+        resolve(widget);
+      }
     };
 
     if (window.SC) {

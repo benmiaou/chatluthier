@@ -137,4 +137,18 @@ module.exports = [
       },
     },
   },
+  {
+    files: ['tests/jest/**/*.{js,ts,tsx}', '**/*.test.{js,ts,tsx}', '**/*.spec.{js,ts,tsx}'],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
+    rules: {
+      'no-undef': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'dot-notation': 'off',
+    },
+  },
 ];
