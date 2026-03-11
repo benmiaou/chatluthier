@@ -86,7 +86,8 @@ export function BackgroundMusic({
       }
     },
     externalSoundsHook.playExternal,
-    externalSoundsHook.stopExternal
+    externalSoundsHook.stopExternal,
+    externalSoundsHook.resolveAndPlayExternal
   );
 
   // Broadcast music change to session peers

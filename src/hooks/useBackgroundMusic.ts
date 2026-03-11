@@ -47,7 +47,8 @@ export function useBackgroundMusic(
   userId: string | null,
   onAutoplayBlocked?: () => void,
   onPlayExternal?: (sound: Sound) => Promise<void>,
-  onStopExternal?: () => Promise<void>
+  onStopExternal?: () => Promise<void>,
+  onResolveExternal?: (payload: ExternalSoundPayload) => Promise<Sound | null>
 ): BackgroundMusicHook {
   const playerRef = useRef<AudioPlayer>(new AudioPlayer());
   const [sounds, setSounds] = useState<Sound[]>([]);
@@ -64,12 +65,16 @@ export function useBackgroundMusic(
   // Keep callbacks in refs so closures always see latest values
   const onPlayExternalRef = useRef(onPlayExternal);
   const onStopExternalRef = useRef(onStopExternal);
+  const onResolveExternalRef = useRef(onResolveExternal);
   useEffect(() => {
     onPlayExternalRef.current = onPlayExternal;
   }, [onPlayExternal]);
   useEffect(() => {
     onStopExternalRef.current = onStopExternal;
   }, [onStopExternal]);
+  useEffect(() => {
+    onResolveExternalRef.current = onResolveExternal;
+  }, [onResolveExternal]);
 
   // ─── Load sounds ──────────────────────────────────────────────────────────
 
@@ -344,7 +349,17 @@ export function useBackgroundMusic(
         return;
       }
 
-      // Find the matching sound in our list (if the user has it saved)
+      // If we have a cross-provider resolver, let it search + play in the user's own provider
+      if (onResolveExternalRef.current) {
+        const resolved = await onResolveExternalRef.current(payload);
+        if (resolved) {
+          setCurrentSound(resolved);
+          setIsPlaying(true);
+        }
+        return;
+      }
+
+      // Fallback: direct play on sender's provider (requires same provider to be connected)
       const match = sounds.find(
         (s) =>
           s.isExternal && s.provider === payload.provider && s.providerTrackId === payload.trackId

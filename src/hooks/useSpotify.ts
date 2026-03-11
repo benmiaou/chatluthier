@@ -11,9 +11,11 @@ import {
   spotifyNext,
   spotifyPause,
   spotifyPlay,
+  spotifySearch,
   spotifySetVolume,
 } from '../services/spotifyService';
 import type { SpotifyPlaylist, SpotifyPlaybackState, SpotifyToken } from '../types/spotify';
+import type { SpotifySearchResult } from '../services/spotifyService';
 
 export function useSpotify(): {
   isAuthenticated: boolean;
@@ -28,6 +30,7 @@ export function useSpotify(): {
   next: () => Promise<void>;
   setVolume: (volume: number) => Promise<void>;
   fetchPlaylists: () => Promise<void>;
+  search: (query: string) => Promise<SpotifySearchResult[]>;
 } {
   const [token, setToken] = useState<SpotifyToken | null>(loadToken);
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -169,6 +172,21 @@ export function useSpotify(): {
     };
   }, [isAuthenticated, fetchPlaybackState, fetchPlaylists]);
 
+  const search = useCallback(
+    async (query: string): Promise<SpotifySearchResult[]> => {
+      const accessToken = await ensureValidToken();
+      if (!accessToken) {
+        return [];
+      }
+      try {
+        return await spotifySearch(query, accessToken);
+      } catch {
+        return [];
+      }
+    },
+    [ensureValidToken]
+  );
+
   return {
     isAuthenticated,
     isConnecting,
@@ -182,5 +200,6 @@ export function useSpotify(): {
     next,
     setVolume,
     fetchPlaylists,
+    search,
   };
 }

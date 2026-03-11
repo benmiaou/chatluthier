@@ -5,6 +5,7 @@ import { useDeezer } from './useDeezer';
 import { useSoundCloud } from './useSoundCloud';
 import { useSpotify } from './useSpotify';
 import { handleError } from '../utils/logger';
+import type { ExternalSoundPayload } from '../contexts/SocketContext';
 
 export interface ExternalSoundRecord {
   id: string;
@@ -59,6 +60,7 @@ export function useExternalSounds(userId: string | null): {
   playExternal: (sound: Sound) => Promise<void>;
   stopExternal: () => Promise<void>;
   reload: () => Promise<void>;
+  resolveAndPlayExternal: (payload: ExternalSoundPayload) => Promise<Sound | null>;
 } {
   const spotify = useSpotify();
   const deezer = useDeezer();
@@ -209,6 +211,128 @@ export function useExternalSounds(userId: string | null): {
     }
   }, [spotify, deezer, soundCloud]);
 
+  /**
+   * Resolve and play an external sound received via WebSocket.
+   * If the sender's provider is available, play directly.
+   * Otherwise search for the track (by artist + title) on the first connected provider
+   * and play that result — so the receiver always uses their own provider and sees its logo.
+   * Returns the Sound as actually played (with the correct provider), or null if no provider is connected.
+   */
+  const resolveAndPlayExternal = useCallback(
+    async (payload: ExternalSoundPayload): Promise<Sound | null> => {
+      const senderProvider = payload.provider;
+      const query = [payload.artist, payload.title].filter(Boolean).join(' ');
+
+      // Helper: build a Sound from a search result
+      const buildSound = (
+        provider: ExternalProvider,
+        trackId: string,
+        artist: string,
+        title: string,
+        album?: string,
+        thumbnailUrl?: string,
+        previewUrl?: string,
+        permalinkUrl?: string
+      ): Sound => ({
+        id: `ext_recv_${provider}_${trackId}`,
+        name: `${artist} – ${title}`,
+        filename: null,
+        category: 'background',
+        isExternal: true,
+        provider,
+        providerTrackId: trackId,
+        artist,
+        title,
+        album,
+        thumbnailUrl,
+        previewUrl,
+        permalinkUrl,
+      });
+
+      // 1. Sender's provider is available → play directly
+      if (connectedProviders.includes(senderProvider)) {
+        const sound = buildSound(
+          senderProvider,
+          payload.trackId,
+          payload.artist ?? '',
+          payload.title ?? '',
+          payload.album,
+          payload.thumbnailUrl,
+          payload.previewUrl
+        );
+        await playExternal(sound);
+        return sound;
+      }
+
+      // 2. Fall back: search on the first connected provider
+      if (!query || connectedProviders.length === 0) {
+        return null;
+      }
+
+      const fallbackProvider = connectedProviders[0];
+
+      try {
+        let sound: Sound | null = null;
+
+        if (fallbackProvider === 'spotify') {
+          const results = await spotify.search(query);
+          const hit = results[0];
+          if (hit) {
+            sound = buildSound(
+              'spotify',
+              hit.trackId,
+              hit.artist,
+              hit.title,
+              hit.album,
+              hit.thumbnailUrl,
+              hit.previewUrl,
+              hit.permalinkUrl
+            );
+          }
+        } else if (fallbackProvider === 'deezer') {
+          const results = await deezer.search(query);
+          const hit = results[0];
+          if (hit) {
+            sound = buildSound(
+              'deezer',
+              hit.trackId,
+              hit.artist,
+              hit.title,
+              hit.album,
+              hit.thumbnailUrl,
+              hit.previewUrl,
+              hit.permalinkUrl
+            );
+          }
+        } else if (fallbackProvider === 'soundcloud') {
+          const results = await soundCloud.search(query);
+          const hit = results[0];
+          if (hit) {
+            sound = buildSound(
+              'soundcloud',
+              hit.trackId,
+              hit.artist,
+              hit.title,
+              hit.album,
+              hit.thumbnailUrl,
+              hit.previewUrl,
+              hit.permalinkUrl
+            );
+          }
+        }
+
+        if (sound) {
+          await playExternal(sound);
+        }
+        return sound;
+      } catch (error) {
+        handleError(error, 'useExternalSounds.resolveAndPlayExternal');
+        return null;
+      }
+    },
+    [connectedProviders, playExternal, spotify, deezer, soundCloud]
+  );
+
   return {
     externalSounds,
     connectedProviders,
@@ -224,5 +348,6 @@ export function useExternalSounds(userId: string | null): {
     playExternal,
     stopExternal,
     reload,
+    resolveAndPlayExternal,
   };
 }

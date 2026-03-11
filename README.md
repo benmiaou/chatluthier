@@ -388,3 +388,87 @@ server {
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Annex — External Sound WebSocket Interaction
+
+### Scenario A — Same provider on both sides
+
+```
+User A (Spotify)                  WebSocket Server              User B (Spotify)
+       │                                  │                              │
+       │  plays "Run Boy Run" (Spotify)   │                              │
+       │─────────────────────────────────▶│                              │
+       │                                  │  backgroundMusicChange       │
+       │                                  │  provider: spotify           │
+       │                                  │  trackId: 4uLU6hMCjMI7e     │
+       │                                  │  artist:  Woodkid            │
+       │                                  │  title:   Run Boy Run        │
+       │                                  │─────────────────────────────▶│
+       │                                  │                              │
+       │                                  │          provider: spotify available ✓
+       │                                  │          plays trackId directly
+       │                                  │          shows 🟢 Spotify logo
+```
+
+---
+
+### Scenario B — Different providers (cross-provider search fallback)
+
+```
+User A (Spotify)                  WebSocket Server              User B (Deezer)
+       │                                  │                              │
+       │  plays "Run Boy Run" (Spotify)   │                              │
+       │─────────────────────────────────▶│                              │
+       │                                  │  backgroundMusicChange       │
+       │                                  │  provider: spotify           │
+       │                                  │  trackId: 4uLU6hMCjMI7e     │
+       │                                  │  artist:  Woodkid            │
+       │                                  │  title:   Run Boy Run        │
+       │                                  │─────────────────────────────▶│
+       │                                  │                              │
+       │                                  │          provider: spotify ✗ not connected
+       │                                  │          fallback: deezer ✓
+       │                                  │          search "Woodkid Run Boy Run"
+       │                                  │                │
+       │                                  │          Deezer API returns closest match
+       │                                  │                │
+       │                                  │          plays result via Deezer SDK
+       │                                  │          shows 🔴 Deezer logo
+```
+
+---
+
+### Scenario C — No provider connected (external sounds disabled)
+
+```
+User A (Spotify)                  WebSocket Server         User C (no provider)
+       │                                  │                              │
+       │  plays "Run Boy Run" (Spotify)   │                              │
+       │─────────────────────────────────▶│                              │
+       │                                  │  backgroundMusicChange       │
+       │                                  │  provider: spotify           │
+       │                                  │─────────────────────────────▶│
+       │                                  │                              │
+       │                                  │        no provider available
+       │                                  │        resolveAndPlayExternal returns null
+       │                                  │        sound silently skipped
+       │                                  │
+       │                                  │   (User C can click "Disable external sounds"
+       │                                  │    toggle — all clients in the session are
+       │                                  │    notified and external sounds are skipped
+       │                                  │    until the toggle is turned off)
+```
+
+---
+
+### Attribution rules per provider
+
+| Provider   | Logo shown  | Link displayed                     | Required by ToS                                |
+| ---------- | ----------- | ---------------------------------- | ---------------------------------------------- |
+| Spotify    | ✅ Green ♠  | Open on Spotify (permalink)        | Yes                                            |
+| Deezer     | ✅ Red ◆    | Open on Deezer (permalink)         | Yes                                            |
+| SoundCloud | ✅ Orange ☁ | Open on SoundCloud (permalink_url) | Yes — also requires uploader credit + backlink |
+
+The logo shown always reflects **the provider actually used for playback** on that client, not the sender's provider.
