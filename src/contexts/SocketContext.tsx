@@ -158,6 +158,18 @@ export function SocketProvider({
             },
           })
         );
+
+        // Request external sounds disabled status from first participant
+        ws.send(
+          JSON.stringify({
+            type: 'requestStatus',
+            id: sessionId,
+            content: {
+              type: 'externalSoundsDisabled',
+              targetParticipantId: firstParticipantId,
+            },
+          })
+        );
       }
     },
     [sessionId]
@@ -175,13 +187,29 @@ export function SocketProvider({
 
       if (data.participants) {
         setParticipants(data.participants);
-        // Request status from first participant if available
+        // Request status from first participant if available (excluding ourselves)
         if (data.participants.length > 0 && data.id) {
           const currentWs = wsRef.current;
           if (currentWs) {
-            handleSubscription(currentWs, data.participants);
+            // Filter out our own participant ID to avoid requesting status from ourselves
+            const otherParticipants = data.participants.filter((p) => p.id !== data.participantId);
+            if (otherParticipants.length > 0) {
+              handleSubscription(currentWs, otherParticipants);
+            }
           }
         }
+      }
+
+      // Clean up URL parameter after successful subscription
+      const urlParams = new URLSearchParams(globalThis.location.search);
+      const urlId = urlParams.get('sessionId');
+      if (urlId) {
+        urlParams.delete('sessionId');
+        globalThis.history.replaceState(
+          {},
+          '',
+          globalThis.location.pathname + (urlParams.toString() ? `?${urlParams}` : '')
+        );
       }
     },
     [handleSubscription]
@@ -264,19 +292,15 @@ export function SocketProvider({
     // Priority: pending subscribe call > URL param > localStorage
     const urlParams = new URLSearchParams(globalThis.location.search);
     const urlId = urlParams.get('sessionId');
-    const idToJoin = pendingIdRef.current ?? urlId ?? localStorage.getItem('lastJoinId');
 
-    // Clean up URL param if present
+    // If URL param is present, use it and clean it up after successful subscription
     if (urlId) {
-      urlParams.delete('sessionId');
-      globalThis.history.replaceState(
-        {},
-        '',
-        globalThis.location.pathname + (urlParams.toString() ? `?${urlParams}` : '')
-      );
+      // Store the URL ID to use it, but don't clean up yet
+      return urlId;
     }
 
-    return idToJoin;
+    // Fallback to pending subscribe call or localStorage
+    return pendingIdRef.current ?? localStorage.getItem('lastJoinId');
   }, []);
 
   const sendSubscriptionRequest = useCallback((ws: WebSocket, targetSessionId: string) => {

@@ -185,9 +185,29 @@ export function BackgroundMusic({
           id: sessionId,
           content: { statusType: 'backgroundMusic', statusData },
         });
+      } else if (content.statusType === 'externalSoundsDisabled') {
+        send({
+          type: 'statusResponse',
+          id: sessionId,
+          content: {
+            statusType: 'externalSoundsDisabled',
+            statusData: { disabled: disableExternalSounds },
+          },
+        });
       }
     },
-    [currentSound, isPlaying, sessionId, send, getCurrentTime]
+    [currentSound, isPlaying, sessionId, send, getCurrentTime, disableExternalSounds]
+  );
+
+  const handleExternalSoundsDisabled = useCallback(
+    (content: { disabled: boolean }) => {
+      setDisableExternalSounds(content.disabled);
+      // If external sounds are now disabled and we're playing one, stop
+      if (content.disabled && currentSound?.isExternal) {
+        stop();
+      }
+    },
+    [setDisableExternalSounds, currentSound, stop]
   );
 
   const handleStatusResponse = useCallback(
@@ -200,6 +220,7 @@ export function BackgroundMusic({
         timestamp?: number;
         currentTime?: number;
         externalSound?: { provider: 'spotify' | 'deezer' | 'soundcloud'; trackId: string };
+        disabled?: boolean;
       };
     }) => {
       if (content.statusType === 'backgroundMusic' && content.statusData) {
@@ -215,20 +236,14 @@ export function BackgroundMusic({
         } else {
           stop();
         }
+      } else if (
+        content.statusType === 'externalSoundsDisabled' &&
+        content.statusData?.disabled !== undefined
+      ) {
+        handleExternalSoundsDisabled({ disabled: content.statusData.disabled });
       }
     },
-    [playSpecificSound, playExternalReceived, stop, sounds]
-  );
-
-  const handleExternalSoundsDisabled = useCallback(
-    (content: { disabled: boolean }) => {
-      setDisableExternalSounds(content.disabled);
-      // If external sounds are now disabled and we're playing one, stop
-      if (content.disabled && currentSound?.isExternal) {
-        stop();
-      }
-    },
-    [setDisableExternalSounds, currentSound, stop]
+    [playSpecificSound, playExternalReceived, stop, sounds, handleExternalSoundsDisabled]
   );
 
   useEffect(() => {

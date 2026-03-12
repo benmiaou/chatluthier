@@ -92,9 +92,21 @@ function initializeServer() {
           logger.info(`Server started on port ${PORT}`);
 
           // Initialize WebSocket server on separate port
-          const { initializeWebSocketServer } = require('./sockets/socketServer');
-          initializeWebSocketServer(server, PORT, wsPort);
-          logger.info(`WebSocket Server started on port ${wsPort}`);
+          try {
+            const { initializeWebSocketServer } = require('./sockets/socketServer');
+            initializeWebSocketServer(server, PORT, wsPort);
+            logger.info(`WebSocket Server started on port ${wsPort}`);
+          } catch (error) {
+            logger.error(`Failed to start WebSocket server on port ${wsPort}`, {
+              error: error.message,
+            });
+            if (error.code === 'EADDRINUSE') {
+              logger.error(
+                `WebSocket port ${wsPort} is already in use. Another instance may be running.`
+              );
+            }
+            // Continue running HTTP server even if WebSocket fails
+          }
         })
         .on('error', (error) => {
           logger.error(`Failed to bind to port ${PORT}`, { error: error.message });
@@ -113,9 +125,21 @@ function initializeServer() {
           logger.info(`Server started on port ${PORT} (database may not be available)`);
 
           // Initialize WebSocket server on separate port
-          const { initializeWebSocketServer } = require('./sockets/socketServer');
-          initializeWebSocketServer(server, PORT, wsPort);
-          logger.info(`WebSocket Server started on port ${wsPort}`);
+          try {
+            const { initializeWebSocketServer } = require('./sockets/socketServer');
+            initializeWebSocketServer(server, PORT, wsPort);
+            logger.info(`WebSocket Server started on port ${wsPort}`);
+          } catch (error) {
+            logger.error(`Failed to start WebSocket server on port ${wsPort}`, {
+              error: error.message,
+            });
+            if (error.code === 'EADDRINUSE') {
+              logger.error(
+                `WebSocket port ${wsPort} is already in use. Another instance may be running.`
+              );
+            }
+            // Continue running HTTP server even if WebSocket fails
+          }
         })
         .on('error', (error) => {
           logger.error(`Failed to bind to port ${PORT} (fallback attempt)`, {

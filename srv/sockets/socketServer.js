@@ -27,8 +27,13 @@ function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
   const websocketPort = wsPort !== null ? wsPort : httpPort + 1;
 
   // Always create a standalone WebSocket server on the specified port
-  wsServer = new WebSocket.Server({ port: websocketPort });
-  console.log(`WebSocket server initialized on port ${websocketPort}`);
+  try {
+    wsServer = new WebSocket.Server({ port: websocketPort });
+    console.log(`WebSocket server initialized on port ${websocketPort}`);
+  } catch (error) {
+    console.error(`Failed to start WebSocket server on port ${websocketPort}:`, error.message);
+    throw error;
+  }
 
   function handleSubscribe(data, ws) {
     const connectedId = data.id;
