@@ -3,7 +3,6 @@ import { notifications } from '@mantine/notifications';
 import type React from 'react';
 import type { SoundCategory } from '../types/sound';
 import {
-  CONTEXT_OPTIONS,
   mapBackendSound,
   getSoundAssetUrl,
   type SoundEdit,
@@ -34,8 +33,7 @@ type EditsAction =
   | { type: 'LOADED' }
   | { type: 'SET_TOGGLE'; filename: string; enabled: boolean }
   | { type: 'SET_EDITING'; id: string | null }
-  | { type: 'ADD_CONTEXT'; filename: string; context: string }
-  | { type: 'REMOVE_CONTEXT'; filename: string; context: string }
+  | { type: 'SET_CONTEXT_ARRAY'; filename: string; contexts: string[] }
   | { type: 'SET_CREDIT'; filename: string; credit: string };
 
 function editsReducer(state: EditsState, action: EditsAction): EditsState {
@@ -48,19 +46,11 @@ function editsReducer(state: EditsState, action: EditsAction): EditsState {
       return { ...state, edits: { ...state.edits, [action.filename]: action.enabled } };
     case 'SET_EDITING':
       return { ...state, editingSoundId: action.id };
-    case 'ADD_CONTEXT': {
-      const current = state.contextEdits[action.filename] ?? [];
+    case 'SET_CONTEXT_ARRAY':
       return {
         ...state,
-        contextEdits: { ...state.contextEdits, [action.filename]: [...current, action.context] },
+        contextEdits: { ...state.contextEdits, [action.filename]: action.contexts },
       };
-    }
-    case 'REMOVE_CONTEXT': {
-      const filtered = (state.contextEdits[action.filename] ?? []).filter(
-        (c) => c !== action.context
-      );
-      return { ...state, contextEdits: { ...state.contextEdits, [action.filename]: filtered } };
-    }
     case 'SET_CREDIT':
       return { ...state, creditEdits: { ...state.creditEdits, [action.filename]: action.credit } };
     default:
@@ -99,23 +89,11 @@ export interface EditSoundsBaseReturn {
   isPlaying: boolean;
   // Derived
   filteredSounds: SoundEdit[];
-  availableContexts: string[];
   // Handlers
   handleToggle: (filename: string, enabled: boolean) => void;
   handlePlayPause: (filename: string) => Promise<void>;
   handleStop: (filename: string) => void;
-  handleRemoveContext: (soundFilename: string, contextToRemove: string) => void;
-  addNewContext: (soundFilename: string, newContext: string) => void;
-  handleNewContextKeyDown: (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    soundFilename: string,
-    currentContexts: string[]
-  ) => void;
-  handleExistingContextChange: (
-    value: string,
-    soundFilename: string,
-    currentContexts: string[]
-  ) => void;
+  handleContextChange: (filename: string, contexts: string[]) => void;
 }
 
 export function useEditSoundsBase({
@@ -144,15 +122,6 @@ export function useEditSoundsBase({
       ),
     [sounds, searchTerm]
   );
-
-  const availableContexts = useMemo(() => {
-    const predefined = CONTEXT_OPTIONS[selectedCategory] || [];
-    const fromSounds = new Set<string>();
-    sounds.forEach((s) => s.contexts?.forEach((c) => typeof c === 'string' && fromSounds.add(c)));
-    return [...new Set([...predefined, ...Array.from(fromSounds)])].sort((a, b) =>
-      a.localeCompare(b)
-    );
-  }, [sounds, selectedCategory]);
 
   useEffect(() => {
     if (!opened) {
@@ -219,35 +188,8 @@ export function useEditSoundsBase({
     }
   };
 
-  const handleRemoveContext = (soundFilename: string, contextToRemove: string) => {
-    dispatch({ type: 'REMOVE_CONTEXT', filename: soundFilename, context: contextToRemove });
-  };
-
-  const addNewContext = (soundFilename: string, newContext: string) => {
-    dispatch({ type: 'ADD_CONTEXT', filename: soundFilename, context: newContext });
-  };
-
-  const handleNewContextKeyDown = (
-    e: React.KeyboardEvent<HTMLInputElement>,
-    soundFilename: string,
-    currentContexts: string[]
-  ) => {
-    const value = e.currentTarget.value?.trim();
-    if (e.key === 'Enter' && value && !currentContexts.includes(value)) {
-      addNewContext(soundFilename, value);
-      e.currentTarget.value = '';
-    }
-  };
-
-  const handleExistingContextChange = (
-    value: string,
-    soundFilename: string,
-    currentContexts: string[]
-  ) => {
-    const trimmed = value?.trim();
-    if (trimmed && !currentContexts.includes(trimmed)) {
-      addNewContext(soundFilename, trimmed);
-    }
+  const handleContextChange = (filename: string, contexts: string[]) => {
+    dispatch({ type: 'SET_CONTEXT_ARRAY', filename, contexts });
   };
 
   // Wrapper so consumers can call setCreditEdits((prev) => ...) without accessing dispatch directly
@@ -278,13 +220,9 @@ export function useEditSoundsBase({
     currentlyPlaying,
     isPlaying,
     filteredSounds,
-    availableContexts,
     handleToggle,
     handlePlayPause,
     handleStop,
-    handleRemoveContext,
-    addNewContext,
-    handleNewContextKeyDown,
-    handleExistingContextChange,
+    handleContextChange,
   };
 }

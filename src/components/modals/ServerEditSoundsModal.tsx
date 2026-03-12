@@ -8,20 +8,14 @@ import {
   Group,
   Badge,
   TextInput,
-  ActionIcon,
   FileInput,
 } from '@mantine/core';
 import { CustomCombobox } from '../audio/CustomCombobox';
+import { ContextSelector } from '../audio/ContextSelector';
 import { useState } from 'react';
 import type React from 'react';
 import { notifications } from '@mantine/notifications';
-import {
-  IconPlayerPlay,
-  IconPlayerPause,
-  IconPlayerStop,
-  IconX,
-  IconSearch,
-} from '@tabler/icons-react';
+import { IconPlayerPlay, IconPlayerPause, IconPlayerStop, IconSearch } from '@tabler/icons-react';
 import type { SoundCategory } from '../../types/sound';
 import {
   SOUNDS_TYPE,
@@ -73,14 +67,10 @@ export function ServerEditSoundsModal({
     currentlyPlaying,
     isPlaying,
     filteredSounds,
-    availableContexts,
     handleToggle,
     handlePlayPause,
     handleStop,
-    handleRemoveContext,
-    addNewContext,
-    handleNewContextKeyDown,
-    handleExistingContextChange,
+    handleContextChange,
   } = useEditSoundsBase({
     opened,
     initialCategory: 'ambiance',
@@ -200,62 +190,11 @@ export function ServerEditSoundsModal({
     }
 
     return (
-      <Stack gap="xs" mt="xs">
-        <Group gap="xs" align="flex-end">
-          <TextInput
-            placeholder="Add new context..."
-            style={{ flex: 1 }}
-            onKeyDown={(e) => handleNewContextKeyDown(e, sound.filename, currentContexts)}
-          />
-          <Button
-            size="xs"
-            onClick={() => {
-              const input = document.querySelector(
-                'input[placeholder="Add new context..."]'
-              ) as HTMLInputElement;
-              const v = input?.value?.trim();
-              if (v && !currentContexts.includes(v)) {
-                addNewContext(sound.filename, v);
-                input.value = '';
-              }
-            }}
-          >
-            Add
-          </Button>
-        </Group>
-        <CustomCombobox
-          value=""
-          onChange={(value) => handleExistingContextChange(value, sound.filename, currentContexts)}
-          data={availableContexts}
-          placeholder="Add existing context"
-          width={200}
-        />
-        {currentContexts.length > 0 && (
-          <Group gap="xs" mt="xs">
-            {currentContexts.map((ctx) => (
-              <Badge
-                key={`${sound.filename}-${ctx}`}
-                variant="light"
-                size="sm"
-                c="blue"
-                rightSection={
-                  <ActionIcon
-                    size="xs"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveContext(sound.filename, ctx);
-                    }}
-                  >
-                    <IconX size={12} />
-                  </ActionIcon>
-                }
-              >
-                {ctx}
-              </Badge>
-            ))}
-          </Group>
-        )}
-      </Stack>
+      <ContextSelector
+        value={currentContexts}
+        onChange={(newContexts) => handleContextChange(sound.filename, newContexts)}
+        category={selectedCategory}
+      />
     );
   };
 
