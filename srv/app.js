@@ -58,10 +58,10 @@ app.use(
 );
 app.use(express.json({ limit: '100mb' }));
 app.use(express.static(path.join(__dirname, '../dist')));
+app.use('/assets', express.static(path.join(__dirname, '../srv_sound_data')));
 app.use('/assets', express.static(path.join(__dirname, '../dist/assets')));
-app.use('/images', express.static(path.join(__dirname, '../dist/assets/images')));
+app.use('/images', express.static(path.join(__dirname, '../dist/images')));
 app.use('/fonts', express.static(path.join(__dirname, '../dist/fonts')));
-app.use('/css', express.static(path.join(__dirname, '../dist/css')));
 
 // Handle preflight requests
 app.options('*', (req, res) => {

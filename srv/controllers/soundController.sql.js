@@ -349,7 +349,7 @@ async function addSound(req, res) {
       return res.status(400).json({ error: 'Invalid sound category.' });
     }
 
-    const assetsDir = path.join(__dirname, '../..', 'dist', 'assets');
+    const assetsDir = path.join(__dirname, '../..', 'srv_sound_data');
     let soundFilePath, imageFilePath;
 
     const sanitizedFileName = file.originalname.replaceAll(' ', '_');

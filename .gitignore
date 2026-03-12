@@ -141,7 +141,7 @@ Tokens
 .idea*
 
 srv_data
-assets
+srv_sound_data
 uploads
 backups
 requests
