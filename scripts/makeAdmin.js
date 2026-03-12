@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+'use strict';
 
 /**
  * Script to make a user an admin in ChatLuthier
@@ -75,4 +76,4 @@ if (process.argv.length < 3) {
 }
 
 const userIdentifier = process.argv[2];
-await makeUserAdmin(userIdentifier);
+makeUserAdmin(userIdentifier);

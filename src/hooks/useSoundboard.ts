@@ -47,6 +47,14 @@ export function useSoundboard(userId: string | null): {
     load();
   }, [loadSounds]);
 
+  useEffect(() => {
+    const handler = () => {
+      loadSounds().catch(() => {});
+    };
+    window.addEventListener('soundsUpdated', handler);
+    return () => window.removeEventListener('soundsUpdated', handler);
+  }, [loadSounds]);
+
   const playSound = useCallback(
     (sound: Sound): void => {
       const audio = new Audio(`${ASSET_PREFIX}${sound.filename}`);

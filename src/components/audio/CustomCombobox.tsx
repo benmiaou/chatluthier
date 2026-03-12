@@ -7,6 +7,7 @@ interface CustomComboboxProps {
   readonly data: string[];
   readonly placeholder?: string;
   readonly width?: number | string;
+  readonly size?: string;
 }
 
 export function CustomCombobox({
@@ -15,6 +16,7 @@ export function CustomCombobox({
   data,
   placeholder = 'Select',
   width = 'auto',
+  size = 'xs',
 }: CustomComboboxProps): React.JSX.Element {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
@@ -36,7 +38,7 @@ export function CustomCombobox({
     >
       <Combobox.Target>
         <Button
-          size="xs"
+          size={size}
           variant="default"
           rightSection={<Combobox.Chevron />}
           onClick={() => combobox.toggleDropdown()}
@@ -44,6 +46,8 @@ export function CustomCombobox({
             width,
             justifyContent: 'space-between',
             minWidth: '100px',
+            minHeight: size === 'md' ? '2.25rem' : size === 'lg' ? '2.625rem' : undefined,
+            fontSize: size === 'md' ? '0.9rem' : undefined,
           }}
         >
           {value || placeholder}

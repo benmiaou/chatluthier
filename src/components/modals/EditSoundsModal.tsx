@@ -1,4 +1,4 @@
-import { Button, Loader, Modal, Stack, Switch, Text, Group, TextInput } from '@mantine/core';
+import { Button, Loader, Modal, Stack, Switch, Text, Group, TextInput, Badge } from '@mantine/core';
 import { CustomCombobox } from '../audio/CustomCombobox';
 import { ContextSelector } from '../audio/ContextSelector';
 import { useState } from 'react';
@@ -6,8 +6,8 @@ import type React from 'react';
 import { notifications } from '@mantine/notifications';
 import { IconPlayerPlay, IconPlayerPause, IconPlayerStop, IconSearch } from '@tabler/icons-react';
 import type { SoundCategory } from '../../types/sound';
-import { SOUNDS_TYPE, ENDPOINT } from './editSoundsShared';
-import type { SoundEdit } from './editSoundsShared';
+import { SOUNDS_TYPE, ENDPOINT, BACKGROUND_INTENSITY_OPTIONS } from './editSoundsShared';
+import type { SoundEdit, BackendSound } from './editSoundsShared';
 import { useEditSoundsBase } from '../../hooks/useEditSoundsBase';
 
 interface EditSoundsModalProps {
@@ -26,11 +26,23 @@ export function EditSoundsModal({
   onSave,
 }: Readonly<EditSoundsModalProps>): React.JSX.Element {
   const [saving, setSaving] = useState(false);
+  // Per-sound list of [intensity, context] tuples
+  const [backgroundTuples, setBackgroundTuples] = useState<Record<string, [string, string][]>>({});
+
+  const parseRawContexts = (contexts: unknown[]): [string, string][] => {
+    return contexts.flatMap((c) => {
+      if (Array.isArray(c) && c.length >= 2) { return [[String(c[0]), String(c[1])] as [string, string]]; }
+      if (typeof c === 'string') {
+        const m = /^\(([^,]+),\s*([^)]+)\)$/.exec(c);
+        if (m) { return [[m[1].trim(), m[2].trim()] as [string, string]]; }
+      }
+      return [];
+    });
+  };
 
   const {
     edits,
     contextEdits,
-    creditEdits,
     selectedCategory,
     setSelectedCategory,
     loading,
@@ -49,22 +61,45 @@ export function EditSoundsModal({
     opened,
     initialCategory: category || 'ambiance',
     buildFetchUrl: (cat) => (userId ? `${ENDPOINT[cat]}?userId=${userId}` : ENDPOINT[cat]),
+    onSoundsLoaded: (_mapped, rawData) => {
+      const initTuples: Record<string, [string, string][]> = {};
+      (rawData as BackendSound[]).forEach((sound) => {
+        if (Array.isArray(sound.contexts) && sound.contexts.length > 0) {
+          const parsed = parseRawContexts(sound.contexts);
+          if (parsed.length > 0) { initTuples[sound.filename] = parsed; }
+        }
+      });
+      setBackgroundTuples(initTuples);
+    },
   });
 
   const handleSave = async () => {
     setSaving(true);
     try {
       const soundsType = SOUNDS_TYPE[selectedCategory];
-      const changes: Array<{ filename: string; isEnabled?: boolean; contexts?: string[] }> = [];
+      const changes: Array<{ filename: string; isEnabled?: boolean; contexts?: unknown }> = [];
 
-      Object.entries(edits).forEach(([filename, isEnabled]) => {
-        changes.push({ filename, isEnabled, contexts: contextEdits[filename] });
-      });
-      Object.entries(contextEdits).forEach(([filename, contexts]) => {
-        if (!edits[filename]) {
-          changes.push({ filename, contexts });
-        }
-      });
+      if (selectedCategory === 'background') {
+        // Save all background sounds that have tuples set
+        const allFilenames = new Set([...Object.keys(edits), ...Object.keys(backgroundTuples)]);
+        allFilenames.forEach((filename) => {
+          const tuples = backgroundTuples[filename];
+          changes.push({
+            filename,
+            ...(edits[filename] !== undefined ? { isEnabled: edits[filename] } : {}),
+            ...(tuples ? { contexts: tuples } : {}),
+          });
+        });
+      } else {
+        Object.entries(edits).forEach(([filename, isEnabled]) => {
+          changes.push({ filename, isEnabled, contexts: contextEdits[filename] });
+        });
+        Object.entries(contextEdits).forEach(([filename, contexts]) => {
+          if (!edits[filename]) {
+            changes.push({ filename, contexts });
+          }
+        });
+      }
 
       if (changes.length > 0) {
         const response = await fetch('/update-user-sounds-batch', {
@@ -79,6 +114,7 @@ export function EditSoundsModal({
       }
 
       notifications.show({ message: 'Saved!', color: 'teal' });
+      window.dispatchEvent(new Event('soundsUpdated'));
       onSave?.();
       onClose();
     } catch (error: unknown) {
@@ -91,13 +127,62 @@ export function EditSoundsModal({
     }
   };
 
-  const renderContextEditor = (sound: SoundEdit, currentContexts: string[]) => (
-    <ContextSelector
-      value={currentContexts}
-      onChange={(newContexts) => handleContextChange(sound.filename, newContexts)}
-      category={selectedCategory}
-    />
-  );
+  const renderContextEditor = (sound: SoundEdit) => {
+    if (selectedCategory === 'background') {
+      const tuples: [string, string][] = backgroundTuples[sound.filename] ?? parseRawContexts(sound.contexts ?? []);
+      const setTuples = (updated: [string, string][]) =>
+        setBackgroundTuples((prev) => ({ ...prev, [sound.filename]: updated }));
+
+      return (
+        <Stack gap="xs" mt="xs">
+          <Text size="xs" c="dimmed" fw={500}>Background contexts</Text>
+          {tuples.map(([intensity, ctx], i) => (
+            <Group key={i} gap="xs" align="flex-end" wrap="nowrap">
+              <CustomCombobox
+                value={intensity || BACKGROUND_INTENSITY_OPTIONS[0]}
+                onChange={(v) => {
+                  const next = tuples.map((t, j): [string, string] => j === i ? [v || '', t[1]] : t);
+                  setTuples(next);
+                }}
+                data={BACKGROUND_INTENSITY_OPTIONS}
+                placeholder="Intensity"
+                width={140}
+              />
+              <TextInput
+                placeholder="context"
+                value={ctx}
+                style={{ flex: 1 }}
+                onChange={(e) => {
+                  const val = e.currentTarget.value;
+                  const next = tuples.map((t, j): [string, string] => j === i ? [t[0], val] : t);
+                  setTuples(next);
+                }}
+              />
+              <Button
+                size="xs"
+                variant="subtle"
+                color="red"
+                onClick={() => setTuples(tuples.filter((_, j) => j !== i))}
+              >✕</Button>
+            </Group>
+          ))}
+          <Button
+            size="xs"
+            variant="light"
+            onClick={() => setTuples([...tuples, [BACKGROUND_INTENSITY_OPTIONS[0], '']])}
+          >+ Add context</Button>
+        </Stack>
+      );
+    }
+    const currentContexts = contextEdits[sound.filename] ?? sound.contexts ?? [];
+    return (
+      <ContextSelector
+        value={currentContexts as string[]}
+        onChange={(newContexts) => handleContextChange(sound.filename, newContexts)}
+        category={selectedCategory}
+      />
+    );
+  };
 
   const renderSoundItem = (sound: SoundEdit) => {
     const enabled = edits[sound.filename] ?? sound.isEnabled ?? true;
@@ -131,7 +216,29 @@ export function EditSoundsModal({
           </Button>
         </Group>
 
-        {isEditing && renderContextEditor(sound, currentContexts)}
+        {isEditing && renderContextEditor(sound)}
+
+        {!isEditing && selectedCategory === 'background' && (() => {
+          const tuples = backgroundTuples[sound.filename] ?? parseRawContexts(sound.contexts ?? []);
+          return tuples.length > 0 ? (
+            <Group gap="xs">
+              {tuples.map(([intensity, ctx], i) => (
+                <Badge key={i} size="xs" variant="light" color="gray">{intensity}, {ctx}</Badge>
+              ))}
+            </Group>
+          ) : null;
+        })()}
+
+        {!isEditing && selectedCategory !== 'background' && currentContexts.length > 0 && (
+          <Group gap="xs">
+            {currentContexts.map((ctx) => {
+              const label = Array.isArray(ctx) ? (ctx as string[]).join(', ') : String(ctx);
+              return (
+                <Badge key={label} size="xs" variant="light" color="gray">{label}</Badge>
+              );
+            })}
+          </Group>
+        )}
 
         <Group gap="xs">
           <Button
@@ -161,9 +268,12 @@ export function EditSoundsModal({
         </Group>
 
         {sound.credit?.trim() && (
-          <Text size="xs" c="dimmed" fs="italic">
-            {sound.credit}
-          </Text>
+          <Text
+            size="xs"
+            c="dimmed"
+            fs="italic"
+            dangerouslySetInnerHTML={{ __html: sound.credit }}
+          />
         )}
       </Stack>
     );
@@ -216,6 +326,8 @@ export function EditSoundsModal({
           onChange={(v) => setSelectedCategory((v as SoundCategory) ?? 'ambiance')}
           data={['background', 'ambiance', 'soundboard']}
           placeholder="Select category"
+          size="md"
+          width="100%"
         />
         <TextInput
           placeholder="Search sounds..."
@@ -228,11 +340,7 @@ export function EditSoundsModal({
           <Button
             onClick={handleSave}
             loading={saving}
-            disabled={
-              Object.keys(edits).length === 0 &&
-              Object.keys(contextEdits).length === 0 &&
-              Object.keys(creditEdits).length === 0
-            }
+            disabled={saving}
           >
             Save Changes
           </Button>

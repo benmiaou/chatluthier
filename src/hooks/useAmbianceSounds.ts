@@ -72,6 +72,14 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
     load();
   }, [loadSounds]);
 
+  useEffect(() => {
+    const handler = () => {
+      loadSounds().catch(() => {});
+    };
+    window.addEventListener('soundsUpdated', handler);
+    return () => window.removeEventListener('soundsUpdated', handler);
+  }, [loadSounds]);
+
   // ─── Volume control ───────────────────────────────────────────────────────
 
   const updateBarAudio = useCallback((bar: AmbianceBar, volume: number) => {

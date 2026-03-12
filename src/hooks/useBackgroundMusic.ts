@@ -121,6 +121,14 @@ export function useBackgroundMusic(
     load();
   }, [loadSounds]);
 
+  useEffect(() => {
+    const handler = () => {
+      loadSounds().catch(() => {});
+    };
+    window.addEventListener('soundsUpdated', handler);
+    return () => window.removeEventListener('soundsUpdated', handler);
+  }, [loadSounds]);
+
   // ─── Progress bar ─────────────────────────────────────────────────────────
 
   const startProgressTracking = () => {
