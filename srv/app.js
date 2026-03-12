@@ -251,6 +251,16 @@ app.use(externalSoundsRoutes);
 
 // SPA fallback — serve index.html for all non-API routes so React Router works
 app.get('*', (req, res) => {
+  // Don't serve index.html for API routes
+  if (
+    req.path.startsWith('/api/') ||
+    req.path.startsWith('/external-sounds') ||
+    req.path.startsWith('/backgroundMusic') ||
+    req.path.startsWith('/ambianceSounds') ||
+    req.path.startsWith('/soundboard')
+  ) {
+    return res.status(404).json({ error: 'Not found' });
+  }
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 

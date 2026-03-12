@@ -16,26 +16,53 @@ async function getExternalSounds(req, res) {
       [userId]
     );
 
-    const sounds = rows.map((row) => ({
-      id: `ext_${row.id}`,
-      dbId: row.id,
-      filename: null,
-      display_name: `${row.artist} – ${row.title}`,
-      imageFile: row.thumbnail_url,
-      credit: row.artist,
-      contexts: row.contexts ? JSON.parse(row.contexts) : [],
-      isEnabled: Boolean(row.is_enabled),
-      isExternal: true,
-      provider: row.provider,
-      providerTrackId: row.provider_track_id,
-      artist: row.artist,
-      title: row.title,
-      album: row.album,
-      durationMs: row.duration_ms,
-      thumbnailUrl: row.thumbnail_url,
-      previewUrl: row.preview_url,
-      permalinkUrl: row.permalink_url || null,
-    }));
+    const sounds = rows.map((row) => {
+      try {
+        return {
+          id: `ext_${row.id}`,
+          dbId: row.id,
+          filename: null,
+          display_name: `${row.artist} – ${row.title}`,
+          imageFile: row.thumbnail_url,
+          credit: row.artist,
+          contexts: row.contexts ? JSON.parse(row.contexts) : [],
+          isEnabled: Boolean(row.is_enabled),
+          isExternal: true,
+          provider: row.provider,
+          providerTrackId: row.provider_track_id,
+          artist: row.artist,
+          title: row.title,
+          album: row.album,
+          durationMs: row.duration_ms,
+          thumbnailUrl: row.thumbnail_url,
+          previewUrl: row.preview_url,
+          permalinkUrl: row.permalink_url || null,
+        };
+      } catch (parseError) {
+        console.error(`Error parsing external sound row ${row.id}:`, parseError);
+        // Return a minimal sound object if parsing fails
+        return {
+          id: `ext_${row.id}`,
+          dbId: row.id,
+          filename: null,
+          display_name: `${row.artist} – ${row.title}`,
+          imageFile: row.thumbnail_url,
+          credit: row.artist,
+          contexts: [],
+          isEnabled: Boolean(row.is_enabled),
+          isExternal: true,
+          provider: row.provider,
+          providerTrackId: row.provider_track_id,
+          artist: row.artist,
+          title: row.title,
+          album: row.album,
+          durationMs: row.duration_ms,
+          thumbnailUrl: row.thumbnail_url,
+          previewUrl: row.preview_url,
+          permalinkUrl: row.permalink_url || null,
+        };
+      }
+    });
 
     return res.json(sounds);
   } catch (error) {
@@ -182,7 +209,8 @@ async function updateExternalSound(req, res) {
       return res.status(404).json({ error: 'External sound not found or not owned by this user' });
     }
 
-    const newContexts = contexts !== undefined ? JSON.stringify(contexts) : existing.contexts;
+    const newContexts =
+      contexts !== undefined ? JSON.stringify(contexts) : existing.contexts || '[]';
     const newEnabled = isEnabled !== undefined ? (isEnabled ? 1 : 0) : existing.is_enabled;
 
     await db.execute(
