@@ -251,10 +251,10 @@ export function EditSoundsModal({
 
         {!isEditing && selectedCategory !== 'background' && currentContexts.length > 0 && (
           <Group gap="xs">
-            {currentContexts.map((ctx) => {
+            {currentContexts.map((ctx, i) => {
               const label = Array.isArray(ctx) ? (ctx as string[]).join(', ') : String(ctx);
               return (
-                <Badge key={label} size="xs" variant="light" color="gray">
+                <Badge key={i} size="xs" variant="light" color="gray">
                   {label}
                 </Badge>
               );

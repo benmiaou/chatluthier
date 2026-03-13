@@ -271,10 +271,10 @@ export function ServerEditSoundsModal({
             <Text size="xs" c="dimmed">
               Contexts:
             </Text>
-            {currentContexts.map((ctx) => {
+            {currentContexts.map((ctx, i) => {
               const label = Array.isArray(ctx) ? (ctx as string[]).join(', ') : String(ctx);
               return (
-                <Badge key={label} variant="light" size="sm" c="blue">
+                <Badge key={i} variant="light" size="sm" c="blue">
                   {label}
                 </Badge>
               );

@@ -8,11 +8,10 @@ const db = require('./database/db');
 const winstonLogger = require('./utils/logger');
 const config = require('./config/appConfig');
 
-let PORT = process.argv[2]
-  ? Number.parseInt(process.argv[2])
-  : Number.parseInt(process.env.PORT ?? '3000');
+const argPort = Number.parseInt(process.argv[2]);
+let PORT =
+  !Number.isNaN(argPort) && argPort > 0 ? argPort : Number.parseInt(process.env.PORT ?? '3000');
 if (Number.isNaN(PORT) || PORT <= 0) {
-  console.error(`Invalid port: ${process.argv[2]}, using default port 3000`);
   PORT = 3000;
 }
 

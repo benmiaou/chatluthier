@@ -143,7 +143,16 @@ async function getContextsForSoundWithUserOverrides(
     `;
   const userContexts = await db.query(sql, [userId, soundTypeStr, soundId]);
   if (userContexts.length > 0) {
-    return userContexts.map((row) => row.context);
+    return userContexts.map((row) => {
+      // Try to parse JSON-encoded tuples (e.g. background music)
+      try {
+        const parsed = JSON.parse(row.context);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (_) {
+        // not JSON, return as plain string
+      }
+      return row.context;
+    });
   }
 
   // Fall back to server contexts - parse from JSON
@@ -1082,9 +1091,11 @@ async function updateUserSoundsBatch(req, res) {
       );
 
       for (let i = 0; i < contexts.length; i++) {
+        // Serialize arrays (background tuples) to JSON string for storage
+        const contextValue = Array.isArray(contexts[i]) ? JSON.stringify(contexts[i]) : contexts[i];
         await db.execute(
           'INSERT INTO user_sound_contexts (user_id, sound_type, sound_id, context, context_index) VALUES (?, ?, ?, ?, ?)',
-          [userId, soundTypeStr, sound.id, contexts[i], i]
+          [userId, soundTypeStr, sound.id, contextValue, i]
         );
       }
     }

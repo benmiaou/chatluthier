@@ -40,15 +40,17 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
 
-      // Check if origin is in the allowed list
+      // In development, allow any localhost origin regardless of port
+      if (process.env.NODE_ENV !== 'production' && /^https?:\/\/localhost(:\d+)?$/.test(origin)) {
+        return callback(null, true);
+      }
+
       if (config.security.cors.allowedOrigins.indexOf(origin) !== -1) {
         return callback(null, true);
       }
 
-      // Origin not allowed - reject with error
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: config.security.cors.credentials,
