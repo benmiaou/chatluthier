@@ -232,7 +232,7 @@ async function deleteSound(req, res) {
   try {
     const payload = await verifyjwt(accessToken);
     const email = payload.email;
-    const isAdmin = isAdminUser(email, payload);
+    const isAdmin = payload.isAdmin || false;
     if (!isAdmin) {
       return res.status(403).json({ error: 'User is not authorized to delete sounds.' });
     }
@@ -297,7 +297,7 @@ async function addSound(req, res) {
   try {
     const payload = await verifyjwt(accessToken);
     const email = payload.email;
-    const isAdmin = isAdminUser(email, payload);
+    const isAdmin = payload.isAdmin || false;
     if (!isAdmin) {
       return res.status(403).json({ error: 'User is not authorized to edit the main playlist.' });
     }
@@ -476,7 +476,7 @@ async function updateMainPlaylist(req, res) {
   try {
     const payload = await verifyjwt(accessToken);
     const email = payload.email;
-    const isAdmin = isAdminUser(email, payload);
+    const isAdmin = payload.isAdmin || false;
     if (!isAdmin) {
       return res.status(403).json({ error: 'User is not authorized to edit the main playlist.' });
     }
