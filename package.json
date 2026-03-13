@@ -28,7 +28,9 @@
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "prepare": "husky install",
-    "precommit": "npm run lint && npm run check-format"
+    "precommit": "npm run lint && npm run check-format",
+    "normalize-sounds": "node scripts/normalize-sounds.js",
+    "normalize-sounds-safe": "node scripts/normalize-sounds.js || echo 'Normalization completed with some errors or FFmpeg not available'"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.29.0",

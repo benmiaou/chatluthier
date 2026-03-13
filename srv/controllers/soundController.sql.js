@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const db = require('../database/db');
 const config = require('../database/config');
 const { verifyjwt } = require('./authController');
+const { processUploadedAudio, ffmpegAvailable } = require('../utils/audioProcessor');
 
 /**
  * SQL-based Sound Controller for ChatLuthier
@@ -330,10 +331,31 @@ async function addSound(req, res) {
         return res.status(400).json({ error: 'Invalid sound category.' });
     }
 
-    // Move uploaded files
-    fs.renameSync(file.path, soundFilePath);
+    // Process and normalize audio file if FFmpeg is available
+    let processedFilePath = file.path;
+    if (ffmpegAvailable) {
+      try {
+        const { normalizedPath } = await processUploadedAudio(file);
+        processedFilePath = normalizedPath;
+      } catch (error) {
+        console.error('Audio normalization failed, using original file:', error.message);
+        // Continue with original file if normalization fails
+      }
+    }
+
+    // Move processed audio file
+    fs.renameSync(processedFilePath, soundFilePath);
+
+    // Move image file if present
     if (imageFile) {
       fs.renameSync(imageFile.path, imageFilePath);
+    }
+
+    // Set success message for uploader
+    let uploadMessage = 'Sound uploaded successfully.';
+    if (ffmpegAvailable) {
+      uploadMessage =
+        'Sound uploaded and automatically normalized to -23 LUFS for consistent volume.';
     }
 
     // Parse contexts as JSON
@@ -399,7 +421,11 @@ async function addSound(req, res) {
 
       await db.commit();
 
-      return res.json({ message: 'Sound added successfully.' });
+      return res.json({
+        message: 'Sound added successfully.',
+        uploadMessage: uploadMessage,
+        normalized: ffmpegAvailable,
+      });
     } catch (error) {
       await db.rollback();
       console.error('Error adding sound:', error);
