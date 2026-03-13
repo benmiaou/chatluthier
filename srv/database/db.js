@@ -331,24 +331,6 @@ class Database {
         `;
     return this.queryOne(sql, [filename]);
   }
-
-  /**
-   * Get user-specific sound overrides (NEW: single JSON entry per user)
-   */
-  async getUserSoundOverrides(userId) {
-    try {
-      const legacySql = `
-                SELECT sound_overrides 
-                FROM user_sounds 
-                WHERE user_id = ?
-            `;
-      const legacyResult = await this.queryOne(legacySql, [userId]);
-      return legacyResult ? legacyResult.sound_overrides : null;
-    } catch (error) {
-      console.error('Error retrieving user sound overrides:', error.message);
-      return null;
-    }
-  }
 }
 
 // Singleton instance
