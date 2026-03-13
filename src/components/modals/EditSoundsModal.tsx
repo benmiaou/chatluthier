@@ -26,8 +26,10 @@ export function EditSoundsModal({
   onSave,
 }: Readonly<EditSoundsModalProps>): React.JSX.Element {
   const [saving, setSaving] = useState(false);
-  // Per-sound list of [intensity, context] tuples
+  // Per-sound list of [intensity, context] tuples (loaded from server, updated by user)
   const [backgroundTuples, setBackgroundTuples] = useState<Record<string, [string, string][]>>({});
+  // Only filenames the user actually edited — used to avoid saving untouched sounds
+  const [dirtyFilenames, setDirtyFilenames] = useState<Set<string>>(new Set());
 
   const parseRawContexts = (contexts: unknown[]): [string, string][] => {
     return contexts.flatMap((c) => {
@@ -86,9 +88,9 @@ export function EditSoundsModal({
       const changes: Array<{ filename: string; isEnabled?: boolean; contexts?: unknown }> = [];
 
       if (selectedCategory === 'background') {
-        // Save all background sounds that have tuples set
-        const allFilenames = new Set([...Object.keys(edits), ...Object.keys(backgroundTuples)]);
-        allFilenames.forEach((filename) => {
+        // Only save sounds the user actually changed (toggled or edited contexts)
+        const dirtySet = new Set([...Object.keys(edits), ...dirtyFilenames]);
+        dirtySet.forEach((filename) => {
           const tuples = backgroundTuples[filename];
           changes.push({
             filename,
@@ -137,8 +139,10 @@ export function EditSoundsModal({
     if (selectedCategory === 'background') {
       const tuples: [string, string][] =
         backgroundTuples[sound.filename] ?? parseRawContexts(sound.contexts ?? []);
-      const setTuples = (updated: [string, string][]) =>
+      const setTuples = (updated: [string, string][]) => {
         setBackgroundTuples((prev) => ({ ...prev, [sound.filename]: updated }));
+        setDirtyFilenames((prev) => new Set(prev).add(sound.filename));
+      };
 
       return (
         <Stack gap="xs" mt="xs">

@@ -238,11 +238,33 @@ class Database {
         name: 'add_external_sounds_permalink',
         sql: `ALTER TABLE external_sounds ADD COLUMN permalink_url TEXT`,
       },
+      {
+        name: 'add_user_sound_overrides_table',
+        sql: `
+          CREATE TABLE IF NOT EXISTS user_sound_overrides (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            sound_type TEXT NOT NULL,
+            sound_id INTEGER NOT NULL,
+            is_enabled BOOLEAN,
+            contexts TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            UNIQUE(user_id, sound_type, sound_id)
+          );
+          CREATE INDEX IF NOT EXISTS idx_user_sound_overrides_user ON user_sound_overrides(user_id);
+          CREATE INDEX IF NOT EXISTS idx_user_sound_overrides_lookup ON user_sound_overrides(user_id, sound_type);
+        `,
+      },
     ];
 
     for (const migration of migrations) {
       try {
-        if (migration.name === 'add_external_sounds_table') {
+        if (
+          migration.name === 'add_external_sounds_table' ||
+          migration.name === 'add_user_sound_overrides_table'
+        ) {
           // For table creation, just run it (IF NOT EXISTS is safe)
           await new Promise((resolve, reject) => {
             this.db.exec(migration.sql, (err) => {
