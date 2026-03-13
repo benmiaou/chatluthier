@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AudioPlayer, precacheAudio } from './useAudioPlayer';
 import type { Sound } from '../types/sound';
-import { BackgroundMusicCategories, bgMatchesCategory, bgScenes } from '../types/sound';
+import { BackgroundMusicCategories, bgMatchesCategoryAndContext } from '../types/sound';
 import { handleError } from '../utils/logger';
 import type { ExternalSoundPayload } from '../contexts/SocketContext';
 
@@ -178,7 +178,9 @@ export function useBackgroundMusic(
         BackgroundMusicCategories.INTENSE,
         BackgroundMusicCategories.ALL,
       ];
-      const soundCategory = categories.find((category) => bgMatchesCategory(sound, category));
+      const soundCategory = categories.find((category) =>
+        bgMatchesCategoryAndContext(sound, category, 'all')
+      );
 
       if (soundCategory) {
         setActiveCategory(soundCategory);
@@ -201,10 +203,8 @@ export function useBackgroundMusic(
     async (category: BackgroundMusicCategory) => {
       const filtered = sounds.filter(
         (s) =>
-          // Skip external sounds when disabled
           !(s.isExternal && disableExternalSounds) &&
-          bgMatchesCategory(s, category) &&
-          (context.toLowerCase() === 'all' || bgScenes(s).includes(context.toLowerCase()))
+          bgMatchesCategoryAndContext(s, category, context)
       );
       if (!filtered.length) {
         return;
@@ -234,8 +234,7 @@ export function useBackgroundMusic(
           const autoAdvanceFiltered = sounds.filter(
             (s) =>
               !(s.isExternal && disableExternalSounds) &&
-              bgMatchesCategory(s, category) &&
-              (context.toLowerCase() === 'all' || bgScenes(s).includes(context.toLowerCase()))
+              bgMatchesCategoryAndContext(s, category, context)
           );
           if (autoAdvanceFiltered.length > 0) {
             const currentIndex = autoAdvanceFiltered.findIndex((s) => s.filename === pick.filename);
@@ -253,10 +252,21 @@ export function useBackgroundMusic(
   );
 
   const next = useCallback(() => {
-    if (activeCategory) {
-      playCategory(activeCategory);
+    if (!activeCategory) {
+      return;
     }
-  }, [activeCategory, playCategory]);
+    const filtered = sounds.filter(
+      (s) =>
+        !(s.isExternal && disableExternalSounds) &&
+        bgMatchesCategoryAndContext(s, activeCategory, context)
+    );
+    if (!filtered.length) {
+      return;
+    }
+    const currentIndex = filtered.findIndex((s) => s.filename === currentSound?.filename);
+    const nextIndex = (currentIndex + 1) % filtered.length;
+    playSpecificSound(filtered[nextIndex]).catch(() => {});
+  }, [activeCategory, sounds, context, currentSound, disableExternalSounds, playSpecificSound]);
 
   const stop = useCallback(() => {
     playerRef.current.stop();

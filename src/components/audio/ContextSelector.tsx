@@ -49,11 +49,13 @@ export function ContextSelector({
     fetchContexts();
   }, [safeCategory]);
 
-  // All known contexts (from server + user + already selected)
+  // All known contexts (from server + user + already selected), deduplicated
   const knownContexts = [
-    ...serverContexts,
-    ...(showUserContexts ? userContexts : []),
-    ...value.filter((v) => !serverContexts.includes(v) && !userContexts.includes(v)),
+    ...new Set([
+      ...serverContexts,
+      ...(showUserContexts ? userContexts : []),
+      ...value.filter((v) => !serverContexts.includes(v) && !userContexts.includes(v)),
+    ]),
   ];
 
   // If the search term isn't in the list and not already selected, offer to create it

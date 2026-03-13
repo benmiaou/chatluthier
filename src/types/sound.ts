@@ -34,6 +34,31 @@ export function bgMatchesCategory(sound: Sound, category: BackgroundMusicCategor
   return (sound.contexts as any[]).some(([cat]: [string, string]) => cat === category);
 }
 
+/**
+ * Returns true if a sound has at least one tuple where BOTH intensity and context match.
+ * This is the correct way to filter — prevents a sound with [dynamic,nature]+[calm,test]
+ * from appearing under "dynamic" when filtering by context "test".
+ */
+export function bgMatchesCategoryAndContext(
+  sound: Sound,
+  category: BackgroundMusicCategory,
+  context: string
+): boolean {
+  const allContext = context.toLowerCase() === 'all';
+  const allCategory = category === 'all';
+
+  if (!sound.contexts?.length) {
+    return allContext && allCategory;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (sound.contexts as any[]).some(([cat, scene]: [string, string]) => {
+    const categoryMatch = allCategory || cat === category;
+    const contextMatch = allContext || scene.toLowerCase() === context.toLowerCase();
+    return categoryMatch && contextMatch;
+  });
+}
+
 /** Returns scene labels from a background music sound's tuple contexts */
 export function bgScenes(sound: Sound): string[] {
   if (!sound.contexts?.length) {

@@ -28,7 +28,7 @@ import { useState, useCallback, useEffect } from 'react';
 import type React from 'react';
 
 import type { BackgroundMusicCategory, Sound } from '../../types/sound';
-import { bgScenes, bgMatchesCategory } from '../../types/sound';
+import { bgScenes, bgMatchesCategoryAndContext } from '../../types/sound';
 import { ExternalSoundBadge } from './ExternalSoundBadge';
 import { ExternalSoundProviderModal } from './ExternalSoundProviderModal';
 import { ExternalSoundSearchModal } from './ExternalSoundSearchModal';
@@ -74,6 +74,7 @@ export function BackgroundMusic({
     seekTo,
     sounds,
     getCurrentTime,
+    handleSetContext,
     disableExternalSounds,
     setDisableExternalSounds,
     playExternalReceived,
@@ -331,16 +332,7 @@ export function BackgroundMusic({
     sound: Sound,
     contextFilter: string,
     categoryFilter: BackgroundMusicCategory
-  ) => {
-    if (contextFilter === 'All') {
-      return categoryFilter === 'all' || bgMatchesCategory(sound, categoryFilter);
-    }
-    const soundScenes = bgScenes(sound);
-    return (
-      soundScenes.includes(contextFilter) &&
-      (categoryFilter === 'all' || bgMatchesCategory(sound, categoryFilter))
-    );
-  };
+  ) => bgMatchesCategoryAndContext(sound, categoryFilter, contextFilter);
 
   const handleSeek = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -404,7 +396,10 @@ export function BackgroundMusic({
             })}
             <CustomCombobox
               value={filterContext}
-              onChange={setFilterContext}
+              onChange={(v) => {
+                setFilterContext(v);
+                handleSetContext(v);
+              }}
               data={contexts}
               placeholder="Context"
             />
