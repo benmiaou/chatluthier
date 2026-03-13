@@ -257,13 +257,21 @@ class Database {
           CREATE INDEX IF NOT EXISTS idx_user_sound_overrides_lookup ON user_sound_overrides(user_id, sound_type);
         `,
       },
+      {
+        name: 'drop_legacy_user_sound_tables',
+        sql: `
+          DROP TABLE IF EXISTS user_sound_contexts;
+          DROP TABLE IF EXISTS user_sounds;
+        `,
+      },
     ];
 
     for (const migration of migrations) {
       try {
         if (
           migration.name === 'add_external_sounds_table' ||
-          migration.name === 'add_user_sound_overrides_table'
+          migration.name === 'add_user_sound_overrides_table' ||
+          migration.name === 'drop_legacy_user_sound_tables'
         ) {
           // For table creation, just run it (IF NOT EXISTS is safe)
           await new Promise((resolve, reject) => {
