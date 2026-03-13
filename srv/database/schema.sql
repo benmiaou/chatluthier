@@ -61,26 +61,20 @@ CREATE TABLE IF NOT EXISTS soundboard (
     UNIQUE(filename)
 );
 
--- User sounds - one entry per user with all sound overrides in JSON
-CREATE TABLE IF NOT EXISTS user_sounds (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id TEXT NOT NULL UNIQUE, -- One entry per user
-    sound_overrides TEXT, -- JSON: { sound_id: { isEnabled, contexts, credit }, ... }
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- User sound contexts - one entry per user context override
-CREATE TABLE IF NOT EXISTS user_sound_contexts (
+-- User sound overrides - one entry per user/sound, only when differing from server defaults
+-- Users can only customize: is_enabled and contexts (intensity+context tuples for background)
+-- Rows are pruned automatically when user reverts to server defaults
+CREATE TABLE IF NOT EXISTS user_sound_overrides (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL,
-    sound_type TEXT NOT NULL,
+    sound_type TEXT NOT NULL, -- 'ambiance', 'background', 'soundboard'
     sound_id INTEGER NOT NULL,
-    context TEXT NOT NULL, -- For background: "intensity:context"
-    context_index INTEGER DEFAULT 0,
+    is_enabled BOOLEAN,  -- NULL = use server default
+    contexts TEXT,       -- JSON array, NULL = use server default
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
-    UNIQUE(user_id, sound_type, sound_id, context, context_index)
+    UNIQUE(user_id, sound_type, sound_id)
 );
 
 -- User presets - one entry per preset
@@ -111,8 +105,8 @@ CREATE TABLE IF NOT EXISTS user_sound_orders (
 CREATE INDEX IF NOT EXISTS idx_ambiance_sounds_filename ON ambiance_sounds(filename);
 CREATE INDEX IF NOT EXISTS idx_background_sounds_filename ON background_sounds(filename);
 CREATE INDEX IF NOT EXISTS idx_soundboard_filename ON soundboard(filename);
-CREATE INDEX IF NOT EXISTS idx_user_sounds_user ON user_sounds(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_sound_contexts_user ON user_sound_contexts(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_sound_overrides_user ON user_sound_overrides(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_sound_overrides_lookup ON user_sound_overrides(user_id, sound_type);
 CREATE INDEX IF NOT EXISTS idx_user_presets_user ON user_presets(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_sound_orders_user ON user_sound_orders(user_id);
 
