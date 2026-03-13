@@ -34,10 +34,10 @@ async function getData(userId, filename) {
       return [];
   }
 
-  // Get all sounds for this category from the correct table
+  // Get all sounds for this category (including disabled) so edit modals can show and re-enable them
   const sql = `
         SELECT * 
-        FROM ${tableName} 
+        FROM ${tableName}
         ORDER BY display_name
     `;
 

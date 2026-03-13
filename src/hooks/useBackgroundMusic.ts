@@ -90,11 +90,13 @@ export function useBackgroundMusic(
       const userExternalSounds = userSounds.filter((s) => s.isExternal);
       const userLocalSounds = userSounds.filter((s) => !s.isExternal);
 
-      const merged = main.map((s) => {
-        const u = userLocalSounds.find((us) => us.filename === s.filename);
-        const base = u ? { ...s, ...u } : s;
-        return { ...base, name: base.name ?? base.display_name ?? base.filename };
-      });
+      const merged = main
+        .map((s) => {
+          const u = userLocalSounds.find((us) => us.filename === s.filename);
+          const base = u ? { ...s, ...u } : s;
+          return { ...base, name: base.name ?? base.display_name ?? base.filename };
+        })
+        .filter((s) => s.isEnabled !== false);
 
       // External sounds don't have local files — don't try to precache them
       const withExternal = [
