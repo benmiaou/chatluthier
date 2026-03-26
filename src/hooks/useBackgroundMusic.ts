@@ -60,7 +60,9 @@ export function useBackgroundMusic(
   const [context, setContext] = useState('All');
   const [userInteracted, setUserInteracted] = useState(false);
   const [disableExternalSounds, setDisableExternalSounds] = useState(false);
+  const [audioInitialized, setAudioInitialized] = useState(false);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const currentCategoryRef = useRef<BackgroundMusicCategory | null>(null);
 
   // Keep callbacks in refs so closures always see latest values
   const onPlayExternalRef = useRef(onPlayExternal);
@@ -75,6 +77,36 @@ export function useBackgroundMusic(
   useEffect(() => {
     onResolveExternalRef.current = onResolveExternal;
   }, [onResolveExternal]);
+
+  // ─── Initialize audio element ────────────────────────────────────────────
+
+  useEffect(() => {
+    console.log('[BackgroundMusic] Initializing audio element');
+    
+    // Ensure audio element is properly initialized on mount
+    const audio = playerRef.current.getElement();
+    console.log('[BackgroundMusic] Audio element created', {
+      src: audio.src,
+      paused: audio.paused,
+      currentTime: audio.currentTime
+    });
+    
+    // Set up basic event handlers
+    audio.onerror = () => {
+      console.error('[BackgroundMusic] Audio initialization error');
+    };
+    
+    // Mark as initialized
+    setAudioInitialized(true);
+    console.log('[BackgroundMusic] Audio initialization complete');
+    
+    return () => {
+      // Cleanup on unmount
+      console.log('[BackgroundMusic] Cleaning up audio element');
+      audio.onended = null;
+      audio.onerror = null;
+    };
+  }, []);
 
   // ─── Load sounds ──────────────────────────────────────────────────────────
 
@@ -156,7 +188,7 @@ export function useBackgroundMusic(
   // ─── Play a specific sound ──────────────────────────────────────────────
 
   const playSpecificSound = useCallback(
-    async (sound: Sound) => {
+    async (sound: Sound, startTime = 0) => {
       setCurrentSound(sound);
 
       // External sounds are routed to the provider SDK
@@ -186,17 +218,83 @@ export function useBackgroundMusic(
 
       if (soundCategory) {
         setActiveCategory(soundCategory);
+        // Store the category in a ref to ensure it persists through the play session
+        currentCategoryRef.current = soundCategory;
       }
 
-      const audio = playerRef.current.getElement();
-      audio.src = `${ASSET_PREFIX}${sound.filename}`;
-      audio.volume = volume;
-      audio.onended = () => {};
-      await audio.play();
-      setIsPlaying(true);
-      startProgressTracking();
+      console.log(`[BackgroundMusic] Playing specific sound: ${sound.filename}`, {
+        activeCategory,
+        currentSound: currentSound?.filename,
+        soundsCount: sounds.length,
+        currentCategoryRef: currentCategoryRef.current,
+        startTime: startTime
+      });
+      
+      try {
+        // Use the AudioPlayer's play method with our onended handler
+        await playerRef.current.play(`${ASSET_PREFIX}${sound.filename}`, volume, startTime, () => {
+          console.log(`[BackgroundMusic] onended fired for: ${sound.filename}`);
+          
+          // When a specific sound ends, try to advance to next in current category
+          // Use the ref to get the original category, not the potentially changed state
+          const originalCategory = currentCategoryRef.current;
+          console.log(`[BackgroundMusic] Advancing from: ${sound.filename}`, {
+            originalCategory,
+            activeCategory,
+            soundsCount: sounds.length
+          });
+          
+          if (originalCategory) {
+            // Use setTimeout to avoid circular reference during initialization
+            setTimeout(() => {
+              const filtered = sounds.filter(
+                (s) =>
+                  !(s.isExternal && disableExternalSounds) &&
+                  bgMatchesCategoryAndContext(s, originalCategory, context)
+              );
+              
+              console.log(`[BackgroundMusic] Filtered sounds: ${filtered.map(s => s.filename).join(', ')}`);
+              
+              if (filtered.length > 0) {
+                const currentIndex = filtered.findIndex((s) => s.filename === sound.filename);
+                console.log(`[BackgroundMusic] Current index: ${currentIndex}`);
+                
+                if (currentIndex >= 0) {
+                  const nextIndex = (currentIndex + 1) % filtered.length;
+                  const nextSound = filtered[nextIndex];
+                  console.log(`[BackgroundMusic] Advancing to: ${nextSound.filename}`);
+                  playSpecificSound(nextSound).catch((error) => {
+                    console.error(`[BackgroundMusic] Failed to play next sound: ${error}`);
+                  });
+                } else {
+                  console.log(`[BackgroundMusic] Current sound not found in filtered list`);
+                  // Fallback to first sound if current not found
+                  if (filtered.length > 0) {
+                    console.log(`[BackgroundMusic] Fallback to first sound`);
+                    setActiveCategory(activeCategory); // Ensure category is preserved
+                    playSpecificSound(filtered[0]).catch((error) => {
+                      console.error(`[BackgroundMusic] Fallback failed: ${error}`);
+                    });
+                  }
+                }
+              } else {
+                console.log(`[BackgroundMusic] No sounds in filtered list`);
+              }
+            }, 0);
+          } else {
+            console.log(`[BackgroundMusic] No active category, not advancing`);
+          }
+        });
+        
+        setIsPlaying(true);
+        startProgressTracking();
+      } catch (error) {
+        console.error(`[BackgroundMusic] Failed to play sound ${sound.filename}:`, error);
+        setIsPlaying(false);
+        throw error;
+      }
     },
-    [volume]
+    [volume, sounds, activeCategory, context, disableExternalSounds]
   );
 
   // ─── Play a category ──────────────────────────────────────────────────────
@@ -213,6 +311,11 @@ export function useBackgroundMusic(
       }
       const pick = filtered[Math.floor(Math.random() * filtered.length)];
       setCurrentSound(pick);
+      
+      // Capture the current sound in the closure to avoid stale state
+      const currentSoundForHandler = pick;
+      // Store the category in a ref to ensure it persists through the play session
+      currentCategoryRef.current = category;
       setActiveCategory(category);
 
       if (pick.isExternal) {
@@ -228,29 +331,74 @@ export function useBackgroundMusic(
         onStopExternalRef.current().catch(() => {});
       }
 
-      const audio = playerRef.current.getElement();
-      audio.src = `${ASSET_PREFIX}${pick.filename}`;
-      audio.volume = volume;
-      audio.onended = () => {
-        if (activeCategory === category) {
-          const autoAdvanceFiltered = sounds.filter(
-            (s) =>
-              !(s.isExternal && disableExternalSounds) &&
-              bgMatchesCategoryAndContext(s, category, context)
-          );
-          if (autoAdvanceFiltered.length > 0) {
-            const currentIndex = autoAdvanceFiltered.findIndex((s) => s.filename === pick.filename);
-            const nextIndex = (currentIndex + 1) % autoAdvanceFiltered.length;
-            const nextSound = autoAdvanceFiltered[nextIndex];
-            playSpecificSound(nextSound).catch(() => {});
-          }
+      console.log(`[BackgroundMusic] Playing category: ${category}`, {
+        pick: pick.filename,
+        activeCategory,
+        soundsCount: sounds.length
+      });
+      
+      // Use the AudioPlayer's play method with our onended handler
+      await playerRef.current.play(`${ASSET_PREFIX}${pick.filename}`, volume, () => {
+        console.log(`[BackgroundMusic] Category onended fired for: ${pick.filename}`);
+        
+        // Use the ref to get the original category, not the potentially changed state
+        const originalCategory = currentCategoryRef.current;
+        console.log(`[BackgroundMusic] Original category: ${originalCategory}, current activeCategory: ${activeCategory}`);
+        
+        if (originalCategory === category) {
+          console.log(`[BackgroundMusic] Category match, advancing`, {
+            originalCategory,
+            category,
+            soundsCount: sounds.length
+          });
+          
+          // Use setTimeout to avoid circular reference during initialization
+          setTimeout(() => {
+            const filtered = sounds.filter(
+              (s) =>
+                !(s.isExternal && disableExternalSounds) &&
+                bgMatchesCategoryAndContext(s, category, context)
+            );
+            
+            console.log(`[BackgroundMusic] Category filtered sounds: ${filtered.map(s => s.filename).join(', ')}`);
+            console.log(`[BackgroundMusic] Looking for current sound: ${currentSoundForHandler.filename}`);
+            
+            if (filtered.length > 0) {
+              const currentIndex = filtered.findIndex((s) => s.filename === currentSoundForHandler.filename);
+              console.log(`[BackgroundMusic] Category current index: ${currentIndex}`, {
+                currentSoundFilename: currentSoundForHandler.filename,
+                filteredHasCurrent: filtered.some(s => s.filename === currentSoundForHandler.filename)
+              });
+              
+              if (currentIndex >= 0) {
+                const nextIndex = (currentIndex + 1) % filtered.length;
+                const nextSound = filtered[nextIndex];
+                console.log(`[BackgroundMusic] Category advancing to: ${nextSound.filename}`);
+                // Ensure category is set for the next play
+                setActiveCategory(originalCategory);
+                playSpecificSound(nextSound).catch((error) => {
+                  console.error(`[BackgroundMusic] Category failed to play next sound: ${error}`);
+                });
+              } else {
+                // Fallback: if current sound not found, play first in category
+                console.log(`[BackgroundMusic] Category fallback to first sound`);
+                // Ensure category is set for the fallback play
+                setActiveCategory(originalCategory);
+                playSpecificSound(filtered[0]).catch((error) => {
+                  console.error(`[BackgroundMusic] Category fallback failed: ${error}`);
+                });
+              }
+            }
+          }, 0);
+        } else {
+          console.log(`[BackgroundMusic] Category mismatch (original: ${originalCategory}, current: ${category})`);
         }
-      };
-      await audio.play();
+      });
+      
       setIsPlaying(true);
       startProgressTracking();
     },
-    [sounds, volume, context, activeCategory, disableExternalSounds, playSpecificSound]
+    [sounds, volume, context, activeCategory, disableExternalSounds, playSpecificSound, currentSound]
   );
 
   const next = useCallback(() => {
@@ -274,7 +422,7 @@ export function useBackgroundMusic(
     playerRef.current.stop();
     setIsPlaying(false);
     setCurrentSound(null);
-    setActiveCategory(null);
+    // Don't clear activeCategory - this allows natural track endings to still advance
     stopProgressTracking();
     // Also stop any active external playback
     if (onStopExternalRef.current) {

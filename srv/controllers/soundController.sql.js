@@ -493,7 +493,18 @@ function buildInsertQuery(tableName, sound) {
 }
 
 async function updateMainPlaylist(req, res) {
-  const { soundsType, sounds } = req.body;
+  let soundsType, sounds;
+  
+  // Handle both JSON and FormData requests
+  if (req.headers['content-type'] && req.headers['content-type'].startsWith('multipart/form-data')) {
+    // FormData request with file uploads
+    soundsType = req.body.soundsType;
+    sounds = JSON.parse(req.body.sounds);
+  } else {
+    // JSON request
+    ({ soundsType, sounds } = req.body);
+  }
+  
   const accessToken = req.cookies.accessToken;
   if (!accessToken) {
     return res.status(400).json({ error: 'Missing ID token or updated playlist.' });
@@ -512,6 +523,42 @@ async function updateMainPlaylist(req, res) {
       return res.status(400).json({ error: 'Invalid sound category.' });
     }
 
+    // Handle image file uploads
+    const imageFiles = req.files && req.files['imageFiles'] ? req.files['imageFiles'] : [];
+    const imageFileMap = {};
+    
+    // Get the file mapping from the request
+    const fileMapping = req.body.fileMapping ? JSON.parse(req.body.fileMapping) : {};
+    
+    // Process uploaded image files
+    if (imageFiles && imageFiles.length > 0) {
+      const assetsDir = path.join(__dirname, '../..', 'srv_sound_data');
+      const imageDir = path.join(assetsDir, 'images', 'backgrounds');
+      
+      // Ensure directory exists
+      if (!fs.existsSync(imageDir)) {
+        fs.mkdirSync(imageDir, { recursive: true });
+      }
+      
+      // Process each uploaded image
+      for (const file of imageFiles) {
+        if (file && file.originalname) {
+          const uploadedFilename = file.originalname;
+          const sanitizedFileName = uploadedFilename.replaceAll(' ', '_');
+          const destinationPath = path.join(imageDir, sanitizedFileName);
+          
+          // Move file to destination
+          fs.renameSync(file.path, destinationPath);
+          
+          // Use the mapping to find the corresponding sound filename
+          const soundFilename = fileMapping[uploadedFilename];
+          if (soundFilename) {
+            imageFileMap[soundFilename] = sanitizedFileName;
+          }
+        }
+      }
+    }
+
     // Update all sounds for this category in a transaction
     await db.beginTransaction();
 
@@ -521,7 +568,20 @@ async function updateMainPlaylist(req, res) {
 
       // Insert updated sounds
       for (const sound of sounds) {
-        const { query, params } = buildInsertQuery(tableName, sound);
+        let finalImageFile = sound.imageFile || sound.image_file || null;
+        
+        // Check if this sound has a newly uploaded image
+        if (imageFileMap[sound.filename]) {
+          finalImageFile = imageFileMap[sound.filename];
+        }
+        
+        // Create sound object with potentially updated image file
+        const soundWithImage = {
+          ...sound,
+          imageFile: finalImageFile
+        };
+        
+        const { query, params } = buildInsertQuery(tableName, soundWithImage);
         await db.execute(query, params);
       }
 

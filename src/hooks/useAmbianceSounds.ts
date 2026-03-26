@@ -85,7 +85,17 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
   const updateBarAudio = useCallback((bar: AmbianceBar, volume: number) => {
     bar.audio.volume = volume;
     if (volume > 0 && bar.audio.paused) {
-      bar.audio.play().catch(() => {});
+      bar.audio.play().catch((error) => {
+        console.log(`[AmbianceSounds] Failed to play audio for ${bar.sound.filename}:`, error);
+        // Try to play again after a small delay if autoplay was blocked
+        if (error.name === 'NotAllowedError') {
+          setTimeout(() => {
+            if (bar.audio.paused && bar.audio.volume > 0) {
+              bar.audio.play().catch(() => {});
+            }
+          }, 100);
+        }
+      });
     } else if (volume === 0) {
       bar.audio.pause();
     }
@@ -129,7 +139,10 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
         const getVolumeForBar = (bar: AmbianceBar) => status[bar.sound.filename ?? ''] ?? 0;
         return prev.map((b) => {
           const vol = getVolumeForBar(b);
-          updateBarAudio(b, vol);
+          // Only update audio if volume actually changed
+          if (vol !== b.volume) {
+            updateBarAudio(b, vol);
+          }
           return { ...b, volume: vol };
         });
       });

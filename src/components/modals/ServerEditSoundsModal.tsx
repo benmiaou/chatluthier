@@ -112,26 +112,78 @@ export function ServerEditSoundsModal({
     setSaving(true);
     try {
       const soundsType = SOUNDS_TYPE[selectedCategory];
-      const updatedSounds = sounds.map((s) => ({
-        ...s,
-        display_name: s.display_name || s.name || s.filename,
-        isEnabled: edits[s.filename] ?? s.isEnabled ?? true,
-        contexts: getFinalContexts(s),
-        credit: creditEdits[s.filename] ?? s.credit ?? '',
-        ...(imageFileEdits[s.filename] && typeof imageFileEdits[s.filename] === 'string'
-          ? { imageFile: imageFileEdits[s.filename] }
-          : {}),
-      }));
+      
+      // Check if we have any file uploads
+      const hasFileUploads = Object.values(imageFileEdits).some(
+        (edit) => edit instanceof File
+      );
 
-      const response = await fetch('/update-main-playlist', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ soundsType, sounds: updatedSounds }),
-      });
+      if (hasFileUploads) {
+        // Use FormData for file uploads
+        const formData = new FormData();
+        formData.append('soundsType', soundsType);
+        
+        // Add sounds data as JSON
+        const updatedSounds = sounds.map((s) => ({
+          ...s,
+          display_name: s.display_name || s.name || s.filename,
+          isEnabled: edits[s.filename] ?? s.isEnabled ?? true,
+          contexts: getFinalContexts(s),
+          credit: creditEdits[s.filename] ?? s.credit ?? '',
+          ...(imageFileEdits[s.filename] && typeof imageFileEdits[s.filename] === 'string'
+            ? { imageFile: imageFileEdits[s.filename] }
+            : {}),
+        }));
+        formData.append('sounds', JSON.stringify(updatedSounds));
 
-      if (!response.ok) {
-        throw new Error('Failed to update main playlist');
+        // Add file uploads and create mapping
+        const fileMapping = {};
+        Object.entries(imageFileEdits).forEach(([filename, fileEdit], index) => {
+          if (fileEdit instanceof File) {
+            // Use index as part of filename to avoid conflicts
+            const fieldName = `imageFiles`;
+            const uniqueFilename = `upload_${index}_${fileEdit.name}`;
+            formData.append(fieldName, fileEdit, uniqueFilename);
+            // Store the mapping
+            fileMapping[uniqueFilename] = filename;
+          }
+        });
+        
+        // Add the mapping as JSON
+        formData.append('fileMapping', JSON.stringify(fileMapping));
+
+        const response = await fetch('/update-main-playlist', {
+          method: 'POST',
+          credentials: 'include',
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to update main playlist');
+        }
+      } else {
+        // No file uploads, use JSON
+        const updatedSounds = sounds.map((s) => ({
+          ...s,
+          display_name: s.display_name || s.name || s.filename,
+          isEnabled: edits[s.filename] ?? s.isEnabled ?? true,
+          contexts: getFinalContexts(s),
+          credit: creditEdits[s.filename] ?? s.credit ?? '',
+          ...(imageFileEdits[s.filename] && typeof imageFileEdits[s.filename] === 'string'
+            ? { imageFile: imageFileEdits[s.filename] }
+            : {}),
+        }));
+
+        const response = await fetch('/update-main-playlist', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ soundsType, sounds: updatedSounds }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update main playlist');
+        }
       }
 
       notifications.show({ message: 'Server sounds updated successfully!', color: 'teal' });

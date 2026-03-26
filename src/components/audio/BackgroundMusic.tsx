@@ -165,8 +165,11 @@ export function BackgroundMusic({
   }, [stop]);
 
   const handleStatusRequest = useCallback(
-    (content: { statusType: string }) => {
-      if (content.statusType === 'backgroundMusic' && currentSound) {
+    (content: { statusType?: string; type?: string }) => {
+      // Handle both statusRequest (statusType) and requestStatus (type) formats
+      const isBackgroundMusicRequest =
+        content.statusType === 'backgroundMusic' || content.type === 'backgroundMusic';
+      if (isBackgroundMusicRequest && currentSound) {
         const currentTime = getCurrentTime();
         const statusData: Record<string, unknown> = {
           filename: currentSound.isExternal ? null : currentSound.filename,
@@ -231,7 +234,11 @@ export function BackgroundMusic({
           } else if (content.statusData.filename) {
             const sound = sounds.find((s) => s.filename === content.statusData.filename);
             if (sound) {
-              playSpecificSound(sound).catch(() => {});
+              // Pass the currentTime from status to sync playback position
+              const startTime = content.statusData.currentTime || 0;
+              playSpecificSound(sound, startTime).catch(() => {
+                console.error('Failed to play specific sound during sync');
+              });
             }
           }
         } else {
@@ -258,6 +265,7 @@ export function BackgroundMusic({
           handleBackgroundMusicChange(c as Parameters<typeof handleBackgroundMusicChange>[0]),
         backgroundMusicStop: () => handleBackgroundMusicStop(),
         statusRequest: (c) => handleStatusRequest(c as { statusType: string }),
+        requestStatus: (c) => handleStatusRequest(c as { type: string }),
         statusResponse: (c) =>
           handleStatusResponse(c as Parameters<typeof handleStatusResponse>[0]),
         externalSoundsDisabled: (c) => handleExternalSoundsDisabled(c as { disabled: boolean }),

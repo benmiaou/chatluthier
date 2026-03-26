@@ -78,7 +78,7 @@ router.get('/load-presets', loadPresets);
 router.get('/get-sound-order', getSoundOrderV2);
 router.post('/save-sound-order', saveSoundOrderV2);
 router.post('/delete-sound', deleteSound);
-router.post('/update-main-playlist', updateMainPlaylist);
+router.post('/update-main-playlist', upload.fields([{ name: 'imageFiles', maxCount: 10 }]), updateMainPlaylist);
 router.post('/update-user-sound', updateUserSound);
 router.post('/update-user-sounds-batch', updateUserSoundsBatch);
 router.post('/add-sound', upload.fields([{ name: 'file' }, { name: 'imageFile' }]), addSound); // Add the addSound route
