@@ -112,17 +112,15 @@ export function ServerEditSoundsModal({
     setSaving(true);
     try {
       const soundsType = SOUNDS_TYPE[selectedCategory];
-      
+
       // Check if we have any file uploads
-      const hasFileUploads = Object.values(imageFileEdits).some(
-        (edit) => edit instanceof File
-      );
+      const hasFileUploads = Object.values(imageFileEdits).some((edit) => edit instanceof File);
 
       if (hasFileUploads) {
         // Use FormData for file uploads
         const formData = new FormData();
         formData.append('soundsType', soundsType);
-        
+
         // Add sounds data as JSON
         const updatedSounds = sounds.map((s) => ({
           ...s,
@@ -141,14 +139,14 @@ export function ServerEditSoundsModal({
         Object.entries(imageFileEdits).forEach(([filename, fileEdit], index) => {
           if (fileEdit instanceof File) {
             // Use index as part of filename to avoid conflicts
-            const fieldName = `imageFiles`;
+            const fieldName = 'imageFiles';
             const uniqueFilename = `upload_${index}_${fileEdit.name}`;
             formData.append(fieldName, fileEdit, uniqueFilename);
             // Store the mapping
             fileMapping[uniqueFilename] = filename;
           }
         });
-        
+
         // Add the mapping as JSON
         formData.append('fileMapping', JSON.stringify(fileMapping));
 
@@ -157,7 +155,7 @@ export function ServerEditSoundsModal({
           credentials: 'include',
           body: formData,
         });
-        
+
         if (!response.ok) {
           throw new Error('Failed to update main playlist');
         }

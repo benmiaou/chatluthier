@@ -8,9 +8,6 @@ module.exports = {
       displayName: 'backend',
       testEnvironment: 'node',
       testMatch: ['<rootDir>/tests/jest/unit/**/*.test.js'],
-      // No transform: backend code is CommonJS
-      // forceExit: WebSocket servers keep the event loop alive after close()
-      forceExit: true,
     },
     {
       displayName: 'frontend',

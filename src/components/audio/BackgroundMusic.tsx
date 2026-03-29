@@ -104,7 +104,7 @@ export function BackgroundMusic({
 
   // When a track starts, broadcast to session (with external sound info when applicable)
   useEffect(() => {
-    if (currentSound && sessionId) {
+    if (currentSound && sessionId && userInteracted) {
       const currentTime = getCurrentTime();
       const content: Record<string, unknown> = {
         filename: currentSound.isExternal ? null : currentSound.filename,
@@ -127,7 +127,7 @@ export function BackgroundMusic({
 
       send({ type: 'backgroundMusicChange', id: sessionId, content });
     }
-  }, [currentSound, sessionId, send, getCurrentTime]);
+  }, [currentSound, sessionId, send, getCurrentTime, userInteracted]);
 
   // Message handler functions
   const handleBackgroundMusicChange = useCallback(
@@ -153,11 +153,17 @@ export function BackgroundMusic({
       if (content.filename) {
         const sound = sounds.find((s) => s.filename === content.filename);
         if (sound) {
-          playSpecificSound(sound).catch(() => {});
+          // Only play if we're not already playing this sound
+          const currentSoundFilename = currentSound?.filename;
+          if (currentSoundFilename !== content.filename) {
+            playSpecificSound(sound).catch(() => {});
+          } else {
+            // Already playing this sound, ignoring duplicate play request
+          }
         }
       }
     },
-    [playSpecificSound, playExternalReceived, sounds]
+    [playSpecificSound, playExternalReceived, sounds, currentSound]
   );
 
   const handleBackgroundMusicStop = useCallback(() => {
@@ -234,11 +240,15 @@ export function BackgroundMusic({
           } else if (content.statusData.filename) {
             const sound = sounds.find((s) => s.filename === content.statusData.filename);
             if (sound) {
-              // Pass the currentTime from status to sync playback position
-              const startTime = content.statusData.currentTime || 0;
-              playSpecificSound(sound, startTime).catch(() => {
-                console.error('Failed to play specific sound during sync');
-              });
+              // Only sync if we're not already playing this sound
+              const currentSoundFilename = currentSound?.filename;
+              if (currentSoundFilename !== content.statusData.filename) {
+                // Pass the currentTime from status to sync playback position
+                const startTime = content.statusData.currentTime || 0;
+                playSpecificSound(sound, startTime).catch(() => {});
+              } else {
+                // Already playing this sound, ignoring sync request
+              }
             }
           }
         } else {
@@ -251,7 +261,14 @@ export function BackgroundMusic({
         handleExternalSoundsDisabled({ disabled: content.statusData.disabled });
       }
     },
-    [playSpecificSound, playExternalReceived, stop, sounds, handleExternalSoundsDisabled]
+    [
+      playSpecificSound,
+      playExternalReceived,
+      stop,
+      sounds,
+      handleExternalSoundsDisabled,
+      currentSound,
+    ]
   );
 
   useEffect(() => {

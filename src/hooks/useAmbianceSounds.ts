@@ -86,7 +86,7 @@ export function useAmbianceSounds(userId: string | null): AmbianceSoundsHook {
     bar.audio.volume = volume;
     if (volume > 0 && bar.audio.paused) {
       bar.audio.play().catch((error) => {
-        console.log(`[AmbianceSounds] Failed to play audio for ${bar.sound.filename}:`, error);
+        // Failed to play audio, try again if autoplay was blocked
         // Try to play again after a small delay if autoplay was blocked
         if (error.name === 'NotAllowedError') {
           setTimeout(() => {

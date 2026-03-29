@@ -1,0 +1,473 @@
+const {
+  initializeWebSocketServer,
+  _resetStateForTests,
+} = require('../../../srv/sockets/socketServer');
+const WebSocket = require('ws');
+
+// Mock Winston logger
+jest.mock('../../../srv/utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+}));
+
+describe('Background Music Socket Server Tests', () => {
+  let server;
+  let port = 8081;
+
+  beforeAll((done) => {
+    // Use a test port
+    server = initializeWebSocketServer(null, 3000, port);
+    done();
+  });
+
+  afterAll((done) => {
+    // Clean up
+    server.close();
+    _resetStateForTests();
+    done();
+  });
+
+  beforeEach(() => {
+    _resetStateForTests();
+  });
+
+  test('should broadcast backgroundMusicChange to all participants except sender', (done) => {
+    const ws1 = new WebSocket(`ws://localhost:${port}`);
+    const ws2 = new WebSocket(`ws://localhost:${port}`);
+    const ws3 = new WebSocket(`ws://localhost:${port}`);
+
+    let subscriberCount = 0;
+    const sessionId = 'test-session-1';
+
+    ws1.on('open', () => {
+      // Subscribe ws1
+      ws1.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User1',
+        })
+      );
+    });
+
+    ws2.on('open', () => {
+      // Subscribe ws2
+      ws2.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User2',
+        })
+      );
+    });
+
+    ws3.on('open', () => {
+      // Subscribe ws3
+      ws3.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User3',
+        })
+      );
+    });
+
+    const messagesReceived = [];
+
+    ws2.on('message', (message) => {
+      const data = JSON.parse(message);
+      if (data.type === 'backgroundMusicChange') {
+        messagesReceived.push({ client: 'ws2', data });
+      }
+    });
+
+    ws3.on('message', (message) => {
+      const data = JSON.parse(message);
+      if (data.type === 'backgroundMusicChange') {
+        messagesReceived.push({ client: 'ws3', data });
+      }
+    });
+
+    // Give time for subscriptions
+    setTimeout(() => {
+      // Send backgroundMusicChange from ws1
+      ws1.send(
+        JSON.stringify({
+          type: 'backgroundMusicChange',
+          id: sessionId,
+          content: {
+            filename: 'test-song.mp3',
+            credit: 'Test Artist',
+            timestamp: Date.now(),
+            currentTime: 30,
+          },
+        })
+      );
+
+      // Check that ws2 and ws3 received the message, but not ws1
+      setTimeout(() => {
+        expect(messagesReceived.length).toBe(2); // ws2 and ws3 should receive
+        expect(messagesReceived[0].data.type).toBe('backgroundMusicChange');
+        expect(messagesReceived[0].data.content.filename).toBe('test-song.mp3');
+        expect(messagesReceived[1].data.content.filename).toBe('test-song.mp3');
+
+        ws1.close();
+        ws2.close();
+        ws3.close();
+        done();
+      }, 100);
+    }, 100);
+  });
+
+  test('should handle backgroundMusicStop broadcasts', (done) => {
+    const ws1 = new WebSocket(`ws://localhost:${port}`);
+    const ws2 = new WebSocket(`ws://localhost:${port}`);
+
+    const sessionId = 'test-session-2';
+
+    ws1.on('open', () => {
+      ws1.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User1',
+        })
+      );
+    });
+
+    ws2.on('open', () => {
+      ws2.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User2',
+        })
+      );
+    });
+
+    const stopMessagesReceived = [];
+
+    ws2.on('message', (message) => {
+      const data = JSON.parse(message);
+      if (data.type === 'backgroundMusicStop') {
+        stopMessagesReceived.push(data);
+      }
+    });
+
+    setTimeout(() => {
+      // Send backgroundMusicStop from ws1
+      ws1.send(
+        JSON.stringify({
+          type: 'backgroundMusicStop',
+          id: sessionId,
+        })
+      );
+
+      setTimeout(() => {
+        expect(stopMessagesReceived.length).toBe(1);
+        expect(stopMessagesReceived[0].type).toBe('backgroundMusicStop');
+
+        ws1.close();
+        ws2.close();
+        done();
+      }, 100);
+    }, 100);
+  });
+
+  test('should handle external sound broadcasts', (done) => {
+    const ws1 = new WebSocket(`ws://localhost:${port}`);
+    const ws2 = new WebSocket(`ws://localhost:${port}`);
+
+    const sessionId = 'test-session-3';
+
+    ws1.on('open', () => {
+      ws1.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User1',
+        })
+      );
+    });
+
+    ws2.on('open', () => {
+      ws2.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User2',
+        })
+      );
+    });
+
+    const externalSoundMessages = [];
+
+    ws2.on('message', (message) => {
+      const data = JSON.parse(message);
+      if (data.type === 'backgroundMusicChange' && data.content.externalSound) {
+        externalSoundMessages.push(data);
+      }
+    });
+
+    setTimeout(() => {
+      // Send external sound change from ws1
+      ws1.send(
+        JSON.stringify({
+          type: 'backgroundMusicChange',
+          id: sessionId,
+          content: {
+            filename: null,
+            externalSound: {
+              provider: 'spotify',
+              trackId: 'spotify-track-123',
+              artist: 'Test Artist',
+              title: 'Test Song',
+              thumbnailUrl: 'https://example.com/thumb.jpg',
+              previewUrl: 'https://example.com/preview.mp3',
+            },
+          },
+        })
+      );
+
+      setTimeout(() => {
+        expect(externalSoundMessages.length).toBe(1);
+        expect(externalSoundMessages[0].content.externalSound.provider).toBe('spotify');
+        expect(externalSoundMessages[0].content.externalSound.trackId).toBe('spotify-track-123');
+
+        ws1.close();
+        ws2.close();
+        done();
+      }, 100);
+    }, 100);
+  });
+
+  test('should not broadcast to different sessions', (done) => {
+    const ws1 = new WebSocket(`ws://localhost:${port}`);
+    const ws2 = new WebSocket(`ws://localhost:${port}`);
+    const ws3 = new WebSocket(`ws://localhost:${port}`);
+
+    const sessionId1 = 'session-1';
+    const sessionId2 = 'session-2';
+
+    ws1.on('open', () => {
+      ws1.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId1,
+          pseudo: 'User1',
+        })
+      );
+    });
+
+    ws2.on('open', () => {
+      ws2.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId1,
+          pseudo: 'User2',
+        })
+      );
+    });
+
+    ws3.on('open', () => {
+      ws3.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId2,
+          pseudo: 'User3',
+        })
+      );
+    });
+
+    const messagesToSession2 = [];
+
+    ws3.on('message', (message) => {
+      const data = JSON.parse(message);
+      if (data.type === 'backgroundMusicChange') {
+        messagesToSession2.push(data);
+      }
+    });
+
+    setTimeout(() => {
+      // Send from session 1
+      ws1.send(
+        JSON.stringify({
+          type: 'backgroundMusicChange',
+          id: sessionId1,
+          content: {
+            filename: 'session1-song.mp3',
+          },
+        })
+      );
+
+      setTimeout(() => {
+        // Session 2 should not receive the message
+        expect(messagesToSession2.length).toBe(0);
+
+        ws1.close();
+        ws2.close();
+        ws3.close();
+        done();
+      }, 100);
+    }, 100);
+  });
+
+  test('should handle participant leave gracefully', (done) => {
+    const ws1 = new WebSocket(`ws://localhost:${port}`);
+    const ws2 = new WebSocket(`ws://localhost:${port}`);
+
+    const sessionId = 'test-session-4';
+
+    ws1.on('open', () => {
+      ws1.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User1',
+        })
+      );
+    });
+
+    ws2.on('open', () => {
+      ws2.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User2',
+        })
+      );
+    });
+
+    let participantLeftReceived = false;
+
+    ws1.on('message', (message) => {
+      const data = JSON.parse(message);
+      if (data.type === 'participantLeft') {
+        participantLeftReceived = true;
+      }
+    });
+
+    setTimeout(() => {
+      // Close ws2 (participant leaves)
+      ws2.close();
+
+      setTimeout(() => {
+        expect(participantLeftReceived).toBe(true);
+        ws1.close();
+        done();
+      }, 100);
+    }, 100);
+  });
+});
+
+describe('Background Music Socket Error Handling', () => {
+  let server;
+  let port = 8082;
+
+  beforeAll((done) => {
+    server = initializeWebSocketServer(null, 3000, port);
+    done();
+  });
+
+  afterAll((done) => {
+    server.close();
+    _resetStateForTests();
+    done();
+  });
+
+  beforeEach(() => {
+    _resetStateForTests();
+  });
+
+  test('should handle malformed messages gracefully', (done) => {
+    const ws = new WebSocket(`ws://localhost:${port}`);
+
+    ws.on('open', () => {
+      // Send invalid JSON
+      ws.send('not valid json');
+
+      // Send message with missing fields
+      ws.send(JSON.stringify({}));
+
+      // Should not crash
+      setTimeout(() => {
+        ws.close();
+        done();
+      }, 50);
+    });
+  });
+
+  test('should handle rate limiting', (done) => {
+    const ws = new WebSocket(`ws://localhost:${port}`);
+    const sessionId = 'rate-limit-test';
+
+    ws.on('open', () => {
+      ws.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User1',
+        })
+      );
+    });
+
+    let errorReceived = false;
+
+    ws.on('message', (message) => {
+      const data = JSON.parse(message);
+      if (data.type === 'error' && data.message.includes('Rate limit')) {
+        errorReceived = true;
+      }
+    });
+
+    setTimeout(() => {
+      // Send many messages quickly
+      for (let i = 0; i < 15; i++) {
+        ws.send(
+          JSON.stringify({
+            type: 'message',
+            id: sessionId,
+            content: { text: `Message ${i}` },
+          })
+        );
+      }
+
+      setTimeout(() => {
+        expect(errorReceived).toBe(true);
+        ws.close();
+        done();
+      }, 100);
+    }, 50);
+  });
+
+  test('should handle unsubscribe gracefully', (done) => {
+    const ws = new WebSocket(`ws://localhost:${port}`);
+    const sessionId = 'unsubscribe-test';
+
+    ws.on('open', () => {
+      ws.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User1',
+        })
+      );
+    });
+
+    setTimeout(() => {
+      ws.send(
+        JSON.stringify({
+          type: 'unsubscribe',
+          id: sessionId,
+        })
+      );
+
+      // Should not crash
+      setTimeout(() => {
+        ws.close();
+        done();
+      }, 50);
+    }, 50);
+  });
+});

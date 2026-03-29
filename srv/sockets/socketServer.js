@@ -1,5 +1,6 @@
 // In srv/sockets/socketServer.js
 const WebSocket = require('ws');
+const logger = require('../utils/logger');
 
 let wsServer = null;
 const subscribers = new Map(); // Map of sessionId -> Set of WebSocket connections
@@ -96,6 +97,22 @@ function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
 
     const subs = subscribers.get(connectedId);
     if (subs) {
+      // Log background music changes for debugging
+      if (data.type === 'backgroundMusicChange' || data.type === 'backgroundMusicStop') {
+        const participantId = Array.from(participantToWs.entries()).find(
+          ([_, wsEntry]) => wsEntry === ws
+        )?.[0];
+        logger.info(`Broadcasting ${data.type} from participant ${participantId || 'unknown'}`, {
+          sessionId: connectedId,
+          participantCount: subs.size,
+          contentType: data.content?.filename
+            ? 'local'
+            : data.content?.externalSound
+              ? 'external'
+              : 'unknown',
+        });
+      }
+
       subs.forEach((subscriberWs) => {
         if (subscriberWs !== ws && subscriberWs.readyState === WebSocket.OPEN) {
           subscriberWs.send(

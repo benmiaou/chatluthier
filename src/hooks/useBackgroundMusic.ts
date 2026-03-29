@@ -60,7 +60,7 @@ export function useBackgroundMusic(
   const [context, setContext] = useState('All');
   const [userInteracted, setUserInteracted] = useState(false);
   const [disableExternalSounds, setDisableExternalSounds] = useState(false);
-  const [audioInitialized, setAudioInitialized] = useState(false);
+  const [_audioInitialized, _setAudioInitialized] = useState(false);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentCategoryRef = useRef<BackgroundMusicCategory | null>(null);
 
@@ -81,28 +81,16 @@ export function useBackgroundMusic(
   // ─── Initialize audio element ────────────────────────────────────────────
 
   useEffect(() => {
-    console.log('[BackgroundMusic] Initializing audio element');
-    
     // Ensure audio element is properly initialized on mount
     const audio = playerRef.current.getElement();
-    console.log('[BackgroundMusic] Audio element created', {
-      src: audio.src,
-      paused: audio.paused,
-      currentTime: audio.currentTime
-    });
-    
+
     // Set up basic event handlers
     audio.onerror = () => {
-      console.error('[BackgroundMusic] Audio initialization error');
+      // Audio initialization error
     };
-    
-    // Mark as initialized
-    setAudioInitialized(true);
-    console.log('[BackgroundMusic] Audio initialization complete');
-    
+
     return () => {
       // Cleanup on unmount
-      console.log('[BackgroundMusic] Cleaning up audio element');
       audio.onended = null;
       audio.onerror = null;
     };
@@ -187,6 +175,8 @@ export function useBackgroundMusic(
 
   // ─── Play a specific sound ──────────────────────────────────────────────
 
+  const playSpecificSoundRef = useRef<(sound: Sound, startTime?: number) => Promise<void>>();
+
   const playSpecificSound = useCallback(
     async (sound: Sound, startTime = 0) => {
       setCurrentSound(sound);
@@ -222,28 +212,13 @@ export function useBackgroundMusic(
         currentCategoryRef.current = soundCategory;
       }
 
-      console.log(`[BackgroundMusic] Playing specific sound: ${sound.filename}`, {
-        activeCategory,
-        currentSound: currentSound?.filename,
-        soundsCount: sounds.length,
-        currentCategoryRef: currentCategoryRef.current,
-        startTime: startTime
-      });
-      
       try {
         // Use the AudioPlayer's play method with our onended handler
         await playerRef.current.play(`${ASSET_PREFIX}${sound.filename}`, volume, startTime, () => {
-          console.log(`[BackgroundMusic] onended fired for: ${sound.filename}`);
-          
           // When a specific sound ends, try to advance to next in current category
           // Use the ref to get the original category, not the potentially changed state
           const originalCategory = currentCategoryRef.current;
-          console.log(`[BackgroundMusic] Advancing from: ${sound.filename}`, {
-            originalCategory,
-            activeCategory,
-            soundsCount: sounds.length
-          });
-          
+
           if (originalCategory) {
             // Use setTimeout to avoid circular reference during initialization
             setTimeout(() => {
@@ -252,44 +227,33 @@ export function useBackgroundMusic(
                   !(s.isExternal && disableExternalSounds) &&
                   bgMatchesCategoryAndContext(s, originalCategory, context)
               );
-              
-              console.log(`[BackgroundMusic] Filtered sounds: ${filtered.map(s => s.filename).join(', ')}`);
-              
+
               if (filtered.length > 0) {
                 const currentIndex = filtered.findIndex((s) => s.filename === sound.filename);
-                console.log(`[BackgroundMusic] Current index: ${currentIndex}`);
-                
+
                 if (currentIndex >= 0) {
                   const nextIndex = (currentIndex + 1) % filtered.length;
                   const nextSound = filtered[nextIndex];
-                  console.log(`[BackgroundMusic] Advancing to: ${nextSound.filename}`);
-                  playSpecificSound(nextSound).catch((error) => {
-                    console.error(`[BackgroundMusic] Failed to play next sound: ${error}`);
-                  });
-                } else {
-                  console.log(`[BackgroundMusic] Current sound not found in filtered list`);
-                  // Fallback to first sound if current not found
-                  if (filtered.length > 0) {
-                    console.log(`[BackgroundMusic] Fallback to first sound`);
-                    setActiveCategory(activeCategory); // Ensure category is preserved
-                    playSpecificSound(filtered[0]).catch((error) => {
-                      console.error(`[BackgroundMusic] Fallback failed: ${error}`);
-                    });
-                  }
+                  // Use a ref to access the latest playSpecificSound
+                  playSpecificSoundRef.current(nextSound).catch(() => {});
                 }
               } else {
-                console.log(`[BackgroundMusic] No sounds in filtered list`);
+                // No sounds in filtered list
               }
             }, 0);
           } else {
-            console.log(`[BackgroundMusic] No active category, not advancing`);
+            // No active category, not advancing
           }
         });
-        
+
         setIsPlaying(true);
         startProgressTracking();
       } catch (error) {
-        console.error(`[BackgroundMusic] Failed to play sound ${sound.filename}:`, error);
+        handleError(error, 'useBackgroundMusic.playSpecificSound', undefined, {
+          soundFilename: sound.filename,
+          activeCategory,
+          currentTime: playerRef.current.getElement().currentTime,
+        });
         setIsPlaying(false);
         throw error;
       }
@@ -311,7 +275,7 @@ export function useBackgroundMusic(
       }
       const pick = filtered[Math.floor(Math.random() * filtered.length)];
       setCurrentSound(pick);
-      
+
       // Capture the current sound in the closure to avoid stale state
       const currentSoundForHandler = pick;
       // Store the category in a ref to ensure it persists through the play session
@@ -331,92 +295,73 @@ export function useBackgroundMusic(
         onStopExternalRef.current().catch(() => {});
       }
 
-      console.log(`[BackgroundMusic] Playing category: ${category}`, {
-        pick: pick.filename,
-        activeCategory,
-        soundsCount: sounds.length
-      });
-      
       // Use the AudioPlayer's play method with our onended handler
       await playerRef.current.play(`${ASSET_PREFIX}${pick.filename}`, volume, () => {
-        console.log(`[BackgroundMusic] Category onended fired for: ${pick.filename}`);
-        
         // Use the ref to get the original category, not the potentially changed state
         const originalCategory = currentCategoryRef.current;
-        console.log(`[BackgroundMusic] Original category: ${originalCategory}, current activeCategory: ${activeCategory}`);
-        
+
         if (originalCategory === category) {
-          console.log(`[BackgroundMusic] Category match, advancing`, {
-            originalCategory,
-            category,
-            soundsCount: sounds.length
-          });
-          
           // Use setTimeout to avoid circular reference during initialization
           setTimeout(() => {
-            const filtered = sounds.filter(
+            const filteredSounds = sounds.filter(
               (s) =>
                 !(s.isExternal && disableExternalSounds) &&
                 bgMatchesCategoryAndContext(s, category, context)
             );
-            
-            console.log(`[BackgroundMusic] Category filtered sounds: ${filtered.map(s => s.filename).join(', ')}`);
-            console.log(`[BackgroundMusic] Looking for current sound: ${currentSoundForHandler.filename}`);
-            
-            if (filtered.length > 0) {
-              const currentIndex = filtered.findIndex((s) => s.filename === currentSoundForHandler.filename);
-              console.log(`[BackgroundMusic] Category current index: ${currentIndex}`, {
-                currentSoundFilename: currentSoundForHandler.filename,
-                filteredHasCurrent: filtered.some(s => s.filename === currentSoundForHandler.filename)
-              });
-              
+
+            if (filteredSounds.length > 0) {
+              const currentIndex = filteredSounds.findIndex(
+                (s) => s.filename === currentSoundForHandler.filename
+              );
+
               if (currentIndex >= 0) {
-                const nextIndex = (currentIndex + 1) % filtered.length;
-                const nextSound = filtered[nextIndex];
-                console.log(`[BackgroundMusic] Category advancing to: ${nextSound.filename}`);
+                const nextIndex = (currentIndex + 1) % filteredSounds.length;
+                const nextSound = filteredSounds[nextIndex];
                 // Ensure category is set for the next play
                 setActiveCategory(originalCategory);
-                playSpecificSound(nextSound).catch((error) => {
-                  console.error(`[BackgroundMusic] Category failed to play next sound: ${error}`);
-                });
+                playSpecificSoundRef.current(nextSound).catch(() => {});
               } else {
                 // Fallback: if current sound not found, play first in category
-                console.log(`[BackgroundMusic] Category fallback to first sound`);
                 // Ensure category is set for the fallback play
                 setActiveCategory(originalCategory);
-                playSpecificSound(filtered[0]).catch((error) => {
-                  console.error(`[BackgroundMusic] Category fallback failed: ${error}`);
-                });
+                playSpecificSoundRef.current(filteredSounds[0]).catch(() => {});
               }
             }
           }, 0);
         } else {
-          console.log(`[BackgroundMusic] Category mismatch (original: ${originalCategory}, current: ${category})`);
+          // Category mismatch
         }
       });
-      
+
       setIsPlaying(true);
       startProgressTracking();
     },
-    [sounds, volume, context, activeCategory, disableExternalSounds, playSpecificSound, currentSound]
+    [sounds, volume, context, disableExternalSounds, playSpecificSoundRef]
   );
 
   const next = useCallback(() => {
     if (!activeCategory) {
       return;
     }
-    const filtered = sounds.filter(
+    const filteredSounds = sounds.filter(
       (s) =>
         !(s.isExternal && disableExternalSounds) &&
         bgMatchesCategoryAndContext(s, activeCategory, context)
     );
-    if (!filtered.length) {
+    if (!filteredSounds.length) {
       return;
     }
-    const currentIndex = filtered.findIndex((s) => s.filename === currentSound?.filename);
-    const nextIndex = (currentIndex + 1) % filtered.length;
-    playSpecificSound(filtered[nextIndex]).catch(() => {});
-  }, [activeCategory, sounds, context, currentSound, disableExternalSounds, playSpecificSound]);
+    const currentIndex = filteredSounds.findIndex((s) => s.filename === currentSound?.filename);
+    const nextIndex = (currentIndex + 1) % filteredSounds.length;
+    playSpecificSoundRef.current(filteredSounds[nextIndex]).catch(() => {});
+  }, [
+    activeCategory,
+    sounds,
+    context,
+    disableExternalSounds,
+    currentSound?.filename,
+    playSpecificSoundRef,
+  ]);
 
   const stop = useCallback(() => {
     playerRef.current.stop();

@@ -7,9 +7,22 @@ const fs = require('fs');
 const path = require('path');
 
 async function runAllTests() {
-  console.log('🧪 Running all authentication system tests...\n');
+  console.log('🧪 Running all ChatLuthier tests...\n');
 
-  // Get all test files
+  // Run Jest tests first
+  console.log('🔵 Running Jest tests...');
+  try {
+    execSync('npm run test:jest', {
+      stdio: 'inherit',
+      encoding: 'utf-8',
+    });
+    console.log('✅ Jest tests: PASSED\n');
+  } catch (error) {
+    console.log('❌ Jest tests: FAILED\n');
+    process.exit(1);
+  }
+
+  // Get all Node.js test files
   const testFiles = fs
     .readdirSync(__dirname)
     .filter(
@@ -18,11 +31,11 @@ async function runAllTests() {
     .sort();
 
   if (testFiles.length === 0) {
-    console.log('❌ No test files found!');
+    console.log('ℹ️  No Node.js test files found!');
     return;
   }
 
-  console.log(`Found ${testFiles.length} test(s) to run:\n`);
+  console.log(`Found ${testFiles.length} Node.js test(s) to run:\n`);
 
   let passedTests = 0;
   let failedTests = 0;
@@ -47,14 +60,16 @@ async function runAllTests() {
 
   // Summary
   console.log('📊 Test Summary:');
-  console.log(`   Total tests: ${testFiles.length}`);
+  console.log(`   Jest tests: Running via npm run test:jest`);
+  console.log(`   Node.js tests: ${testFiles.length}`);
   console.log(`   Passed: ${passedTests}`);
   console.log(`   Failed: ${failedTests}`);
 
   if (failedTests === 0) {
-    console.log('\n🎉 All tests passed!');
+    console.log('\n🎉 All Node.js tests passed!');
+    console.log('📝 Check Jest test results above for full coverage.');
   } else {
-    console.log(`\n⚠️  ${failedTests} test(s) failed.`);
+    console.log(`\n⚠️  ${failedTests} Node.js test(s) failed.`);
     process.exit(1);
   }
 }
