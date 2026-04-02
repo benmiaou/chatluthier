@@ -175,7 +175,7 @@ export function useBackgroundMusic(
 
   // ─── Play a specific sound ──────────────────────────────────────────────
 
-  const playSpecificSoundRef = useRef<(sound: Sound, startTime?: number) => Promise<void>>();
+  const playSpecificSoundRef = useRef<(sound: Sound, startTime?: number) => Promise<void>>(null);
 
   const playSpecificSound = useCallback(
     async (sound: Sound, startTime = 0) => {
@@ -235,7 +235,7 @@ export function useBackgroundMusic(
                   const nextIndex = (currentIndex + 1) % filtered.length;
                   const nextSound = filtered[nextIndex];
                   // Use a ref to access the latest playSpecificSound
-                  playSpecificSoundRef.current(nextSound).catch(() => {});
+                  playSpecificSoundRef.current?.(nextSound).catch(() => {});
                 }
               } else {
                 // No sounds in filtered list
@@ -260,6 +260,11 @@ export function useBackgroundMusic(
     },
     [volume, sounds, activeCategory, context, disableExternalSounds]
   );
+
+  // Initialize the ref with the current playSpecificSound function
+  useEffect(() => {
+    playSpecificSoundRef.current = playSpecificSound;
+  }, [playSpecificSound]);
 
   // ─── Play a category ──────────────────────────────────────────────────────
 
@@ -319,12 +324,12 @@ export function useBackgroundMusic(
                 const nextSound = filteredSounds[nextIndex];
                 // Ensure category is set for the next play
                 setActiveCategory(originalCategory);
-                playSpecificSoundRef.current(nextSound).catch(() => {});
+                playSpecificSoundRef.current?.(nextSound).catch(() => {});
               } else {
                 // Fallback: if current sound not found, play first in category
                 // Ensure category is set for the fallback play
                 setActiveCategory(originalCategory);
-                playSpecificSoundRef.current(filteredSounds[0]).catch(() => {});
+                playSpecificSoundRef.current?.(filteredSounds[0]).catch(() => {});
               }
             }
           }, 0);
@@ -353,7 +358,7 @@ export function useBackgroundMusic(
     }
     const currentIndex = filteredSounds.findIndex((s) => s.filename === currentSound?.filename);
     const nextIndex = (currentIndex + 1) % filteredSounds.length;
-    playSpecificSoundRef.current(filteredSounds[nextIndex]).catch(() => {});
+    playSpecificSoundRef.current?.(filteredSounds[nextIndex]).catch(() => {});
   }, [
     activeCategory,
     sounds,
