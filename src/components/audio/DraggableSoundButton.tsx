@@ -4,6 +4,14 @@ import { Button } from '@mantine/core';
 import { IconGripVertical } from '@tabler/icons-react';
 import type { Sound } from '../../types/sound';
 
+function contextToHue(context: string): number {
+  let hash = 0;
+  for (let i = 0; i < context.length; i += 1) {
+    hash = (hash * 31 + context.charCodeAt(i)) % 360;
+  }
+  return Math.abs(hash);
+}
+
 interface DraggableSoundButtonProps {
   sound: Sound;
   index: number;
@@ -11,6 +19,7 @@ interface DraggableSoundButtonProps {
   moveItem: (fromIndex: number, toIndex: number) => void;
   onDragEnd: (fromIndex: number, toIndex: number) => void;
   showDragHandle: boolean;
+  isActive: boolean;
 }
 
 export function DraggableSoundButton({
@@ -20,8 +29,12 @@ export function DraggableSoundButton({
   moveItem,
   onDragEnd,
   showDragHandle,
+  isActive,
 }: Readonly<DraggableSoundButtonProps>): React.JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
+  const primaryContext = (sound.contexts?.[0] ?? 'all').toLowerCase();
+  const contextKey = primaryContext.replace(/\s+/g, '-');
+  const contextHue = contextToHue(primaryContext);
 
   const [{ isDragging }, drag] = useDrag({
     type: 'SOUND_BUTTON',
@@ -66,43 +79,53 @@ export function DraggableSoundButton({
   return (
     <div
       ref={combinedRef}
-      style={{
-        opacity: isDragging ? 0.5 : 1,
-        width: '100%',
-        cursor: 'default',
-        transform: isDragging ? 'scale(0.95)' : 'none',
-        transition: 'transform 0.1s ease, opacity 0.1s ease',
-        zIndex: isDragging ? 1000 : 'auto',
-        position: 'relative',
-        height: '40px', // Fixed height to match button
-      }}
+      className={`soundboard-draggable-item ${isActive ? 'soundboard-draggable-item-active' : ''}`}
+      data-context={contextKey}
+      style={
+        {
+          '--soundboard-context-hue': `${contextHue}`,
+          opacity: isDragging ? 0.5 : 1,
+          width: '100%',
+          cursor: 'default',
+          transform: isDragging ? 'scale(0.95)' : 'none',
+          transition: 'transform 0.1s ease, opacity 0.1s ease',
+          zIndex: isDragging ? 1000 : 'auto',
+          position: 'relative',
+          aspectRatio: '1 / 1',
+        } as React.CSSProperties
+      }
     >
       {showDragHandle && (
         <div
-          ref={drag as React.RefObject<HTMLDivElement>}
+          ref={(node) => {
+            drag(node);
+          }}
+          className="soundboard-drag-handle"
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
-            bottom: 0,
-            width: '24px',
+            right: 0,
+            height: '28px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'grab',
             zIndex: 10,
-            background: 'rgba(0, 0, 0, 0.05)',
-            borderRadius: '4px 0 0 4px',
+            background: 'rgba(0, 0, 0, 0.08)',
+            borderRadius: '8px 8px 0 0',
           }}
         >
-          <IconGripVertical size={16} color="#666" />
+          <IconGripVertical size={16} color="#8b8b8b" />
         </div>
       )}
       <div
+        className="soundboard-button-wrap"
         style={{
           pointerEvents: isDragging ? 'none' : 'auto',
-          marginLeft: showDragHandle ? '24px' : '0',
-          width: showDragHandle ? 'calc(100% - 24px)' : '100%',
+          marginTop: showDragHandle ? '28px' : '0',
+          height: showDragHandle ? 'calc(100% - 28px)' : '100%',
+          width: '100%',
         }}
       >
         <Button
@@ -110,10 +133,10 @@ export function DraggableSoundButton({
           style={{
             width: '100%',
             cursor: 'pointer',
-            height: '40px',
+            height: '100%',
             padding: '8px 12px',
-            textAlign: 'left',
-            justifyContent: 'flex-start',
+            textAlign: 'center',
+            justifyContent: 'center',
             fontSize: '14px',
           }}
           size="compact-xs"

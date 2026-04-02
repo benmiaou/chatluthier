@@ -3,15 +3,17 @@ import {
   Button,
   Group,
   Modal,
-  Paper,
   Slider,
   Stack,
   Text,
   Progress,
   Switch,
   Tooltip,
+  Grid,
+  ActionIcon,
+  Avatar,
 } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { CustomCombobox } from './CustomCombobox';
 import {
   IconPlayerSkipForward,
@@ -26,6 +28,7 @@ import { useExternalSounds } from '../../hooks/useExternalSounds';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { useState, useCallback, useEffect } from 'react';
 import type React from 'react';
+import { SETTINGS } from '../../constants/settings';
 
 import type { BackgroundMusicCategory, Sound } from '../../types/sound';
 import { bgScenes, bgMatchesCategoryAndContext } from '../../types/sound';
@@ -48,6 +51,7 @@ const CATEGORIES: { value: BackgroundMusicCategory; label: string }[] = [
 export function BackgroundMusic({
   userId = null,
 }: Readonly<BackgroundMusicProps>): React.JSX.Element {
+  const isMobile = useMediaQuery('(max-width: 48em)');
   const { send, addMessageHandler, sessionId } = useSocketContext();
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const [modalOpened, { open, close }] = useDisclosure(false);
@@ -147,7 +151,7 @@ export function BackgroundMusic({
       };
     }) => {
       if (content.externalSound) {
-        playExternalReceived(content.externalSound).catch(() => {});
+        playExternalReceived(content.externalSound).catch(() => { });
         return;
       }
       if (content.filename) {
@@ -156,7 +160,7 @@ export function BackgroundMusic({
           // Only play if we're not already playing this sound
           const currentSoundFilename = currentSound?.filename;
           if (currentSoundFilename !== content.filename) {
-            playSpecificSound(sound).catch(() => {});
+            playSpecificSound(sound).catch(() => { });
           } else {
             // Already playing this sound, ignoring duplicate play request
           }
@@ -236,7 +240,7 @@ export function BackgroundMusic({
       if (content.statusType === 'backgroundMusic' && content.statusData) {
         if (content.statusData.isPlaying) {
           if (content.statusData.externalSound) {
-            playExternalReceived(content.statusData.externalSound).catch(() => {});
+            playExternalReceived(content.statusData.externalSound).catch(() => { });
           } else if (content.statusData.filename) {
             const sound = sounds.find((s) => s.filename === content.statusData.filename);
             if (sound) {
@@ -244,8 +248,7 @@ export function BackgroundMusic({
               const currentSoundFilename = currentSound?.filename;
               if (currentSoundFilename !== content.statusData.filename) {
                 // Pass the currentTime from status to sync playback position
-                const startTime = content.statusData.currentTime || 0;
-                playSpecificSound(sound, startTime).catch(() => {});
+                playSpecificSound(sound).catch(() => { });
               } else {
                 // Already playing this sound, ignoring sync request
               }
@@ -337,7 +340,7 @@ export function BackgroundMusic({
       setUserInteracted(true);
     }
     if (currentSound) {
-      playSpecificSound(currentSound).catch(() => {});
+      playSpecificSound(currentSound).catch(() => { });
     }
   }, [currentSound, playSpecificSound, userInteracted]);
 
@@ -376,190 +379,228 @@ export function BackgroundMusic({
   const hasConnectedProviders = externalSoundsHook.connectedProviders.length > 0;
   const externalCount = sounds.filter((s) => s.isExternal).length;
 
+
   return (
     <>
-      <Paper p="md" radius="md" withBorder>
-        <Stack gap="sm">
-          {/* Title with volume control */}
-          <Group justify="space-between" align="center">
-            <Text fw={600} size="sm" tt="uppercase" c="dimmed">
-              Background Music
-            </Text>
-            <Group gap={6} align="center">
-              <IconVolume size={16} color="var(--mantine-color-dimmed)" />
-              <Slider
-                size="xs"
-                w={80}
-                min={0}
-                max={1}
-                step={0.01}
-                value={volume}
-                onChange={handleVolumeChange}
-                label={(v) => `${Math.round(v * 100)}%`}
+      <Box
+        px="xs"
+        h={SETTINGS.BACKGROUND_MUSIC_HEIGHT}
+        style={{
+          height: SETTINGS.BACKGROUND_MUSIC_HEIGHT,
+          minHeight: SETTINGS.BACKGROUND_MUSIC_HEIGHT,
+          maxHeight: SETTINGS.BACKGROUND_MUSIC_HEIGHT,
+          overflow: 'hidden',
+        }}
+      >
+
+
+        <Grid gutter={isMobile ? 6 : 'sm'}>
+          <Grid.Col span={{ base: 12, md: 5 }}>
+
+
+
+
+            {/* Current track info */}
+            <Group gap="xs" align="flex-start" wrap="nowrap" >
+              <Avatar radius="md" size={isMobile ? 'sm' : 'md'}>
+                <Box
+                  className={
+                    isPlaying && currentSound
+                      ? 'background-music-equalizer background-music-equalizer-playing'
+                      : 'background-music-equalizer'
+                  }
+                >
+                  <span className="background-music-equalizer-bar" />
+                  <span className="background-music-equalizer-bar" />
+                  <span className="background-music-equalizer-bar" />
+                </Box>
+              </Avatar>
+              <Stack gap="3" justify="flex-start" align="flex-start" ta="left" w="100%">
+                <Text size="xs" c="dimmed" ta="left" className="background-music-track-title">
+                  {currentSound
+                    ? `${currentSound.isExternal ? `${currentSound.artist ?? ''} – ${currentSound.title ?? ''}` : (currentSound.name ?? '')}`
+                    : 'No track playing'}
+                </Text>
+                {!isMobile && currentSound?.isExternal && currentSound.provider && (
+                  <ExternalSoundBadge provider={currentSound.provider} compact />
+                )}
+
+                {!isMobile && currentSound?.isExternal && currentSound.provider && (
+                  <Group gap={6} align="center" justify="flex-start" w="100%">
+                    <ExternalSoundBadge provider={currentSound.provider} />
+                    {currentSound.permalinkUrl ? (
+                      <Text
+                        size="xs"
+                        c="dimmed"
+                        component="a"
+                        href={currentSound.permalinkUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ textDecoration: 'underline dotted', fontSize: 11 }}
+                      >
+                        Open on{' '}
+                        {currentSound.provider === 'soundcloud'
+                          ? 'SoundCloud'
+                          : currentSound.provider === 'deezer'
+                            ? 'Deezer'
+                            : 'Spotify'}
+                      </Text>
+                    ) : null}
+                  </Group>
+                )}
+                {currentSound?.credit && !currentSound.isExternal && (
+                  <Text
+                    size="xs"
+                    c="dimmed"
+                    fs="italic"
+                    truncate
+                    dangerouslySetInnerHTML={{ __html: currentSound.credit }}
+                  />
+                )}
+              </Stack>
+            </Group>
+            {/* Category buttons + context filter */}
+            <Group
+              gap={3}
+
+              wrap="wrap"
+              visibleFrom="md"
+            >
+              {CATEGORIES.map(({ value, label }) => {
+                const count = sounds.filter(
+                  (s) =>
+                    !(s.isExternal && disableExternalSounds) &&
+                    filterSoundsByContextAndCategory(s, filterContext, value)
+                ).length;
+                return (
+                  <Button
+                    key={value}
+                    size="compact-xs"
+                    variant={activeCategory === value ? 'filled' : 'light'}
+                    className="background-music-category-btn"
+                    onClick={() => handlePlayCategory(value)}
+                  >
+                    Play {label} ({count})
+                  </Button>
+                );
+              })}
+              <CustomCombobox
+                value={filterContext}
+                onChange={(v) => {
+                  setFilterContext(v);
+                  handleSetContext(v);
+                }}
+                data={contexts}
+                placeholder="Context"
+                size="compact-xs"
+                width={112}
               />
             </Group>
-          </Group>
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 7 }} ta="center">
 
-          {/* Category buttons + context filter */}
-          <Group gap="xs" align="center">
-            {CATEGORIES.map(({ value, label }) => {
-              const count = sounds.filter(
-                (s) =>
-                  !(s.isExternal && disableExternalSounds) &&
-                  filterSoundsByContextAndCategory(s, filterContext, value)
-              ).length;
-              return (
-                <Button
-                  key={value}
-                  size="xs"
-                  variant={activeCategory === value ? 'filled' : 'default'}
-                  onClick={() => handlePlayCategory(value)}
+            <Box bg="dark.8" px="15" style={{ borderRadius: 8 }}>
+              <Group gap="xs" align="flex-start" wrap="nowrap" >
+                <ActionIcon
+                  size={isMobile ? 'sm' : 'md'}
+                  variant="subtle"
+                  onClick={handleStop}
+                  disabled={!isPlaying}
                 >
-                  Play {label} ({count})
-                </Button>
-              );
-            })}
-            <CustomCombobox
-              value={filterContext}
-              onChange={(v) => {
-                setFilterContext(v);
-                handleSetContext(v);
-              }}
-              data={contexts}
-              placeholder="Context"
-            />
-          </Group>
-
-          {/* Current track info */}
-          <Group gap="xs" align="center">
-            <Text size="xs" c="dimmed" truncate style={{ flex: 1 }}>
-              {currentSound
-                ? `♪ ${currentSound.isExternal ? `${currentSound.artist ?? ''} – ${currentSound.title ?? ''}` : (currentSound.name ?? '')}`
-                : 'No track playing'}
-            </Text>
-            {currentSound?.isExternal && currentSound.provider && (
-              <ExternalSoundBadge provider={currentSound.provider} compact />
-            )}
-          </Group>
-          {currentSound?.isExternal && currentSound.provider && (
-            <Group gap={6} align="center">
-              <ExternalSoundBadge provider={currentSound.provider} />
-              {currentSound.permalinkUrl ? (
-                <Text
-                  size="xs"
-                  c="dimmed"
-                  component="a"
-                  href={currentSound.permalinkUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ textDecoration: 'underline dotted', fontSize: 11 }}
+                  <IconPlayerStop size={isMobile ? 16 : 18} />
+                </ActionIcon>
+                <ActionIcon
+                  size={isMobile ? 'sm' : 'md'}
+                  variant="subtle"
+                  onClick={handleNext}
+                  disabled={!isPlaying || currentSound?.isExternal}
                 >
-                  Open on{' '}
-                  {currentSound.provider === 'soundcloud'
-                    ? 'SoundCloud'
-                    : currentSound.provider === 'deezer'
-                      ? 'Deezer'
-                      : 'Spotify'}
-                </Text>
-              ) : null}
-            </Group>
-          )}
-          {currentSound?.credit && !currentSound.isExternal && (
-            <Text
-              size="xs"
-              c="dimmed"
-              fs="italic"
-              truncate
-              dangerouslySetInnerHTML={{ __html: currentSound.credit }}
-            />
-          )}
-
-          {/* Progress bar (not shown for external sounds) */}
-          {!currentSound?.isExternal && (
-            <Box style={{ cursor: 'pointer' }} onClick={handleSeek}>
-              <Progress value={progress} size="sm" radius="xs" color="maroon" />
-            </Box>
-          )}
-
-          {/* Controls row */}
-          <Group gap="xs" align="center" justify="space-between">
-            <Group gap="xs">
-              <Button
-                size="xs"
-                variant="subtle"
-                leftSection={<IconPlayerStop size={14} />}
-                onClick={handleStop}
-                disabled={!isPlaying}
-              >
-                Stop
-              </Button>
-              <Button
-                size="xs"
-                variant="subtle"
-                leftSection={<IconPlayerSkipForward size={14} />}
-                onClick={handleNext}
-                disabled={!isPlaying || currentSound?.isExternal}
-              >
-                Next
-              </Button>
-            </Group>
-
-            {/* External sounds controls */}
-            <Group gap="xs">
-              {externalCount > 0 && (
-                <Tooltip
-                  label={
-                    disableExternalSounds
-                      ? 'External sounds disabled for this session'
-                      : 'Disable external sounds for this session'
-                  }
-                  withArrow
-                >
-                  <Group gap={4}>
-                    <IconCloudOff size={14} color="var(--mantine-color-dimmed)" />
-                    <Switch
-                      size="xs"
-                      checked={disableExternalSounds}
-                      onChange={(e) => handleToggleDisableExternal(e.currentTarget.checked)}
-                      label={
-                        <Text size="xs" c="dimmed">
-                          Disable ext.
-                        </Text>
-                      }
-                    />
-                  </Group>
-                </Tooltip>
-              )}
-              <Tooltip label="Manage external sound providers" withArrow>
-                <Button
-                  size="xs"
-                  variant={hasConnectedProviders ? 'light' : 'subtle'}
-                  color={hasConnectedProviders ? 'green' : undefined}
-                  leftSection={<IconPlugConnected size={14} />}
-                  onClick={openProviderModal}
-                >
-                  Providers
-                </Button>
-              </Tooltip>
-              {hasConnectedProviders && (
-                <Tooltip label="Search and add external tracks" withArrow>
-                  <Button
-                    size="xs"
-                    variant="subtle"
-                    leftSection={<IconSearch size={14} />}
-                    onClick={openSearchModal}
+                  <IconPlayerSkipForward size={isMobile ? 16 : 18} />
+                </ActionIcon>
+                {/* Progress bar (not shown for external sounds) */}
+                {!currentSound?.isExternal && (
+                  <Box
+                    mt={15}
+                    style={{ cursor: 'pointer', flex: 1, minWidth: 120, maxWidth: '100%' }}
+                    onClick={handleSeek}
+                    className="background-music-progress-wrap"
                   >
-                    Add track
-                  </Button>
-                </Tooltip>
-              )}
-            </Group>
-          </Group>
-        </Stack>
-      </Paper>
+                    <Progress value={progress} size="sm" radius="xs" color="maroon" />
+                  </Box>
+                )}
+                <Group gap={6} mt={8}>
+                  <IconVolume size={isMobile ? 16 : 20} color="var(--mantine-color-dimmed)" />
+                  <Slider
+                    size="xs"
+                    w={isMobile ? 70 : 100}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={volume}
+                    onChange={handleVolumeChange}
+                    label={isMobile ? null : (v) => `${Math.round(v * 100)}%`}
+                  />
+                </Group>
+                {/* External sounds controls */}
+                <Group gap="xs" wrap="wrap" justify="flex-end" visibleFrom="md">
+                  {externalCount > 0 && (
+                    <Tooltip
+                      label={
+                        disableExternalSounds
+                          ? 'External sounds disabled for this session'
+                          : 'Disable external sounds for this session'
+                      }
+                      withArrow
+                    >
+                      <Group gap={4}>
+                        <IconCloudOff size={14} color="var(--mantine-color-dimmed)" />
+                        <Switch
+                          size="xs"
+                          checked={disableExternalSounds}
+                          onChange={(e) => handleToggleDisableExternal(e.currentTarget.checked)}
+                          label={
+                            <Text size="xs" c="dimmed">
+                              Disable ext.
+                            </Text>
+                          }
+                        />
+                      </Group>
+                    </Tooltip>
+                  )}
+                  <Tooltip label="Manage external sound providers" withArrow>
+                    <Button
+                      size="xs"
+                      variant={hasConnectedProviders ? 'light' : 'subtle'}
+                      color={hasConnectedProviders ? 'green' : undefined}
+                      leftSection={<IconPlugConnected size={14} />}
+                      onClick={openProviderModal}
+                    >
+                      Providers
+                    </Button>
+                  </Tooltip>
+                  {hasConnectedProviders && (
+                    <Tooltip label="Search and add external tracks" withArrow>
+                      <Button
+                        size="xs"
+                        variant="subtle"
+                        leftSection={<IconSearch size={14} />}
+                        onClick={openSearchModal}
+                      >
+                        Add track
+                      </Button>
+                    </Tooltip>
+                  )}
+                </Group>
+              </Group>
+            </Box>
+          </Grid.Col>
+
+
+        </Grid>
+      </Box >
 
       {/* Autoplay Permission Modal */}
-      <Modal
+      < Modal
         opened={modalOpened}
         onClose={close}
         title="Playback Permission Required"
@@ -586,17 +627,17 @@ export function BackgroundMusic({
             </Button>
           </Group>
         </Stack>
-      </Modal>
+      </Modal >
 
       {/* External Sound Provider Modal */}
-      <ExternalSoundProviderModal
+      < ExternalSoundProviderModal
         opened={providerModalOpened}
         onClose={closeProviderModal}
         externalSoundsHook={externalSoundsHook}
       />
 
       {/* External Sound Search Modal */}
-      <ExternalSoundSearchModal
+      < ExternalSoundSearchModal
         opened={searchModalOpened}
         onClose={closeSearchModal}
         userId={userId}

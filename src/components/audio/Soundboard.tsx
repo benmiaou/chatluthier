@@ -1,4 +1,4 @@
-import { Group, Paper, Slider, Stack, Text } from '@mantine/core';
+import { Badge, Box, Group, ScrollArea, Slider, Stack, Text } from '@mantine/core';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IconVolume } from '@tabler/icons-react';
@@ -17,6 +17,7 @@ interface SoundboardProps {
 export function Soundboard({ userId = null }: SoundboardProps): React.ReactElement {
   const { send, addMessageHandler, sessionId } = useSocketContext();
   const { sounds, volume, context, setContext, playSound, setVolume } = useSoundboard(userId);
+  const [activeFilename, setActiveFilename] = useState<string | null>(null);
 
   // Initialize soundOrder with the current order of sounds
   const [soundOrder, setSoundOrder] = useState<string[]>(() => {
@@ -150,6 +151,10 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
     }
 
     playSound(sound);
+    setActiveFilename(filename);
+    setTimeout(() => {
+      setActiveFilename((prev) => (prev === filename ? null : prev));
+    }, 750);
 
     // Always try to show credits, regardless of session
     if (sound.credit) {
@@ -182,6 +187,10 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
         const sound = sounds.find((s) => s.filename === filename);
         if (sound) {
           playSound(sound);
+          setActiveFilename(filename);
+          setTimeout(() => {
+            setActiveFilename((prev) => (prev === filename ? null : prev));
+          }, 750);
           // Show credit for received soundboard sounds
           if (credit && name) {
             showCreditToast(name, credit);
@@ -192,59 +201,38 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
   }, [addMessageHandler, playSound, sounds]);
 
   return (
-    <Paper p="xs" radius="md" withBorder>
-      <Stack gap="xs">
-        {/* Title with volume control */}
-        <Group justify="center" align="center">
-          <Text fw={600} size="sm" tt="uppercase" c="dimmed">
-            Soundboard
-          </Text>
-          <Group gap={6} align="center" ml={8}>
-            <IconVolume size={16} color="var(--mantine-color-dimmed)" />
-            <Slider
-              size="xs"
-              w={80}
-              min={0}
-              max={1}
-              step={0.01}
-              value={volume}
-              onChange={setVolume}
-              label={(v) => `${Math.round(v * 100)}%`}
-            />
-          </Group>
+
+    <Stack gap="sm" bg="dark.7" style={{ flex: 1, minHeight: '100%', height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 8, overflow: 'hidden' }}>
+      <Group justify="space-between" align="center" wrap="wrap" px="xs" mt="xs">
+        <Text fw={700} size="sm" tt="uppercase" c="dimmed" className="soundboard-title">
+          Soundboard
+        </Text>
+        <Group gap="xs" wrap="wrap">
+          {Boolean(userId) && (
+            <Badge size="sm" variant="light" color="teal">
+              Drag enabled
+            </Badge>
+          )}
         </Group>
+      </Group>
 
-        {/* Context dropdown */}
-        {contexts.length > 1 && (
-          <Group justify="flex-end" gap="xs">
-            <CustomCombobox
-              value={context}
-              onChange={(v) => setContext(v ?? 'All')}
-              data={contexts}
-              placeholder="Context"
-            />
-          </Group>
-        )}
 
+
+
+      <ScrollArea
+        px={10}
+        pb={5}
+        style={{ flex: 1 }}
+        type="auto"
+      >
         {orderedSounds.length === 0 && (
-          <Text size="xs" c="dimmed">
+          <Text size="xs" c="dimmed" ta="center" py="sm">
             Loading sounds...
           </Text>
         )}
 
         <DndProvider backend={HTML5Backend}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-              gap: '8px',
-              margin: 0,
-              padding: 0,
-              width: '100%',
-              overflow: 'visible',
-              alignContent: 'start',
-            }}
-          >
+          <div className="soundboard-grid">
             {orderedSounds.map((sound, index) => (
               <DraggableSoundButton
                 key={`${sound.filename}-${index}`}
@@ -254,11 +242,40 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
                 moveItem={moveItem}
                 onDragEnd={handleDragEnd}
                 showDragHandle={Boolean(userId)}
+                isActive={activeFilename === sound.filename}
               />
             ))}
           </div>
         </DndProvider>
-      </Stack>
-    </Paper>
+      </ScrollArea>
+      <Box bg="dark.8" p="xs">
+        <Group justify="space-between" align="center" wrap="wrap" gap="xs">
+          {contexts.length > 1 && (
+            <CustomCombobox
+              value={context}
+              onChange={(v) => setContext(v ?? 'All')}
+              data={contexts}
+              placeholder="Context"
+            />
+          )}
+
+          <Group gap={6} align="center" className="soundboard-volume-control">
+            <IconVolume size={16} color="var(--mantine-color-dimmed)" />
+            <Slider
+              size="xs"
+              w={110}
+              min={0}
+              max={1}
+              step={0.01}
+              value={volume}
+              onChange={setVolume}
+              label={(v) => `${Math.round(v * 100)}%`}
+            />
+          </Group>
+        </Group>
+      </Box>
+
+    </Stack >
+
   );
 }
