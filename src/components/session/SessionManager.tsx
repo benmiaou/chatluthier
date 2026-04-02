@@ -3,7 +3,6 @@ import {
   Button,
   CopyButton,
   Group,
-  Paper,
   Stack,
   Text,
   TextInput,
@@ -39,7 +38,7 @@ export function SessionManager(): React.JSX.Element {
   const inviteLink = sessionId ? `${globalThis.location.origin}?sessionId=${sessionId}` : '';
 
   return (
-    <Paper p="md" radius="md" withBorder>
+    < >
       <Stack gap="sm">
         <Group justify="space-between" align="center">
           <Group gap="xs" align="center">
@@ -146,6 +145,6 @@ export function SessionManager(): React.JSX.Element {
           </Group>
         )}
       </Stack>
-    </Paper>
+    </>
   );
 }

@@ -68,9 +68,9 @@ export function DraggableSoundBar({
       ref={combinedRef}
       style={{
         opacity: isDragging ? 0.5 : 1,
-        width: '200px',
-        minWidth: '175px',
-        maxWidth: '175px',
+        width: '100%',
+        minWidth: 0,
+        maxWidth: 'none',
         cursor: 'default',
         transform: isDragging ? 'scale(0.95)' : 'none',
         transition: 'transform 0.1s ease, opacity 0.1s ease',
@@ -80,13 +80,15 @@ export function DraggableSoundBar({
     >
       {showDragHandle && (
         <div
-          ref={drag as React.RefObject<HTMLDivElement>}
+          ref={(node) => {
+            drag(node);
+          }}
           style={{
             position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
-            height: '30px',
+            height: '34px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -96,7 +98,7 @@ export function DraggableSoundBar({
             borderRadius: '4px 4px 0 0',
           }}
         >
-          <IconGripVertical size={18} color="#666" />
+          <IconGripVertical size={20} color="#666" />
         </div>
       )}
       <div style={{ pointerEvents: isDragging ? 'none' : 'auto' }}>

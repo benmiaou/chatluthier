@@ -1,4 +1,4 @@
-import { Button, Group, Paper, Stack, Text, TextInput } from '@mantine/core';
+import { Badge, Box, Button, Group, ScrollArea, Stack, Text, TextInput } from '@mantine/core';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { IconDeviceFloppy, IconRefresh } from '@tabler/icons-react';
@@ -288,13 +288,60 @@ export function AmbianceSounds({
   const presetNames = Object.keys(presets);
 
   return (
-    <Paper p="md" radius="md" withBorder>
-      <Stack gap="sm" style={{ margin: 0, padding: 0 }}>
-        <Text fw={600} size="sm" tt="uppercase" c="dimmed" ta="center">
-          Ambiance Sounds
-        </Text>
-        <Group justify="space-between">
-          <Group gap="xs">
+
+    <Stack gap="sm" bg="dark.7" style={{ flex: 1, minHeight: '100%', height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 8, overflow: 'hidden' }}>
+      <Group justify="space-between" align="center" wrap="wrap" px="xs" mt="xs">
+        <Stack gap={2}>
+          <Text fw={700} size="sm" tt="uppercase" c="dimmed">
+            Ambiance Sounds
+          </Text>
+        </Stack>
+        <Group gap="xs" wrap="wrap">
+          <Badge size="sm" variant="light" color="gray">
+            {bars.length} {bars.length !== 1 ? ' ambiance sounds' : ' ambiance sound'}
+          </Badge>
+          {Boolean(userId) && (
+            <Badge size="sm" variant="light" color="teal">
+              Drag enabled
+            </Badge>
+          )}
+        </Group>
+      </Group>
+
+
+
+      <ScrollArea
+        px={10}
+        pb={5}
+        style={{ flex: 1 }}
+        type="auto"
+      >
+
+        {bars.length === 0 && (
+          <Text size="xs" c="dimmed" ta="center" py="sm">
+            Loading ambiance sounds…
+          </Text>
+        )}
+
+        <DndProvider backend={HTML5Backend}>
+          <div className="ambiance-sound-grid">
+            {orderedBars.map((bar, index) => (
+              <DraggableSoundBar
+                key={`${bar.sound.filename}-${index}`}
+                bar={bar}
+                index={index}
+                onChange={handleChange}
+                moveItem={moveItem}
+                onDragEnd={handleDragEnd}
+                showDragHandle={Boolean(userId)}
+              />
+            ))}
+          </div>
+        </DndProvider>
+      </ScrollArea>
+      <Box bg="dark.8" p="xs">
+        <Group justify="space-between" align="center" wrap="wrap" gap="xs">
+          <Group gap="xs" wrap="wrap">
             {contexts.length > 1 && (
               <CustomCombobox
                 value={context}
@@ -312,14 +359,15 @@ export function AmbianceSounds({
               Reset
             </Button>
           </Group>
+
           {userId && (
-            <Group gap="xs">
+            <Group gap="xs" wrap="wrap" className="ambiance-preset-controls">
               <TextInput
                 size="xs"
                 placeholder="Preset name"
                 value={presetName}
                 onChange={(e) => setPresetName(e.currentTarget.value)}
-                style={{ width: 150 }}
+                className="ambiance-preset-input"
                 onKeyDown={(e) => e.key === 'Enter' && handleSavePreset()}
               />
               <Button
@@ -336,50 +384,14 @@ export function AmbianceSounds({
                   value=""
                   onChange={handleApplyPreset}
                   data={presetNames}
-                  placeholder="Load preset…"
+                  placeholder="Load preset..."
                 />
               )}
             </Group>
           )}
         </Group>
+      </Box>
+    </Stack>
 
-        {bars.length === 0 && (
-          <Text size="xs" c="dimmed">
-            Loading ambiance sounds…
-          </Text>
-        )}
-
-        <DndProvider backend={HTML5Backend}>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, 175px)',
-              gridTemplateRows: 'repeat(auto-fill, 95px)',
-              minHeight: '100px',
-              position: 'relative',
-              width: '100%',
-              overflow: 'visible',
-              alignContent: 'start',
-              columnGap: '10px', // Reduced horizontal spacing between images
-              rowGap: '10px', // Consistent vertical spacing between rows
-              marginTop: '0',
-              paddingTop: '0',
-            }}
-          >
-            {orderedBars.map((bar, index) => (
-              <DraggableSoundBar
-                key={`${bar.sound.filename}-${index}`}
-                bar={bar}
-                index={index}
-                onChange={handleChange}
-                moveItem={moveItem}
-                onDragEnd={handleDragEnd}
-                showDragHandle={Boolean(userId)}
-              />
-            ))}
-          </div>
-        </DndProvider>
-      </Stack>
-    </Paper>
   );
 }
