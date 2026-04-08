@@ -10,14 +10,11 @@ import { AppFooter } from './Footer';
 
 import { SETTINGS } from '../../constants/settings';
 
-
 interface AppLayoutProps {
   children: ReactNode;
 }
 
 export function AppLayout({ children }: Readonly<AppLayoutProps>): React.ReactElement {
-
-
   return (
     <AppShell
       header={{ height: SETTINGS.HEADER_HEIGHT }}
@@ -29,18 +26,11 @@ export function AppLayout({ children }: Readonly<AppLayoutProps>): React.ReactEl
         <AppHeader />
       </AppShell.Header>
 
-      <AppShell.Main bg="dark.9">
-        {children}
-      </AppShell.Main>
+      <AppShell.Main bg="dark.9">{children}</AppShell.Main>
 
       <AppShell.Footer p={0}>
-
-
-
-
         <AppFooter />
-
       </AppShell.Footer>
-    </AppShell >
+    </AppShell>
   );
 }

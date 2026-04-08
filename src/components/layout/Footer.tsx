@@ -19,7 +19,6 @@ export function AppFooter(): React.ReactElement {
 
   return (
     <>
-
       <Group p="xs" justify="center" gap="xl">
         <Anchor size="xs" c="dimmed" onClick={openPrivacy} style={{ cursor: 'pointer' }}>
           Privacy Policy

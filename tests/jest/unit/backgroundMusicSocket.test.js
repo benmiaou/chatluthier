@@ -91,32 +91,43 @@ describe('Background Music Socket Server Tests', () => {
 
     // Give time for subscriptions
     setTimeout(() => {
-      // Send backgroundMusicChange from ws1
+      // Set ws1 as leader first
       ws1.send(
         JSON.stringify({
-          type: 'backgroundMusicChange',
+          type: 'setLeader',
           id: sessionId,
-          content: {
-            filename: 'test-song.mp3',
-            credit: 'Test Artist',
-            timestamp: Date.now(),
-            currentTime: 30,
-          },
         })
       );
 
-      // Check that ws2 and ws3 received the message, but not ws1
+      // Give time for leader to be set
       setTimeout(() => {
-        expect(messagesReceived.length).toBe(2); // ws2 and ws3 should receive
-        expect(messagesReceived[0].data.type).toBe('backgroundMusicChange');
-        expect(messagesReceived[0].data.content.filename).toBe('test-song.mp3');
-        expect(messagesReceived[1].data.content.filename).toBe('test-song.mp3');
+        // Send backgroundMusicChange from ws1 (now leader)
+        ws1.send(
+          JSON.stringify({
+            type: 'backgroundMusicChange',
+            id: sessionId,
+            content: {
+              filename: 'test-song.mp3',
+              credit: 'Test Artist',
+              timestamp: Date.now(),
+              currentTime: 30,
+            },
+          })
+        );
 
-        ws1.close();
-        ws2.close();
-        ws3.close();
-        done();
-      }, 100);
+        // Check that ws2 and ws3 received the message, but not ws1
+        setTimeout(() => {
+          expect(messagesReceived.length).toBe(2); // ws2 and ws3 should receive
+          expect(messagesReceived[0].data.type).toBe('backgroundMusicChange');
+          expect(messagesReceived[0].data.content.filename).toBe('test-song.mp3');
+          expect(messagesReceived[1].data.content.filename).toBe('test-song.mp3');
+
+          ws1.close();
+          ws2.close();
+          ws3.close();
+          done();
+        }, 100);
+      }, 50);
     }, 100);
   });
 
@@ -357,6 +368,318 @@ describe('Background Music Socket Server Tests', () => {
         ws1.close();
         done();
       }, 100);
+    }, 100);
+  });
+});
+
+describe('Leader and Playlist Management', () => {
+  let server;
+  let port = 8083;
+
+  beforeAll((done) => {
+    server = initializeWebSocketServer(null, 3000, port);
+    done();
+  });
+
+  afterAll((done) => {
+    server.close();
+    _resetStateForTests();
+    done();
+  });
+
+  beforeEach(() => {
+    _resetStateForTests();
+  });
+
+  test('should set leader and broadcast leader change', (done) => {
+    const ws1 = new WebSocket(`ws://localhost:${port}`);
+    const ws2 = new WebSocket(`ws://localhost:${port}`);
+    const sessionId = 'leader-test-1';
+
+    ws1.on('open', () => {
+      ws1.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User1',
+        })
+      );
+    });
+
+    ws2.on('open', () => {
+      ws2.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User2',
+        })
+      );
+    });
+
+    let leaderChangeReceived = false;
+    let leaderStatusReceived = false;
+
+    ws2.on('message', (message) => {
+      const data = JSON.parse(message);
+      if (data.type === 'leaderChange') {
+        leaderChangeReceived = true;
+        expect(data.content.leaderId).toBeDefined();
+      }
+    });
+
+    ws1.on('message', (message) => {
+      const data = JSON.parse(message);
+      if (data.type === 'leaderStatus') {
+        leaderStatusReceived = true;
+        expect(data.content.isLeader).toBe(true);
+      }
+    });
+
+    setTimeout(() => {
+      // Set ws1 as leader
+      ws1.send(
+        JSON.stringify({
+          type: 'setLeader',
+          id: sessionId,
+        })
+      );
+
+      setTimeout(() => {
+        expect(leaderChangeReceived).toBe(true);
+        expect(leaderStatusReceived).toBe(true);
+        ws1.close();
+        ws2.close();
+        done();
+      }, 100);
+    }, 100);
+  });
+
+  test('should get leader status', (done) => {
+    const ws1 = new WebSocket(`ws://localhost:${port}`);
+    const ws2 = new WebSocket(`ws://localhost:${port}`);
+    const sessionId = 'leader-test-2';
+
+    ws1.on('open', () => {
+      ws1.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User1',
+        })
+      );
+    });
+
+    ws2.on('open', () => {
+      ws2.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User2',
+        })
+      );
+    });
+
+    let leaderStatusResponse = null;
+
+    ws2.on('message', (message) => {
+      const data = JSON.parse(message);
+      if (data.type === 'leaderStatus') {
+        leaderStatusResponse = data;
+      }
+    });
+
+    setTimeout(() => {
+      // Set ws1 as leader
+      ws1.send(
+        JSON.stringify({
+          type: 'setLeader',
+          id: sessionId,
+        })
+      );
+
+      // Give time for leader to be set
+      setTimeout(() => {
+        // Check leader status from ws2
+        ws2.send(
+          JSON.stringify({
+            type: 'getLeaderStatus',
+            id: sessionId,
+          })
+        );
+
+        setTimeout(() => {
+          expect(leaderStatusResponse).not.toBeNull();
+          expect(leaderStatusResponse.content.isLeader).toBe(false);
+          expect(leaderStatusResponse.content.leaderId).toBeDefined();
+          ws1.close();
+          ws2.close();
+          done();
+        }, 100);
+      }, 50);
+    }, 100);
+  });
+
+  test('should only allow leader to broadcast background music', (done) => {
+    const ws1 = new WebSocket(`ws://localhost:${port}`);
+    const ws2 = new WebSocket(`ws://localhost:${port}`);
+    const sessionId = 'leader-test-3';
+
+    ws1.on('open', () => {
+      ws1.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User1',
+        })
+      );
+    });
+
+    ws2.on('open', () => {
+      ws2.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User2',
+        })
+      );
+    });
+
+    let errorReceived = false;
+
+    ws2.on('message', (message) => {
+      const data = JSON.parse(message);
+      if (data.type === 'error' && data.message.includes('Only the leader')) {
+        errorReceived = true;
+      }
+    });
+
+    setTimeout(() => {
+      // Try to broadcast background music from ws2 (not leader)
+      ws2.send(
+        JSON.stringify({
+          type: 'backgroundMusicChange',
+          id: sessionId,
+          content: {
+            filename: 'test-song.mp3',
+          },
+        })
+      );
+
+      setTimeout(() => {
+        expect(errorReceived).toBe(true);
+        ws1.close();
+        ws2.close();
+        done();
+      }, 100);
+    }, 100);
+  });
+
+  test('should manage playlist and auto-play next track', (done) => {
+    const ws1 = new WebSocket(`ws://localhost:${port}`);
+    const ws2 = new WebSocket(`ws://localhost:${port}`);
+    const sessionId = 'playlist-test-1';
+
+    ws1.on('open', () => {
+      ws1.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User1',
+        })
+      );
+    });
+
+    ws2.on('open', () => {
+      ws2.send(
+        JSON.stringify({
+          type: 'subscribe',
+          id: sessionId,
+          pseudo: 'User2',
+        })
+      );
+    });
+
+    const playlistStatuses = [];
+    const backgroundMusicChanges = [];
+
+    ws1.on('message', (message) => {
+      const data = JSON.parse(message);
+      if (data.type === 'playlistStatus') {
+        playlistStatuses.push(data);
+      } else if (data.type === 'backgroundMusicChange') {
+        backgroundMusicChanges.push(data);
+      }
+    });
+
+    setTimeout(() => {
+      // Set ws1 as leader
+      ws1.send(
+        JSON.stringify({
+          type: 'setLeader',
+          id: sessionId,
+        })
+      );
+
+      // Give time for leader to be set
+      setTimeout(() => {
+        // Add first track
+        ws1.send(
+          JSON.stringify({
+            type: 'backgroundMusicChange',
+            id: sessionId,
+            content: {
+              filename: 'track1.mp3',
+            },
+          })
+        );
+
+        // Add second track
+        setTimeout(() => {
+          ws1.send(
+            JSON.stringify({
+              type: 'backgroundMusicChange',
+              id: sessionId,
+              content: {
+                filename: 'track2.mp3',
+              },
+            })
+          );
+
+          // Check playlist
+          setTimeout(() => {
+            ws1.send(
+              JSON.stringify({
+                type: 'getPlaylist',
+                id: sessionId,
+              })
+            );
+
+            setTimeout(() => {
+              expect(playlistStatuses.length).toBe(1);
+              expect(playlistStatuses[0].content.playlist).toContain('track1.mp3');
+              expect(playlistStatuses[0].content.playlist).toContain('track2.mp3');
+
+              // Simulate track ended
+              ws1.send(
+                JSON.stringify({
+                  type: 'trackEnded',
+                  id: sessionId,
+                })
+              );
+
+              setTimeout(() => {
+                // Should have auto-played next track
+                expect(backgroundMusicChanges.length).toBe(3); // Original 2 + auto-play
+                expect(backgroundMusicChanges[2].content.isAutoPlay).toBe(true);
+
+                ws1.close();
+                ws2.close();
+                done();
+              }, 100);
+            }, 100);
+          }, 100);
+        }, 50);
+      }, 50);
     }, 100);
   });
 });

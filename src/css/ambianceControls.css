@@ -118,14 +118,12 @@
   padding: 1px;
 }
 
-
-
 .ambiance-panel-header {
   padding-bottom: 2px;
 }
 
 .ambiance-toolbar {
-  padding: 8px;;
+  padding: 8px;
   border-radius: 5px;
   background: color-mix(in srgb, var(--main-background-color-transparency) 20%, transparent);
 }

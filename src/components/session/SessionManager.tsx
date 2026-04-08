@@ -10,15 +10,24 @@ import {
   Avatar,
   Tooltip,
 } from '@mantine/core';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type React from 'react';
-import { useSocketContext } from '../../contexts/SocketContext';
-import { IconCopy, IconCheck, IconPlugConnectedX, IconUsers } from '@tabler/icons-react';
+import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
+import { IconCopy, IconCheck, IconPlugConnectedX, IconUsers, IconCrown } from '@tabler/icons-react';
 
 export function SessionManager(): React.JSX.Element {
-  const { connected, sessionId, subscribe, disconnect, statusMessage, participants } =
-    useSocketContext();
+  const {
+    connected,
+    sessionId,
+    subscribe,
+    disconnect,
+    statusMessage,
+    participants,
+    send,
+    addMessageHandler,
+  } = useSocketContext();
   const [joinInput, setJoinInput] = useState('');
+  const [isLeader, setIsLeader] = useState(false);
 
   const handleJoin = () => {
     const id = joinInput.trim();
@@ -37,8 +46,41 @@ export function SessionManager(): React.JSX.Element {
 
   const inviteLink = sessionId ? `${globalThis.location.origin}?sessionId=${sessionId}` : '';
 
+  // Check leader status when session changes
+  useEffect(() => {
+    if (sessionId) {
+      // Request leader status from server
+      send({ type: 'getLeaderStatus', id: sessionId });
+    } else {
+      // Reset leader status when session ends
+      setTimeout(() => setIsLeader(false), 0);
+    }
+  }, [sessionId, send]);
+
+  // Handle leader status messages
+  useEffect(() => {
+    if (!sessionId) {
+      return;
+    }
+
+    const handleMessage = (msg: WsMessage) => {
+      if (msg.type === 'leaderStatus' && msg.content) {
+        setIsLeader(Boolean(msg.content.isLeader));
+      } else if (msg.type === 'leaderChange') {
+        // Check if we're the new leader
+        send({ type: 'getLeaderStatus', id: sessionId });
+      }
+    };
+
+    const removeHandler = addMessageHandler(handleMessage);
+
+    return () => {
+      removeHandler();
+    };
+  }, [sessionId, send, addMessageHandler]);
+
   return (
-    < >
+    <>
       <Stack gap="sm">
         <Group justify="space-between" align="center">
           <Group gap="xs" align="center">
@@ -48,8 +90,12 @@ export function SessionManager(): React.JSX.Element {
             {connected && !sessionId && <Loader size="xs" color="gray" />}
           </Group>
           <Group gap="xs" align="center">
-            <Badge color={sessionId ? 'green' : 'gray'} size="xs">
-              {sessionId ? 'Connected' : 'Disconnected'}
+            <Badge
+              color={sessionId ? (isLeader ? 'darkgreen' : 'green') : 'gray'}
+              size="xs"
+              leftSection={isLeader ? <IconCrown size={10} /> : null}
+            >
+              {sessionId ? (isLeader ? 'Connected (Leader)' : 'Connected') : 'Disconnected'}
             </Badge>
           </Group>
         </Group>

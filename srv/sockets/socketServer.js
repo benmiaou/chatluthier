@@ -6,6 +6,9 @@ let wsServer = null;
 const subscribers = new Map(); // Map of sessionId -> Set of WebSocket connections
 const sessionParticipants = new Map(); // Map of sessionId -> Map of clientId -> {pseudo, isAnonymous}
 const participantToWs = new Map(); // Map of participantId -> WebSocket connection
+const sessionLeaders = new Map(); // Map of sessionId -> leaderParticipantId
+const sessionPlaylists = new Map(); // Map of sessionId -> playlist array
+const sessionCurrentTrackIndex = new Map(); // Map of sessionId -> current track index
 const MAX_MESSAGES_PER_SECOND = 10;
 const messageTimestamps = new Map();
 
@@ -96,34 +99,331 @@ function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
     }
 
     const subs = subscribers.get(connectedId);
-    if (subs) {
-      // Log background music changes for debugging
-      if (data.type === 'backgroundMusicChange' || data.type === 'backgroundMusicStop') {
-        const participantId = Array.from(participantToWs.entries()).find(
-          ([_, wsEntry]) => wsEntry === ws
-        )?.[0];
-        logger.info(`Broadcasting ${data.type} from participant ${participantId || 'unknown'}`, {
-          sessionId: connectedId,
-          participantCount: subs.size,
-          contentType: data.content?.filename
-            ? 'local'
-            : data.content?.externalSound
-              ? 'external'
-              : 'unknown',
-        });
+    if (!subs) return;
+
+    // Get the participant ID for the sender
+    const participantId = Array.from(participantToWs.entries()).find(
+      ([_, wsEntry]) => wsEntry === ws
+    )?.[0];
+
+    // Check if this is a background music related message
+    if (
+      data.type === 'backgroundMusicChange' ||
+      data.type === 'backgroundMusicStop' ||
+      data.type === 'backgroundMusicVolumeChange'
+    ) {
+      // Only leaders can broadcast background music changes
+      const currentLeader = sessionLeaders.get(connectedId);
+
+      if (participantId !== currentLeader) {
+        ws.send(
+          JSON.stringify({
+            type: 'error',
+            message: 'Only the leader can broadcast background music changes.',
+          })
+        );
+        return;
+      }
+    }
+
+    // Log background music changes for debugging
+    if (data.type === 'backgroundMusicChange' || data.type === 'backgroundMusicStop') {
+      logger.info(`Broadcasting ${data.type} from participant ${participantId || 'unknown'}`, {
+        sessionId: connectedId,
+        participantCount: subs.size,
+        contentType: data.content?.filename
+          ? 'local'
+          : data.content?.externalSound
+            ? 'external'
+            : 'unknown',
+      });
+    }
+
+    // Handle playlist management for background music changes
+    if (data.type === 'backgroundMusicChange' && data.content) {
+      // Initialize playlist if it doesn't exist
+      if (!sessionPlaylists.has(connectedId)) {
+        sessionPlaylists.set(connectedId, []);
       }
 
+      const playlist = sessionPlaylists.get(connectedId);
+
+      // Add the track to playlist if it's not already there
+      const trackKey =
+        data.content.filename ||
+        (data.content.externalSound
+          ? `${data.content.externalSound.provider}:${data.content.externalSound.trackId}`
+          : null);
+
+      if (trackKey && !playlist.includes(trackKey)) {
+        playlist.push(trackKey);
+      }
+
+      // Update current track index
+      if (trackKey) {
+        const currentIndex = playlist.indexOf(trackKey);
+        if (currentIndex !== -1) {
+          sessionCurrentTrackIndex.set(connectedId, currentIndex);
+        }
+      }
+    }
+
+    subs.forEach((subscriberWs) => {
+      if (subscriberWs !== ws && subscriberWs.readyState === WebSocket.OPEN) {
+        subscriberWs.send(
+          JSON.stringify({
+            type: data.type,
+            id: connectedId,
+            content: data.content,
+          })
+        );
+      }
+    });
+  }
+
+  function handleSetLeader(data, ws, connectedId) {
+    if (!connectedId) {
+      ws.send(JSON.stringify({ type: 'error', message: 'Client not connected to any ID.' }));
+      return;
+    }
+
+    // Get the participant ID for the requester
+    const participantId = Array.from(participantToWs.entries()).find(
+      ([_, wsEntry]) => wsEntry === ws
+    )?.[0];
+
+    if (!participantId) {
+      ws.send(JSON.stringify({ type: 'error', message: 'Participant not found.' }));
+      return;
+    }
+
+    // Set this participant as the leader for the session
+    sessionLeaders.set(connectedId, participantId);
+
+    // Notify all participants about the new leader
+    const subs = subscribers.get(connectedId);
+    if (subs) {
       subs.forEach((subscriberWs) => {
-        if (subscriberWs !== ws && subscriberWs.readyState === WebSocket.OPEN) {
+        if (subscriberWs.readyState === WebSocket.OPEN) {
           subscriberWs.send(
             JSON.stringify({
-              type: data.type,
+              type: 'leaderChange',
               id: connectedId,
-              content: data.content,
+              content: {
+                leaderId: participantId,
+              },
             })
           );
         }
       });
+    }
+
+    ws.send(
+      JSON.stringify({
+        type: 'leaderStatus',
+        id: connectedId,
+        content: {
+          isLeader: true,
+        },
+      })
+    );
+  }
+
+  function handleGetLeaderStatus(data, ws, connectedId) {
+    if (!connectedId) {
+      ws.send(JSON.stringify({ type: 'error', message: 'Client not connected to any ID.' }));
+      return;
+    }
+
+    // Get the participant ID for the requester
+    const participantId = Array.from(participantToWs.entries()).find(
+      ([_, wsEntry]) => wsEntry === ws
+    )?.[0];
+
+    if (!participantId) {
+      ws.send(JSON.stringify({ type: 'error', message: 'Participant not found.' }));
+      return;
+    }
+
+    const currentLeader = sessionLeaders.get(connectedId);
+    const isLeader = participantId === currentLeader;
+
+    ws.send(
+      JSON.stringify({
+        type: 'leaderStatus',
+        id: connectedId,
+        content: {
+          isLeader: isLeader,
+          leaderId: currentLeader,
+        },
+      })
+    );
+  }
+
+  function handleSetPlaylist(data, ws, connectedId) {
+    if (!connectedId) {
+      ws.send(JSON.stringify({ type: 'error', message: 'Client not connected to any ID.' }));
+      return;
+    }
+
+    // Get the participant ID for the requester
+    const participantId = Array.from(participantToWs.entries()).find(
+      ([_, wsEntry]) => wsEntry === ws
+    )?.[0];
+
+    // Check if this participant is the leader
+    const currentLeader = sessionLeaders.get(connectedId);
+
+    if (participantId !== currentLeader) {
+      ws.send(
+        JSON.stringify({
+          type: 'error',
+          message: 'Only the leader can set the playlist.',
+        })
+      );
+      return;
+    }
+
+    // Validate and set the playlist
+    if (data.content?.playlist && Array.isArray(data.content.playlist)) {
+      sessionPlaylists.set(connectedId, data.content.playlist);
+
+      if (typeof data.content.currentTrackIndex === 'number') {
+        sessionCurrentTrackIndex.set(connectedId, data.content.currentTrackIndex);
+      } else {
+        sessionCurrentTrackIndex.set(connectedId, 0);
+      }
+
+      console.log(`Playlist set for session ${connectedId}:`, data.content.playlist);
+
+      ws.send(
+        JSON.stringify({
+          type: 'playlistStatus',
+          id: connectedId,
+          content: {
+            playlist: data.content.playlist,
+            currentTrackIndex: sessionCurrentTrackIndex.get(connectedId) || 0,
+          },
+        })
+      );
+    } else {
+      ws.send(
+        JSON.stringify({
+          type: 'error',
+          message: 'Invalid playlist data.',
+        })
+      );
+    }
+  }
+
+  function handleGetPlaylist(data, ws, connectedId) {
+    if (!connectedId) {
+      ws.send(JSON.stringify({ type: 'error', message: 'Client not connected to any ID.' }));
+      return;
+    }
+
+    const playlist = sessionPlaylists.get(connectedId) || [];
+    const currentIndex = sessionCurrentTrackIndex.get(connectedId) || 0;
+
+    ws.send(
+      JSON.stringify({
+        type: 'playlistStatus',
+        id: connectedId,
+        content: {
+          playlist: playlist,
+          currentTrackIndex: currentIndex,
+        },
+      })
+    );
+  }
+
+  function handleTrackEnded(data, ws, connectedId) {
+    console.log(`[Server] TrackEnded received for session: ${connectedId}`);
+
+    if (!connectedId) {
+      console.warn(`[Server] TrackEnded: No connectedId`);
+      ws.send(JSON.stringify({ type: 'error', message: 'Client not connected to any ID.' }));
+      return;
+    }
+
+    // Get the participant ID for the requester
+    const participantId = Array.from(participantToWs.entries()).find(
+      ([_, wsEntry]) => wsEntry === ws
+    )?.[0];
+
+    console.log(`[Server] TrackEnded: Participant ${participantId} in session ${connectedId}`);
+
+    // Check if this participant is the leader
+    const currentLeader = sessionLeaders.get(connectedId);
+
+    console.log(
+      `[Server] TrackEnded: Current leader for session ${connectedId} is ${currentLeader}, participant is ${participantId}`
+    );
+
+    if (participantId !== currentLeader) {
+      // Not the leader, just ignore or send error
+      console.warn(
+        `[Server] TrackEnded: Participant ${participantId} is not leader ${currentLeader}`
+      );
+      ws.send(
+        JSON.stringify({
+          type: 'error',
+          message: 'Only the leader can handle track ended events.',
+        })
+      );
+      return;
+    }
+
+    // Get current playlist and index
+    const playlist = sessionPlaylists.get(connectedId) || [];
+    let currentIndex = sessionCurrentTrackIndex.get(connectedId) || 0;
+
+    console.log(`[Server] TrackEnded: Current playlist for session ${connectedId}:`, playlist);
+    console.log(`[Server] TrackEnded: Current index BEFORE increment: ${currentIndex}`);
+
+    if (playlist.length === 0) {
+      // No playlist, nothing to do
+      console.warn(`[Server] TrackEnded: No playlist for session ${connectedId}`);
+      return;
+    }
+
+    // Move to next track (or loop to beginning)
+    const previousIndex = currentIndex;
+    currentIndex = (currentIndex + 1) % playlist.length;
+    sessionCurrentTrackIndex.set(connectedId, currentIndex);
+
+    const nextTrackKey = playlist[currentIndex];
+
+    console.log(
+      `[Track Ended] Session ${connectedId}: Advancing from track ${previousIndex} to ${currentIndex}, next track: ${nextTrackKey}`
+    );
+    console.log(
+      `[Track Ended] Session ${connectedId}: Playlist length: ${playlist.length}, current index after update: ${currentIndex}`
+    );
+
+    // Broadcast the next track to all participants
+    // Note: We only have the track key here, not the full track data.
+    // The clients will need to look up the track details locally.
+    const subs = subscribers.get(connectedId);
+    if (subs) {
+      subs.forEach((subscriberWs) => {
+        if (subscriberWs.readyState === WebSocket.OPEN) {
+          subscriberWs.send(
+            JSON.stringify({
+              type: 'backgroundMusicChange',
+              id: connectedId,
+              content: {
+                trackKey: nextTrackKey,
+                isAutoPlay: true,
+              },
+            })
+          );
+        }
+      });
+    } else {
+      console.warn(
+        `[Track Ended] Session ${connectedId}: No subscribers to notify about next track`
+      );
     }
   }
 
@@ -229,6 +529,26 @@ function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
             handleBroadcast(data, ws, connectedId);
             break;
 
+          case 'setLeader':
+            handleSetLeader(data, ws, connectedId);
+            break;
+
+          case 'getLeaderStatus':
+            handleGetLeaderStatus(data, ws, connectedId);
+            break;
+
+          case 'setPlaylist':
+            handleSetPlaylist(data, ws, connectedId);
+            break;
+
+          case 'getPlaylist':
+            handleGetPlaylist(data, ws, connectedId);
+            break;
+
+          case 'trackEnded':
+            handleTrackEnded(data, ws, connectedId);
+            break;
+
           case 'requestStatus':
             handleRequestStatus(data, ws, connectedId, participantId);
             break;
@@ -285,6 +605,9 @@ function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
           if (subs.size === 0) {
             subscribers.delete(connectedId);
             sessionParticipants.delete(connectedId);
+            sessionLeaders.delete(connectedId);
+            sessionPlaylists.delete(connectedId);
+            sessionCurrentTrackIndex.delete(connectedId);
             console.log(`No more subscribers for ID: ${connectedId}, ID removed.`);
           }
         }
@@ -299,6 +622,9 @@ function _resetStateForTests() {
   subscribers.clear();
   sessionParticipants.clear();
   participantToWs.clear();
+  sessionLeaders.clear();
+  sessionPlaylists.clear();
+  sessionCurrentTrackIndex.clear();
   messageTimestamps.clear();
 }
 

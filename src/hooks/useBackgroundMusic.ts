@@ -41,6 +41,7 @@ interface BackgroundMusicHook {
   }) => Promise<void>;
   playExternalReceived: (payload: ExternalSoundPayload) => Promise<void>;
   stopReceived: () => void;
+  setOnTrackEnded: (callback: (() => void) | null) => void;
 }
 
 export function useBackgroundMusic(
@@ -48,7 +49,9 @@ export function useBackgroundMusic(
   onAutoplayBlocked?: () => void,
   onPlayExternal?: (sound: Sound) => Promise<void>,
   onStopExternal?: () => Promise<void>,
-  onResolveExternal?: (payload: ExternalSoundPayload) => Promise<Sound | null>
+  onResolveExternal?: (payload: ExternalSoundPayload) => Promise<Sound | null>,
+  onTrackEnded?: () => void,
+  sessionId?: string | null
 ): BackgroundMusicHook {
   const playerRef = useRef<AudioPlayer>(new AudioPlayer());
   const [sounds, setSounds] = useState<Sound[]>([]);
@@ -63,6 +66,8 @@ export function useBackgroundMusic(
   const [_audioInitialized, _setAudioInitialized] = useState(false);
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentCategoryRef = useRef<BackgroundMusicCategory | null>(null);
+  const onTrackEndedRef = useRef(onTrackEnded);
+  const sessionIdRef = useRef(sessionId);
 
   // Keep callbacks in refs so closures always see latest values
   const onPlayExternalRef = useRef(onPlayExternal);
@@ -77,6 +82,13 @@ export function useBackgroundMusic(
   useEffect(() => {
     onResolveExternalRef.current = onResolveExternal;
   }, [onResolveExternal]);
+  useEffect(() => {
+    onTrackEndedRef.current = onTrackEnded;
+  }, [onTrackEnded]);
+
+  useEffect(() => {
+    sessionIdRef.current = sessionId;
+  }, [sessionId]);
 
   // ─── Initialize audio element ────────────────────────────────────────────
 
@@ -178,11 +190,13 @@ export function useBackgroundMusic(
   const playSpecificSoundRef = useRef<(sound: Sound, startTime?: number) => Promise<void>>(null);
 
   const playSpecificSound = useCallback(
-    async (sound: Sound, startTime = 0) => {
+    async (sound: Sound, _startTime = 0) => {
+      // console.log(`[playSpecificSound] Starting playback of: ${sound.filename}`);
       setCurrentSound(sound);
 
       // External sounds are routed to the provider SDK
       if (sound.isExternal) {
+        // console.log('[playSpecificSound] External sound, routing to provider');
         if (onPlayExternalRef.current) {
           await onPlayExternalRef.current(sound);
           setIsPlaying(true);
@@ -214,12 +228,18 @@ export function useBackgroundMusic(
 
       try {
         // Use the AudioPlayer's play method with our onended handler
-        await playerRef.current.play(`${ASSET_PREFIX}${sound.filename}`, volume, startTime, () => {
+        await playerRef.current.play(`${ASSET_PREFIX}${sound.filename}`, volume, () => {
           // When a specific sound ends, try to advance to next in current category
           // Use the ref to get the original category, not the potentially changed state
           const originalCategory = currentCategoryRef.current;
 
-          if (originalCategory) {
+          // console.log(
+          //   `[TrackEnded] Local playback ended for: ${sound.filename}, category: ${originalCategory}, sessionId: ${sessionIdRef.current}`
+          // );
+
+          if (originalCategory && !sessionIdRef.current) {
+            // Only auto-play next track if we're NOT in a session
+            // In sessions, the server handles track advancement
             // Use setTimeout to avoid circular reference during initialization
             setTimeout(() => {
               const filtered = sounds.filter(
@@ -228,21 +248,53 @@ export function useBackgroundMusic(
                   bgMatchesCategoryAndContext(s, originalCategory, context)
               );
 
+              // console.log(
+              //   `[TrackEnded] Filtered sounds for category ${originalCategory}:`,
+              //   filtered.map((s) => s.filename)
+              // );
+              // console.log(`[TrackEnded] Current sound: ${sound.filename}`);
+
               if (filtered.length > 0) {
                 const currentIndex = filtered.findIndex((s) => s.filename === sound.filename);
+
+                // console.log(
+                //   `[TrackEnded] Current index: ${currentIndex}, filtered length: ${filtered.length}`
+                // );
 
                 if (currentIndex >= 0) {
                   const nextIndex = (currentIndex + 1) % filtered.length;
                   const nextSound = filtered[nextIndex];
+                  // console.log(
+                  //   `[TrackEnded] Next sound: ${nextSound.filename}, next index: ${nextIndex}`
+                  // );
                   // Use a ref to access the latest playSpecificSound
-                  playSpecificSoundRef.current?.(nextSound).catch(() => {});
+                  playSpecificSoundRef.current?.(nextSound).catch((_error) => {
+                    // console.error('[TrackEnded] Error playing next sound:', _error);
+                  });
+                } else {
+                  // console.log(
+                  //   '[TrackEnded] Current sound not found in filtered list, playing first sound'
+                  // );
+                  playSpecificSoundRef.current?.(filtered[0]).catch((_error) => {
+                    // console.error('[TrackEnded] Error playing first sound:', _error);
+                  });
                 }
               } else {
-                // No sounds in filtered list
+                // console.log('[TrackEnded] No sounds in filtered list');
               }
             }, 0);
+          } else if (sessionIdRef.current) {
+            // console.log('[TrackEnded] In session, calling track ended callback');
+            // In sessions, just call the track ended callback to notify server
+            // The server will handle broadcasting the next track
           } else {
-            // No active category, not advancing
+            // console.log('[TrackEnded] No active category, not advancing');
+          }
+
+          // Call the track ended callback if provided
+          if (onTrackEndedRef.current) {
+            // console.log('[TrackEnded] Calling onTrackEnded callback');
+            onTrackEndedRef.current();
           }
         });
 
@@ -261,7 +313,7 @@ export function useBackgroundMusic(
     [volume, sounds, activeCategory, context, disableExternalSounds]
   );
 
-  // Initialize the ref with the current playSpecificSound function
+  // Use the logged version for debugging
   useEffect(() => {
     playSpecificSoundRef.current = playSpecificSound;
   }, [playSpecificSound]);
@@ -305,6 +357,10 @@ export function useBackgroundMusic(
         // Use the ref to get the original category, not the potentially changed state
         const originalCategory = currentCategoryRef.current;
 
+        // console.log(
+        //   `[TrackEnded] Category playback ended for: ${pick.filename}, category: ${category}, originalCategory: ${originalCategory}`
+        // );
+
         if (originalCategory === category) {
           // Use setTimeout to avoid circular reference during initialization
           setTimeout(() => {
@@ -314,18 +370,34 @@ export function useBackgroundMusic(
                 bgMatchesCategoryAndContext(s, category, context)
             );
 
+            // console.log(
+            //   `[TrackEnded] Filtered sounds for category ${category}:`,
+            //   filteredSounds.map((s) => s.filename)
+            // );
+            // console.log(`[TrackEnded] Current sound: ${currentSoundForHandler.filename}`);
+
             if (filteredSounds.length > 0) {
               const currentIndex = filteredSounds.findIndex(
                 (s) => s.filename === currentSoundForHandler.filename
               );
 
+              // console.log(
+              //   `[TrackEnded] Current index: ${currentIndex}, filtered length: ${filteredSounds.length}`
+              // );
+
               if (currentIndex >= 0) {
                 const nextIndex = (currentIndex + 1) % filteredSounds.length;
                 const nextSound = filteredSounds[nextIndex];
+                // console.log(
+                //   `[TrackEnded] Next sound: ${nextSound.filename}, next index: ${nextIndex}`
+                // );
                 // Ensure category is set for the next play
                 setActiveCategory(originalCategory);
                 playSpecificSoundRef.current?.(nextSound).catch(() => {});
               } else {
+                // console.log(
+                //   '[TrackEnded] Current sound not found in filtered list, playing first sound'
+                // );
                 // Fallback: if current sound not found, play first in category
                 // Ensure category is set for the fallback play
                 setActiveCategory(originalCategory);
@@ -334,7 +406,7 @@ export function useBackgroundMusic(
             }
           }, 0);
         } else {
-          // Category mismatch
+          // console.log(`[TrackEnded] Category mismatch: ${category} !== ${originalCategory}`);
         }
       });
 
@@ -358,6 +430,9 @@ export function useBackgroundMusic(
     }
     const currentIndex = filteredSounds.findIndex((s) => s.filename === currentSound?.filename);
     const nextIndex = (currentIndex + 1) % filteredSounds.length;
+    // console.log(
+    //   `[Next] Current index: ${currentIndex}, next index: ${nextIndex}, next sound: ${filteredSounds[nextIndex].filename}`
+    // );
     playSpecificSoundRef.current?.(filteredSounds[nextIndex]).catch(() => {});
   }, [
     activeCategory,
@@ -568,5 +643,8 @@ export function useBackgroundMusic(
     setUserInteracted,
     disableExternalSounds,
     setDisableExternalSounds,
+    setOnTrackEnded: (callback: (() => void) | null) => {
+      onTrackEndedRef.current = callback;
+    },
   };
 }

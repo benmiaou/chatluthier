@@ -112,7 +112,7 @@ export function AppHeader(): React.ReactElement {
 
       {isAdmin && (
         <>
-          <AddSoundModal opened={addOpened} onClose={closeAdd} onAdded={() => { }} />
+          <AddSoundModal opened={addOpened} onClose={closeAdd} onAdded={() => {}} />
 
           <ReviewRequestsModal opened={reviewOpened} onClose={closeReview} />
         </>

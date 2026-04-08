@@ -288,8 +288,19 @@ export function AmbianceSounds({
   const presetNames = Object.keys(presets);
 
   return (
-
-    <Stack gap="sm" bg="dark.7" style={{ flex: 1, minHeight: '100%', height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 8, overflow: 'hidden' }}>
+    <Stack
+      gap="sm"
+      bg="dark.7"
+      style={{
+        flex: 1,
+        minHeight: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: 8,
+        overflow: 'hidden',
+      }}
+    >
       <Group justify="space-between" align="center" wrap="wrap" px="xs" mt="xs">
         <Stack gap={2}>
           <Text fw={700} size="sm" tt="uppercase" c="dimmed">
@@ -308,15 +319,7 @@ export function AmbianceSounds({
         </Group>
       </Group>
 
-
-
-      <ScrollArea
-        px={10}
-        pb={5}
-        style={{ flex: 1 }}
-        type="auto"
-      >
-
+      <ScrollArea px={10} pb={5} style={{ flex: 1 }} type="auto">
         {bars.length === 0 && (
           <Text size="xs" c="dimmed" ta="center" py="sm">
             Loading ambiance sounds…
@@ -392,6 +395,5 @@ export function AmbianceSounds({
         </Group>
       </Box>
     </Stack>
-
   );
 }

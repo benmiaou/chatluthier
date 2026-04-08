@@ -16,7 +16,6 @@ export function Home(): React.ReactElement {
   if (isMobile) {
     return (
       <>
-
         <Tabs
           defaultValue="ambiance"
           variant="pills"
@@ -76,7 +75,6 @@ export function Home(): React.ReactElement {
 
   return (
     <>
-
       <div
         style={{
           height: contentHeight,
@@ -98,7 +96,6 @@ export function Home(): React.ReactElement {
         </Box>
       </div>
       <BackgroundMusic userId={userId} isAdmin={isAdmin} />
-
     </>
   );
 }
