@@ -8,12 +8,15 @@ import {
   TextInput,
   Loader,
   Avatar,
-  Tooltip,
+  Divider,
+  ScrollArea,
+  List,
+  Box,
 } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import type React from 'react';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
-import { IconCopy, IconCheck, IconPlugConnectedX, IconUsers, IconCrown } from '@tabler/icons-react';
+import { IconCopy, IconCheck, IconPlugConnectedX, IconUsers, IconPlus, IconCrown } from '@tabler/icons-react';
 
 export function SessionManager(): React.JSX.Element {
   const {
@@ -81,8 +84,20 @@ export function SessionManager(): React.JSX.Element {
 
   return (
     <>
-      <Stack gap="sm">
-        <Group justify="space-between" align="center">
+      <Stack
+        gap="sm"
+        bg="dark.7"
+        style={{
+          flex: 1,
+          minHeight: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: 8,
+          overflow: 'hidden',
+        }}
+      >
+        <Group justify="space-between" align="center" p="xs">
           <Group gap="xs" align="center">
             <Text fw={600} size="sm" tt="uppercase" c="dimmed">
               Session
@@ -100,61 +115,71 @@ export function SessionManager(): React.JSX.Element {
           </Group>
         </Group>
 
-        {statusMessage && (
-          <Text
-            size="xs"
-            c={
-              /* Extract nested ternary to improve readability */
-              (() => {
-                if (statusMessage.toLowerCase().includes('error')) {
-                  return 'red';
-                }
-                return sessionId ? 'teal' : 'orange';
-              })()
-            }
-          >
-            {statusMessage}
-          </Text>
+        {sessionId && participants.length > 0 && (
+          <>
+            <Group gap="xs" mt="sm" px="xs">
+              <IconUsers size={14} color="gray" />
+              <Text size="xs" c="dimmed">
+                {participants.length} participant{participants.length === 1 ? '' : 's'}:
+              </Text>
+            </Group>
+            <ScrollArea bg="dark.8" p="xs" pb={5} style={{ flex: 1 }} type="auto">
+              <List spacing="xs" size="sm" center icon={<Avatar name="?" size="xs" radius="xl" />}>
+                {participants.map((participant) => (
+                  <List.Item
+                    key={participant.id}
+                    icon={
+                      <Avatar
+                        color={participant.isAnonymous ? 'gray' : 'blue'}
+                        name={participant.isAnonymous ? 'Anonymous' : participant.pseudo || '?'}
+                        radius="xl"
+                        size="sm"
+                      />
+                    }
+                  >
+                    {participant.isAnonymous ? 'Anonymous' : participant.pseudo || 'Unknown'}
+                  </List.Item>
+                ))}
+              </List>
+            </ScrollArea>
+          </>
         )}
 
-        {sessionId && participants.length > 0 && (
-          <Group gap="xs" mt="sm">
-            <IconUsers size={14} color="gray" />
-            <Text size="xs" c="dimmed">
-              {participants.length} participant{participants.length === 1 ? '' : 's'}:
+        <Box px="xs">
+          {!sessionId && statusMessage && (
+            <Text
+              size="xs"
+              c={
+                /* Extract nested ternary to improve readability */
+                (() => {
+                  if (statusMessage.toLowerCase().includes('error')) {
+                    return 'red';
+                  }
+                  return sessionId ? 'teal' : 'orange';
+                })()
+              }
+            >
+              {statusMessage}
             </Text>
-            <Group gap="xs">
-              {participants.map((participant) => (
-                <Tooltip
-                  key={participant.id}
-                  label={participant.isAnonymous ? 'Anonymous' : participant.pseudo || 'Unknown'}
-                  position="top"
-                >
-                  <Avatar size="xs" radius="xl" color={participant.isAnonymous ? 'gray' : 'blue'}>
-                    {participant.isAnonymous
-                      ? '?'
-                      : participant.pseudo?.charAt(0).toUpperCase() || '?'}
-                  </Avatar>
-                </Tooltip>
-              ))}
-            </Group>
-          </Group>
-        )}
+          )}
+        </Box>
 
         {sessionId ? (
           <Stack gap="xs">
-            <Group gap="xs" align="center">
-              <Text size="xs">Session:</Text>
-              <Text size="xs" fw={700} ff="monospace">
-                {sessionId}
-              </Text>
+            <Group gap="xs" align="center" px="xs" justify="space-between">
+              <Group gap={3}>
+                <Text size="xs">Session:</Text>
+                <Text size="xs" fw={700} ff="monospace">
+                  {sessionId}
+                </Text>
+              </Group>
               <CopyButton value={inviteLink} timeout={2000}>
                 {({ copied, copy }) => (
                   <Button
-                    size="xs"
-                    variant="subtle"
+                    size="compact-xs"
+                    variant="filled"
                     leftSection={copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
-                    color={copied ? 'teal' : 'gray'}
+                    color={copied ? 'teal' : 'maroon.6'}
                     onClick={copy}
                   >
                     {copied ? 'Copied!' : 'Copy Invite'}
@@ -164,8 +189,7 @@ export function SessionManager(): React.JSX.Element {
             </Group>
             <Button
               size="xs"
-              variant="subtle"
-              color="red"
+              color="maroon.5"
               leftSection={<IconPlugConnectedX size={14} />}
               onClick={disconnect}
             >
@@ -173,24 +197,32 @@ export function SessionManager(): React.JSX.Element {
             </Button>
           </Stack>
         ) : (
-          <Group gap="xs">
-            <Button size="xs" variant="default" onClick={generateId} style={{ flex: 1 }}>
+          <Stack gap="xs" px="xs">
+            <Group gap="0">
+              <TextInput
+                size="xs"
+                placeholder="Session ID"
+                value={joinInput}
+                onChange={(e) => setJoinInput(e.currentTarget.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
+                style={{ flex: 2 }}
+              />
+              <Button size="xs" onClick={handleJoin}>
+                Join
+              </Button>
+            </Group>
+            <Divider label="or" labelPosition="center" />
+            <Button
+              size="xs"
+              variant="default"
+              onClick={generateId}
+              leftSection={<IconPlus size={14} />}
+            >
               Create New Session
             </Button>
-            <TextInput
-              size="xs"
-              placeholder="Session ID"
-              value={joinInput}
-              onChange={(e) => setJoinInput(e.currentTarget.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-              style={{ flex: 2 }}
-            />
-            <Button size="xs" onClick={handleJoin}>
-              Join
-            </Button>
-          </Group>
+          </Stack>
         )}
       </Stack>
     </>
-  );
+    );
 }

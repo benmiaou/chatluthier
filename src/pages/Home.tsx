@@ -62,7 +62,7 @@ export function Home(): React.ReactElement {
             </Tabs.Panel>
 
             <Tabs.Panel value="session" style={{ height: '100%' }}>
-              <Box bg="dark.7" p="sm" style={{ borderRadius: 8, height: '100%', overflow: 'auto' }}>
+              <Box bg="dark.7" style={{ borderRadius: 8, height: '100%', overflow: 'auto' }}>
                 <SessionManager />
               </Box>
             </Tabs.Panel>
@@ -91,7 +91,7 @@ export function Home(): React.ReactElement {
         <Box style={{ overflow: 'hidden' }}>
           <AmbianceSounds userId={userId} />
         </Box>
-        <Box bg="dark.7" p="sm" style={{ borderRadius: 8, overflow: 'hidden' }}>
+        <Box bg="dark.7" style={{ borderRadius: 8, overflow: 'hidden' }}>
           <SessionManager />
         </Box>
       </div>

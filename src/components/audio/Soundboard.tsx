@@ -1,7 +1,7 @@
-import { Badge, Box, Group, ScrollArea, Slider, Stack, Text } from '@mantine/core';
+import { Group, ScrollArea, Slider, Stack, Text, ThemeIcon, Tooltip } from '@mantine/core';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { IconVolume } from '@tabler/icons-react';
+import { IconDragDrop2, IconVolume } from '@tabler/icons-react';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useSoundboard } from '../../hooks/useSoundboard';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
@@ -215,14 +215,39 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
       }}
     >
       <Group justify="space-between" align="center" wrap="wrap" px="xs" mt="xs">
-        <Text fw={700} size="sm" tt="uppercase" c="dimmed" className="soundboard-title">
-          Soundboard
-        </Text>
-        <Group gap="xs" wrap="wrap">
+        <Group gap={4}>
+          <Text fw={700} size="sm" tt="uppercase" c="dimmed" className="soundboard-title">
+            Soundboard
+          </Text>
           {Boolean(userId) && (
-            <Badge size="sm" variant="light" color="teal">
-              Drag enabled
-            </Badge>
+            <Tooltip label="Drag enabled">
+              <ThemeIcon color="teal" size="xs">
+                <IconDragDrop2 style={{ width: '70%', height: '70%' }} />
+              </ThemeIcon>
+            </Tooltip>
+          )}
+        </Group>
+        <Group justify="space-between" align="center" wrap="wrap" gap="xs">
+          <Group gap={6} align="center" className="soundboard-volume-control">
+            <IconVolume size={16} color="var(--mantine-color-dimmed)" />
+            <Slider
+              size="xs"
+              w={70}
+              min={0}
+              max={1}
+              step={0.01}
+              value={volume}
+              onChange={setVolume}
+              label={(v) => `${Math.round(v * 100)}%`}
+            />
+          </Group>
+          {contexts.length > 1 && (
+            <CustomCombobox
+              value={context}
+              onChange={(v) => setContext(v ?? 'All')}
+              data={contexts}
+              placeholder="Context"
+            />
           )}
         </Group>
       </Group>
@@ -251,32 +276,6 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
           </div>
         </DndProvider>
       </ScrollArea>
-      <Box bg="dark.8" p="xs">
-        <Group justify="space-between" align="center" wrap="wrap" gap="xs">
-          {contexts.length > 1 && (
-            <CustomCombobox
-              value={context}
-              onChange={(v) => setContext(v ?? 'All')}
-              data={contexts}
-              placeholder="Context"
-            />
-          )}
-
-          <Group gap={6} align="center" className="soundboard-volume-control">
-            <IconVolume size={16} color="var(--mantine-color-dimmed)" />
-            <Slider
-              size="xs"
-              w={110}
-              min={0}
-              max={1}
-              step={0.01}
-              value={volume}
-              onChange={setVolume}
-              label={(v) => `${Math.round(v * 100)}%`}
-            />
-          </Group>
-        </Group>
-      </Box>
     </Stack>
   );
 }
