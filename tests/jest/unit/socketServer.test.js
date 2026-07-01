@@ -211,39 +211,6 @@ describe('socketServer', () => {
       a.ws.close();
       b.ws.close();
     });
-
-    it('passes an external sound payload through intact', async () => {
-      const a = await trackedOpenClient(port);
-      const b = await trackedOpenClient(port);
-      await subscribe(a.ws, a.messages, 'session-ext-1', 'Alice');
-      await subscribe(b.ws, b.messages, 'session-ext-1', 'Bob');
-
-      const externalSound = {
-        provider: 'spotify',
-        trackId: 'abc123',
-        artist: 'Woodkid',
-        title: 'Run Boy Run',
-        album: 'The Golden Age',
-        thumbnailUrl: 'https://example.com/thumb.jpg',
-        previewUrl: 'https://example.com/preview.mp3',
-      };
-
-      const received = await sendAndWait(
-        a.ws,
-        {
-          type: 'backgroundMusicChange',
-          id: 'session-ext-1',
-          content: { filename: null, externalSound },
-        },
-        b.messages
-      );
-
-      expect(received.type).toBe('backgroundMusicChange');
-      expect(received.content.externalSound).toEqual(externalSound);
-
-      a.ws.close();
-      b.ws.close();
-    });
   });
 
   // ─── Session isolation ─────────────────────────────────────────────────────

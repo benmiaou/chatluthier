@@ -23,7 +23,6 @@ export type WsMessageType =
   | 'statusRequest'
   | 'statusResponse'
   | 'unsubscribe'
-  | 'externalSoundsDisabled'
   | 'error'
   | 'setLeader'
   | 'getLeaderStatus'
@@ -33,16 +32,6 @@ export type WsMessageType =
   | 'getPlaylist'
   | 'playlistStatus'
   | 'trackEnded';
-
-export interface ExternalSoundPayload {
-  provider: 'spotify' | 'deezer' | 'soundcloud';
-  trackId: string;
-  artist?: string;
-  title?: string;
-  album?: string;
-  thumbnailUrl?: string;
-  previewUrl?: string;
-}
 
 export interface WsMessage {
   type: WsMessageType;
@@ -162,18 +151,6 @@ export function SocketProvider({
             id: sessionId,
             content: {
               type: 'ambiance',
-              targetParticipantId: firstParticipantId,
-            },
-          })
-        );
-
-        // Request external sounds disabled status from first participant
-        ws.send(
-          JSON.stringify({
-            type: 'requestStatus',
-            id: sessionId,
-            content: {
-              type: 'externalSoundsDisabled',
               targetParticipantId: firstParticipantId,
             },
           })

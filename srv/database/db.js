@@ -210,35 +210,6 @@ class Database {
   async runMigrations() {
     const migrations = [
       {
-        name: 'add_external_sounds_table',
-        sql: `
-          CREATE TABLE IF NOT EXISTS external_sounds (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT NOT NULL,
-            provider TEXT NOT NULL CHECK(provider IN ('spotify', 'deezer', 'soundcloud')),
-            provider_track_id TEXT NOT NULL,
-            artist TEXT NOT NULL,
-            title TEXT NOT NULL,
-            album TEXT,
-            duration_ms INTEGER,
-            thumbnail_url TEXT,
-            preview_url TEXT,
-            contexts TEXT,
-            is_enabled BOOLEAN DEFAULT TRUE,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id),
-            UNIQUE(user_id, provider, provider_track_id)
-          );
-          CREATE INDEX IF NOT EXISTS idx_external_sounds_user ON external_sounds(user_id);
-          CREATE INDEX IF NOT EXISTS idx_external_sounds_provider ON external_sounds(provider);
-        `,
-      },
-      {
-        name: 'add_external_sounds_permalink',
-        sql: `ALTER TABLE external_sounds ADD COLUMN permalink_url TEXT`,
-      },
-      {
         name: 'add_user_sound_overrides_table',
         sql: `
           CREATE TABLE IF NOT EXISTS user_sound_overrides (
@@ -269,7 +240,6 @@ class Database {
     for (const migration of migrations) {
       try {
         if (
-          migration.name === 'add_external_sounds_table' ||
           migration.name === 'add_user_sound_overrides_table' ||
           migration.name === 'drop_legacy_user_sound_tables'
         ) {
@@ -285,17 +255,6 @@ class Database {
               }
             });
           });
-        } else if (migration.name === 'add_external_sounds_permalink') {
-          // For column addition, check if column already exists first
-          const columnCheck = await this.query('PRAGMA table_info(external_sounds)');
-          const hasPermalink = columnCheck.some((col) => col.name === 'permalink_url');
-
-          if (!hasPermalink) {
-            await this.execute(migration.sql);
-            console.log(`Migration ${migration.name} applied`);
-          } else {
-            console.log(`Migration ${migration.name} skipped - column already exists`);
-          }
         }
       } catch (error) {
         console.error(`Migration ${migration.name} failed:`, error.message);

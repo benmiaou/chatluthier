@@ -6,7 +6,6 @@ const path = require('node:path');
 const authRoutes = require('./routes/authRoutes');
 const soundRoutes = require('./routes/soundRoutes');
 const requestRoutes = require('./routes/requestRoutes');
-const externalSoundsRoutes = require('./routes/externalSoundsRoutes');
 const logger = require('./utils/logger');
 const config = require('./config/appConfig');
 
@@ -94,169 +93,16 @@ app.use((req, res, next) => {
   next();
 });
 
-// Spotify PKCE token exchange endpoint
-app.post('/api/spotify/token', async (req, res) => {
-  try {
-    const { code, code_verifier, redirect_uri } = req.body;
-
-    if (!code || !code_verifier || !redirect_uri) {
-      return res.status(400).json({ error: 'Missing required parameters' });
-    }
-
-    // Exchange authorization code for access token
-    const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        code: code,
-        redirect_uri: redirect_uri,
-        client_id: process.env.SPOTIFY_CLIENT_ID,
-      }),
-    });
-
-    const tokenData = await tokenResponse.json();
-
-    if (tokenResponse.ok) {
-      res.json({
-        access_token: tokenData.access_token,
-        token_type: tokenData.token_type,
-        expires_in: tokenData.expires_in,
-        refresh_token: tokenData.refresh_token,
-        scope: tokenData.scope,
-      });
-      console.log('Spotify token exchange successful');
-    } else {
-      console.error('Spotify token exchange error:', tokenData);
-      res.status(400).json({ error: tokenData.error_description || 'Token exchange failed' });
-    }
-  } catch (error) {
-    console.error('Error in Spotify token exchange:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Spotify token refresh endpoint
-app.post('/api/spotify/refresh', async (req, res) => {
-  try {
-    const { refresh_token } = req.body;
-
-    if (!refresh_token) {
-      return res.status(400).json({ error: 'Missing refresh token' });
-    }
-
-    // Refresh the access token
-    const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        grant_type: 'refresh_token',
-        refresh_token: refresh_token,
-        client_id: process.env.SPOTIFY_CLIENT_ID,
-      }),
-    });
-
-    const tokenData = await tokenResponse.json();
-
-    if (tokenResponse.ok) {
-      res.json({
-        access_token: tokenData.access_token,
-        token_type: tokenData.token_type,
-        expires_in: tokenData.expires_in,
-        refresh_token: tokenData.refresh_token || refresh_token, // Use new refresh token if provided, otherwise keep old one
-        scope: tokenData.scope,
-      });
-      console.log('Spotify token refresh successful');
-    } else {
-      console.error('Spotify token refresh error:', tokenData);
-      res.status(400).json({ error: tokenData.error_description || 'Token refresh failed' });
-    }
-  } catch (error) {
-    console.error('Error in Spotify token refresh:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Spotify search endpoint — proxies search to the Spotify Web API
-app.get('/api/spotify/search', async (req, res) => {
-  const { q, limit = 20 } = req.query;
-  const authHeader = req.headers.authorization;
-
-  if (!q) {
-    return res.status(400).json({ error: 'Missing search query' });
-  }
-  if (!authHeader) {
-    return res.status(401).json({ error: 'Missing Authorization header' });
-  }
-
-  try {
-    const url = new URL('https://api.spotify.com/v1/search');
-    url.searchParams.set('q', q);
-    url.searchParams.set('type', 'track');
-    url.searchParams.set('limit', String(limit));
-
-    const response = await fetch(url.toString(), {
-      headers: { Authorization: authHeader },
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return res
-        .status(response.status)
-        .json({ error: data.error?.message || 'Spotify search failed' });
-    }
-
-    const results = (data.tracks?.items || []).map((track) => ({
-      trackId: track.id,
-      title: track.name,
-      artist: track.artists.map((a) => a.name).join(', '),
-      album: track.album.name,
-      durationMs: track.duration_ms,
-      thumbnailUrl: track.album.images[1]?.url || track.album.images[0]?.url || '',
-      previewUrl: track.preview_url || '',
-      spotifyUri: track.uri,
-      permalinkUrl: track.external_urls?.spotify || '',
-      provider: 'spotify',
-    }));
-
-    return res.json({ results });
-  } catch (error) {
-    console.error('Spotify search error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Deezer search proxy
-const { search: deezerSearch } = require('./controllers/deezerController');
-app.get('/api/deezer/search', deezerSearch);
-
-// SoundCloud endpoints
-const {
-  exchangeToken: scExchangeToken,
-  refreshToken: scRefreshToken,
-  search: scSearch,
-} = require('./controllers/soundcloudController');
-app.post('/api/soundcloud/token', scExchangeToken);
-app.post('/api/soundcloud/refresh', scRefreshToken);
-app.get('/api/soundcloud/search', scSearch);
-
 // API routes must come before the catch-all route
 app.use(authRoutes);
 app.use(soundRoutes);
 app.use(requestRoutes);
-app.use(externalSoundsRoutes);
 
 // SPA fallback — serve index.html for all non-API routes so React Router works
 app.get('*', (req, res) => {
   // Don't serve index.html for API routes
   if (
     req.path.startsWith('/api/') ||
-    req.path.startsWith('/external-sounds') ||
     req.path.startsWith('/backgroundMusic') ||
     req.path.startsWith('/ambianceSounds') ||
     req.path.startsWith('/soundboard')
