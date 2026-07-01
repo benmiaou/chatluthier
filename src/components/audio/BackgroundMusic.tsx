@@ -10,7 +10,6 @@ import {
   Grid,
   ActionIcon,
   Avatar,
-  Menu,
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { CustomCombobox } from './CustomCombobox';
@@ -182,17 +181,12 @@ export function BackgroundMusic({
       trackKey?: string;
       isAutoPlay?: boolean;
     }) => {
-      if (content.externalSound) {
-        playExternalReceived(content.externalSound).catch(() => { });
-        return;
-      }
-
       // Handle auto-played tracks from server
       if (content.trackKey && content.isAutoPlay) {
         // Find the sound by track key (filename)
         const sound = sounds.find((s) => s.filename === content.trackKey);
         if (sound) {
-          playSpecificSound(sound).catch(() => { });
+          playSpecificSound(sound).catch(() => {});
         }
         return;
       }
@@ -203,7 +197,7 @@ export function BackgroundMusic({
           // Only play if we're not already playing this sound
           const currentSoundFilename = currentSound?.filename;
           if (currentSoundFilename !== content.filename) {
-            playSpecificSound(sound).catch(() => { });
+            playSpecificSound(sound).catch(() => {});
           } else {
             // Already playing this sound, ignoring duplicate play request
           }
@@ -254,9 +248,6 @@ export function BackgroundMusic({
     }) => {
       if (content.statusType === 'backgroundMusic' && content.statusData) {
         if (content.statusData.isPlaying) {
-          if (content.statusData.externalSound) {
-            playExternalReceived(content.statusData.externalSound).catch(() => { });
-          } else if (content.statusData.filename) {
           if (content.statusData.filename) {
             const sound = sounds.find((s) => s.filename === content.statusData.filename);
             if (sound) {
@@ -264,7 +255,7 @@ export function BackgroundMusic({
               const currentSoundFilename = currentSound?.filename;
               if (currentSoundFilename !== content.statusData.filename) {
                 // Pass the currentTime from status to sync playback position
-                playSpecificSound(sound).catch(() => { });
+                playSpecificSound(sound).catch(() => {});
               } else {
                 // Already playing this sound, ignoring sync request
               }
@@ -345,7 +336,7 @@ export function BackgroundMusic({
     if (currentSound) {
       // Set as leader when playing background music
       setAsLeader();
-      playSpecificSound(currentSound).catch(() => { });
+      playSpecificSound(currentSound).catch(() => {});
     }
   }, [currentSound, playSpecificSound, userInteracted, setAsLeader]);
 
@@ -391,10 +382,10 @@ export function BackgroundMusic({
         }}
       >
         <Grid gutter={isMobile ? 6 : 'sm'}>
-          <Grid.Col span={{ base: 10, md: 6 }}>
+          <Grid.Col span={{ base: 12, md: 5 }}>
             {/* Current track info */}
             <Group gap="xs" align="flex-start" wrap="nowrap">
-              <Avatar radius="md" size={isMobile ? 'sm' : 'md'} visibleFrom="md">
+              <Avatar radius="md" size={isMobile ? 'sm' : 'md'}>
                 <Box
                   className={
                     isPlaying && currentSound
@@ -407,15 +398,7 @@ export function BackgroundMusic({
                   <span className="background-music-equalizer-bar" />
                 </Box>
               </Avatar>
-              <Stack
-                gap="0"
-                justify="flex-start"
-                mt={3}
-                align="flex-start"
-                ta="left"
-                w="100%"
-                style={{ minWidth: 0 }}
-              >
+              <Stack gap="3" justify="flex-start" align="flex-start" ta="left" w="100%">
                 <Text size="xs" c="dimmed" ta="left" className="background-music-track-title">
                   {currentSound?.name ?? currentSound?.filename ?? 'No track playing'}
                 </Text>
@@ -424,53 +407,14 @@ export function BackgroundMusic({
                     size="xs"
                     c="dimmed"
                     fs="italic"
-                    className="background-music-track-title"
+                    truncate
                     dangerouslySetInnerHTML={{ __html: currentSound.credit }}
                   />
                 )}
               </Stack>
             </Group>
-          </Grid.Col>
-          <Grid.Col span={{ base: 2, md: 6 }} ta="end">
             {/* Category buttons + context filter */}
-            <Box hiddenFrom="md">
-              <Menu>
-                <Menu.Target>
-                  <Button size="compact-xs">
-                    {CATEGORIES.find(({ value }) => value === activeCategory)?.label}
-                  </Button>
-                </Menu.Target>
-
-                <Menu.Dropdown>
-                  {CATEGORIES.map(({ value, label }) => {
-                    const count = sounds.filter(
-                      (s) =>
-                        !(s.isExternal && disableExternalSounds) &&
-                        filterSoundsByContextAndCategory(s, filterContext, value)
-                    ).length;
-                    return (
-                      <Menu.Item onClick={() => handlePlayCategory(value)} key={value}>
-                        {label} ({count})
-                      </Menu.Item>
-                    );
-                  })}
-                  <Menu.Divider />
-
-                  <CustomCombobox
-                    value={filterContext}
-                    onChange={(v) => {
-                      setFilterContext(v);
-                      handleSetContext(v);
-                    }}
-                    data={contexts}
-                    placeholder="Context"
-                    size="xs"
-                  />
-                </Menu.Dropdown>
-              </Menu>
-            </Box>
-
-            <Group gap={3} justify="flex-end" wrap="wrap" visibleFrom="md">
+            <Group gap={3} wrap="wrap" visibleFrom="md">
               {CATEGORIES.map(({ value, label }) => {
                 const count = sounds.filter((s) =>
                   filterSoundsByContextAndCategory(s, filterContext, value)
@@ -478,12 +422,12 @@ export function BackgroundMusic({
                 return (
                   <Button
                     key={value}
-                    size="xs"
-                    variant={activeCategory === value ? 'light' : 'subtle'}
+                    size="compact-xs"
+                    variant={activeCategory === value ? 'filled' : 'light'}
                     className="background-music-category-btn"
                     onClick={() => handlePlayCategory(value)}
                   >
-                    {label} ({count})
+                    Play {label} ({count})
                   </Button>
                 );
               })}
@@ -495,105 +439,10 @@ export function BackgroundMusic({
                 }}
                 data={contexts}
                 placeholder="Context"
-                size="xs"
+                size="compact-xs"
               />
             </Group>
           </Grid.Col>
-        </Grid>
-        <Box bg="dark.8" mt="5" px="15" style={{ borderRadius: 8, flex: 1 }}>
-          <Group gap="xs" align="flex-start" wrap="nowrap">
-            <ActionIcon
-              size={isMobile ? 'sm' : 'md'}
-              variant="subtle"
-              onClick={handleStop}
-              disabled={!isPlaying}
-            >
-              <IconPlayerStop size={isMobile ? 16 : 18} />
-            </ActionIcon>
-            <ActionIcon
-              size={isMobile ? 'sm' : 'md'}
-              variant="subtle"
-              onClick={handleNext}
-              disabled={!isPlaying || currentSound?.isExternal}
-            >
-              <IconPlayerSkipForward size={isMobile ? 16 : 18} />
-            </ActionIcon>
-            {/* Progress bar (not shown for external sounds) */}
-            {!currentSound?.isExternal && (
-              <Box
-                mt={15}
-                style={{ cursor: 'pointer', flex: 1, minWidth: 120, maxWidth: '100%' }}
-                onClick={handleSeek}
-                className="background-music-progress-wrap"
-              >
-                <Progress value={progress} size="sm" radius="xs" color="maroon" />
-              </Box>
-            )}
-            <Group gap={6} mt={8}>
-              <IconVolume size={isMobile ? 16 : 20} color="var(--mantine-color-dimmed)" />
-              <Slider
-                size="xs"
-                w={isMobile ? 70 : 100}
-                min={0}
-                max={1}
-                step={0.01}
-                value={volume}
-                onChange={handleVolumeChange}
-                label={isMobile ? null : (v) => `${Math.round(v * 100)}%`}
-              />
-            </Group>
-            {/* External sounds controls */}
-            <Group gap="xs" wrap="wrap" justify="flex-end" visibleFrom="md">
-              {externalCount > 0 && (
-                <Tooltip
-                  label={
-                    disableExternalSounds
-                      ? 'External sounds disabled for this session'
-                      : 'Disable external sounds for this session'
-                  }
-                  withArrow
-                >
-                  <Group gap={4}>
-                    <IconCloudOff size={14} color="var(--mantine-color-dimmed)" />
-                    <Switch
-                      size="xs"
-                      checked={disableExternalSounds}
-                      onChange={(e) => handleToggleDisableExternal(e.currentTarget.checked)}
-                      label={
-                        <Text size="xs" c="dimmed">
-                          Disable ext.
-                        </Text>
-                      }
-                    />
-                  </Group>
-                </Tooltip>
-              )}
-              <Tooltip label="Manage external sound providers" withArrow>
-                <Button
-                  size="xs"
-                  variant={hasConnectedProviders ? 'light' : 'subtle'}
-                  color={hasConnectedProviders ? 'green' : undefined}
-                  leftSection={<IconPlugConnected size={14} />}
-                  onClick={openProviderModal}
-                >
-                  Providers
-                </Button>
-              </Tooltip>
-              {hasConnectedProviders && (
-                <Tooltip label="Search and add external tracks" withArrow>
-                  <Button
-                    size="xs"
-                    variant="subtle"
-                    leftSection={<IconSearch size={14} />}
-                    onClick={openSearchModal}
-                  >
-                    Add track
-                  </Button>
-                </Tooltip>
-              )}
-            </Group>
-          </Group>
-        </Box>
           <Grid.Col span={{ base: 12, md: 7 }} ta="center">
             <Box bg="dark.8" px="15" style={{ borderRadius: 8 }}>
               <Group gap="xs" align="flex-start" wrap="nowrap">

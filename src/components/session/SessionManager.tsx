@@ -16,7 +16,14 @@ import {
 import { useState, useEffect } from 'react';
 import type React from 'react';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
-import { IconCopy, IconCheck, IconPlugConnectedX, IconUsers, IconPlus, IconCrown } from '@tabler/icons-react';
+import {
+  IconCopy,
+  IconCheck,
+  IconPlugConnectedX,
+  IconUsers,
+  IconPlus,
+  IconCrown,
+} from '@tabler/icons-react';
 
 export function SessionManager(): React.JSX.Element {
   const {
@@ -224,5 +231,5 @@ export function SessionManager(): React.JSX.Element {
         )}
       </Stack>
     </>
-    );
+  );
 }
