@@ -5,9 +5,8 @@
   font-style: normal;
 }
 
-/* GLOBAL BUTTON STYLING - ALL BUTTONS USE MAIN BUTTON COLORS */
-button,
-.mantine-Button-root {
+/* GLOBAL BUTTON STYLING - native buttons only */
+button {
   font-family: var(--fontfamilly);
   border: none;
   color: white;
@@ -22,27 +21,29 @@ button,
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s ease;
-  font-weight: 500;
+  font-weight: 300;
   background-color: var(--main-button-color); /* ALL buttons use main color */
 }
 
-/* Hover state for ALL buttons */
-button:hover,
-.mantine-Button-root:hover {
+/* Keep Mantine button text weight aligned with native buttons */
+.mantine-Button-root {
+  font-weight: 300;
+}
+
+/* Hover state for native buttons */
+button:hover {
   background-color: var(--main-button-hover-color);
 }
 
-/* Disabled state for ALL buttons */
-button:disabled,
-.mantine-Button-root:disabled {
+/* Disabled state for native buttons */
+button:disabled {
   background-color: var(--main-button-disable-color);
   cursor: not-allowed;
   opacity: 0.8;
 }
 
-/* Active/pressed state for ALL buttons */
-button:active,
-.mantine-Button-root:active {
+/* Active/pressed state for native buttons */
+button:active {
   background-color: var(--main-button-active-color);
 }
 
@@ -102,24 +103,6 @@ button:active,
 
 .soundboard-button:active {
   background-color: var(--main-button-active-color);
-}
-
-/* Override any Mantine variant-specific colors to use main colors */
-.mantine-Button-root[data-variant='default'],
-.mantine-Button-root[data-variant='outline'],
-.mantine-Button-root[data-variant='filled'],
-.mantine-Button-root[data-variant='subtle'] {
-  background-color: var(--main-button-color) !important;
-  color: white !important;
-  border-color: var(--main-button-color) !important;
-}
-
-.mantine-Button-root[data-variant='default']:hover,
-.mantine-Button-root[data-variant='outline']:hover,
-.mantine-Button-root[data-variant='filled']:hover,
-.mantine-Button-root[data-variant='subtle']:hover {
-  background-color: var(--main-button-hover-color) !important;
-  border-color: var(--main-button-hover-color) !important;
 }
 
 /* Success button (green) */
