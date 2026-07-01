@@ -13,7 +13,6 @@ const {
   updateUserSoundsBatch,
   getAllContexts,
 } = require('../controllers/soundController.sql');
-const { getExternalSounds } = require('../controllers/externalSoundsController');
 const multer = require('multer');
 
 // Configure multer with a file size limit
@@ -26,25 +25,7 @@ router.get('/backgroundMusic', async (req, res) => {
   try {
     const userId = req.query.userId || req.headers['user-id'] || req.body.userId;
     const backgroundMusicData = await getData(userId, 'backgroundMusic');
-
-    // Merge user's external sounds at the end when a userId is provided
-    if (userId) {
-      try {
-        const req2 = { query: { userId }, headers: {} };
-        const externalSoundsData = [];
-        const fakeRes = {
-          json: (data) => externalSoundsData.push(...(Array.isArray(data) ? data : [])),
-          status: () => ({ json: () => {} }),
-        };
-        await getExternalSounds(req2, fakeRes);
-        res.json([...backgroundMusicData, ...externalSoundsData]);
-      } catch (_err) {
-        // External sounds are best-effort — don't fail the whole request
-        res.json(backgroundMusicData);
-      }
-    } else {
-      res.json(backgroundMusicData);
-    }
+    res.json(backgroundMusicData);
   } catch (error) {
     console.error('Error getting background music:', error);
     res.status(500).json({ error: 'Failed to get background music data' });

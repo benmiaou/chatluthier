@@ -7,8 +7,6 @@ import {
   Stack,
   Text,
   Progress,
-  Switch,
-  Tooltip,
   Grid,
   ActionIcon,
   Avatar,
@@ -16,16 +14,8 @@ import {
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { CustomCombobox } from './CustomCombobox';
-import {
-  IconPlayerSkipForward,
-  IconPlayerStop,
-  IconVolume,
-  IconPlugConnected,
-  IconSearch,
-  IconCloudOff,
-} from '@tabler/icons-react';
+import { IconPlayerSkipForward, IconPlayerStop, IconVolume } from '@tabler/icons-react';
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
-import { useExternalSounds } from '../../hooks/useExternalSounds';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { useState, useCallback, useEffect } from 'react';
 import type React from 'react';
@@ -33,9 +23,6 @@ import { SETTINGS } from '../../constants/settings';
 
 import type { BackgroundMusicCategory, Sound } from '../../types/sound';
 import { bgScenes, bgMatchesCategoryAndContext } from '../../types/sound';
-import { ExternalSoundBadge } from './ExternalSoundBadge';
-import { ExternalSoundProviderModal } from './ExternalSoundProviderModal';
-import { ExternalSoundSearchModal } from './ExternalSoundSearchModal';
 
 interface BackgroundMusicProps {
   userId?: string | null;
@@ -56,10 +43,6 @@ export function BackgroundMusic({
   const { send, addMessageHandler, sessionId } = useSocketContext();
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const [modalOpened, { open, close }] = useDisclosure(false);
-  const [providerModalOpened, { open: openProviderModal, close: closeProviderModal }] =
-    useDisclosure(false);
-  const [searchModalOpened, { open: openSearchModal, close: closeSearchModal }] =
-    useDisclosure(false);
   const [userInteracted, setUserInteracted] = useState(false);
   const [filterContext, setFilterContext] = useState<string>('All');
   const [isLeader, setIsLeader] = useState(false);
@@ -70,8 +53,6 @@ export function BackgroundMusic({
       send({ type: 'trackEnded', id: sessionId });
     }
   }, [sessionId, isLeader, send]);
-
-  const externalSoundsHook = useExternalSounds(userId);
 
   const {
     currentSound,
@@ -89,9 +70,6 @@ export function BackgroundMusic({
     sounds,
     getCurrentTime,
     handleSetContext,
-    disableExternalSounds,
-    setDisableExternalSounds,
-    playExternalReceived,
     setOnTrackEnded,
   } = useBackgroundMusic(
     userId,
@@ -101,9 +79,6 @@ export function BackgroundMusic({
         open();
       }
     },
-    externalSoundsHook.playExternal,
-    externalSoundsHook.stopExternal,
-    externalSoundsHook.resolveAndPlayExternal,
     notifyTrackEnded,
     sessionId
   );
@@ -140,16 +115,9 @@ export function BackgroundMusic({
       setAsLeader();
 
       // Generate the playlist for this category
-      const filteredSounds = sounds.filter(
-        (s) =>
-          !(s.isExternal && disableExternalSounds) &&
-          bgMatchesCategoryAndContext(s, category, context)
+      const filteredSounds = sounds.filter((s) =>
+        bgMatchesCategoryAndContext(s, category, context)
       );
-
-      // console.log(
-      //   `[Leader Play] Category: ${category}, Playlist:`,
-      //   filteredSounds.map((s) => s.filename)
-      // );
 
       // Send the playlist to server if we're in a session
       if (sessionId) {
@@ -166,41 +134,19 @@ export function BackgroundMusic({
 
       await playCategory(category);
     },
-    [
-      playCategory,
-      userInteracted,
-      setAsLeader,
-      sounds,
-      disableExternalSounds,
-      context,
-      sessionId,
-      send,
-    ]
+    [playCategory, userInteracted, setAsLeader, sounds, context, sessionId, send]
   );
 
-  // When a track starts, broadcast to session (with external sound info when applicable)
+  // When a track starts, broadcast to session
   useEffect(() => {
     if (currentSound && sessionId && userInteracted) {
       const currentTime = getCurrentTime();
-      const content: Record<string, unknown> = {
-        filename: currentSound.isExternal ? null : currentSound.filename,
+      const content = {
+        filename: currentSound.filename,
         credit: currentSound.credit,
         timestamp: Date.now(),
         currentTime,
       };
-
-      if (currentSound.isExternal) {
-        content.externalSound = {
-          provider: currentSound.provider,
-          trackId: currentSound.providerTrackId,
-          artist: currentSound.artist,
-          title: currentSound.title,
-          album: currentSound.album,
-          thumbnailUrl: currentSound.thumbnailUrl,
-          previewUrl: currentSound.previewUrl,
-        };
-      }
-
       send({ type: 'backgroundMusicChange', id: sessionId, content });
     }
   }, [currentSound, sessionId, send, getCurrentTime, userInteracted]);
@@ -233,15 +179,6 @@ export function BackgroundMusic({
       credit?: string;
       timestamp?: number;
       currentTime?: number;
-      externalSound?: {
-        provider: 'spotify' | 'deezer' | 'soundcloud';
-        trackId: string;
-        artist?: string;
-        title?: string;
-        album?: string;
-        thumbnailUrl?: string;
-        previewUrl?: string;
-      };
       trackKey?: string;
       isAutoPlay?: boolean;
     }) => {
@@ -273,7 +210,7 @@ export function BackgroundMusic({
         }
       }
     },
-    [playSpecificSound, playExternalReceived, sounds, currentSound]
+    [playSpecificSound, sounds, currentSound]
   );
 
   const handleBackgroundMusicStop = useCallback(() => {
@@ -287,47 +224,21 @@ export function BackgroundMusic({
         content.statusType === 'backgroundMusic' || content.type === 'backgroundMusic';
       if (isBackgroundMusicRequest && currentSound) {
         const currentTime = getCurrentTime();
-        const statusData: Record<string, unknown> = {
-          filename: currentSound.isExternal ? null : currentSound.filename,
+        const statusData = {
+          filename: currentSound.filename,
           credit: currentSound.credit || '',
           isPlaying,
           timestamp: Date.now(),
           currentTime,
         };
-        if (currentSound.isExternal) {
-          statusData.externalSound = {
-            provider: currentSound.provider,
-            trackId: currentSound.providerTrackId,
-          };
-        }
         send({
           type: 'statusResponse',
           id: sessionId,
           content: { statusType: 'backgroundMusic', statusData },
         });
-      } else if (content.statusType === 'externalSoundsDisabled') {
-        send({
-          type: 'statusResponse',
-          id: sessionId,
-          content: {
-            statusType: 'externalSoundsDisabled',
-            statusData: { disabled: disableExternalSounds },
-          },
-        });
       }
     },
-    [currentSound, isPlaying, sessionId, send, getCurrentTime, disableExternalSounds]
-  );
-
-  const handleExternalSoundsDisabled = useCallback(
-    (content: { disabled: boolean }) => {
-      setDisableExternalSounds(content.disabled);
-      // If external sounds are now disabled and we're playing one, stop
-      if (content.disabled && currentSound?.isExternal) {
-        stop();
-      }
-    },
-    [setDisableExternalSounds, currentSound, stop]
+    [currentSound, isPlaying, sessionId, send, getCurrentTime]
   );
 
   const handleStatusResponse = useCallback(
@@ -339,8 +250,6 @@ export function BackgroundMusic({
         isPlaying: boolean;
         timestamp?: number;
         currentTime?: number;
-        externalSound?: { provider: 'spotify' | 'deezer' | 'soundcloud'; trackId: string };
-        disabled?: boolean;
       };
     }) => {
       if (content.statusType === 'backgroundMusic' && content.statusData) {
@@ -348,6 +257,7 @@ export function BackgroundMusic({
           if (content.statusData.externalSound) {
             playExternalReceived(content.statusData.externalSound).catch(() => { });
           } else if (content.statusData.filename) {
+          if (content.statusData.filename) {
             const sound = sounds.find((s) => s.filename === content.statusData.filename);
             if (sound) {
               // Only sync if we're not already playing this sound
@@ -363,21 +273,9 @@ export function BackgroundMusic({
         } else {
           stop();
         }
-      } else if (
-        content.statusType === 'externalSoundsDisabled' &&
-        content.statusData?.disabled !== undefined
-      ) {
-        handleExternalSoundsDisabled({ disabled: content.statusData.disabled });
       }
     },
-    [
-      playSpecificSound,
-      playExternalReceived,
-      stop,
-      sounds,
-      handleExternalSoundsDisabled,
-      currentSound,
-    ]
+    [playSpecificSound, stop, sounds, currentSound]
   );
 
   // Check leader status when session changes or on initial load
@@ -401,7 +299,6 @@ export function BackgroundMusic({
         requestStatus: (c) => handleStatusRequest(c as { type: string }),
         statusResponse: (c) =>
           handleStatusResponse(c as Parameters<typeof handleStatusResponse>[0]),
-        externalSoundsDisabled: (c) => handleExternalSoundsDisabled(c as { disabled: boolean }),
         leaderChange: (c) => handleLeaderChange(c as { leaderId: string }),
         leaderStatus: (c) => handleLeaderStatus(c as { isLeader: boolean; leaderId?: string }),
         playlistStatus: (c) =>
@@ -419,24 +316,10 @@ export function BackgroundMusic({
     handleBackgroundMusicStop,
     handleStatusRequest,
     handleStatusResponse,
-    handleExternalSoundsDisabled,
     handleLeaderChange,
     handleLeaderStatus,
     handlePlaylistStatus,
   ]);
-
-  const handleToggleDisableExternal = useCallback(
-    (disabled: boolean) => {
-      setDisableExternalSounds(disabled);
-      if (sessionId) {
-        send({ type: 'externalSoundsDisabled', id: sessionId, content: { disabled } });
-      }
-      if (disabled && currentSound?.isExternal) {
-        stop();
-      }
-    },
-    [setDisableExternalSounds, send, sessionId, currentSound, stop]
-  );
 
   const handleVolumeChange = useCallback(
     (v: number) => {
@@ -489,17 +372,11 @@ export function BackgroundMusic({
       if (!userInteracted) {
         setUserInteracted(true);
       }
-      if (currentSound?.isExternal) {
-        return;
-      } // Can't seek external sounds via progress bar
       const rect = e.currentTarget.getBoundingClientRect();
       seekTo(((e.clientX - rect.left) / rect.width) * 100);
     },
-    [seekTo, userInteracted, currentSound]
+    [seekTo, userInteracted]
   );
-
-  const hasConnectedProviders = externalSoundsHook.connectedProviders.length > 0;
-  const externalCount = sounds.filter((s) => s.isExternal).length;
 
   return (
     <>
@@ -540,38 +417,9 @@ export function BackgroundMusic({
                 style={{ minWidth: 0 }}
               >
                 <Text size="xs" c="dimmed" ta="left" className="background-music-track-title">
-                  {currentSound
-                    ? `${currentSound.isExternal ? `${currentSound.artist ?? ''} – ${currentSound.title ?? ''}` : (currentSound.name ?? '')}`
-                    : 'No track playing'}
+                  {currentSound?.name ?? currentSound?.filename ?? 'No track playing'}
                 </Text>
-                {!isMobile && currentSound?.isExternal && currentSound.provider && (
-                  <ExternalSoundBadge provider={currentSound.provider} compact />
-                )}
-
-                {!isMobile && currentSound?.isExternal && currentSound.provider && (
-                  <Group gap={6} align="center" justify="flex-start" w="100%">
-                    <ExternalSoundBadge provider={currentSound.provider} />
-                    {currentSound.permalinkUrl ? (
-                      <Text
-                        size="xs"
-                        c="dimmed"
-                        component="a"
-                        href={currentSound.permalinkUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ textDecoration: 'underline dotted', fontSize: 11 }}
-                      >
-                        Open on{' '}
-                        {currentSound.provider === 'soundcloud'
-                          ? 'SoundCloud'
-                          : currentSound.provider === 'deezer'
-                            ? 'Deezer'
-                            : 'Spotify'}
-                      </Text>
-                    ) : null}
-                  </Group>
-                )}
-                {currentSound?.credit && !currentSound.isExternal && (
+                {currentSound?.credit && (
                   <Text
                     size="xs"
                     c="dimmed"
@@ -624,10 +472,8 @@ export function BackgroundMusic({
 
             <Group gap={3} justify="flex-end" wrap="wrap" visibleFrom="md">
               {CATEGORIES.map(({ value, label }) => {
-                const count = sounds.filter(
-                  (s) =>
-                    !(s.isExternal && disableExternalSounds) &&
-                    filterSoundsByContextAndCategory(s, filterContext, value)
+                const count = sounds.filter((s) =>
+                  filterSoundsByContextAndCategory(s, filterContext, value)
                 ).length;
                 return (
                   <Button
@@ -748,6 +594,51 @@ export function BackgroundMusic({
             </Group>
           </Group>
         </Box>
+          <Grid.Col span={{ base: 12, md: 7 }} ta="center">
+            <Box bg="dark.8" px="15" style={{ borderRadius: 8 }}>
+              <Group gap="xs" align="flex-start" wrap="nowrap">
+                <ActionIcon
+                  size={isMobile ? 'sm' : 'md'}
+                  variant="subtle"
+                  onClick={handleStop}
+                  disabled={!isPlaying}
+                >
+                  <IconPlayerStop size={isMobile ? 16 : 18} />
+                </ActionIcon>
+                <ActionIcon
+                  size={isMobile ? 'sm' : 'md'}
+                  variant="subtle"
+                  onClick={handleNext}
+                  disabled={!isPlaying}
+                >
+                  <IconPlayerSkipForward size={isMobile ? 16 : 18} />
+                </ActionIcon>
+                {/* Progress bar */}
+                <Box
+                  mt={15}
+                  style={{ cursor: 'pointer', flex: 1, minWidth: 120, maxWidth: '100%' }}
+                  onClick={handleSeek}
+                  className="background-music-progress-wrap"
+                >
+                  <Progress value={progress} size="sm" radius="xs" color="maroon" />
+                </Box>
+                <Group gap={6} mt={8}>
+                  <IconVolume size={isMobile ? 16 : 20} color="var(--mantine-color-dimmed)" />
+                  <Slider
+                    size="xs"
+                    w={isMobile ? 70 : 100}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={volume}
+                    onChange={handleVolumeChange}
+                    label={isMobile ? null : (v) => `${Math.round(v * 100)}%`}
+                  />
+                </Group>
+              </Group>
+            </Box>
+          </Grid.Col>
+        </Grid>
       </Box>
 
       {/* Autoplay Permission Modal */}
@@ -779,21 +670,6 @@ export function BackgroundMusic({
           </Group>
         </Stack>
       </Modal>
-
-      {/* External Sound Provider Modal */}
-      <ExternalSoundProviderModal
-        opened={providerModalOpened}
-        onClose={closeProviderModal}
-        externalSoundsHook={externalSoundsHook}
-      />
-
-      {/* External Sound Search Modal */}
-      <ExternalSoundSearchModal
-        opened={searchModalOpened}
-        onClose={closeSearchModal}
-        userId={userId}
-        externalSoundsHook={externalSoundsHook}
-      />
     </>
   );
 }

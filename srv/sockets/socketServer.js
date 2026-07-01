@@ -131,11 +131,7 @@ function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
       logger.info(`Broadcasting ${data.type} from participant ${participantId || 'unknown'}`, {
         sessionId: connectedId,
         participantCount: subs.size,
-        contentType: data.content?.filename
-          ? 'local'
-          : data.content?.externalSound
-            ? 'external'
-            : 'unknown',
+        contentType: data.content?.filename ? 'local' : 'unknown',
       });
     }
 
@@ -149,11 +145,7 @@ function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
       const playlist = sessionPlaylists.get(connectedId);
 
       // Add the track to playlist if it's not already there
-      const trackKey =
-        data.content.filename ||
-        (data.content.externalSound
-          ? `${data.content.externalSound.provider}:${data.content.externalSound.trackId}`
-          : null);
+      const trackKey = data.content.filename;
 
       if (trackKey && !playlist.includes(trackKey)) {
         playlist.push(trackKey);
