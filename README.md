@@ -51,7 +51,7 @@ Developers can enable file-based logging for both client and server during devel
 
 | Layer        | Technology                                                                           |
 | ------------ | ------------------------------------------------------------------------------------ |
-| Frontend     | React 18 + TypeScript + [Mantine v7](https://mantine.dev) + [Vite](https://vite.dev) |
+| Frontend     | React 19 + TypeScript + [Mantine v8](https://mantine.dev) + [Vite](https://vite.dev) |
 | Routing      | React Router v7                                                                      |
 | Backend      | Express + WebSocket (Node.js)                                                        |
 | Database     | SQLite (via `sqlite3`)                                                               |
@@ -59,6 +59,8 @@ Developers can enable file-based logging for both client and server during devel
 | Styling      | Mantine dark theme + original CSS variables (BagnardSans font, maroon palette)       |
 | Testing      | Jest (unit + frontend service tests) + plain Node integration tests                  |
 | Code quality | ESLint + Prettier + Husky pre-commit hook                                            |
+| Monitoring   | Sentry (error tracking & session replay)                                             |
+| UI Utilities | Drag-and-drop (hello-pangea/dnd), Rich notifications                                 |
 
 ---
 
@@ -108,6 +110,16 @@ npm start       # serves dist/ via Express
 ## Environment Variables
 
 Create a `.env` file at the project root. All `VITE_*` variables are bundled into the frontend; the others are server-only.
+
+### Optional: Sentry Error Monitoring
+
+To enable Sentry error tracking and session replay in production:
+
+```env
+VITE_REACT_APP_SENTRY_DSN=https://your-sentry-dsn@sentry.io/your-project-id
+```
+
+Sentry is only initialized in production mode (`NODE_ENV=production`) and is optional. When configured, it captures runtime errors and records session replays for debugging.
 
 ---
 

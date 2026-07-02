@@ -1,5 +1,6 @@
 /**
  * Test runner for all authentication system tests
+ * Runs Jest suite with coverage and Node.js integration tests
  */
 
 const { execSync } = require('child_process');
@@ -7,18 +8,19 @@ const fs = require('fs');
 const path = require('path');
 
 async function runAllTests() {
-  console.log('🧪 Running all ChatLuthier tests...\n');
+  console.log('🧪 Running ChatLuthier test suite...\n');
 
-  // Run Jest tests first
-  console.log('🔵 Running Jest tests...');
+  // Run Jest tests first (with coverage)
+  console.log('🔵 Running Jest tests with coverage...');
   try {
-    execSync('npm run test:jest', {
+    execSync('npm run test:jest -- --coverage', {
       stdio: 'inherit',
       encoding: 'utf-8',
     });
     console.log('✅ Jest tests: PASSED\n');
   } catch (error) {
     console.log('❌ Jest tests: FAILED\n');
+    console.log('💡 Run `npm run test:jest -- --coverage` for details\n');
     process.exit(1);
   }
 
@@ -31,45 +33,44 @@ async function runAllTests() {
     .sort();
 
   if (testFiles.length === 0) {
-    console.log('ℹ️  No Node.js test files found!');
+    console.log('ℹ️  No Node.js integration test files found');
+    console.log('\n📊 Test Summary:');
+    console.log('   Jest: ✅ PASSED (check coverage/index.html for details)');
+    console.log('   Integration: ℹ️  None configured');
     return;
   }
 
-  console.log(`Found ${testFiles.length} Node.js test(s) to run:\n`);
+  console.log(`\n🔵 Running ${testFiles.length} integration test(s)...\n`);
 
   let passedTests = 0;
   let failedTests = 0;
 
   for (const testFile of testFiles) {
     const testName = testFile.replace('test_', '').replace('.js', '').replace(/_/g, ' ');
-    console.log(`🔵 Running: ${testName}`);
+    console.log(`  🔵 ${testName}`);
 
     try {
-      // Run the test file
       execSync(`node ${path.join(__dirname, testFile)}`, {
-        stdio: 'inherit',
+        stdio: 'pipe',
         encoding: 'utf-8',
       });
-      console.log(`✅ ${testName}: PASSED\n`);
+      console.log(`  ✅ PASSED\n`);
       passedTests++;
     } catch (error) {
-      console.log(`❌ ${testName}: FAILED\n`);
+      console.log(`  ❌ FAILED\n`);
       failedTests++;
     }
   }
 
   // Summary
   console.log('📊 Test Summary:');
-  console.log(`   Jest tests: Running via npm run test:jest`);
-  console.log(`   Node.js tests: ${testFiles.length}`);
-  console.log(`   Passed: ${passedTests}`);
-  console.log(`   Failed: ${failedTests}`);
+  console.log('   Jest tests: ✅ PASSED');
+  console.log(`   Integration tests: ${passedTests}/${testFiles.length} passed`);
 
   if (failedTests === 0) {
-    console.log('\n🎉 All Node.js tests passed!');
-    console.log('📝 Check Jest test results above for full coverage.');
+    console.log('\n🎉 All tests passed!\n');
   } else {
-    console.log(`\n⚠️  ${failedTests} Node.js test(s) failed.`);
+    console.log(`\n⚠️  ${failedTests} integration test(s) failed.`);
     process.exit(1);
   }
 }
