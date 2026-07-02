@@ -16,27 +16,27 @@ describe('audioProcessor', () => {
 
   it('should export functions', () => {
     const audioProcessor = require('../../../srv/utils/audioProcessor');
-    
+
     expect(audioProcessor).toBeTruthy();
     expect(typeof audioProcessor).toBe('object');
   });
 
   it('should have processUploadedAudio function', () => {
     const { processUploadedAudio } = require('../../../srv/utils/audioProcessor');
-    
+
     expect(typeof processUploadedAudio).toBe('function');
   });
 
   it('should have ffmpegAvailable property', () => {
     const { ffmpegAvailable } = require('../../../srv/utils/audioProcessor');
-    
+
     expect(typeof ffmpegAvailable).toBe('boolean');
   });
 
   describe('processUploadedAudio', () => {
     it('should be callable', async () => {
       const { processUploadedAudio } = require('../../../srv/utils/audioProcessor');
-      
+
       // Function should not throw when called (may error due to missing ffmpeg, that's ok)
       try {
         await processUploadedAudio({ path: '/tmp/test.mp3', originalname: 'test.mp3' });

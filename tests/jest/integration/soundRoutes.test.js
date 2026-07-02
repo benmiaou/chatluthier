@@ -41,30 +41,30 @@ describe('Sound API Endpoints', () => {
 
   it('should fetch background music', async () => {
     const sounds = await soundController.getData(null, 'backgroundMusic');
-    
+
     expect(Array.isArray(sounds)).toBe(true);
     expect(db.query).toHaveBeenCalled();
   });
 
   it('should fetch ambiance sounds', async () => {
     const sounds = await soundController.getData(null, 'ambianceSounds');
-    
+
     expect(Array.isArray(sounds)).toBe(true);
     expect(db.query).toHaveBeenCalled();
   });
 
   it('should fetch soundboard sounds', async () => {
     const sounds = await soundController.getData(null, 'soundboard');
-    
+
     expect(Array.isArray(sounds)).toBe(true);
     expect(db.query).toHaveBeenCalled();
   });
 
   it('should handle empty sound list', async () => {
     db.query.mockResolvedValue([]);
-    
+
     const sounds = await soundController.getData(null, 'backgroundMusic');
-    
+
     expect(sounds.length).toBe(0);
   });
 });

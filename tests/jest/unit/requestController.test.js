@@ -23,10 +23,7 @@ jest.mock('../../../srv/controllers/authController', () => ({
 }));
 
 // Now require helpers
-const {
-  createMockRequest,
-  createMockResponse,
-} = require('../utils/testHelpers');
+const { createMockRequest, createMockResponse } = require('../utils/testHelpers');
 
 const requestController = require('../../../srv/controllers/requestController');
 

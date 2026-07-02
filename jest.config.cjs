@@ -7,7 +7,10 @@ module.exports = {
     {
       displayName: 'backend',
       testEnvironment: 'node',
-      testMatch: ['<rootDir>/tests/jest/unit/**/*.test.js', '<rootDir>/tests/jest/integration/**/*.test.js'],
+      testMatch: [
+        '<rootDir>/tests/jest/unit/**/*.test.js',
+        '<rootDir>/tests/jest/integration/**/*.test.js',
+      ],
       collectCoverageFrom: [
         'srv/**/*.js',
         '!srv/server.js',

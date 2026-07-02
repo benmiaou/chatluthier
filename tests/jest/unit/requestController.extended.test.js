@@ -17,11 +17,7 @@ jest.mock('../../../srv/utils/logger', () => ({
   debug: jest.fn(),
 }));
 
-const {
-  createMockRequest,
-  createMockResponse,
-  createMockUser,
-} = require('../utils/testHelpers');
+const { createMockRequest, createMockResponse, createMockUser } = require('../utils/testHelpers');
 
 const requestController = require('../../../srv/controllers/requestController');
 const db = require('../../../srv/database/db');
@@ -67,7 +63,7 @@ describe('requestController - Extended Tests', () => {
         id: i,
         title: `Request ${i}`,
       }));
-      
+
       db.query = jest.fn().mockResolvedValue(largeResultSet);
 
       try {

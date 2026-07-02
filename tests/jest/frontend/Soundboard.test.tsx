@@ -30,7 +30,6 @@ jest.mock('../../../src/services/api');
 
 describe('Soundboard', () => {
   it('should import without errors', () => {
-     
     expect(() => {
       // eslint-disable-next-line
       require('../../../src/components/audio/Soundboard');

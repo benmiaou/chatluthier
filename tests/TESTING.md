@@ -11,32 +11,38 @@ This project uses a multi-layered testing approach:
 ## Running Tests
 
 ### Run all tests (Jest + integration)
+
 ```bash
 npm test
 ```
 
 ### Run Jest tests only (with coverage)
+
 ```bash
 npm run test:jest -- --coverage
 ```
 
 ### Run specific Jest project
+
 ```bash
 npm run test:jest:unit     # Backend unit tests only
 npm run test:jest:frontend # Frontend component tests only
 ```
 
 ### Run specific test file
+
 ```bash
 npm run test:jest -- tests/jest/unit/authController.test.js
 ```
 
 ### Watch mode (re-run on file changes)
+
 ```bash
 npm run test:jest -- --watch
 ```
 
 ### Integration tests (requires running server)
+
 ```bash
 # Terminal 1: Start the server
 npm run dev
@@ -77,6 +83,7 @@ tests/
 Reusable utilities for writing tests quickly:
 
 ### Mock Data Factories
+
 ```javascript
 import {
   createMockUser,
@@ -95,6 +102,7 @@ const res = createMockResponse();
 ```
 
 ### Assertion Helpers
+
 ```javascript
 import {
   expectResponse,
@@ -171,7 +179,7 @@ describe('MyComponent', () => {
   it('should handle click events', () => {
     const handleClick = jest.fn();
     render(<MyComponent onClick={handleClick} />);
-    
+
     fireEvent.click(screen.getByRole('button'));
     expect(handleClick).toHaveBeenCalled();
   });
@@ -179,7 +187,7 @@ describe('MyComponent', () => {
   it('should update state on input', () => {
     render(<MyComponent />);
     const input = screen.getByRole('textbox');
-    
+
     fireEvent.change(input, { target: { value: 'new value' } });
     expect(input).toHaveValue('new value');
   });
@@ -189,14 +197,17 @@ describe('MyComponent', () => {
 ## Coverage Targets
 
 The project aims for:
+
 - **Backend**: ≥70% coverage
 - **Frontend**: ≥60% coverage
 
 Current thresholds (enforced):
+
 - **Backend**: 50% (global)
 - **Frontend**: 40% (global)
 
 View coverage report:
+
 ```bash
 npm run test:jest -- --coverage
 open coverage/index.html
@@ -205,6 +216,7 @@ open coverage/index.html
 ## Mocking Patterns
 
 ### Mocking Modules
+
 ```javascript
 jest.mock('../../../srv/database/db');
 const db = require('../../../srv/database/db');
@@ -213,6 +225,7 @@ db.query = jest.fn().mockResolvedValue([{ id: 1 }]);
 ```
 
 ### Mocking External Services
+
 ```javascript
 jest.mock('../../../srv/config/secret', () => {
   return () => ({
@@ -223,9 +236,11 @@ jest.mock('../../../srv/config/secret', () => {
 ```
 
 ### Mocking Async Operations
+
 ```javascript
-const mockAsync = jest.fn()
-  .mockResolvedValueOnce({ success: true })  // First call
+const mockAsync = jest
+  .fn()
+  .mockResolvedValueOnce({ success: true }) // First call
   .mockResolvedValueOnce({ success: false }); // Second call
 
 // or for errors
@@ -235,6 +250,7 @@ jest.fn().mockRejectedValue(new Error('Failed'));
 ## Common Test Scenarios
 
 ### Testing Authentication
+
 ```javascript
 const user = createMockUser({ isAdmin: true });
 const token = createMockToken(user, accessTokenSecret);
@@ -249,8 +265,10 @@ expect(res.body.isSignedIn).toBe(true);
 ```
 
 ### Testing Database Operations
+
 ```javascript
-db.query = jest.fn()
+db.query = jest
+  .fn()
   .mockResolvedValueOnce([{ id: 1, name: 'Item 1' }])
   .mockResolvedValueOnce([{ id: 2, name: 'Item 2' }]);
 
@@ -262,6 +280,7 @@ expect(result2[0].name).toBe('Item 2');
 ```
 
 ### Testing Error Handling
+
 ```javascript
 db.query = jest.fn().mockRejectedValue(new Error('DB connection failed'));
 
@@ -309,17 +328,21 @@ runTest();
 ## Debugging Tests
 
 ### Run with verbose output
+
 ```bash
 npm run test:jest -- --verbose
 ```
 
 ### Run specific test
+
 ```bash
 npm run test:jest -- --testNamePattern="should verify valid token"
 ```
 
 ### Debug in VS Code
+
 Add to `.vscode/launch.json`:
+
 ```json
 {
   "type": "node",
@@ -361,24 +384,28 @@ jobs:
           node-version: 18
       - run: npm ci
       - run: npm run test:jest -- --coverage
-      - run: npm test  # Run integration tests
+      - run: npm test # Run integration tests
 ```
 
 ## Troubleshooting
 
 ### "Cannot find module" errors
+
 - Ensure mock paths are correct: `jest.mock('../../../srv/path/module')`
 - Check that file actually exists
 
 ### Tests timeout
+
 - Increase timeout: `jest.setTimeout(10000)`
 - Check for infinite loops or missing `await`
 
 ### Coverage not reporting
+
 - Ensure `collectCoverageFrom` is set in jest.config.cjs
 - Run with `--coverage` flag
 
 ### Import.meta issues in tests
+
 - Use Babel for transforming TypeScript/JSX
 - Babel is already configured for frontend tests
 
