@@ -122,7 +122,7 @@ describe('Frontend Context and Custom Hooks', () => {
 
   describe('Custom Hooks', () => {
     it('should have hooks for data fetching', () => {
-      const useFetch = (url) => {
+      const useFetch = (_url) => {
         return { data: null, loading: true, error: null };
       };
 
@@ -153,7 +153,7 @@ describe('Frontend Context and Custom Hooks', () => {
     });
 
     it('should have hooks for effects', () => {
-      const useEffect = (callback, dependencies) => {
+      const useEffect = (_callback, _dependencies) => {
         return { cleanup: jest.fn() };
       };
 
@@ -176,7 +176,7 @@ describe('Frontend Context and Custom Hooks', () => {
     });
 
     it('should have hooks for memo', () => {
-      const useMemo = (compute, dependencies) => {
+      const useMemo = (compute, _dependencies) => {
         return compute();
       };
 
@@ -186,11 +186,12 @@ describe('Frontend Context and Custom Hooks', () => {
     });
 
     it('should have hooks for callbacks', () => {
-      const useCallback = (callback, dependencies) => {
+      const useCallback = (callback, _dependencies) => {
         return callback;
       };
 
       const fn = jest.fn();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       const memoCallback = useCallback(fn, []);
 
       expect(memoCallback).toBe(fn);
@@ -236,7 +237,7 @@ describe('Frontend Context and Custom Hooks', () => {
     });
 
     it('should handle form submission', async () => {
-      const submitForm = async (form) => {
+      const submitForm = async (_form) => {
         return Promise.resolve({ success: true, id: 123 });
       };
 

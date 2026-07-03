@@ -76,6 +76,7 @@ describe('Frontend utility modules', () => {
     it('should validate URL', () => {
       const validateUrl = (url) => {
         try {
+          // eslint-disable-next-line no-new
           new URL(url);
           return true;
         } catch {
@@ -125,9 +126,11 @@ describe('Frontend utility modules', () => {
     it('should format file size', () => {
       const formatFileSize = (bytes) => {
         const sizes = ['B', 'KB', 'MB', 'GB'];
-        if (bytes === 0) return '0 B';
+        if (bytes === 0) {
+          return '0 B';
+        }
         const i = Math.floor(Math.log(bytes) / Math.log(1024));
-        return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
+        return `${Math.round((bytes / Math.pow(1024, i)) * 100) / 100} ${sizes[i]}`;
       };
 
       expect(formatFileSize(1024)).toContain('KB');
@@ -148,7 +151,7 @@ describe('Frontend utility modules', () => {
 
     it('should format percentage', () => {
       const formatPercentage = (value, total) => {
-        return Math.round((value / total) * 100) + '%';
+        return `${Math.round((value / total) * 100)}%`;
       };
 
       expect(formatPercentage(50, 100)).toBe('50%');
@@ -251,8 +254,12 @@ describe('Frontend utility modules', () => {
 
     it('should extract error message', () => {
       const extractMessage = (error) => {
-        if (typeof error === 'string') return error;
-        if (error?.message) return error.message;
+        if (typeof error === 'string') {
+          return error;
+        }
+        if (error?.message) {
+          return error.message;
+        }
         return 'Unknown error';
       };
 

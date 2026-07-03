@@ -10,8 +10,8 @@ describe('api service', () => {
   });
 
   it('should export API functions', () => {
-    // eslint-disable-next-line
     const api =
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       require('../../../src/services/api').default || require('../../../src/services/api');
 
     // Check for common API functions
