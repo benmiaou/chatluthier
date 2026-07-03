@@ -451,7 +451,7 @@ describe('E2E User Workflows', () => {
       };
 
       expect(canPerform('user-1', 'manage-context')).toBe(true);
-      expect(canPerform('user-2', 'manage-context')).toBeUndefined();
+      expect(canPerform('user-2', 'manage-context')).toBe(false);
     });
   });
 });

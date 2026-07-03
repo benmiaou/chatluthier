@@ -94,6 +94,11 @@ function createMockResponse() {
       this.cookies[name] = { value, options };
       return this;
     },
+    clearCookie(name, options = {}) {
+      this.cookieCalls.push({ name, value: null, options, cleared: true });
+      delete this.cookies[name];
+      return this;
+    },
     setHeader(name, value) {
       this.headers[name] = value;
       return this;
