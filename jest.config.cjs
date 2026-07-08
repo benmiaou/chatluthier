@@ -58,6 +58,6 @@ module.exports = {
   ],
   // npm test:jest runs all
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
-  coverageReporters: ['text', 'text-summary', 'html'],
+  coverageReporters: ['text', 'text-summary', 'html', 'lcov'],
   coverageDirectory: 'coverage',
 };

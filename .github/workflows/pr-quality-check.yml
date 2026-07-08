@@ -32,6 +32,9 @@ jobs:
       - name: Run Prettier check
         run: npm run check-format
 
+      - name: Run tests with coverage
+        run: npm run test:jest -- --coverage
+
       - name: Run SonarQube analysis
         uses: SonarSource/sonarqube-scan-action@v6
         env:

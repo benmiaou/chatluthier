@@ -44,7 +44,7 @@ describe('Soundboard Component', () => {
 
     it('should be a valid React component', () => {
       // eslint-disable-next-line
-      const Soundboard = require('../../../src/components/audio/Soundboard').default;
+      const { Soundboard } = require('../../../src/components/audio/Soundboard');
       expect(Soundboard).toBeTruthy();
       expect(typeof Soundboard).toBe('function');
     });

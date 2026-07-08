@@ -50,8 +50,8 @@ describe('Frontend utility modules', () => {
 
     it('should handle date utilities', () => {
       const dateUtils = {
-        formatDate: (date) => date.toLocaleDateString(),
-        daysAgo: (days) => {
+        formatDate: (date: Date) => date.toLocaleDateString(),
+        daysAgo: (days: number) => {
           const d = new Date();
           d.setDate(d.getDate() - days);
           return d;
@@ -59,8 +59,13 @@ describe('Frontend utility modules', () => {
       };
 
       const date = new Date();
-      expect(typeof dateUtils.formatDate(date)).toBe('string');
-      expect(dateUtils.daysAgo(1)).toBeLessThan(new Date());
+      const formatted = dateUtils.formatDate(date);
+      expect(typeof formatted).toBe('string');
+      expect(formatted.length).toBeGreaterThan(0);
+
+      const yesterday = dateUtils.daysAgo(1);
+      expect(yesterday).toBeInstanceOf(Date);
+      expect(yesterday.getTime()).toBeLessThan(date.getTime());
     });
   });
 
@@ -89,7 +94,7 @@ describe('Frontend utility modules', () => {
     });
 
     it('should validate password strength', () => {
-      const validatePassword = (password) => {
+      const validatePassword = (password: string) => {
         const hasUpperCase = /[A-Z]/.test(password);
         const hasLowerCase = /[a-z]/.test(password);
         const hasNumbers = /\d/.test(password);
@@ -98,9 +103,16 @@ describe('Frontend utility modules', () => {
         return hasUpperCase && hasLowerCase && hasNumbers && isLongEnough;
       };
 
-      expect(validatePassword('Weak123')).toBe(true);
-      expect(validatePassword('weak')).toBe(false);
-      expect(validatePassword('WEAK123')).toBe(false);
+      // Strong password: 12 chars with upper, lower, and numbers
+      expect(validatePassword('StrongPass123')).toBe(true);
+      // Too short (7 chars)
+      expect(validatePassword('Weak123')).toBe(false);
+      // No uppercase
+      expect(validatePassword('weak12345')).toBe(false);
+      // No lowercase
+      expect(validatePassword('WEAK12345')).toBe(false);
+      // No numbers
+      expect(validatePassword('StrongPass')).toBe(false);
     });
 
     it('should validate phone number', () => {

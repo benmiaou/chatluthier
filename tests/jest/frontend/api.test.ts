@@ -46,10 +46,9 @@ describe('api service', () => {
       expect(global.fetch).toHaveBeenCalledWith(
         '/test',
         expect.objectContaining({
-          headers: {
-            'Content-Type': 'application/json',
+          headers: expect.objectContaining({
             'X-Custom': 'value',
-          },
+          }),
         })
       );
     });

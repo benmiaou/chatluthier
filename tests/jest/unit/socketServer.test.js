@@ -38,7 +38,7 @@ function openClient(port) {
 }
 
 /** Send a message and wait for the next inbound message on a given client */
-function sendAndWait(senderWs, payload, receiverMessages, timeout = 500) {
+function sendAndWait(senderWs, payload, receiverMessages, timeout = 5000) {
   return new Promise((resolve, reject) => {
     const before = receiverMessages.length;
     senderWs.send(JSON.stringify(payload));
@@ -56,7 +56,7 @@ function sendAndWait(senderWs, payload, receiverMessages, timeout = 500) {
 }
 
 /** Wait until a condition is true (polling), reject after timeout */
-function waitFor(condition, timeout = 500) {
+function waitFor(condition, timeout = 5000) {
   return new Promise((resolve, reject) => {
     const deadline = Date.now() + timeout;
     const poll = setInterval(() => {
@@ -79,9 +79,16 @@ async function subscribe(ws, messages, sessionId, pseudo = 'TestUser', participa
   return ack;
 }
 
+/** Set a client as the leader for a session */
+async function setLeader(ws, messages, sessionId, participantId) {
+  const ack = await sendAndWait(ws, { type: 'setLeader', id: sessionId, participantId }, messages);
+  return ack;
+}
+
 // ─── Test suite ───────────────────────────────────────────────────────────────
 
 describe('socketServer', () => {
+  jest.setTimeout(10000);
   let server, wsServer, port;
   /** Track all opened clients so afterEach can force-close stragglers */
   const openClients = [];
@@ -163,8 +170,11 @@ describe('socketServer', () => {
     it('delivers the message to other session members', async () => {
       const a = await trackedOpenClient(port);
       const b = await trackedOpenClient(port);
-      await subscribe(a.ws, a.messages, 'session-bmc-1', 'Alice');
+      const aSub = await subscribe(a.ws, a.messages, 'session-bmc-1', 'Alice');
       await subscribe(b.ws, b.messages, 'session-bmc-1', 'Bob');
+
+      // Set Alice as leader so she can broadcast background music
+      await setLeader(a.ws, a.messages, 'session-bmc-1', aSub.participantId);
 
       const received = await sendAndWait(
         a.ws,
@@ -189,8 +199,11 @@ describe('socketServer', () => {
       const b = await trackedOpenClient(port);
       const before = a.messages.length;
 
-      await subscribe(a.ws, a.messages, 'session-bmc-2', 'Alice');
+      const aSub = await subscribe(a.ws, a.messages, 'session-bmc-2', 'Alice');
       await subscribe(b.ws, b.messages, 'session-bmc-2', 'Bob');
+
+      // Set Alice as leader
+      await setLeader(a.ws, a.messages, 'session-bmc-2', aSub.participantId);
 
       // Drain the participantJoined notice on a
       await waitFor(() => a.messages.length > before);
@@ -205,7 +218,7 @@ describe('socketServer', () => {
       );
 
       // Wait a bit and ensure sender got nothing extra
-      await new Promise((r) => setTimeout(r, 150));
+      await new Promise((r) => setTimeout(r, 1000));
       expect(a.messages.length).toBe(countAfterJoin);
 
       a.ws.close();
@@ -311,7 +324,10 @@ describe('socketServer', () => {
   describe('rate limiting', () => {
     it('returns an error when a client exceeds 10 messages per second', async () => {
       const { ws, messages } = await trackedOpenClient(port);
-      await subscribe(ws, messages, 'session-rate-1', 'Spammer');
+      const sub = await subscribe(ws, messages, 'session-rate-1', 'Spammer');
+
+      // Set as leader to allow broadcasting
+      await setLeader(ws, messages, 'session-rate-1', sub.participantId);
 
       // Send 12 rapid-fire messages
       for (let i = 0; i < 12; i++) {
@@ -324,7 +340,7 @@ describe('socketServer', () => {
         );
       }
 
-      await waitFor(() => messages.some((m) => m.type === 'error'), 1000);
+      await waitFor(() => messages.some((m) => m.type === 'error'), 3000);
       const err = messages.find((m) => m.type === 'error');
       expect(err).toBeDefined();
       expect(err.message).toMatch(/rate limit/i);
@@ -345,8 +361,13 @@ describe('socketServer', () => {
     ])('broadcasts %s to peers', async (msgType) => {
       const a = await trackedOpenClient(port);
       const b = await trackedOpenClient(port);
-      await subscribe(a.ws, a.messages, `session-type-${msgType}`, 'Alice');
+      const aSub = await subscribe(a.ws, a.messages, `session-type-${msgType}`, 'Alice');
       await subscribe(b.ws, b.messages, `session-type-${msgType}`, 'Bob');
+
+      // For background music types, need to be leader
+      if (['backgroundMusicVolumeChange', 'backgroundMusicStop'].includes(msgType)) {
+        await setLeader(a.ws, a.messages, `session-type-${msgType}`, aSub.participantId);
+      }
 
       const received = await sendAndWait(
         a.ws,

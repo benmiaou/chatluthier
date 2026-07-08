@@ -16,6 +16,12 @@ jest.mock('../../../srv/utils/logger', () => ({
   debug: jest.fn(),
 }));
 
+jest.mock('../../../srv/controllers/authController', () => ({
+  verifyjwt: jest
+    .fn()
+    .mockResolvedValue({ userId: 'admin', email: 'admin@test.com', isAdmin: true }),
+}));
+
 const { createMockRequest, createMockResponse } = require('../utils/testHelpers');
 const requestController = require('../../../srv/controllers/requestController');
 const db = require('../../../srv/database/db');
@@ -26,6 +32,7 @@ describe('requestController - Route Validation', () => {
   beforeEach(() => {
     req = createMockRequest();
     res = createMockResponse();
+    req.cookies = { accessToken: 'valid-admin-token' };
     jest.clearAllMocks();
     db.query = jest.fn().mockResolvedValue([]);
     db.execute = jest.fn().mockResolvedValue({ lastID: 1 });
@@ -320,6 +327,7 @@ describe('requestController - Route Validation', () => {
       const requests = Array.from({ length: 5 }, (_, i) => {
         const r = createMockRequest();
         r.params = { id: i };
+        r.cookies = { accessToken: 'valid-admin-token' };
         return requestController.getRequests(r, createMockResponse());
       });
 

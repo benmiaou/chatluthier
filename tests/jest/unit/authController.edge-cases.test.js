@@ -38,6 +38,13 @@ describe('authController - Edge Cases and Error Scenarios', () => {
     req = createMockRequest();
     res = createMockResponse();
     jest.clearAllMocks();
+    // Reset jwt.verify to default mock behavior
+    jwt.verify.mockImplementation((token, secret) => {
+      if (token === 'invalid.token') {
+        throw new Error('invalid signature');
+      }
+      return { userId: 'test', email: 'test@example.com' };
+    });
   });
 
   describe('verifyjwt', () => {

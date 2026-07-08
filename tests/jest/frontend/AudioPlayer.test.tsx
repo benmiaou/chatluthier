@@ -373,12 +373,20 @@ describe('AudioPlayer Component', () => {
     });
 
     it('should handle invalid audio file', () => {
-      const validateAudio = (url) => {
-        return url && typeof url === 'string';
+      const validateAudio = (url: string) => {
+        // Basic validation: url should be a non-empty string with a valid extension
+        if (!url || typeof url !== 'string') {
+          return false;
+        }
+        const validExtensions = ['.mp3', '.wav', '.ogg', '.m4a'];
+        return validExtensions.some((ext) => url.toLowerCase().endsWith(ext));
       };
 
-      expect(validateAudio('invalid')).toBe(true);
+      expect(validateAudio('song.mp3')).toBe(true);
+      expect(validateAudio('audio.wav')).toBe(true);
+      expect(validateAudio('invalid')).toBe(false);
       expect(validateAudio(null)).toBe(false);
+      expect(validateAudio(undefined)).toBe(false);
     });
 
     it('should recover from errors', () => {
