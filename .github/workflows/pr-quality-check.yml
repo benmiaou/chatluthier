@@ -71,8 +71,8 @@ jobs:
           script: |
             cd ${{ secrets.DEV_PROJECT_PATH }}
             git pull origin ${GITHUB_REF#refs/heads/}
-            npm install --production
-            pm2 restart app
+            npm install --production --ignore-scripts
+            pm2 restart chatluthier-dev
 
       - name: Deploy to PROD server
         if: github.ref == 'refs/heads/main'
@@ -85,5 +85,5 @@ jobs:
           script: |
             cd ${{ secrets.PROD_PROJECT_PATH }}
             git pull origin ${GITHUB_REF#refs/heads/}
-            npm install --production
-            pm2 restart app
+            npm install --production --ignore-scripts
+            pm2 restart chatluthier

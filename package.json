@@ -27,7 +27,7 @@
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
-    "prepare": "husky install",
+    "prepare": "node -e \"if(process.env.NODE_ENV !== 'production') require('husky').install()\"",
     "precommit": "npm run lint && npm run check-format",
     "normalize-sounds": "node scripts/normalize-sounds.js",
     "normalize-sounds-safe": "node scripts/normalize-sounds.js || echo 'Normalization completed with some errors or FFmpeg not available'"
@@ -100,6 +100,10 @@
   ],
   "author": "Benjamin Thibault",
   "type": "commonjs",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0"
+  },
   "overrides": {
     "tar": "^7.5.9",
     "node-gyp": "^10.3.1"
