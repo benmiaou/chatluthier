@@ -32,6 +32,16 @@ export function AppFooter(): React.ReactElement {
           About
         </Anchor>
 
+        <Anchor
+          size="xs"
+          c="dimmed"
+          href="https://buymeacoffee.com/chatluthier"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Support me
+        </Anchor>
+
         <Text size="xs" c="dimmed">
           © {new Date().getFullYear()} Le Chat Luthier
         </Text>
