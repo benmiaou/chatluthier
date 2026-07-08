@@ -70,7 +70,7 @@ jobs:
           port: 22
           script: |
             cd ${{ secrets.DEV_PROJECT_PATH }}
-            git pull origin ${GITHUB_REF#refs/heads/}
+            git reset --hard origin ${GITHUB_REF#refs/heads/}
             npm install --production --ignore-scripts
             pm2 restart chatluthier-dev
 
@@ -84,6 +84,6 @@ jobs:
           port: 22
           script: |
             cd ${{ secrets.PROD_PROJECT_PATH }}
-            git pull origin ${GITHUB_REF#refs/heads/}
+            git reset --hard origin ${GITHUB_REF#refs/heads/}
             npm install --production --ignore-scripts
             pm2 restart chatluthier
