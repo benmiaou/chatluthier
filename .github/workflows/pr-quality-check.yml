@@ -66,7 +66,8 @@ jobs:
         with:
           host: ${{ secrets.DEV_SERVER_IP }}
           username: ${{ secrets.DEV_SERVER_USER }}
-          key: ${{ secrets.CHATLUTHIER_PEM }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
           script: |
             cd ${{ secrets.DEV_PROJECT_PATH }}
             git pull origin ${GITHUB_REF#refs/heads/}
@@ -79,7 +80,8 @@ jobs:
         with:
           host: ${{ secrets.PROD_SERVER_IP }}
           username: ${{ secrets.PROD_SERVER_USER }}
-          key: ${{ secrets.CHATLUTHIER_PEM }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
           script: |
             cd ${{ secrets.PROD_PROJECT_PATH }}
             git pull origin ${GITHUB_REF#refs/heads/}
