@@ -140,10 +140,15 @@ Tokens
 # Jetbrains
 .idea*
 
-adminGoogleIds.json
 srv_data
-package-lock.json
-assets
+srv_sound_data/
+srv_sound_data - Copie
 uploads
 backups
 requests
+.DS_Store
+srv/database/chatluthier.db
+LeChat/
+scripts/deploy-prod.bat
+scripts/deploy-dev.bat
+temp_dev_nginx.conf

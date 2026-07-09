@@ -1,0 +1,524 @@
+import {
+  Box,
+  Button,
+  Group,
+  Modal,
+  Slider,
+  Stack,
+  Text,
+  Progress,
+  Grid,
+  ActionIcon,
+  Avatar,
+} from '@mantine/core';
+import { useDisclosure, useMediaQuery } from '@mantine/hooks';
+import { CustomCombobox } from './CustomCombobox';
+import { IconPlayerSkipForward, IconPlayerStop, IconVolume } from '@tabler/icons-react';
+import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
+import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
+import { useState, useCallback, useEffect } from 'react';
+import type React from 'react';
+import { SETTINGS } from '../../constants/settings';
+
+import type { BackgroundMusicCategory, Sound } from '../../types/sound';
+import { bgScenes, bgMatchesCategoryAndContext } from '../../types/sound';
+
+interface BackgroundMusicProps {
+  userId?: string | null;
+  isAdmin?: boolean;
+}
+
+const CATEGORIES: { value: BackgroundMusicCategory; label: string }[] = [
+  { value: 'calm', label: 'Calm' },
+  { value: 'dynamic', label: 'Dynamic' },
+  { value: 'intense', label: 'Intense' },
+  { value: 'all', label: 'All' },
+];
+
+export function BackgroundMusic({
+  userId = null,
+}: Readonly<BackgroundMusicProps>): React.JSX.Element {
+  const isMobile = useMediaQuery('(max-width: 48em)');
+  const { send, addMessageHandler, sessionId } = useSocketContext();
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [modalOpened, { open, close }] = useDisclosure(false);
+  const [userInteracted, setUserInteracted] = useState(false);
+  const [filterContext, setFilterContext] = useState<string>('All');
+  const [isLeader, setIsLeader] = useState(false);
+
+  // Notify server when track ends (if this client is leader)
+  const notifyTrackEnded = useCallback(() => {
+    if (sessionId && isLeader) {
+      send({ type: 'trackEnded', id: sessionId });
+    }
+  }, [sessionId, isLeader, send]);
+
+  const {
+    currentSound,
+    activeCategory,
+    isPlaying,
+    volume,
+    progress,
+    context,
+    playCategory,
+    playSpecificSound,
+    next,
+    stop,
+    setVolume,
+    seekTo,
+    sounds,
+    getCurrentTime,
+    handleSetContext,
+    setOnTrackEnded,
+  } = useBackgroundMusic(
+    userId,
+    () => {
+      if (!autoplayBlocked) {
+        setAutoplayBlocked(true);
+        open();
+      }
+    },
+    notifyTrackEnded,
+    sessionId
+  );
+
+  // Set up track ended callback
+  useEffect(() => {
+    // Only set track ended callback if we're the leader AND in a session
+    // This prevents client-side auto-play from interfering with server-controlled playback
+    setOnTrackEnded(sessionId && isLeader ? notifyTrackEnded : null);
+  }, [sessionId, isLeader, setOnTrackEnded, notifyTrackEnded]);
+
+  // Check and set leader status
+  const checkLeaderStatus = useCallback(() => {
+    if (sessionId) {
+      send({ type: 'getLeaderStatus', id: sessionId });
+    }
+  }, [sessionId, send]);
+
+  // Set this client as leader when playing background music
+  const setAsLeader = useCallback(() => {
+    if (sessionId) {
+      send({ type: 'setLeader', id: sessionId });
+    }
+  }, [sessionId, send]);
+
+  // Broadcast music change to session peers
+  const handlePlayCategory = useCallback(
+    async (category: BackgroundMusicCategory) => {
+      if (!userInteracted) {
+        setUserInteracted(true);
+      }
+
+      // Set as leader when playing background music
+      setAsLeader();
+
+      // Generate the playlist for this category
+      const filteredSounds = sounds.filter((s) =>
+        bgMatchesCategoryAndContext(s, category, context)
+      );
+
+      // Send the playlist to server if we're in a session
+      if (sessionId) {
+        const playlist = filteredSounds.map((s) => s.filename);
+        send({
+          type: 'setPlaylist',
+          id: sessionId,
+          content: {
+            playlist: playlist,
+            currentTrackIndex: 0,
+          },
+        });
+      }
+
+      await playCategory(category);
+    },
+    [playCategory, userInteracted, setAsLeader, sounds, context, sessionId, send]
+  );
+
+  // When a track starts, broadcast to session
+  useEffect(() => {
+    if (currentSound && sessionId && userInteracted) {
+      const currentTime = getCurrentTime();
+      const content = {
+        filename: currentSound.filename,
+        credit: currentSound.credit,
+        timestamp: Date.now(),
+        currentTime,
+      };
+      send({ type: 'backgroundMusicChange', id: sessionId, content });
+    }
+  }, [currentSound, sessionId, send, getCurrentTime, userInteracted]);
+
+  // Message handler functions
+  const handleLeaderChange = useCallback(
+    (_content: { leaderId: string }) => {
+      // Check if the new leader is this client
+      // For now, we'll just check leader status when we receive this
+      checkLeaderStatus();
+    },
+    [checkLeaderStatus]
+  );
+
+  const handleLeaderStatus = useCallback((content: { isLeader: boolean; leaderId?: string }) => {
+    setIsLeader(content.isLeader);
+  }, []);
+
+  const handlePlaylistStatus = useCallback(
+    (_content: { playlist: string[]; currentTrackIndex: number }) => {
+      // Handle playlist updates from server
+      // console.log('Playlist status:', _content);
+    },
+    []
+  );
+
+  const handleBackgroundMusicChange = useCallback(
+    (content: {
+      filename?: string | null;
+      credit?: string;
+      timestamp?: number;
+      currentTime?: number;
+      trackKey?: string;
+      isAutoPlay?: boolean;
+    }) => {
+      // Handle auto-played tracks from server
+      if (content.trackKey && content.isAutoPlay) {
+        // Find the sound by track key (filename)
+        const sound = sounds.find((s) => s.filename === content.trackKey);
+        if (sound) {
+          playSpecificSound(sound).catch(() => {});
+        }
+        return;
+      }
+
+      if (content.filename) {
+        const sound = sounds.find((s) => s.filename === content.filename);
+        if (sound) {
+          // Only play if we're not already playing this sound
+          const currentSoundFilename = currentSound?.filename;
+          if (currentSoundFilename !== content.filename) {
+            playSpecificSound(sound).catch(() => {});
+          } else {
+            // Already playing this sound, ignoring duplicate play request
+          }
+        }
+      }
+    },
+    [playSpecificSound, sounds, currentSound]
+  );
+
+  const handleBackgroundMusicStop = useCallback(() => {
+    stop();
+  }, [stop]);
+
+  const handleStatusRequest = useCallback(
+    (content: { statusType?: string; type?: string }) => {
+      // Handle both statusRequest (statusType) and requestStatus (type) formats
+      const isBackgroundMusicRequest =
+        content.statusType === 'backgroundMusic' || content.type === 'backgroundMusic';
+      if (isBackgroundMusicRequest && currentSound) {
+        const currentTime = getCurrentTime();
+        const statusData = {
+          filename: currentSound.filename,
+          credit: currentSound.credit || '',
+          isPlaying,
+          timestamp: Date.now(),
+          currentTime,
+        };
+        send({
+          type: 'statusResponse',
+          id: sessionId,
+          content: { statusType: 'backgroundMusic', statusData },
+        });
+      }
+    },
+    [currentSound, isPlaying, sessionId, send, getCurrentTime]
+  );
+
+  const handleStatusResponse = useCallback(
+    (content: {
+      statusType: string;
+      statusData: {
+        filename?: string;
+        credit?: string;
+        isPlaying: boolean;
+        timestamp?: number;
+        currentTime?: number;
+      };
+    }) => {
+      if (content.statusType === 'backgroundMusic' && content.statusData) {
+        if (content.statusData.isPlaying) {
+          if (content.statusData.filename) {
+            const sound = sounds.find((s) => s.filename === content.statusData.filename);
+            if (sound) {
+              // Only sync if we're not already playing this sound
+              const currentSoundFilename = currentSound?.filename;
+              if (currentSoundFilename !== content.statusData.filename) {
+                // Pass the currentTime from status to sync playback position
+                playSpecificSound(sound).catch(() => {});
+              } else {
+                // Already playing this sound, ignoring sync request
+              }
+            }
+          }
+        } else {
+          stop();
+        }
+      }
+    },
+    [playSpecificSound, stop, sounds, currentSound]
+  );
+
+  // Check leader status when session changes or on initial load
+  useEffect(() => {
+    if (sessionId) {
+      checkLeaderStatus();
+    }
+  }, [sessionId, checkLeaderStatus]);
+
+  useEffect(() => {
+    return addMessageHandler((msg: WsMessage) => {
+      if (!msg.content && msg.type !== 'backgroundMusicStop') {
+        return;
+      }
+
+      const handlers: Record<string, (content: unknown) => void> = {
+        backgroundMusicChange: (c) =>
+          handleBackgroundMusicChange(c as Parameters<typeof handleBackgroundMusicChange>[0]),
+        backgroundMusicStop: () => handleBackgroundMusicStop(),
+        statusRequest: (c) => handleStatusRequest(c as { statusType: string }),
+        requestStatus: (c) => handleStatusRequest(c as { type: string }),
+        statusResponse: (c) =>
+          handleStatusResponse(c as Parameters<typeof handleStatusResponse>[0]),
+        leaderChange: (c) => handleLeaderChange(c as { leaderId: string }),
+        leaderStatus: (c) => handleLeaderStatus(c as { isLeader: boolean; leaderId?: string }),
+        playlistStatus: (c) =>
+          handlePlaylistStatus(c as { playlist: string[]; currentTrackIndex: number }),
+      };
+
+      const handler = handlers[msg.type];
+      if (handler) {
+        handler(msg.content);
+      }
+    });
+  }, [
+    addMessageHandler,
+    handleBackgroundMusicChange,
+    handleBackgroundMusicStop,
+    handleStatusRequest,
+    handleStatusResponse,
+    handleLeaderChange,
+    handleLeaderStatus,
+    handlePlaylistStatus,
+  ]);
+
+  const handleVolumeChange = useCallback(
+    (v: number) => {
+      if (!userInteracted) {
+        setUserInteracted(true);
+      }
+      setVolume(v);
+    },
+    [setVolume, userInteracted]
+  );
+
+  const handleNext = useCallback(() => {
+    if (!userInteracted) {
+      setUserInteracted(true);
+    }
+    next();
+  }, [next, userInteracted]);
+
+  const handlePlayCurrentSound = useCallback(() => {
+    if (!userInteracted) {
+      setUserInteracted(true);
+    }
+    if (currentSound) {
+      // Set as leader when playing background music
+      setAsLeader();
+      playSpecificSound(currentSound).catch(() => {});
+    }
+  }, [currentSound, playSpecificSound, userInteracted, setAsLeader]);
+
+  const handleStop = useCallback(() => {
+    if (!userInteracted) {
+      setUserInteracted(true);
+    }
+    stop();
+    if (sessionId) {
+      send({ type: 'backgroundMusicStop', id: sessionId });
+    }
+  }, [stop, send, sessionId, userInteracted]);
+
+  const contexts = ['All', ...Array.from(new Set(sounds.flatMap((s) => bgScenes(s))))];
+
+  const filterSoundsByContextAndCategory = (
+    sound: Sound,
+    contextFilter: string,
+    categoryFilter: BackgroundMusicCategory
+  ) => bgMatchesCategoryAndContext(sound, categoryFilter, contextFilter);
+
+  const handleSeek = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (!userInteracted) {
+        setUserInteracted(true);
+      }
+      const rect = e.currentTarget.getBoundingClientRect();
+      seekTo(((e.clientX - rect.left) / rect.width) * 100);
+    },
+    [seekTo, userInteracted]
+  );
+
+  return (
+    <>
+      <Box
+        px="xs"
+        h={SETTINGS.BACKGROUND_MUSIC_HEIGHT}
+        style={{
+          height: SETTINGS.BACKGROUND_MUSIC_HEIGHT,
+          minHeight: SETTINGS.BACKGROUND_MUSIC_HEIGHT,
+          maxHeight: SETTINGS.BACKGROUND_MUSIC_HEIGHT,
+          overflow: 'hidden',
+        }}
+      >
+        <Grid gutter={isMobile ? 6 : 'sm'}>
+          <Grid.Col span={{ base: 12, md: 5 }}>
+            {/* Current track info */}
+            <Group gap="xs" align="flex-start" wrap="nowrap">
+              <Avatar radius="md" size={isMobile ? 'sm' : 'md'}>
+                <Box
+                  className={
+                    isPlaying && currentSound
+                      ? 'background-music-equalizer background-music-equalizer-playing'
+                      : 'background-music-equalizer'
+                  }
+                >
+                  <span className="background-music-equalizer-bar" />
+                  <span className="background-music-equalizer-bar" />
+                  <span className="background-music-equalizer-bar" />
+                </Box>
+              </Avatar>
+              <Stack gap="3" justify="flex-start" align="flex-start" ta="left" w="100%">
+                <Text size="xs" c="dimmed" ta="left" className="background-music-track-title">
+                  {currentSound?.name ?? currentSound?.filename ?? 'No track playing'}
+                </Text>
+                {currentSound?.credit && (
+                  <Text
+                    size="xs"
+                    c="dimmed"
+                    fs="italic"
+                    truncate
+                    dangerouslySetInnerHTML={{ __html: currentSound.credit }}
+                  />
+                )}
+              </Stack>
+            </Group>
+            {/* Category buttons + context filter */}
+            <Group gap={3} wrap="wrap" visibleFrom="md">
+              {CATEGORIES.map(({ value, label }) => {
+                const count = sounds.filter((s) =>
+                  filterSoundsByContextAndCategory(s, filterContext, value)
+                ).length;
+                return (
+                  <Button
+                    key={value}
+                    size="compact-xs"
+                    variant={activeCategory === value ? 'filled' : 'light'}
+                    className="background-music-category-btn"
+                    onClick={() => handlePlayCategory(value)}
+                  >
+                    Play {label} ({count})
+                  </Button>
+                );
+              })}
+              <CustomCombobox
+                value={filterContext}
+                onChange={(v) => {
+                  setFilterContext(v);
+                  handleSetContext(v);
+                }}
+                data={contexts}
+                placeholder="Context"
+                size="compact-xs"
+              />
+            </Group>
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 7 }} ta="center">
+            <Box bg="dark.8" px="15" style={{ borderRadius: 8 }}>
+              <Group gap="xs" align="flex-start" wrap="nowrap">
+                <ActionIcon
+                  size={isMobile ? 'sm' : 'md'}
+                  variant="subtle"
+                  onClick={handleStop}
+                  disabled={!isPlaying}
+                >
+                  <IconPlayerStop size={isMobile ? 16 : 18} />
+                </ActionIcon>
+                <ActionIcon
+                  size={isMobile ? 'sm' : 'md'}
+                  variant="subtle"
+                  onClick={handleNext}
+                  disabled={!isPlaying}
+                >
+                  <IconPlayerSkipForward size={isMobile ? 16 : 18} />
+                </ActionIcon>
+                {/* Progress bar */}
+                <Box
+                  mt={15}
+                  style={{ cursor: 'pointer', flex: 1, minWidth: 120, maxWidth: '100%' }}
+                  onClick={handleSeek}
+                  className="background-music-progress-wrap"
+                >
+                  <Progress value={progress} size="sm" radius="xs" color="maroon" />
+                </Box>
+                <Group gap={6} mt={8}>
+                  <IconVolume size={isMobile ? 16 : 20} color="var(--mantine-color-dimmed)" />
+                  <Slider
+                    size="xs"
+                    w={isMobile ? 70 : 100}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={volume}
+                    onChange={handleVolumeChange}
+                    label={isMobile ? null : (v) => `${Math.round(v * 100)}%`}
+                  />
+                </Group>
+              </Group>
+            </Box>
+          </Grid.Col>
+        </Grid>
+      </Box>
+
+      {/* Autoplay Permission Modal */}
+      <Modal
+        opened={modalOpened}
+        onClose={close}
+        title="Playback Permission Required"
+        centered
+        withCloseButton={false}
+      >
+        <Stack gap="md">
+          <Text size="sm">
+            The browser blocked automatic playback. Please click &quot;Allow Playback&quot; to
+            enable background music.
+          </Text>
+          <Group justify="flex-end" gap="sm">
+            <Button
+              variant="default"
+              onClick={() => {
+                close();
+                setAutoplayBlocked(false);
+              }}
+            >
+              Not Now
+            </Button>
+            <Button variant="filled" onClick={handlePlayCurrentSound}>
+              Allow Audio
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+    </>
+  );
+}

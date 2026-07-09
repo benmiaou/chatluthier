@@ -1,21 +1,5 @@
 /*src/css/styles.css*/
 @import './colors.css';
-
-/* Basic reset for styling */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-@font-face {
-    font-family: 'BagnardSans';
-    src: url('../fonts/BagnardSans.otf') format('opentype'); 
-    font-weight: normal;
-    font-style: normal;
-}
-
-
 @import './pages.css';
 @import './modal.css';
 @import './progressBar.css';
@@ -27,3 +11,175 @@
 @import './dropDownMenu.css';
 @import './editSounds.css';
 @import './ambianceControls.css';
+
+/* Error Fallback Styles */
+.error-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  min-height: 100vh;
+  background-color: var(--mantine-color-dark-7);
+  color: var(--mantine-color-text);
+  text-align: center;
+}
+
+.error-fallback h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.error-fallback p {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  max-width: 400px;
+}
+
+.error-fallback button {
+  padding: 0.5rem 1rem;
+  background-color: var(--mantine-primary-color-filled);
+  color: white;
+  border: none;
+  border-radius: var(--mantine-radius-sm);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.error-fallback button:hover {
+  background-color: var(--mantine-primary-color-filled-hover);
+}
+
+/* Basic reset for styling */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Drag and drop styles */
+.drag-handle {
+  cursor: grab;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.dragging {
+  opacity: 0.8;
+  background-color: var(--mantine-color-gray-1);
+}
+
+@font-face {
+  font-family: 'BagnardSans';
+  src: url('/fonts/BagnardSans.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@keyframes backgroundMusicEqualizer {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.background-music-equalizer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  width: 18px;
+  height: 18px;
+}
+
+.background-music-equalizer-bar {
+  width: 3px;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--mantine-color-dimmed);
+  transform: scaleY(0.3);
+  transform-origin: bottom;
+  opacity: 0.55;
+}
+
+.background-music-equalizer-bar:nth-child(1) {
+  height: 50%;
+}
+
+.background-music-equalizer-bar:nth-child(2) {
+  height: 90%;
+}
+
+.background-music-equalizer-bar:nth-child(3) {
+  height: 65%;
+}
+
+.background-music-equalizer-playing .background-music-equalizer-bar {
+  animation: backgroundMusicEqualizer 0.9s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.background-music-equalizer-playing .background-music-equalizer-bar:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.background-music-equalizer-playing .background-music-equalizer-bar:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.background-music-panel {
+  backdrop-filter: blur(4px);
+  background: color-mix(in srgb, var(--main-background-color) 92%, black 8%);
+}
+
+.background-music-title {
+  letter-spacing: 0.08em;
+}
+
+.background-music-status-row {
+  align-items: center;
+}
+
+.background-music-track-wrap {
+  min-height: 72px;
+}
+
+.background-music-track-title {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.background-music-progress-wrap {
+  margin: 0 auto 8px;
+  max-width: 320px;
+}
+
+.background-music-category-btn {
+  padding: 4px 8px !important;
+  font-size: 11px !important;
+  min-height: 24px !important;
+}
+
+.background-music-controls-cluster {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .background-music-panel {
+    padding: 10px;
+  }
+
+  .background-music-controls-cluster {
+    justify-content: flex-start;
+  }
+}

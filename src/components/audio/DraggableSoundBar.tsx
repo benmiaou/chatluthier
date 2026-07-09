@@ -1,0 +1,109 @@
+import React, { useRef } from 'react';
+import { useDrag, useDrop } from 'react-dnd';
+import { SoundBar } from './SoundBar';
+import { IconGripVertical } from '@tabler/icons-react';
+import type { AmbianceBar } from '../../hooks/useAmbianceSounds';
+
+interface DraggableSoundBarProps {
+  bar: AmbianceBar;
+  index: number;
+  onChange: (filename: string, volume: number) => void;
+  moveItem: (fromIndex: number, toIndex: number) => void;
+  onDragEnd: (fromIndex: number, toIndex: number) => void;
+  showDragHandle: boolean;
+}
+
+export function DraggableSoundBar({
+  bar,
+  index,
+  onChange,
+  moveItem,
+  onDragEnd,
+  showDragHandle,
+}: Readonly<DraggableSoundBarProps>): React.JSX.Element {
+  const ref = useRef<HTMLDivElement>(null);
+
+  const [{ isDragging }, drag] = useDrag({
+    type: 'SOUND_BAR',
+    item: { index },
+    end: (item, monitor) => {
+      if (monitor.didDrop()) {
+        const dropResult = monitor.getDropResult();
+        if (
+          dropResult &&
+          typeof dropResult === 'object' &&
+          dropResult !== null &&
+          'droppedOn' in dropResult &&
+          typeof dropResult.droppedOn === 'number'
+        ) {
+          onDragEnd(item.index, dropResult.droppedOn);
+        }
+      }
+    },
+    collect: (monitor) => ({
+      isDragging: Boolean(monitor.isDragging()),
+    }),
+  });
+
+  const [, drop] = useDrop({
+    accept: 'SOUND_BAR',
+    hover: (draggedItem: { index: number }) => {
+      if (draggedItem.index !== index) {
+        moveItem(draggedItem.index, index);
+        draggedItem.index = index;
+      }
+    },
+    drop: () => ({
+      droppedOn: index,
+    }),
+  });
+
+  const combinedRef = (node: HTMLDivElement | null) => {
+    drop(node);
+    ref.current = node;
+  };
+
+  return (
+    <div
+      ref={combinedRef}
+      style={{
+        opacity: isDragging ? 0.5 : 1,
+        width: '100%',
+        minWidth: 0,
+        maxWidth: 'none',
+        cursor: 'default',
+        transform: isDragging ? 'scale(0.95)' : 'none',
+        transition: 'transform 0.1s ease, opacity 0.1s ease',
+        zIndex: isDragging ? 1000 : 'auto',
+        position: 'relative',
+      }}
+    >
+      {showDragHandle && (
+        <div
+          ref={(node) => {
+            drag(node);
+          }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '34px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'grab',
+            zIndex: 10,
+            background: 'rgba(0, 0, 0, 0.1)',
+            borderRadius: '4px 4px 0 0',
+          }}
+        >
+          <IconGripVertical size={20} color="#666" />
+        </div>
+      )}
+      <div style={{ pointerEvents: isDragging ? 'none' : 'auto' }}>
+        <SoundBar key={bar.sound.filename} bar={bar} onChange={onChange} showDragHandle={false} />
+      </div>
+    </div>
+  );
+}

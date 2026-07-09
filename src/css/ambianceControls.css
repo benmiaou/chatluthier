@@ -1,119 +1,170 @@
 .progress-bar-volume {
-    display: block;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    opacity: 0;
-    
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    background-color: var(--main-background-color-transparency);
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  opacity: 0;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-color: var(--main-background-color-transparency);
 }
 .progress-bar-volume:hover,
 .progress-bar-volume.touch-hover {
-    opacity: 1;
-    transition: opacity 300ms;
+  opacity: 1;
+  transition: opacity 300ms;
 }
 
 .progress-bar-volume.plus {
-    left: 50%;
-    right: 0;
+  left: 50%;
+  right: 0;
 }
 .progress-bar-volume.minus {
-    left: 0;
-    right: 50%;
+  left: 0;
+  right: 50%;
 }
 
 .progress-bar-volume.minus:before {
-    content: "";
-    display: block;
-    background-color: var(--main-text);
-    height: 2px;
-    width: 20px;
-    position: absolute;
-    top: 75%;
-    left: 50%;
-    transform: translateX(-50%);
+  content: '';
+  display: block;
+  background-color: var(--main-text);
+  height: 2px;
+  width: 20px;
+  position: absolute;
+  top: 75%;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .progress-bar-volume.plus:before {
-    content: "";
-    display: block;
-    background-color: var(--main-text);
-    height: 2px;
-    width: 20px;
-    position: absolute;
-    top: 80%;
-    left: 50%;
-    transform: translateX(-50%);
+  content: '';
+  display: block;
+  background-color: var(--main-text);
+  height: 2px;
+  width: 20px;
+  position: absolute;
+  top: 80%;
+  left: 50%;
+  transform: translateX(-50%);
 }
 .progress-bar-volume.plus:after {
-    content: "";
-    display: block;
-    background-color: var(--main-text);
-    height: 2px;
-    width: 20px;
-    position: absolute;
-    top: 80%;
-    left: 50%;
-    transform: translateX(-50%) rotate(90deg);
+  content: '';
+  display: block;
+  background-color: var(--main-text);
+  height: 2px;
+  width: 20px;
+  position: absolute;
+  top: 80%;
+  left: 50%;
+  transform: translateX(-50%) rotate(90deg);
 }
 
 .progress-bar-container {
-    position: relative;
-    width: 100%;
-    height: 100px;
-    background-color: var(--main-background-color);
-    overflow: hidden;
-    background-position: center;
-    background-size: cover;
-    border-radius: 5px;
-    border: 2px solid var(--main-border);
+  position: relative;
+  width: 100%;
+  height: 100px;
+  background-color: var(--main-background-color);
+  overflow: hidden;
+  background-position: center;
+  background-size: cover;
+  border-radius: 5px;
+  border: 2px solid var(--main-border);
 }
 
 .ambiance-volume-bar {
-    background-color: var(--main-progressbar);
-    width: 0%;
-    height: 100%;
-    transition: width 0.3s ease;
+  background-color: var(--main-progressbar);
+  width: 0%;
+  height: 100%;
+  transition: width 0.3s ease;
 }
 
 .progress-and-credits {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    width: 50%;
-    margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 50%;
+  margin: 0 auto;
 }
 
 .sound-bar-text,
 .sound-bar-licence {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 0;
-    text-align: center;
-    padding: 5px 10px;
-    color: black;
-    background-color: var(--main-background-color-transparency);
-    user-select: none;
-    pointer-events: none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 0;
+  text-align: center;
+  padding: 5px 10px;
+  color: black;
+  background-color: var(--main-background-color-transparency);
+  user-select: none;
+  pointer-events: none;
 }
 
 .sound-bar-text {
-    top: 10px;
-    width: 80%;
+  top: 10px;
+  width: 80%;
 }
 
 .sound-bar-licence {
-    bottom: 10px;
-    width: 40%;
-    height: 15px;
-    font-size: 10px;
-    padding: 1px;
+  bottom: 10px;
+  width: 40%;
+  height: 15px;
+  font-size: 10px;
+  padding: 1px;
+}
+
+.ambiance-panel-header {
+  padding-bottom: 2px;
+}
+
+.ambiance-toolbar {
+  padding: 8px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--main-background-color-transparency) 20%, transparent);
+}
+
+.ambiance-preset-controls {
+  justify-content: flex-end;
+}
+
+.ambiance-preset-input {
+  min-width: 170px;
+  width: 170px;
+}
+
+.ambiance-sound-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  min-height: 140px;
+  position: relative;
+  width: 100%;
+  overflow: visible;
+  align-content: start;
+  gap: 10px;
+  padding: 4px 2px;
+}
+
+@media (max-width: 768px) {
+  .ambiance-toolbar {
+    padding: 10px;
+  }
+
+  .ambiance-preset-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .ambiance-preset-input {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .ambiance-sound-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
 }

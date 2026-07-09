@@ -1,46 +1,47 @@
 /* Session Management Styling */
 .id-management {
-    background-color: var(--main-background-color);
-    border: 1px solid var(--main-background-color-secondary);
-    padding: 20px;
-    margin: 20px;
-    border-radius: 5px;
-    color: var(--main-text);
+  background-color: var(--main-background-color);
+  border: 1px solid var(--main-background-color-secondary);
+  padding: 20px;
+  margin: 20px;
+  border-radius: 5px;
+  color: var(--main-text);
 }
 
 .id-management h2 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    text-align: center;
-    color: var(--main-text);
+  margin-top: 0;
+  margin-bottom: 15px;
+  text-align: center;
+  color: var(--main-text);
 }
 
-.create-id, .join-id {
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.create-id,
+.join-id {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #status-message {
-    text-align: center;
-    color: var(--main-text-info);
-    margin-top: 10px;
+  text-align: center;
+  color: var(--main-text-info);
+  margin-top: 10px;
 }
 
 #your-id {
-    text-align: center;
-    margin-top: 10px;
-    color: var(--main-text);
+  text-align: center;
+  margin-top: 10px;
+  color: var(--main-text);
 }
 
 #your-id span {
-    font-weight: bold;
-    color: var(--main-button-active-color);
+  font-weight: bold;
+  color: var(--main-button-active-color);
 }
 
 #connection-status {
-    text-align: center;
-    margin-top: 10px;
-    font-weight: bold;
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
 }
