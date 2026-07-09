@@ -141,7 +141,7 @@ Tokens
 .idea*
 
 srv_data
-srv_sound_data
+srv_sound_data/
 srv_sound_data - Copie
 uploads
 backups

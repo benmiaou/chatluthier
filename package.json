@@ -13,6 +13,8 @@
     "dev:watch": "concurrently \"vite\" \"nodemon srv/server.js\"",
     "dev:watch:logs": "concurrently \"node scripts/vite-with-logs.js\" \"nodemon srv/server-with-logs.js\"",
     "start": "vite build && node srv/server.js",
+    "db:backup": "node scripts/backup-db.js",
+    "assets:backup": "bash scripts/backup-assets.sh",
     "local": "npm run dev",
     "npm:local": "npm run dev",
     "test": "node tests/run_all_tests.js",

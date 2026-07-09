@@ -125,20 +125,22 @@ Sentry is only initialized in production mode (`NODE_ENV=production`) and is opt
 
 ## Scripts
 
-| Command                      | Description                                   |
-| ---------------------------- | --------------------------------------------- |
-| `npm run dev`                | Start Express + WebSocket server only         |
-| `npm run dev:watch`          | Start Vite HMR frontend + nodemon backend     |
-| `npm run build`              | Production build → `dist/`                    |
-| `npm start`                  | Serve production build                        |
-| `npm test`                   | Run all plain Node integration tests          |
-| `npm run test:jest`          | Run full Jest suite (backend unit + frontend) |
-| `npm run test:jest:unit`     | Jest backend unit tests only (no server)      |
-| `npm run test:jest:frontend` | Jest frontend service tests only              |
-| `npm run lint`               | ESLint check                                  |
-| `npm run lint:fix`           | ESLint auto-fix                               |
-| `npm run check-format`       | Prettier check                                |
-| `npm run format`             | Prettier auto-fix                             |
+| Command                      | Description                                                                                                                                           |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`                | Start Express + WebSocket server only                                                                                                                 |
+| `npm run dev:watch`          | Start Vite HMR frontend + nodemon backend                                                                                                             |
+| `npm run build`              | Production build → `dist/`                                                                                                                            |
+| `npm start`                  | Serve production build                                                                                                                                |
+| `npm run db:backup`          | Snapshot `srv/database/chatluthier.db` to `srv/database/backups/` (run before risky git ops on a server)                                              |
+| `npm run assets:backup`      | Zip all unversioned runtime assets (DB, `srv_sound_data/`, `uploads/`, `srv/Tokens`) into `/var/www/assets-backup/` with a date/time-stamped filename |
+| `npm test`                   | Run all plain Node integration tests                                                                                                                  |
+| `npm run test:jest`          | Run full Jest suite (backend unit + frontend)                                                                                                         |
+| `npm run test:jest:unit`     | Jest backend unit tests only (no server)                                                                                                              |
+| `npm run test:jest:frontend` | Jest frontend service tests only                                                                                                                      |
+| `npm run lint`               | ESLint check                                                                                                                                          |
+| `npm run lint:fix`           | ESLint auto-fix                                                                                                                                       |
+| `npm run check-format`       | Prettier check                                                                                                                                        |
+| `npm run format`             | Prettier auto-fix                                                                                                                                     |
 
 ---
 
@@ -334,6 +336,23 @@ server {
 
 > **How the WebSocket URL is resolved at runtime:**
 > With `VITE_WS_HOST=yourDomain.org`, `VITE_WS_PORT=443`, and `VITE_WS_PATH=/ws/` in `.env`, the frontend builds the URL `wss://yourDomain.org:443/ws/`. Nginx receives the upgrade request on port 443 and proxies it internally to Express on port 3001 — no extra port needs to be opened in your firewall.
+
+---
+
+### 4. Database & asset safety on the server (⚠️ read before running git commands in prod/dev)
+
+`srv/database/chatluthier.db` **and** `srv_sound_data/` (uploaded/curated audio + images) are **live, server-only data** and are intentionally listed in `.gitignore` — neither must ever be committed. If either _is_ accidentally committed (e.g. via `git add -A` / `git add -f` during an ad-hoc server fix), any later `git reset --hard`, `git checkout`, or `git clean -fd` that moves HEAD to a commit/branch **without** those paths tracked will **delete them from disk**.
+
+- For the database: on next server start, `srv/database/db.js` sees no file, creates a fresh empty SQLite database, and silently reinitializes the schema — wiping all sounds, users, and presets with no error or warning ("Database schema initialized successfully" instead of "already initialized" is the tell-tale log line).
+- For `srv_sound_data/`: the app keeps running, but every sound/image request 404s or the whole directory silently disappears — soundboard, ambiance, and background music all break at once.
+
+**This exact incident happened on `dev.chatluthier.org`** on 2026-07-09: a manual on-server patch committed both `chatluthier.db` and `srv_sound_data/` outside of the normal git history; a subsequent `git reset --hard origin/dev` (used to resync the server with the real codebase) deleted both, wiping the DB and every sound file. Both were recovered from the stray commit's git tree (`git show <bad-commit>:srv/database/chatluthier.db > recovered.db` and `git checkout <bad-commit> -- srv_sound_data`, then `git reset -- srv_sound_data` to unstage it again) — recovery is only possible if that bad commit still exists somewhere (branch, stash, or reflog).
+
+**Before running any destructive git command on a server with live data:**
+
+1. `git status` — check neither path is listed as tracked/modified. If either is, that's a red flag; back them up immediately before touching git.
+2. Prefer taking an out-of-band backup regardless: `npm run assets:backup` zips the database, `srv_sound_data/`, `uploads/`, and `srv/Tokens` into a single date/time-stamped archive in `/var/www/assets-backup/` — run it before any `git reset --hard`, `git pull`, `git checkout`, or deploy script run. (`npm run db:backup` is a lighter-weight alternative that only snapshots the database.)
+3. After any deploy, verify row counts didn't drop to zero (`sqlite3 srv/database/chatluthier.db "SELECT count(*) FROM ambiance_sounds;"` or the Python one-liner in this repo's ops notes) and spot-check a couple of sound URLs (`/assets/<category>/<filename>`) before assuming the deploy succeeded.
 
 ---
 

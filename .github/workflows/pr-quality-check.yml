@@ -70,6 +70,8 @@ jobs:
           port: 22
           script: |
             cd ${{ secrets.DEV_PROJECT_PATH }}
+            npm run db:backup || true
+            npm run assets:backup || true
             git reset --hard origin ${GITHUB_REF#refs/heads/}
             npm install --production --ignore-scripts
             pm2 restart chatluthier-dev
@@ -84,6 +86,8 @@ jobs:
           port: 22
           script: |
             cd ${{ secrets.PROD_PROJECT_PATH }}
+            npm run db:backup || true
+            npm run assets:backup || true
             git reset --hard origin ${GITHUB_REF#refs/heads/}
             npm install --production --ignore-scripts
             pm2 restart chatluthier
