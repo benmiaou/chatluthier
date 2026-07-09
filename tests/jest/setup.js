@@ -4,11 +4,6 @@
  */
 globalThis.__importMeta = {
   env: {
-    VITE_DEEZER_APP_ID: 'test-deezer-app-id',
-    VITE_SOUNDCLOUD_CLIENT_ID: 'test-sc-client-id',
-    VITE_SOUNDCLOUD_REDIRECT_URI_LOCAL: 'http://localhost:3000/sc-callback',
-    VITE_SOUNDCLOUD_REDIRECT_URI_PROD: 'https://prod.example.com/sc-callback',
-    VITE_SPOTIFY_CLIENT_ID: 'test-spotify-client-id',
     VITE_REDIRECT_URI_LOCAL: 'http://localhost:5173/callback',
     VITE_REDIRECT_URI_PROD: 'https://prod.example.com/callback',
     VITE_API_BASE_URL: '',
