@@ -73,8 +73,9 @@ jobs:
             npm run db:backup || true
             npm run assets:backup || true
             git fetch --all
-            git reset --hard origin ${GITHUB_REF#refs/heads/}
-            npm install --production --ignore-scripts
+            git reset --hard origin/dev
+            npm install --production
+            npm run build
             pm2 restart chatluthier-dev
 
       - name: Deploy to PROD server
@@ -90,6 +91,7 @@ jobs:
             npm run db:backup || true
             npm run assets:backup || true
             git fetch --all
-            git reset --hard origin ${GITHUB_REF#refs/heads/}
-            npm install --production --ignore-scripts
+            git reset --hard origin/main
+            npm install --production
+            npm run build
             pm2 restart chatluthier
