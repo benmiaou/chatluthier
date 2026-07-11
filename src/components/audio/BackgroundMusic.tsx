@@ -13,7 +13,12 @@ import {
 } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import { CustomCombobox } from './CustomCombobox';
-import { IconPlayerSkipForward, IconPlayerStop, IconVolume } from '@tabler/icons-react';
+import {
+  IconPlayerPlay,
+  IconPlayerSkipForward,
+  IconPlayerStop,
+  IconVolume,
+} from '@tabler/icons-react';
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic';
 import { useSocketContext, type WsMessage } from '../../contexts/SocketContext';
 import { useState, useCallback, useEffect } from 'react';
@@ -373,11 +378,11 @@ export function BackgroundMusic({
     <>
       <Box
         px="xs"
-        h={SETTINGS.BACKGROUND_MUSIC_HEIGHT}
+        h={isMobile ? 140 : SETTINGS.BACKGROUND_MUSIC_HEIGHT}
         style={{
-          height: SETTINGS.BACKGROUND_MUSIC_HEIGHT,
-          minHeight: SETTINGS.BACKGROUND_MUSIC_HEIGHT,
-          maxHeight: SETTINGS.BACKGROUND_MUSIC_HEIGHT,
+          height: isMobile ? 140 : SETTINGS.BACKGROUND_MUSIC_HEIGHT,
+          minHeight: isMobile ? 140 : SETTINGS.BACKGROUND_MUSIC_HEIGHT,
+          maxHeight: isMobile ? 140 : SETTINGS.BACKGROUND_MUSIC_HEIGHT,
           overflow: 'hidden',
         }}
       >
@@ -414,7 +419,7 @@ export function BackgroundMusic({
               </Stack>
             </Group>
             {/* Category buttons + context filter */}
-            <Group gap={3} wrap="wrap" visibleFrom="md">
+            <Group gap={3} wrap="wrap">
               {CATEGORIES.map(({ value, label }) => {
                 const count = sounds.filter((s) =>
                   filterSoundsByContextAndCategory(s, filterContext, value)
@@ -446,6 +451,14 @@ export function BackgroundMusic({
           <Grid.Col span={{ base: 12, md: 7 }} ta="center">
             <Box bg="dark.8" px="15" style={{ borderRadius: 8 }}>
               <Group gap="xs" align="flex-start" wrap="nowrap">
+                <ActionIcon
+                  size={isMobile ? 'sm' : 'md'}
+                  variant="subtle"
+                  onClick={handlePlayCurrentSound}
+                  disabled={!currentSound || (isPlaying && !autoplayBlocked)}
+                >
+                  <IconPlayerPlay size={isMobile ? 16 : 18} />
+                </ActionIcon>
                 <ActionIcon
                   size={isMobile ? 'sm' : 'md'}
                   variant="subtle"

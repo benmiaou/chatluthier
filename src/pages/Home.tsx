@@ -12,7 +12,8 @@ import { BackgroundMusic } from '../components/audio/BackgroundMusic';
 export function Home(): React.ReactElement {
   const { userId, isAdmin } = useAuthContext();
   const isMobile = useMediaQuery('(max-width: 48em)');
-  const contentHeight = `calc(100vh - ${SETTINGS.HEADER_HEIGHT}px - ${SETTINGS.FOOTER_HEIGHT}px - ${SETTINGS.BACKGROUND_MUSIC_HEIGHT}px)`;
+  const bgMusicHeight = isMobile ? 140 : SETTINGS.BACKGROUND_MUSIC_HEIGHT;
+  const contentHeight = `calc(100vh - ${SETTINGS.HEADER_HEIGHT}px - ${SETTINGS.FOOTER_HEIGHT}px - ${bgMusicHeight}px)`;
   if (isMobile) {
     return (
       <>

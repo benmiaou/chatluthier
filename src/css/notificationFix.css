@@ -11,7 +11,7 @@
 
 /* Specific fixes for credit toasts */
 .credit-toast {
-  pointer-events: none !important;
+  pointer-events: auto !important;
 }
 
 .credit-notification {
