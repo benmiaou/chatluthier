@@ -63,6 +63,12 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): R
       isAdmin: false,
       token: null,
     });
+
+    // Notify WebSocket to clear pseudo for current session if connected
+    // Delay by 5 seconds to ensure WebSocket connection is established
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('pseudoUpdated', { detail: { pseudo: null } }));
+    }, 5000);
   }, []);
 
   // Check for existing session on initial load
@@ -223,6 +229,12 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): R
         isAdmin: data.isAdmin ?? false,
         token: null,
       });
+
+      // Notify WebSocket to update pseudo for current session if connected
+      // Delay by 5 seconds to ensure WebSocket connection is established
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('pseudoUpdated', { detail: { pseudo: data.pseudo } }));
+      }, 5000);
     },
     []
   );
@@ -265,6 +277,12 @@ export function AuthProvider({ children }: Readonly<{ children: ReactNode }>): R
         isAdmin: false, // New users are not admins
         token: null,
       });
+
+      // Notify WebSocket to update pseudo for current session if connected
+      // Delay by 5 seconds to ensure WebSocket connection is established
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('pseudoUpdated', { detail: { pseudo: data.pseudo } }));
+      }, 5000);
     },
     []
   );
