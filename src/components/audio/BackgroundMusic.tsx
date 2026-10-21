@@ -91,7 +91,7 @@ export function BackgroundMusic({
   useEffect(() => {
     // Only set track ended callback if we're the leader AND in a session
     // This prevents client-side auto-play from interfering with server-controlled playback
-    setOnTrackEnded(sessionId && isLeader ? notifyTrackEnded : null);
+    setOnTrackEnded(sessionId && isLeader ? notifyTrackEnded : undefined);
   }, [sessionId, isLeader, setOnTrackEnded, notifyTrackEnded]);
 
   // Check and set leader status

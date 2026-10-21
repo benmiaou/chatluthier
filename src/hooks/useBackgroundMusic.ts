@@ -36,7 +36,7 @@ interface BackgroundMusicHook {
     currentTime?: number;
   }) => Promise<void>;
   stopReceived: () => void;
-  setOnTrackEnded: (callback: (() => void) | null) => void;
+  setOnTrackEnded: (callback: (() => void) | undefined) => void;
 }
 
 export function useBackgroundMusic(
@@ -163,11 +163,13 @@ export function useBackgroundMusic(
       try {
         await playerRef.current.play(`${ASSET_PREFIX}${sound.filename}`, volume, () => {
           const originalCategory = currentCategoryRef.current;
+          const originalContext = context;
 
-          if (originalCategory && !sessionIdRef.current) {
-            setTimeout(() => {
+          // Always auto-advance to next track, regardless of session mode
+          setTimeout(() => {
+            if (originalCategory) {
               const filtered = sounds.filter((s) =>
-                bgMatchesCategoryAndContext(s, originalCategory, context)
+                bgMatchesCategoryAndContext(s, originalCategory, originalContext)
               );
 
               if (filtered.length > 0) {
@@ -181,11 +183,10 @@ export function useBackgroundMusic(
                   playSpecificSoundRef.current?.(filtered[0]).catch(() => {});
                 }
               }
-            }, 0);
-          } else if (sessionIdRef.current) {
-            // In sessions, the server will handle broadcasting the next track
-          }
+            }
+          }, 0);
 
+          // Notify server for session synchronization
           if (onTrackEndedRef.current) {
             onTrackEndedRef.current();
           }
@@ -226,11 +227,13 @@ export function useBackgroundMusic(
 
       await playerRef.current.play(`${ASSET_PREFIX}${pick.filename}`, volume, () => {
         const originalCategory = currentCategoryRef.current;
+        const originalContext = context;
 
-        if (originalCategory === category) {
-          setTimeout(() => {
+        // Always auto-advance to next track, regardless of session mode
+        setTimeout(() => {
+          if (originalCategory) {
             const filteredSounds = sounds.filter((s) =>
-              bgMatchesCategoryAndContext(s, category, context)
+              bgMatchesCategoryAndContext(s, originalCategory, originalContext)
             );
 
             if (filteredSounds.length > 0) {
@@ -248,8 +251,8 @@ export function useBackgroundMusic(
                 playSpecificSoundRef.current?.(filteredSounds[0]).catch(() => {});
               }
             }
-          }, 0);
-        }
+          }
+        }, 0);
       });
 
       setIsPlaying(true);
@@ -411,7 +414,7 @@ export function useBackgroundMusic(
     getCurrentTime,
     userInteracted,
     setUserInteracted,
-    setOnTrackEnded: (callback: (() => void) | null) => {
+    setOnTrackEnded: (callback: (() => void) | undefined) => {
       onTrackEndedRef.current = callback;
     },
   };
