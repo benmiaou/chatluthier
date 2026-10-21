@@ -48,7 +48,16 @@ jobs:
         run: npm run test:jest -- --coverage
 
       - name: Run SonarQube analysis
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarqube-scan-action@v8.2.0
+        with:
+          args: >-
+            -Dsonar.projectBaseDir=.
+            -Dsonar.sources=src,srv
+            -Dsonar.tests=tests
+            -Dsonar.language=ts
+            -Dsonar.nodejs.version=20
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.typescript.lcov.reportPaths=coverage/lcov.info
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
@@ -72,8 +81,10 @@ jobs:
             cd ${{ secrets.DEV_PROJECT_PATH }}
             npm run db:backup || true
             npm run assets:backup || true
-            git reset --hard origin ${GITHUB_REF#refs/heads/}
-            npm install --production --ignore-scripts
+            git fetch --all
+            git reset --hard origin/dev
+            npm install --build-from-source=sqlite3
+            npm run build
             pm2 restart chatluthier-dev
 
       - name: Deploy to PROD server
@@ -88,6 +99,8 @@ jobs:
             cd ${{ secrets.PROD_PROJECT_PATH }}
             npm run db:backup || true
             npm run assets:backup || true
-            git reset --hard origin ${GITHUB_REF#refs/heads/}
-            npm install --production --ignore-scripts
+            git fetch --all
+            git reset --hard origin/main
+            npm install --build-from-source=sqlite3
+            npm run build
             pm2 restart chatluthier

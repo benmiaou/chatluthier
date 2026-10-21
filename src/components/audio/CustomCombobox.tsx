@@ -55,7 +55,7 @@ export function CustomCombobox({
             overflow: 'hidden',
             maxHeight: '300px',
             overflowY: 'auto',
-            minWidth: '200px',
+            minWidth: '160px',
             width: 'max-content',
           }}
         >
