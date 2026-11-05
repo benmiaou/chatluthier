@@ -26,10 +26,18 @@ export function SoundBar({
   const dragging = useRef(false);
   const wasActive = useRef(isActive);
   const [localVolume, setLocalVolume] = useState(bar.volume);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Keep audio ref in sync with bar.audio
+  useEffect(() => {
+    audioRef.current = bar.audio;
+  }, [bar.audio]);
 
   // Sync localVolume with bar.volume when bar changes (for external updates)
   useEffect(() => {
-    setLocalVolume(bar.volume);
+    queueMicrotask(() => {
+      setLocalVolume(() => bar.volume);
+    });
   }, [bar.volume]);
 
   const handleChange = (filename: string, vol: number) => {
@@ -44,13 +52,14 @@ export function SoundBar({
 
   // Local audio update for real-time feedback during dragging
   const updateLocalAudio = (vol: number) => {
-    const audioElement = bar.audio;
-    // eslint-disable-next-line react-hooks/immutability
-    audioElement.volume = vol;
-    if (vol > 0 && audioElement.paused) {
-      audioElement.play().catch(() => {});
-    } else if (vol === 0) {
-      audioElement.pause();
+    const audioElement = audioRef.current;
+    if (audioElement) {
+      audioElement.volume = vol;
+      if (vol > 0 && audioElement.paused) {
+        audioElement.play().catch(() => {});
+      } else if (vol === 0) {
+        audioElement.pause();
+      }
     }
   };
 

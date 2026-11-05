@@ -10,6 +10,9 @@ import {
 } from 'react';
 import React from 'react';
 
+// Custom type for EventListener to fix ESLint
+type CustomEventListener = (event: Event) => void;
+
 export type WsMessageType =
   | 'backgroundMusicChange'
   | 'backgroundMusicStop'
@@ -31,7 +34,8 @@ export type WsMessageType =
   | 'setPlaylist'
   | 'getPlaylist'
   | 'playlistStatus'
-  | 'trackEnded';
+  | 'trackEnded'
+  | 'updatePseudo';
 
 export interface WsMessage {
   type: WsMessageType;
@@ -41,6 +45,7 @@ export interface WsMessage {
   participants?: Array<{ pseudo: string | null; isAnonymous: boolean; id: string }>;
   participant?: { pseudo: string | null; isAnonymous: boolean; id: string };
   participantId?: string;
+  pseudo?: string;
 }
 
 type MessageHandler = (msg: WsMessage) => void;
@@ -50,10 +55,12 @@ interface SocketContextValue {
   sessionId: string | null;
   statusMessage: string;
   participants: Array<{ pseudo: string | null; isAnonymous: boolean; id: string }>;
+  participantId: string | null;
   subscribe: (id: string) => void;
   disconnect: () => void;
   send: (msg: Record<string, unknown>) => void;
   addMessageHandler: (handler: MessageHandler) => () => void;
+  updatePseudo: (pseudo: string | null) => void;
 }
 
 const SocketContext = createContext<SocketContextValue | null>(null);
@@ -222,6 +229,22 @@ export function SocketProvider({
     }
   }, []);
 
+  const handlePseudoUpdate = useCallback((data: WsMessage) => {
+    if (data.participantId && data.pseudo !== undefined) {
+      setParticipants((prev) =>
+        prev.map((p) =>
+          p.id === data.participantId
+            ? {
+                ...p,
+                pseudo: data.pseudo ?? null,
+                isAnonymous: !data.pseudo,
+              }
+            : p
+        )
+      );
+    }
+  }, []);
+
   const handleMessage = useCallback(
     (event: MessageEvent) => {
       try {
@@ -238,6 +261,9 @@ export function SocketProvider({
           case 'participantLeft':
             handleParticipantLeft(data);
             break;
+          case 'updatePseudo':
+            handlePseudoUpdate(data);
+            break;
           default:
             break;
         }
@@ -248,7 +274,7 @@ export function SocketProvider({
         /* ignore parse errors */
       }
     },
-    [handleSubscribedMessage, handleParticipantJoined, handleParticipantLeft]
+    [handleSubscribedMessage, handleParticipantJoined, handleParticipantLeft, handlePseudoUpdate]
   );
 
   const handleConnectionClose = useCallback(() => {
@@ -261,6 +287,7 @@ export function SocketProvider({
     clearHeartbeat();
 
     if (shouldReconnectRef.current) {
+      // eslint-disable-next-line react-hooks/immutability
       reconnectRef.current = setTimeout(connect, RECONNECT_MS);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -309,6 +336,7 @@ export function SocketProvider({
     localStorage.removeItem('pendingParticipantId');
   }, []);
 
+  // eslint-disable-next-line react-hooks/preserve-manual-memoization
   const connect = useCallback((): void => {
     const ws = new WebSocket(WS_URL);
     wsRef.current = ws;
@@ -355,6 +383,46 @@ export function SocketProvider({
       connect();
     }, 1000); // 500ms delay
 
+    // Listen for pseudo updates from AuthContext
+    const handlePseudoUpdated = (event: CustomEvent) => {
+      const pseudo = event.detail?.pseudo;
+      if (pseudo !== undefined && sessionId && participantId) {
+        // Update local storage
+        if (pseudo) {
+          localStorage.setItem('userPseudo', pseudo);
+        } else {
+          localStorage.removeItem('userPseudo');
+        }
+
+        // Send update to server if connected
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+          wsRef.current.send(
+            JSON.stringify({
+              type: 'updatePseudo',
+              id: sessionId,
+              participantId: participantId,
+              pseudo: pseudo,
+            })
+          );
+        }
+
+        // Update local participants state
+        setParticipants((prev) =>
+          prev.map((p) =>
+            p.id === participantId
+              ? {
+                  ...p,
+                  pseudo: pseudo ?? null,
+                  isAnonymous: !pseudo,
+                }
+              : p
+          )
+        );
+      }
+    };
+
+    window.addEventListener('pseudoUpdated', handlePseudoUpdated as CustomEventListener);
+
     return () => {
       shouldReconnectRef.current = false;
       clearTimeout(connectionTimeout);
@@ -363,8 +431,9 @@ export function SocketProvider({
         clearTimeout(reconnectRef.current);
       }
       wsRef.current?.close();
+      window.removeEventListener('pseudoUpdated', handlePseudoUpdated as CustomEventListener);
     };
-  }, [connect]);
+  }, [connect, sessionId, participantId]);
 
   const subscribe = useCallback((id: string) => {
     localStorage.setItem('lastJoinId', id);
@@ -372,9 +441,9 @@ export function SocketProvider({
     // Get stored participant ID for reconnection, or generate a new one
     const storedParticipantId = localStorage.getItem('wsParticipantId');
     const participantIdToUse = storedParticipantId || Math.random().toString(36).substring(2, 10);
+    const userPseudo = localStorage.getItem('userPseudo');
 
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      const userPseudo = localStorage.getItem('userPseudo');
       wsRef.current.send(
         JSON.stringify({
           type: 'subscribe',
@@ -430,26 +499,71 @@ export function SocketProvider({
     return () => handlersRef.current.delete(handler);
   }, []);
 
+  const updatePseudo = useCallback(
+    (pseudo: string | null) => {
+      if (!sessionId || !participantId) {
+        return;
+      }
+
+      // Update local storage
+      if (pseudo) {
+        localStorage.setItem('userPseudo', pseudo);
+      } else {
+        localStorage.removeItem('userPseudo');
+      }
+
+      // Send update to server
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        wsRef.current.send(
+          JSON.stringify({
+            type: 'updatePseudo',
+            id: sessionId,
+            participantId: participantId,
+            pseudo: pseudo,
+          })
+        );
+      }
+
+      // Update local participants state
+      setParticipants((prev) =>
+        prev.map((p) =>
+          p.id === participantId
+            ? {
+                ...p,
+                pseudo: pseudo,
+                isAnonymous: !pseudo,
+              }
+            : p
+        )
+      );
+    },
+    [sessionId, participantId]
+  );
+
   const contextValue = useMemo(
     () => ({
       connected,
       sessionId,
       statusMessage,
       participants,
+      participantId,
       subscribe,
       disconnect,
       send,
       addMessageHandler,
+      updatePseudo,
     }),
     [
       connected,
       sessionId,
       statusMessage,
       participants,
+      participantId,
       subscribe,
       disconnect,
       send,
       addMessageHandler,
+      updatePseudo,
     ]
   );
 

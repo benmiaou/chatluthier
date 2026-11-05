@@ -87,7 +87,9 @@ export function Soundboard({ userId = null }: SoundboardProps): React.ReactEleme
 
   useEffect(() => {
     if (userId) {
-      loadSoundOrder();
+      queueMicrotask(() => {
+        loadSoundOrder();
+      });
     }
   }, [userId, loadSoundOrder]);
 

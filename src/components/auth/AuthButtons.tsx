@@ -13,7 +13,7 @@ import {
 
 import { IconLogout, IconLogin, IconUserPlus } from '@tabler/icons-react';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { handleError } from '../../utils/logger';
 
@@ -109,31 +109,23 @@ export function AuthButtons(): React.ReactElement {
 
   const [pseudoChecking, setPseudoChecking] = useState(false);
 
-  const [passwordMatch, setPasswordMatch] = useState(false);
+  // Derived states using useMemo to avoid setState in useEffect
 
-  const [passwordStrongEnough, setPasswordStrongEnough] = useState(false);
-
-  // Real-time validation effects
-
-  useEffect(() => {
-    // Check if passwords match
-
-    setPasswordMatch(
-      registerPassword === registerConfirmPassword && registerConfirmPassword !== ''
-    );
+  const passwordMatch = useMemo(() => {
+    return registerPassword === registerConfirmPassword && registerConfirmPassword !== '';
   }, [registerPassword, registerConfirmPassword]);
 
-  useEffect(() => {
-    // Check if password is strong enough (at least 6 characters)
-
-    setPasswordStrongEnough(registerPassword.length >= 6);
+  const passwordStrongEnough = useMemo(() => {
+    return registerPassword.length >= 6;
   }, [registerPassword]);
 
-  useEffect(() => {
-    // Check if pseudo is available (debounced to avoid too many requests)
+  // Pseudo availability check (debounced to avoid too many requests)
 
+  useEffect(() => {
     if (registerPseudo.trim() === '') {
-      setPseudoAvailable(null);
+      queueMicrotask(() => {
+        setPseudoAvailable(() => null);
+      });
 
       return;
     }
@@ -157,19 +149,19 @@ export function AuthButtons(): React.ReactElement {
         if (response.ok) {
           const data = await response.json();
 
-          setPseudoAvailable(data.available);
+          setPseudoAvailable(() => data.available);
         } else {
           // If the endpoint fails, assume pseudo is available for development
 
           // Pseudo availability check failed, assuming available
 
-          setPseudoAvailable(true);
+          setPseudoAvailable(() => true);
         }
       } catch (_error) {
         // Log the error for debugging purposes
         handleError(_error, 'AuthButtons.pseudoAvailabilityCheck');
         // If there's an error, assume pseudo is available for development
-        setPseudoAvailable(true);
+        setPseudoAvailable(() => true);
       } finally {
         setPseudoChecking(false);
       }

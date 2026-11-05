@@ -1,5 +1,5 @@
 import { Button, Group, Loader, Modal, Stack, Text, Anchor } from '@mantine/core';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type React from 'react';
 import { notifications } from '@mantine/notifications';
 
@@ -27,29 +27,31 @@ export function ReviewRequestsModal({
   const [requests, setRequests] = useState<SoundRequest[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchRequests = async () => {
-    setLoading(true);
+  const fetchRequests = useCallback(async () => {
+    setLoading(() => true);
     try {
       const response = await fetch('/get-requests');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      setRequests(Array.isArray(data) ? data : []);
+      setRequests(() => (Array.isArray(data) ? data : []));
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       notifications.show({ message: `Failed to load requests: ${errorMessage}`, color: 'red' });
-      setRequests([]);
+      setRequests(() => []);
     } finally {
-      setLoading(false);
+      setLoading(() => false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (opened) {
-      fetchRequests();
+      queueMicrotask(() => {
+        fetchRequests();
+      });
     }
-  }, [opened]);
+  }, [opened, fetchRequests]);
 
   const closeRequest = async (requestId: number) => {
     try {

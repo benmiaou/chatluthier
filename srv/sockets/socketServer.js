@@ -491,6 +491,40 @@ function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
     console.log(`Participant ${participantId} properly left session ${connectedId}`);
   }
 
+  function handleUpdatePseudo(data, ws, connectedId) {
+    if (!connectedId || !data.participantId) return;
+
+    const participants = sessionParticipants.get(connectedId);
+    if (!participants?.has(data.participantId)) return;
+
+    const participantInfo = participants.get(data.participantId);
+
+    // Update the participant's pseudo
+    participantInfo.pseudo = data.pseudo || null;
+    participantInfo.isAnonymous = !data.pseudo;
+    participants.set(data.participantId, participantInfo);
+
+    // Notify all participants about the pseudo update
+    const subs = subscribers.get(connectedId);
+    if (subs) {
+      subs.forEach((subscriberWs) => {
+        if (subscriberWs.readyState === WebSocket.OPEN) {
+          subscriberWs.send(
+            JSON.stringify({
+              type: 'updatePseudo',
+              participantId: data.participantId,
+              pseudo: data.pseudo || null,
+            })
+          );
+        }
+      });
+    }
+
+    console.log(
+      `Participant ${data.participantId} updated pseudo to: ${data.pseudo || 'Anonymous'}`
+    );
+  }
+
   wsServer.on('connection', function connection(ws) {
     let connectedId = null;
     let participantId = null;
@@ -556,6 +590,9 @@ function initializeWebSocketServer(httpServer, httpPort, wsPort = null) {
           case 'ping':
             break;
 
+          case 'updatePseudo':
+            handleUpdatePseudo(data, ws, connectedId);
+            break;
           default:
             console.warn('Unknown message type:', data.type);
         }

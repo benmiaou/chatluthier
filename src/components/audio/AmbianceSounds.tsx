@@ -108,8 +108,10 @@ export function AmbianceSounds({
 
   useEffect(() => {
     if (userId) {
-      loadPresets();
-      loadSoundOrder();
+      queueMicrotask(() => {
+        loadPresets();
+        loadSoundOrder();
+      });
     }
   }, [userId, loadPresets, loadSoundOrder]);
 
