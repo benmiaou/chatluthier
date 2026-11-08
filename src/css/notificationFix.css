@@ -17,15 +17,64 @@
 .credit-notification {
   pointer-events: auto !important;
   z-index: 150 !important;
+  max-width: 350px;
+}
+
+/* Mobile-specific credit toast styles */
+.credit-toast-mobile {
+  pointer-events: auto !important;
+  width: auto !important;
+}
+
+.credit-notification-mobile {
+  pointer-events: auto !important;
+  z-index: 200 !important;
+  max-width: calc(100vw - 40px) !important;
+  width: auto !important;
+  left: 20px !important;
+  right: 20px !important;
+  font-size: 10px !important;
+}
+
+.credit-toast-title-mobile {
+  font-size: 12px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Desktop credit toast styles */
+.credit-toast-title {
+  font-size: 14px;
 }
 
 /* Make links in credits clickable */
-.credit-notification a {
+.credit-notification a,
+.credit-notification-mobile a {
   pointer-events: auto !important;
   color: var(--mantine-primary-color-6) !important;
   text-decoration: underline !important;
 }
 
-.credit-notification a:hover {
+.credit-notification a:hover,
+.credit-notification-mobile a:hover {
   color: var(--mantine-primary-color-8) !important;
+}
+
+/* Mobile-specific overrides */
+@media (max-width: 48em) {
+  .credit-notification {
+    max-width: calc(100vw - 40px) !important;
+    width: auto !important;
+    left: 20px !important;
+    right: 20px !important;
+    font-size: 10px !important;
+  }
+
+  .credit-toast-title {
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
 }
